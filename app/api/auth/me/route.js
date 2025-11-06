@@ -7,6 +7,9 @@ export async function GET(request) {
   try {
     const token = request.cookies.get('token')?.value;
 
+    console.log('[AUTH ME] Token exists:', !!token);
+    console.log('[AUTH ME] JWT_SECRET exists:', !!process.env.JWT_SECRET);
+
     if (!token) {
       return NextResponse.json(
         { error: 'Not authenticated' },
@@ -28,6 +31,7 @@ export async function GET(request) {
       { status: 200 }
     );
   } catch (error) {
+    console.error('[AUTH ME] Error:', error.message);
     return NextResponse.json(
       { error: 'Invalid token' },
       { status: 401 }

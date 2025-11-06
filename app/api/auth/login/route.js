@@ -10,6 +10,10 @@ export async function POST(request) {
   try {
     const { email, password } = await request.json();
 
+    console.log('[LOGIN] Attempt for email:', email);
+    console.log('[LOGIN] JWT_SECRET exists:', !!process.env.JWT_SECRET);
+    console.log('[LOGIN] MONGODB_URI exists:', !!process.env.MONGODB_URI);
+
     if (!email || !password) {
       return NextResponse.json(
         { error: 'Email and password are required' },
@@ -20,6 +24,8 @@ export async function POST(request) {
     await dbConnect();
 
     const user = await User.findOne({ email });
+    console.log('[LOGIN] User found:', !!user);
+    
     if (!user) {
       return NextResponse.json(
         { error: 'Invalid credentials' },
@@ -28,6 +34,8 @@ export async function POST(request) {
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log('[LOGIN] Password valid:', isPasswordValid);
+    
     if (!isPasswordValid) {
       return NextResponse.json(
         { error: 'Invalid credentials' },
@@ -66,6 +74,8 @@ export async function POST(request) {
       maxAge: 7 * 24 * 60 * 60, // 7 days
       path: '/',
     });
+
+    console.log('[LOGIN] Login successful for:', email);
 
     return response;
   } catch (error) {
