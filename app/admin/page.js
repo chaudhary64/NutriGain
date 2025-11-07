@@ -37,7 +37,11 @@ export default function AdminPage() {
     try {
       const res = await fetch("/api/meals");
       const data = await res.json();
-      setMeals(data.meals);
+      // Sort meals alphabetically by name
+      const sortedMeals = data.meals.sort((a, b) => 
+        a.name.localeCompare(b.name)
+      );
+      setMeals(sortedMeals);
     } catch (error) {
       console.error("Error fetching meals:", error);
     } finally {
