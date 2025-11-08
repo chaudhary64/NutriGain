@@ -55,7 +55,7 @@ export default function DashboardPage() {
       const res = await fetch("/api/meals");
       const data = await res.json();
       // Sort meals alphabetically by name
-      const sortedMeals = data.meals.sort((a, b) => 
+      const sortedMeals = data.meals.sort((a, b) =>
         a.name.localeCompare(b.name)
       );
       setMeals(sortedMeals);
@@ -282,7 +282,7 @@ export default function DashboardPage() {
                 type="date"
                 value={currentDate}
                 onChange={(e) => setCurrentDate(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm text-gray-900"
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm text-gray-900 cursor-pointer"
               />
               <span className="text-gray-700 font-medium">
                 Welcome, {user.name}!
@@ -444,7 +444,7 @@ export default function DashboardPage() {
                   <select
                     value={selectedMealType}
                     onChange={(e) => setSelectedMealType(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-gray-900 bg-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-gray-900 bg-white cursor-pointer"
                   >
                     <option value="breakfast">🌅 Breakfast</option>
                     <option value="lunch">☀️ Lunch</option>
@@ -460,7 +460,7 @@ export default function DashboardPage() {
                     <select
                       value={selectedMeal}
                       onChange={(e) => setSelectedMeal(e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-gray-900 bg-white"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-gray-900 bg-white cursor-pointer"
                       required
                     >
                       <option value="">Choose a meal...</option>
