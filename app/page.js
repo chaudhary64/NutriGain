@@ -20,13 +20,13 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
             <Link
               href="/register"
-              className="bg-linear-to-r from-blue-600 to-indigo-600 text-white px-10 py-4 rounded-xl text-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition shadow-xl transform hover:scale-105"
+              className="bg-linear-to-r from-blue-600 to-indigo-600 text-white px-10 py-4 rounded-xl text-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition shadow-xl transform hover:scale-105 cursor-pointer"
             >
               Get Started
             </Link>
             <Link
               href="/login"
-              className="bg-white text-blue-600 px-10 py-4 rounded-xl text-lg font-semibold hover:bg-gray-50 transition shadow-xl border-2 border-blue-600 transform hover:scale-105"
+              className="bg-white text-blue-600 px-10 py-4 rounded-xl text-lg font-semibold hover:bg-gray-50 transition shadow-xl border-2 border-blue-600 transform hover:scale-105 cursor-pointer"
             >
               Login
             </Link>

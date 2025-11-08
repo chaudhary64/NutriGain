@@ -289,7 +289,7 @@ export default function DashboardPage() {
               </span>
               <button
                 onClick={logout}
-                className="bg-linear-to-r from-red-500 to-red-600 text-white px-5 py-2 rounded-lg hover:from-red-600 hover:to-red-700 transition shadow-md font-medium"
+                className="bg-linear-to-r from-red-500 to-red-600 text-white px-5 py-2 rounded-lg hover:from-red-600 hover:to-red-700 transition shadow-md font-medium cursor-pointer"
               >
                 Logout
               </button>
@@ -474,7 +474,7 @@ export default function DashboardPage() {
                       type="button"
                       onClick={() => setShowMealStats(!showMealStats)}
                       disabled={!selectedMeal}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed font-medium"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed font-medium cursor-pointer"
                       title="Show meal stats"
                     >
                       📊
@@ -500,9 +500,9 @@ export default function DashboardPage() {
                 <div className="col-span-4">
                   <button
                     type="submit"
-                    className="w-full bg-linear-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition shadow-md font-semibold"
+                    className="w-full bg-linear-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition shadow-md font-semibold cursor-pointer"
                   >
-                    Add
+                    Add to Log
                   </button>
                 </div>
               </form>
@@ -517,7 +517,7 @@ export default function DashboardPage() {
                     </h3>
                     <button
                       onClick={() => setShowMealStats(false)}
-                      className="text-gray-500 hover:text-gray-700 font-bold text-xl"
+                      className="text-gray-500 hover:text-gray-700 font-bold text-xl cursor-pointer"
                     >
                       ×
                     </button>
@@ -660,7 +660,7 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
                           Math.max(0.5, parseFloat(entry.quantity) - 0.5)
                         )
                       }
-                      className="w-8 h-8 bg-gray-200 rounded-md hover:bg-gray-300 transition flex items-center justify-center font-bold text-gray-700"
+                      className="w-8 h-8 bg-gray-200 rounded-md hover:bg-gray-300 transition flex items-center justify-center font-bold text-gray-700 cursor-pointer"
                     >
                       -
                     </button>
@@ -681,7 +681,7 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
                           parseFloat(entry.quantity) + 0.5
                         )
                       }
-                      className="w-8 h-8 bg-gray-200 rounded-md hover:bg-gray-300 transition flex items-center justify-center font-bold text-gray-700"
+                      className="w-8 h-8 bg-gray-200 rounded-md hover:bg-gray-300 transition flex items-center justify-center font-bold text-gray-700 cursor-pointer"
                     >
                       +
                     </button>
@@ -689,7 +689,7 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
 
                   <button
                     onClick={() => onDelete(entry._id)}
-                    className="text-red-600 hover:text-red-800 font-medium px-3 py-2 rounded-lg hover:bg-red-50 transition"
+                    className="text-red-600 hover:text-red-800 font-medium px-3 py-2 rounded-lg hover:bg-red-50 transition cursor-pointer"
                   >
                     🗑️
                   </button>

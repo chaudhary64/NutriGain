@@ -156,7 +156,7 @@ export default function AdminPage() {
               <span className="text-gray-800">Welcome, {user.name}</span>
               <button
                 onClick={logout}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
+                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition cursor-pointer"
               >
                 Logout
               </button>
@@ -170,7 +170,7 @@ export default function AdminPage() {
           <div className="mb-6">
             <button
               onClick={() => setShowForm(!showForm)}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
+              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition cursor-pointer"
             >
               + Add New Meal
             </button>
@@ -298,14 +298,14 @@ export default function AdminPage() {
               <div className="col-span-2 flex gap-4">
                 <button
                   type="submit"
-                  className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition"
+                  className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition cursor-pointer"
                 >
                   {editingMeal ? "Update Meal" : "Add Meal"}
                 </button>
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="bg-gray-400 text-white px-6 py-2 rounded-lg hover:bg-gray-500 transition"
+                  className="bg-gray-400 text-white px-6 py-2 rounded-lg hover:bg-gray-500 transition cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -378,13 +378,13 @@ export default function AdminPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
                       onClick={() => handleEdit(meal)}
-                      className="text-indigo-600 hover:text-indigo-900 mr-4"
+                      className="text-indigo-600 hover:text-indigo-900 mr-4 cursor-pointer"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDelete(meal._id)}
-                      className="text-red-600 hover:text-red-900"
+                      className="text-red-600 hover:text-red-900 cursor-pointer"
                     >
                       Delete
                     </button>
