@@ -270,26 +270,44 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-100">
       <nav className="bg-white shadow-lg border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center gap-3">
-              <div className="text-3xl">🎯</div>
-              <h1 className="text-2xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                NutriGain
-              </h1>
+          <div className="flex flex-col sm:flex-row justify-between items-center py-3 sm:py-0 sm:h-16 gap-3 sm:gap-4">
+            {/* Top row on mobile: Logo and Logout */}
+            <div className="flex items-center justify-between w-full sm:w-auto">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="text-2xl sm:text-3xl">🎯</div>
+                <h1 className="text-xl sm:text-2xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  NutriGain
+                </h1>
+              </div>
+              
+              {/* Logout button - visible on mobile, hidden on desktop */}
+              <button
+                onClick={logout}
+                className="sm:hidden bg-linear-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-lg hover:from-red-600 hover:to-red-700 transition shadow-md font-medium cursor-pointer text-sm"
+              >
+                Logout
+              </button>
             </div>
-            <div className="flex items-center gap-4">
+            
+            {/* Controls - Date picker and desktop logout */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              {/* Date picker - full width on mobile */}
               <input
                 type="date"
                 value={currentDate}
                 onChange={(e) => setCurrentDate(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm text-gray-900 cursor-pointer"
+                className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm text-gray-900 cursor-pointer text-sm"
               />
-              <span className="text-gray-700 font-medium">
+              
+              {/* Welcome message - hidden on mobile, shown on tablet+ */}
+              <span className="hidden sm:inline text-gray-700 font-medium text-sm whitespace-nowrap">
                 Welcome, {user.name}!
               </span>
+              
+              {/* Logout button - hidden on mobile, visible on desktop */}
               <button
                 onClick={logout}
-                className="bg-linear-to-r from-red-500 to-red-600 text-white px-5 py-2 rounded-lg hover:from-red-600 hover:to-red-700 transition shadow-md font-medium cursor-pointer"
+                className="hidden sm:block bg-linear-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-lg hover:from-red-600 hover:to-red-700 transition shadow-md font-medium cursor-pointer text-sm"
               >
                 Logout
               </button>
@@ -298,14 +316,14 @@ export default function DashboardPage() {
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Macro Meters */}
-          <div className="lg:col-span-1">
-            <div className="bg-white p-6 rounded-xl shadow-lg sticky top-6 border border-gray-100">
-              <div className="flex items-center gap-2 mb-6">
-                <span className="text-2xl">📊</span>
-                <h2 className="text-xl font-bold text-gray-800">
+          <div className="lg:col-span-1 order-2 lg:order-1">
+            <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg lg:sticky lg:top-6 border border-gray-100">
+              <div className="flex items-center gap-2 mb-4 sm:mb-6">
+                <span className="text-xl sm:text-2xl">📊</span>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-800">
                   Today's Macros
                 </h2>
               </div>
@@ -338,11 +356,11 @@ export default function DashboardPage() {
                 color="bg-linear-to-r from-green-500 to-emerald-600"
               />
 
-              <div className="mt-6 p-4 bg-linear-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
-                <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+              <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-linear-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
+                <h3 className="font-semibold text-gray-800 mb-2 sm:mb-3 flex items-center gap-2 text-sm sm:text-base">
                   <span>📈</span>Summary
                 </h3>
-                <div className="space-y-2 text-sm text-gray-800">
+                <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-gray-800">
                   <div className="flex justify-between">
                     <span>
                       Calories{" "}
@@ -429,22 +447,22 @@ export default function DashboardPage() {
           </div>
 
           {/* Meal Sections */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6 order-1 lg:order-2">
             {/* Add Meal Form */}
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-2xl">➕</span>
-                <h2 className="text-xl font-bold text-gray-800">Add Meal</h2>
+            <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-100">
+              <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                <span className="text-xl sm:text-2xl">➕</span>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-800">Add Meal</h2>
               </div>
-              <form onSubmit={handleAddMeal} className="grid grid-cols-4 gap-4">
+              <form onSubmit={handleAddMeal} className="grid grid-cols-1 gap-3 sm:gap-4">
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">
+                  <label className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
                     Meal Type
                   </label>
                   <select
                     value={selectedMealType}
                     onChange={(e) => setSelectedMealType(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-gray-900 bg-white cursor-pointer"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-gray-900 bg-white cursor-pointer text-sm sm:text-base"
                   >
                     <option value="breakfast">🌅 Breakfast</option>
                     <option value="lunch">☀️ Lunch</option>
@@ -452,15 +470,15 @@ export default function DashboardPage() {
                   </select>
                 </div>
 
-                <div className="col-span-2">
-                  <label className="block text-gray-700 font-medium mb-2">
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
                     Select Meal
                   </label>
                   <div className="flex gap-2">
                     <select
                       value={selectedMeal}
                       onChange={(e) => setSelectedMeal(e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-gray-900 bg-white cursor-pointer"
+                      className="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-gray-900 bg-white cursor-pointer text-sm sm:text-base"
                       required
                     >
                       <option value="">Choose a meal...</option>
@@ -474,7 +492,7 @@ export default function DashboardPage() {
                       type="button"
                       onClick={() => setShowMealStats(!showMealStats)}
                       disabled={!selectedMeal}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed font-medium cursor-pointer"
+                      className="shrink-0 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed font-medium cursor-pointer text-sm sm:text-base"
                       title="Show meal stats"
                     >
                       📊
@@ -483,7 +501,7 @@ export default function DashboardPage() {
                 </div>
 
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">
+                  <label className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
                     Quantity
                   </label>
                   <input
@@ -492,15 +510,15 @@ export default function DashboardPage() {
                     min="0.5"
                     value={quantity}
                     onChange={(e) => setQuantity(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-gray-900"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-gray-900 text-sm sm:text-base"
                     required
                   />
                 </div>
 
-                <div className="col-span-4">
+                <div>
                   <button
                     type="submit"
-                    className="w-full bg-linear-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition shadow-md font-semibold cursor-pointer"
+                    className="w-full bg-linear-to-r from-blue-600 to-indigo-600 text-white py-2 sm:py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition shadow-md font-semibold cursor-pointer text-sm sm:text-base"
                   >
                     Add to Log
                   </button>
@@ -509,9 +527,9 @@ export default function DashboardPage() {
 
               {/* Meal Stats Display */}
               {showMealStats && selectedMeal && (
-                <div className="mt-4 p-4 bg-linear-to-br from-green-50 to-emerald-50 rounded-lg border border-green-200">
-                  <div className="flex justify-between items-center mb-3">
-                    <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-linear-to-br from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                  <div className="flex justify-between items-center mb-2 sm:mb-3">
+                    <h3 className="font-semibold text-gray-800 flex items-center gap-2 text-sm sm:text-base">
                       <span>📊</span>
                       Meal Nutritional Info
                     </h3>
@@ -526,7 +544,7 @@ export default function DashboardPage() {
                     const meal = meals.find((m) => m._id === selectedMeal);
                     if (!meal) return null;
                     return (
-                      <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
                         <div className="bg-white p-3 rounded-lg shadow-sm">
                           <span className="text-gray-600">Meal:</span>
                           <p className="font-bold text-gray-800">{meal.name}</p>
@@ -613,14 +631,14 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-      <h2 className="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
-        <span className="text-2xl">{getMealIcon(title)}</span>
+    <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-100">
+      <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-gray-800 flex items-center gap-2">
+        <span className="text-xl sm:text-2xl">{getMealIcon(title)}</span>
         {title}
       </h2>
 
       {meals.length === 0 ? (
-        <p className="text-gray-700 text-center py-8 bg-gray-50 rounded-lg font-medium">
+        <p className="text-gray-700 text-center py-6 sm:py-8 bg-gray-50 rounded-lg font-medium text-sm sm:text-base">
           No meals added yet
         </p>
       ) : (
@@ -635,13 +653,13 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
             return (
               <div
                 key={entry._id}
-                className="flex items-center justify-between p-4 bg-linear-to-r from-gray-50 to-blue-50 rounded-lg border border-gray-200 hover:shadow-md transition"
+                className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 bg-linear-to-r from-gray-50 to-blue-50 rounded-lg border border-gray-200 hover:shadow-md transition gap-3 sm:gap-0"
               >
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-800">
+                <div className="flex-1 w-full sm:w-auto">
+                  <h3 className="font-semibold text-gray-800 text-sm sm:text-base">
                     {entry.mealName} ({entry.meal?.servingSize || "1 serving"})
                   </h3>
-                  <div className="flex gap-4 mt-1 text-sm text-gray-800">
+                  <div className="flex flex-wrap gap-2 sm:gap-4 mt-1 text-xs sm:text-sm text-gray-800">
                     <span className="font-medium">
                       {entry.meal?.macros?.calories || 0} cal
                     </span>
@@ -651,8 +669,8 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2 bg-white rounded-lg border border-gray-300 p-1">
+                <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                  <div className="flex items-center gap-2 bg-white rounded-lg border border-gray-300 p-1 flex-1 sm:flex-none">
                     <button
                       onClick={() =>
                         onUpdateQuantity(
@@ -660,7 +678,7 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
                           Math.max(0.5, parseFloat(entry.quantity) - 0.5)
                         )
                       }
-                      className="w-8 h-8 bg-gray-200 rounded-md hover:bg-gray-300 transition flex items-center justify-center font-bold text-gray-700 cursor-pointer"
+                      className="w-8 h-8 bg-gray-200 rounded-md hover:bg-gray-300 transition flex items-center justify-center font-bold text-gray-700 cursor-pointer text-sm sm:text-base"
                     >
                       -
                     </button>
@@ -672,7 +690,7 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
                       onChange={(e) =>
                         onUpdateQuantity(entry._id, parseFloat(e.target.value))
                       }
-                      className="w-16 text-center px-2 py-1 border-0 focus:outline-none font-medium text-gray-900"
+                      className="w-12 sm:w-16 text-center px-1 sm:px-2 py-1 border-0 focus:outline-none font-medium text-gray-900 text-sm sm:text-base"
                     />
                     <button
                       onClick={() =>
@@ -681,7 +699,7 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
                           parseFloat(entry.quantity) + 0.5
                         )
                       }
-                      className="w-8 h-8 bg-gray-200 rounded-md hover:bg-gray-300 transition flex items-center justify-center font-bold text-gray-700 cursor-pointer"
+                      className="w-8 h-8 bg-gray-200 rounded-md hover:bg-gray-300 transition flex items-center justify-center font-bold text-gray-700 cursor-pointer text-sm sm:text-base"
                     >
                       +
                     </button>
@@ -689,7 +707,7 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
 
                   <button
                     onClick={() => onDelete(entry._id)}
-                    className="text-red-600 hover:text-red-800 font-medium px-3 py-2 rounded-lg hover:bg-red-50 transition cursor-pointer"
+                    className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition cursor-pointer text-sm sm:text-base"
                   >
                     🗑️
                   </button>
