@@ -4,6 +4,12 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 
+// Helper function to convert text to title case
+const toTitleCase = (str) => {
+  if (!str) return "";
+  return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
 export default function AdminPage() {
   const { user, loading: authLoading, logout } = useAuth();
   const router = useRouter();
@@ -38,7 +44,7 @@ export default function AdminPage() {
       const res = await fetch("/api/meals");
       const data = await res.json();
       // Sort meals alphabetically by name
-      const sortedMeals = data.meals.sort((a, b) => 
+      const sortedMeals = data.meals.sort((a, b) =>
         a.name.localeCompare(b.name)
       );
       setMeals(sortedMeals);
@@ -154,7 +160,7 @@ export default function AdminPage() {
               <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
                 Admin Dashboard
               </h1>
-              
+
               {/* Logout button - visible on mobile, hidden on desktop */}
               <button
                 onClick={logout}
@@ -163,14 +169,14 @@ export default function AdminPage() {
                 Logout
               </button>
             </div>
-            
+
             {/* Desktop controls */}
             <div className="hidden sm:flex items-center gap-3">
               {/* Welcome message - shown on tablet+ */}
               <span className="text-gray-800 text-sm whitespace-nowrap">
                 Welcome, {user.name}
               </span>
-              
+
               {/* Logout button - visible on desktop */}
               <button
                 onClick={logout}
@@ -200,11 +206,19 @@ export default function AdminPage() {
             <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-gray-800">
               {editingMeal ? "Edit Meal" : "Add New Meal"}
             </h2>
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <form
+              onSubmit={handleSubmit}
+              className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4"
+            >
               <div>
-                <label className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
-                  Meal Name *
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-gray-700 font-medium text-sm sm:text-base">
+                    Meal Name *
+                  </label>
+                  <p className="text-xs text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+                    ℹ️ Auto-capitalized
+                  </p>
+                </div>
                 <input
                   type="text"
                   value={formData.name}
@@ -366,7 +380,9 @@ export default function AdminPage() {
               {meals.map((meal) => (
                 <tr key={meal._id}>
                   <td className="px-3 sm:px-6 py-4">
-                    <div className="font-medium text-gray-900 text-sm sm:text-base">{meal.name}</div>
+                    <div className="font-medium text-gray-900 text-sm sm:text-base">
+                      {toTitleCase(meal.name)}
+                    </div>
                     {meal.description && (
                       <div className="text-xs sm:text-sm text-gray-500">
                         {meal.description}

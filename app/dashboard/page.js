@@ -5,6 +5,12 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 
+// Helper function to convert text to title case
+const toTitleCase = (str) => {
+  if (!str) return "";
+  return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
 export default function DashboardPage() {
   const { user, loading: authLoading, logout } = useAuth();
   const router = useRouter();
@@ -279,7 +285,7 @@ export default function DashboardPage() {
                   NutriGain
                 </h1>
               </div>
-              
+
               {/* Logout button - visible on mobile, hidden on desktop */}
               <button
                 onClick={logout}
@@ -288,7 +294,7 @@ export default function DashboardPage() {
                 Logout
               </button>
             </div>
-            
+
             {/* Controls - Date picker and desktop logout */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
               {/* Date picker - full width on mobile */}
@@ -298,12 +304,12 @@ export default function DashboardPage() {
                 onChange={(e) => setCurrentDate(e.target.value)}
                 className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm text-gray-900 cursor-pointer text-sm"
               />
-              
+
               {/* Welcome message - hidden on mobile, shown on tablet+ */}
               <span className="hidden sm:inline text-gray-700 font-medium text-sm whitespace-nowrap">
                 Welcome, {user.name}!
               </span>
-              
+
               {/* Logout button - hidden on mobile, visible on desktop */}
               <button
                 onClick={logout}
@@ -452,9 +458,14 @@ export default function DashboardPage() {
             <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-100">
               <div className="flex items-center gap-2 mb-3 sm:mb-4">
                 <span className="text-xl sm:text-2xl">➕</span>
-                <h2 className="text-lg sm:text-xl font-bold text-gray-800">Add Meal</h2>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-800">
+                  Add Meal
+                </h2>
               </div>
-              <form onSubmit={handleAddMeal} className="grid grid-cols-1 gap-3 sm:gap-4">
+              <form
+                onSubmit={handleAddMeal}
+                className="grid grid-cols-1 gap-3 sm:gap-4"
+              >
                 <div>
                   <label className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
                     Meal Type
@@ -484,7 +495,7 @@ export default function DashboardPage() {
                       <option value="">Choose a meal...</option>
                       {meals.map((meal) => (
                         <option key={meal._id} value={meal._id}>
-                          {meal.name} ({meal.servingSize})
+                          {toTitleCase(meal.name)} ({meal.servingSize})
                         </option>
                       ))}
                     </select>
@@ -547,7 +558,9 @@ export default function DashboardPage() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
                         <div className="bg-white p-3 rounded-lg shadow-sm">
                           <span className="text-gray-600">Meal:</span>
-                          <p className="font-bold text-gray-800">{meal.name}</p>
+                          <p className="font-bold text-gray-800">
+                            {toTitleCase(meal.name)}
+                          </p>
                         </div>
                         <div className="bg-white p-3 rounded-lg shadow-sm">
                           <span className="text-gray-600">Serving Size:</span>
@@ -657,7 +670,8 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
               >
                 <div className="flex-1 w-full sm:w-auto">
                   <h3 className="font-semibold text-gray-800 text-sm sm:text-base">
-                    {entry.mealName} ({entry.meal?.servingSize || "1 serving"})
+                    {toTitleCase(entry.mealName)} (
+                    {entry.meal?.servingSize || "1 serving"})
                   </h3>
                   <div className="flex flex-wrap gap-2 sm:gap-4 mt-1 text-xs sm:text-sm text-gray-800">
                     <span className="font-medium">
