@@ -358,14 +358,14 @@ export default function MealTrackingPage() {
 
               <button
                 onClick={() => router.push("/dashboard/meal")}
-                className="px-4 py-2 text-blue-600 bg-blue-50 rounded-lg font-medium text-sm flex items-center gap-1"
+                className="px-4 py-2 text-blue-600 bg-blue-50 rounded-lg font-medium text-sm flex items-center gap-1 cursor-pointer"
               >
                 🍽️ Meal
               </button>
 
               <button
                 onClick={() => router.push("/dashboard/gym")}
-                className="px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-lg transition font-medium text-sm flex items-center gap-1"
+                className="px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-lg transition font-medium text-sm flex items-center gap-1 cursor-pointer"
               >
                 💪 Gym
               </button>
