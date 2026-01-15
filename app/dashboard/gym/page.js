@@ -142,60 +142,570 @@ export default function GymTrackingPage() {
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <div className="bg-white rounded-2xl shadow-xl p-8 sm:p-12 text-center">
-          <div className="text-8xl mb-6">🏋️‍♂️</div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">
-            Gym Tracking Coming Soon!
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
+        {/* Weekly Schedule - Grid Layout */}
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
+            <span className="text-2xl sm:text-3xl">📅</span>
+            Weekly Workout Schedule
           </h2>
-          <p className="text-gray-600 text-lg mb-8">
-            This feature is currently under development. Soon you'll be able to:
-          </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto text-left">
-            <div className="bg-linear-to-br from-green-50 to-emerald-50 p-6 rounded-lg border border-green-200">
-              <div className="text-3xl mb-3">📝</div>
-              <h3 className="font-bold text-gray-800 mb-2">Log Workouts</h3>
-              <p className="text-gray-600 text-sm">
-                Track your exercises, sets, reps, and weight for each workout
-                session
-              </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3 sm:gap-4">
+            {/* Monday */}
+            <div className="bg-linear-to-br from-blue-50 to-blue-100 rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-blue-200 shadow-md hover:shadow-xl transition cursor-pointer">
+              <div className="text-center">
+                <div className="text-base sm:text-lg lg:text-xl font-bold text-blue-900 mb-2">
+                  Monday
+                </div>
+                <div className="space-y-1">
+                  <div className="bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-blue-800">
+                    💪 Chest
+                  </div>
+                  <div className="bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-blue-800">
+                    🔥 Triceps
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="bg-linear-to-br from-green-50 to-emerald-50 p-6 rounded-lg border border-green-200">
-              <div className="text-3xl mb-3">📈</div>
-              <h3 className="font-bold text-gray-800 mb-2">
-                Progress Tracking
+            {/* Tuesday */}
+            <div className="bg-linear-to-br from-green-50 to-green-100 rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-green-200 shadow-md hover:shadow-xl transition cursor-pointer">
+              <div className="text-center">
+                <div className="text-base sm:text-lg lg:text-xl font-bold text-green-900 mb-2">
+                  Tuesday
+                </div>
+                <div className="space-y-1">
+                  <div className="bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-green-800">
+                    🏋️ Back
+                  </div>
+                  <div className="bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-green-800">
+                    💪 Biceps
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Wednesday */}
+            <div className="bg-linear-to-br from-purple-50 to-purple-100 rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-purple-200 shadow-md hover:shadow-xl transition cursor-pointer">
+              <div className="text-center">
+                <div className="text-base sm:text-lg lg:text-xl font-bold text-purple-900 mb-2">
+                  Wednesday
+                </div>
+                <div className="space-y-1">
+                  <div className="bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-purple-800">
+                    🦵 Shoulders
+                  </div>
+                  <div className="bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-purple-800">
+                    🦿 Legs
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Thursday */}
+            <div className="bg-linear-to-br from-orange-50 to-orange-100 rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-orange-200 shadow-md hover:shadow-xl transition cursor-pointer">
+              <div className="text-center">
+                <div className="text-base sm:text-lg lg:text-xl font-bold text-orange-900 mb-2">
+                  Thursday
+                </div>
+                <div className="space-y-1">
+                  <div className="bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-orange-800">
+                    🔥 Cardio
+                  </div>
+                  <div className="bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-orange-800">
+                    🧘 Core
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Friday */}
+            <div className="bg-linear-to-br from-pink-50 to-pink-100 rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-pink-200 shadow-md hover:shadow-xl transition cursor-pointer">
+              <div className="text-center">
+                <div className="text-base sm:text-lg lg:text-xl font-bold text-pink-900 mb-2">
+                  Friday
+                </div>
+                <div className="space-y-1">
+                  <div className="bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-pink-800">
+                    🏋️ Full Body
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Saturday */}
+            <div className="bg-linear-to-br from-teal-50 to-teal-100 rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-teal-200 shadow-md hover:shadow-xl transition cursor-pointer">
+              <div className="text-center">
+                <div className="text-base sm:text-lg lg:text-xl font-bold text-teal-900 mb-2">
+                  Saturday
+                </div>
+                <div className="space-y-1">
+                  <div className="bg-white px-3 py-2 rounded-lg text-sm font-semibold text-teal-800">
+                    🎯 Active Recovery
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Sunday */}
+            <div className="bg-linear-to-br from-gray-50 to-gray-100 rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-gray-200 shadow-md hover:shadow-xl transition cursor-pointer">
+              <div className="text-center">
+                <div className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-2">
+                  Sunday
+                </div>
+                <div className="space-y-1">
+                  <div className="bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-gray-800">
+                    😴 Rest Day
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Today's Workout Details */}
+        <div className="bg-linear-to-br from-white to-gray-50 rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 lg:p-8 border border-gray-200">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-3">
+            <div>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-2 sm:gap-3">
+                <span className="text-3xl sm:text-4xl lg:text-5xl">💪</span>
+                Today's Workout
+              </h2>
+              <p className="text-sm sm:text-base lg:text-lg text-gray-600 mt-1 sm:mt-2 ml-10 sm:ml-12 lg:ml-14 font-semibold">
+                Monday Session
+              </p>
+            </div>
+            <span className="bg-linear-to-r from-blue-500 to-purple-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm shadow-lg">
+              Chest & Triceps
+            </span>
+          </div>
+
+          {/* Chest Exercises */}
+          <div className="mb-8">
+            <div className="mb-4">
+              <h3 className="text-2xl sm:text-3xl font-bold text-gray-800">
+                Chest
               </h3>
-              <p className="text-gray-600 text-sm">
-                Monitor your strength gains and workout consistency over time
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                3 Exercises
               </p>
             </div>
 
-            <div className="bg-linear-to-br from-green-50 to-emerald-50 p-6 rounded-lg border border-green-200">
-              <div className="text-3xl mb-3">🎯</div>
-              <h3 className="font-bold text-gray-800 mb-2">Set Goals</h3>
-              <p className="text-gray-600 text-sm">
-                Create and achieve personal fitness goals for different
-                exercises
-              </p>
-            </div>
+            <div className="space-y-4">
+              {/* Incline Dumbbell Press */}
+              <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-l-4 border-blue-500">
+                <div className="bg-linear-to-r from-blue-50 via-indigo-50 to-purple-50 px-4 sm:px-6 py-3 sm:py-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
+                    <div>
+                      <h4 className="text-lg sm:text-xl font-bold text-gray-800 mb-1">
+                        Incline Dumbbell Press
+                      </h4>
+                      <span className="inline-block bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold">
+                        COMPOUND
+                      </span>
+                    </div>
+                  </div>
+                </div>
 
-            <div className="bg-linear-to-br from-green-50 to-emerald-50 p-6 rounded-lg border border-green-200">
-              <div className="text-3xl mb-3">📊</div>
-              <h3 className="font-bold text-gray-800 mb-2">View Analytics</h3>
-              <p className="text-gray-600 text-sm">
-                Get insights into your workout patterns and performance trends
-              </p>
+                <div className="p-4 sm:p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-3 sm:mb-4">
+                    <div className="bg-linear-to-br from-orange-50 to-orange-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-orange-200">
+                      <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                        <span className="text-xl sm:text-2xl">🔥</span>
+                        <p className="text-xs font-bold text-orange-700 uppercase">
+                          Warm Up
+                        </p>
+                      </div>
+                      <p className="text-2xl sm:text-3xl font-bold text-orange-600 mb-1">
+                        20 kg
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-600">
+                        2 sets × 12 reps
+                      </p>
+                    </div>
+
+                    <div className="bg-linear-to-br from-blue-50 to-blue-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-blue-200">
+                      <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                        <span className="text-xl sm:text-2xl">💪</span>
+                        <p className="text-xs font-bold text-blue-700 uppercase">
+                          Working
+                        </p>
+                      </div>
+                      <p className="text-2xl sm:text-3xl font-bold text-blue-600 mb-1">
+                        35 kg
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-600">
+                        4 sets × 8-10 reps
+                      </p>
+                    </div>
+
+                    <div className="bg-linear-to-br from-green-50 to-emerald-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-green-300 relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-20 h-20 bg-green-200 rounded-full blur-2xl opacity-50"></div>
+                      <div className="flex items-center gap-2 mb-2 sm:mb-3 relative z-10">
+                        <span className="text-xl sm:text-2xl">🏆</span>
+                        <p className="text-xs font-bold text-green-700 uppercase">
+                          Last PR
+                        </p>
+                      </div>
+                      <p className="text-2xl sm:text-3xl font-bold text-green-600 mb-1 relative z-10">
+                        42.5 kg
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-600 mb-1 relative z-10">
+                        📅 Jan 2, 2026
+                      </p>
+                      <p className="text-xs sm:text-sm font-bold text-red-600 relative z-10">
+                        ⏱️ 14 days ago
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-linear-to-r from-yellow-50 to-amber-50 border-l-4 border-yellow-400 p-3 sm:p-4 rounded-lg">
+                    <p className="text-xs sm:text-sm font-semibold text-yellow-900 flex items-start gap-2">
+                      <span className="text-base sm:text-lg">💡</span>
+                      <span>
+                        Focus on controlled movement and chest contraction
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Flat Bench Press */}
+              <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-l-4 border-indigo-500">
+                <div className="bg-linear-to-r from-blue-50 via-indigo-50 to-purple-50 px-4 sm:px-6 py-3 sm:py-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
+                    <div>
+                      <h4 className="text-lg sm:text-xl font-bold text-gray-800 mb-1">
+                        Flat Bench Press
+                      </h4>
+                      <span className="inline-block bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold">
+                        COMPOUND
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 sm:p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-3 sm:mb-4">
+                    <div className="bg-linear-to-br from-orange-50 to-orange-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-orange-200">
+                      <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                        <span className="text-xl sm:text-2xl">🔥</span>
+                        <p className="text-xs font-bold text-orange-700 uppercase">
+                          Warm Up
+                        </p>
+                      </div>
+                      <p className="text-2xl sm:text-3xl font-bold text-orange-600 mb-1">
+                        40 kg
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-600">
+                        2 sets × 10 reps
+                      </p>
+                    </div>
+
+                    <div className="bg-linear-to-br from-blue-50 to-blue-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-blue-200">
+                      <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                        <span className="text-xl sm:text-2xl">💪</span>
+                        <p className="text-xs font-bold text-blue-700 uppercase">
+                          Working
+                        </p>
+                      </div>
+                      <p className="text-2xl sm:text-3xl font-bold text-blue-600 mb-1">
+                        70 kg
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-600">
+                        4 sets × 6-8 reps
+                      </p>
+                    </div>
+
+                    <div className="bg-linear-to-br from-green-50 to-emerald-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-green-300 relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-20 h-20 bg-green-200 rounded-full blur-2xl opacity-50"></div>
+                      <div className="flex items-center gap-2 mb-2 sm:mb-3 relative z-10">
+                        <span className="text-xl sm:text-2xl">🏆</span>
+                        <p className="text-xs font-bold text-green-700 uppercase">
+                          Last PR
+                        </p>
+                      </div>
+                      <p className="text-2xl sm:text-3xl font-bold text-green-600 mb-1 relative z-10">
+                        85 kg
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-600 mb-1 relative z-10">
+                        📅 Dec 28, 2025
+                      </p>
+                      <p className="text-xs sm:text-sm font-bold text-red-600 relative z-10">
+                        ⏱️ 19 days ago
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-linear-to-r from-yellow-50 to-amber-50 border-l-4 border-yellow-400 p-3 sm:p-4 rounded-lg">
+                    <p className="text-sm font-semibold text-yellow-900 flex items-start gap-2">
+                      <span className="text-lg">💡</span>
+                      <span>
+                        Keep your feet planted and maintain a slight arch
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Cable Flyes */}
+              <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-l-4 border-purple-500">
+                <div className="bg-linear-to-r from-purple-50 via-pink-50 to-purple-50 px-4 sm:px-6 py-3 sm:py-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
+                    <div>
+                      <h4 className="text-lg sm:text-xl font-bold text-gray-800 mb-1">
+                        Cable Flyes
+                      </h4>
+                      <span className="inline-block bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-bold">
+                        ISOLATION
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 sm:p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-3 sm:mb-4">
+                    <div className="bg-linear-to-br from-orange-50 to-orange-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-orange-200">
+                      <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                        <span className="text-xl sm:text-2xl">🔥</span>
+                        <p className="text-xs font-bold text-orange-700 uppercase">
+                          Warm Up
+                        </p>
+                      </div>
+                      <p className="text-2xl sm:text-3xl font-bold text-orange-600 mb-1">
+                        15 kg
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-600">
+                        1 set × 15 reps
+                      </p>
+                    </div>
+
+                    <div className="bg-linear-to-br from-blue-50 to-blue-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-blue-200">
+                      <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                        <span className="text-xl sm:text-2xl">💪</span>
+                        <p className="text-xs font-bold text-blue-700 uppercase">
+                          Working
+                        </p>
+                      </div>
+                      <p className="text-2xl sm:text-3xl font-bold text-blue-600 mb-1">
+                        25 kg
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-600">
+                        3 sets × 12-15 reps
+                      </p>
+                    </div>
+
+                    <div className="bg-linear-to-br from-green-50 to-emerald-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-green-300 relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-20 h-20 bg-green-200 rounded-full blur-2xl opacity-50"></div>
+                      <div className="flex items-center gap-2 mb-2 sm:mb-3 relative z-10">
+                        <span className="text-xl sm:text-2xl">🏆</span>
+                        <p className="text-xs font-bold text-green-700 uppercase">
+                          Last PR
+                        </p>
+                      </div>
+                      <p className="text-2xl sm:text-3xl font-bold text-green-600 mb-1 relative z-10">
+                        30 kg
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-600 mb-1 relative z-10">
+                        📅 Jan 9, 2026
+                      </p>
+                      <p className="text-xs sm:text-sm font-bold text-green-600 relative z-10">
+                        ⏱️ 7 days ago
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-linear-to-r from-yellow-50 to-amber-50 border-l-4 border-yellow-400 p-4 rounded-lg">
+                    <p className="text-sm font-semibold text-yellow-900 flex items-start gap-2">
+                      <span className="text-lg">💡</span>
+                      <span>
+                        Squeeze at the peak contraction for maximum chest
+                        engagement
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="mt-8">
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="bg-linear-to-r from-green-600 to-emerald-600 text-white px-8 py-3 rounded-lg hover:from-green-700 hover:to-emerald-700 transition shadow-md font-semibold cursor-pointer"
-            >
-              Back to Dashboard
+          {/* Triceps Exercises */}
+          <div>
+            <div className="mb-4">
+              <h3 className="text-2xl sm:text-3xl font-bold text-gray-800">
+                Triceps
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                2 Exercises
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              {/* Tricep Pushdowns */}
+              <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-l-4 border-red-500">
+                <div className="bg-linear-to-r from-red-50 via-pink-50 to-red-50 px-4 sm:px-6 py-3 sm:py-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
+                    <div>
+                      <h4 className="text-lg sm:text-xl font-bold text-gray-800 mb-1">
+                        Tricep Pushdowns
+                      </h4>
+                      <span className="inline-block bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-bold">
+                        ISOLATION
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 sm:p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-3 sm:mb-4">
+                    <div className="bg-linear-to-br from-orange-50 to-orange-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-orange-200">
+                      <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                        <span className="text-xl sm:text-2xl">🔥</span>
+                        <p className="text-xs font-bold text-orange-700 uppercase">
+                          Warm Up
+                        </p>
+                      </div>
+                      <p className="text-2xl sm:text-3xl font-bold text-orange-600 mb-1">
+                        20 kg
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-600">
+                        2 sets × 15 reps
+                      </p>
+                    </div>
+
+                    <div className="bg-linear-to-br from-blue-50 to-blue-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-blue-200">
+                      <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                        <span className="text-xl sm:text-2xl">💪</span>
+                        <p className="text-xs font-bold text-blue-700 uppercase">
+                          Working
+                        </p>
+                      </div>
+                      <p className="text-2xl sm:text-3xl font-bold text-blue-600 mb-1">
+                        35 kg
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-600">
+                        3 sets × 10-12 reps
+                      </p>
+                    </div>
+
+                    <div className="bg-linear-to-br from-green-50 to-emerald-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-green-300 relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-20 h-20 bg-green-200 rounded-full blur-2xl opacity-50"></div>
+                      <div className="flex items-center gap-2 mb-2 sm:mb-3 relative z-10">
+                        <span className="text-xl sm:text-2xl">🏆</span>
+                        <p className="text-xs font-bold text-green-700 uppercase">
+                          Last PR
+                        </p>
+                      </div>
+                      <p className="text-2xl sm:text-3xl font-bold text-green-600 mb-1 relative z-10">
+                        42.5 kg
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-600 mb-1 relative z-10">
+                        📅 Jan 13, 2026
+                      </p>
+                      <p className="text-xs sm:text-sm font-bold text-green-600 relative z-10">
+                        ⏱️ 3 days ago
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-linear-to-r from-yellow-50 to-amber-50 border-l-4 border-yellow-400 p-3 sm:p-4 rounded-lg">
+                    <p className="text-xs sm:text-sm font-semibold text-yellow-900 flex items-start gap-2">
+                      <span className="text-base sm:text-lg">💡</span>
+                      <span>
+                        Keep elbows tucked and fully extend at the bottom
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Overhead Tricep Extension */}
+              <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-l-4 border-pink-500">
+                <div className="bg-linear-to-r from-red-50 via-pink-50 to-red-50 px-4 sm:px-6 py-3 sm:py-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
+                    <div>
+                      <h4 className="text-lg sm:text-xl font-bold text-gray-800 mb-1">
+                        Overhead Tricep Extension
+                      </h4>
+                      <span className="inline-block bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-bold">
+                        ISOLATION
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 sm:p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-3 sm:mb-4">
+                    <div className="bg-linear-to-br from-orange-50 to-orange-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-orange-200">
+                      <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                        <span className="text-xl sm:text-2xl">🔥</span>
+                        <p className="text-xs font-bold text-orange-700 uppercase">
+                          Warm Up
+                        </p>
+                      </div>
+                      <p className="text-2xl sm:text-3xl font-bold text-orange-600 mb-1">
+                        12 kg
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-600">
+                        2 sets × 12 reps
+                      </p>
+                    </div>
+
+                    <div className="bg-linear-to-br from-blue-50 to-blue-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-blue-200">
+                      <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                        <span className="text-xl sm:text-2xl">💪</span>
+                        <p className="text-xs font-bold text-blue-700 uppercase">
+                          Working
+                        </p>
+                      </div>
+                      <p className="text-2xl sm:text-3xl font-bold text-blue-600 mb-1">
+                        20 kg
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-600">
+                        3 sets × 10-12 reps
+                      </p>
+                    </div>
+
+                    <div className="bg-linear-to-br from-green-50 to-emerald-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-green-300 relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-20 h-20 bg-green-200 rounded-full blur-2xl opacity-50"></div>
+                      <div className="flex items-center gap-2 mb-2 sm:mb-3 relative z-10">
+                        <span className="text-xl sm:text-2xl">🏆</span>
+                        <p className="text-xs font-bold text-green-700 uppercase">
+                          Last PR
+                        </p>
+                      </div>
+                      <p className="text-2xl sm:text-3xl font-bold text-green-600 mb-1 relative z-10">
+                        25 kg
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-600 mb-1 relative z-10">
+                        📅 Jan 6, 2026
+                      </p>
+                      <p className="text-xs sm:text-sm font-bold text-red-600 relative z-10">
+                        ⏱️ 10 days ago
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-linear-to-r from-yellow-50 to-amber-50 border-l-4 border-yellow-400 p-3 sm:p-4 rounded-lg">
+                    <p className="text-xs sm:text-sm font-semibold text-yellow-900 flex items-start gap-2">
+                      <span className="text-base sm:text-lg">💡</span>
+                      <span>
+                        Keep elbows stationary and focus on tricep stretch
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="mt-8 flex flex-wrap gap-4">
+            <button className="flex-1 bg-linear-to-r from-green-600 to-emerald-600 text-white px-6 py-3 rounded-lg hover:from-green-700 hover:to-emerald-700 transition shadow-md font-semibold">
+              ✅ Start Workout
+            </button>
+            <button className="flex-1 bg-linear-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition shadow-md font-semibold">
+              📊 View History
             </button>
           </div>
         </div>
