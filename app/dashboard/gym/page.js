@@ -3,6 +3,15 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 export default function GymTrackingPage() {
   const { user, loading: authLoading, logout } = useAuth();
@@ -258,6 +267,148 @@ export default function GymTrackingPage() {
                     😴 Rest Day
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Body Weight Chart */}
+        <div className="mb-6 sm:mb-8">
+          <div className="bg-linear-to-br from-white to-blue-50 rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 lg:p-8 border border-blue-200">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2">
+              <span className="text-2xl sm:text-3xl">⚖️</span>
+              Body Weight Progress
+            </h2>
+
+            {/* Chart Container */}
+            <div className="bg-white rounded-xl p-4 sm:p-6 shadow-lg">
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart
+                  data={[
+                    { date: "Jan 1", weight: 88, fullDate: "Jan 1, 2026" },
+                    { date: "Jan 5", weight: 86, fullDate: "Jan 5, 2026" },
+                    { date: "Jan 16", weight: 90, fullDate: "Jan 16, 2026" },
+                  ]}
+                  margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis
+                    dataKey="date"
+                    stroke="#6b7280"
+                    style={{ fontSize: "12px", fontWeight: "600" }}
+                  />
+                  <YAxis
+                    stroke="#6b7280"
+                    style={{ fontSize: "12px", fontWeight: "600" }}
+                    domain={[84, 92]}
+                    ticks={[84, 86, 88, 90, 92]}
+                    label={{
+                      value: "Weight (kg)",
+                      angle: -90,
+                      position: "insideLeft",
+                      style: { fontSize: "14px", fontWeight: "700" },
+                    }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#1f2937",
+                      border: "none",
+                      borderRadius: "8px",
+                      color: "#fff",
+                      padding: "10px 15px",
+                      fontWeight: "600",
+                    }}
+                    formatter={(value, name, props) => [
+                      `${value} kg`,
+                      "Weight",
+                    ]}
+                    labelFormatter={(label) => {
+                      const item = [
+                        { date: "Jan 1", fullDate: "Jan 1, 2026" },
+                        { date: "Jan 5", fullDate: "Jan 5, 2026" },
+                        { date: "Jan 16", fullDate: "Jan 16, 2026" },
+                      ].find((d) => d.date === label);
+                      return item ? item.fullDate : label;
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="weight"
+                    stroke="url(#colorWeight)"
+                    strokeWidth={3}
+                    dot={{
+                      fill: "#8b5cf6",
+                      stroke: "#fff",
+                      strokeWidth: 2,
+                      r: 6,
+                    }}
+                    activeDot={{
+                      r: 8,
+                      fill: "#ec4899",
+                      stroke: "#fff",
+                      strokeWidth: 2,
+                    }}
+                  />
+                  <defs>
+                    <linearGradient
+                      id="colorWeight"
+                      x1="0"
+                      y1="0"
+                      x2="1"
+                      y2="0"
+                    >
+                      <stop offset="0%" stopColor="#3b82f6" />
+                      <stop offset="50%" stopColor="#8b5cf6" />
+                      <stop offset="100%" stopColor="#ec4899" />
+                    </linearGradient>
+                  </defs>
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Stats Summary */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-4 sm:mt-6">
+              <div className="bg-linear-to-br from-blue-50 to-blue-100 rounded-lg p-4 border-2 border-blue-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xl sm:text-2xl">📊</span>
+                  <p className="text-xs font-bold text-blue-700 uppercase">
+                    Starting Weight
+                  </p>
+                </div>
+                <p className="text-2xl sm:text-3xl font-bold text-blue-600">
+                  88 kg
+                </p>
+                <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                  Jan 1, 2026
+                </p>
+              </div>
+
+              <div className="bg-linear-to-br from-green-50 to-green-100 rounded-lg p-4 border-2 border-green-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xl sm:text-2xl">🎯</span>
+                  <p className="text-xs font-bold text-green-700 uppercase">
+                    Current Weight
+                  </p>
+                </div>
+                <p className="text-2xl sm:text-3xl font-bold text-green-600">
+                  90 kg
+                </p>
+                <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                  Jan 16, 2026
+                </p>
+              </div>
+
+              <div className="bg-linear-to-br from-purple-50 to-purple-100 rounded-lg p-4 border-2 border-purple-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xl sm:text-2xl">📈</span>
+                  <p className="text-xs font-bold text-purple-700 uppercase">
+                    Total Change
+                  </p>
+                </div>
+                <p className="text-2xl sm:text-3xl font-bold text-purple-600">
+                  +2 kg
+                </p>
+                <p className="text-xs sm:text-sm text-gray-600 mt-1">15 days</p>
               </div>
             </div>
           </div>
