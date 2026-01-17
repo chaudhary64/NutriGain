@@ -476,77 +476,63 @@ export default function GymTrackingPage() {
               {/* Incline Dumbbell Press */}
               <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-l-4 border-blue-500">
                 <div className="bg-linear-to-r from-blue-50 via-indigo-50 to-purple-50 px-4 sm:px-6 py-3 sm:py-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
-                    <div>
-                      <h4 className="text-lg sm:text-xl font-bold text-gray-800 mb-1">
-                        Incline Dumbbell Press
-                      </h4>
-                      <span className="inline-block bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold">
-                        COMPOUND
-                      </span>
-                    </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <h4 className="text-lg sm:text-xl font-bold text-gray-800">
+                      Incline Dumbbell Press
+                    </h4>
+                    <span className="inline-block bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">
+                      COMPOUND
+                    </span>
                   </div>
                 </div>
 
                 <div className="p-4 sm:p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-3 sm:mb-4">
-                    <div className="bg-linear-to-br from-orange-50 to-orange-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-orange-200">
-                      <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                        <span className="text-xl sm:text-2xl">🔥</span>
-                        <p className="text-xs font-bold text-orange-700 uppercase">
-                          Warm Up
-                        </p>
-                      </div>
-                      <p className="text-2xl sm:text-3xl font-bold text-orange-600 mb-1">
-                        20 kg
-                      </p>
-                      <p className="text-xs sm:text-sm text-gray-600">
-                        2 sets × 12 reps
-                      </p>
-                    </div>
-
-                    <div className="bg-linear-to-br from-blue-50 to-blue-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-blue-200">
-                      <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                        <span className="text-xl sm:text-2xl">💪</span>
-                        <p className="text-xs font-bold text-blue-700 uppercase">
-                          Working
-                        </p>
-                      </div>
-                      <p className="text-2xl sm:text-3xl font-bold text-blue-600 mb-1">
-                        35 kg
-                      </p>
-                      <p className="text-xs sm:text-sm text-gray-600">
-                        4 sets × 8-10 reps
-                      </p>
-                    </div>
-
-                    <div className="bg-linear-to-br from-green-50 to-emerald-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-green-300 relative overflow-hidden">
-                      <div className="absolute top-0 right-0 w-20 h-20 bg-green-200 rounded-full blur-2xl opacity-50"></div>
-                      <div className="flex items-center gap-2 mb-2 sm:mb-3 relative z-10">
-                        <span className="text-xl sm:text-2xl">🏆</span>
-                        <p className="text-xs font-bold text-green-700 uppercase">
-                          Last PR
-                        </p>
-                      </div>
-                      <p className="text-2xl sm:text-3xl font-bold text-green-600 mb-1 relative z-10">
-                        42.5 kg
-                      </p>
-                      <p className="text-xs sm:text-sm text-gray-600 mb-1 relative z-10">
-                        📅 Jan 2, 2026
-                      </p>
-                      <p className="text-xs sm:text-sm font-bold text-red-600 relative z-10">
-                        ⏱️ 14 days ago
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="bg-linear-to-r from-yellow-50 to-amber-50 border-l-4 border-yellow-400 p-3 sm:p-4 rounded-lg">
-                    <p className="text-xs sm:text-sm font-semibold text-yellow-900 flex items-start gap-2">
-                      <span className="text-base sm:text-lg">💡</span>
-                      <span>
-                        Focus on controlled movement and chest contraction
-                      </span>
-                    </p>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse table-fixed">
+                      <thead>
+                        <tr className="bg-gray-100">
+                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                            Warm Up
+                          </th>
+                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                            Working
+                          </th>
+                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                            Last PR
+                          </th>
+                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                            Last PR Date
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="hover:bg-gray-50">
+                          <td className="px-3 py-4 border-b border-gray-200">
+                            <div className="font-bold text-orange-600 text-lg">
+                              20 kg
+                            </div>
+                          </td>
+                          <td className="px-3 py-4 border-b border-gray-200">
+                            <div className="font-bold text-blue-600 text-lg">
+                              35 kg
+                            </div>
+                          </td>
+                          <td className="px-3 py-4 border-b border-gray-200">
+                            <div className="font-bold text-green-600 text-lg">
+                              42.5 kg
+                            </div>
+                          </td>
+                          <td className="px-3 py-4 border-b border-gray-200">
+                            <div className="text-sm text-gray-700">
+                              Jan 2, 2026
+                            </div>
+                            <div className="text-xs text-red-600 font-semibold">
+                              (14 days ago)
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
@@ -554,77 +540,63 @@ export default function GymTrackingPage() {
               {/* Flat Bench Press */}
               <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-l-4 border-indigo-500">
                 <div className="bg-linear-to-r from-blue-50 via-indigo-50 to-purple-50 px-4 sm:px-6 py-3 sm:py-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
-                    <div>
-                      <h4 className="text-lg sm:text-xl font-bold text-gray-800 mb-1">
-                        Flat Bench Press
-                      </h4>
-                      <span className="inline-block bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold">
-                        COMPOUND
-                      </span>
-                    </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <h4 className="text-lg sm:text-xl font-bold text-gray-800">
+                      Flat Bench Press
+                    </h4>
+                    <span className="inline-block bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">
+                      COMPOUND
+                    </span>
                   </div>
                 </div>
 
                 <div className="p-4 sm:p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-3 sm:mb-4">
-                    <div className="bg-linear-to-br from-orange-50 to-orange-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-orange-200">
-                      <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                        <span className="text-xl sm:text-2xl">🔥</span>
-                        <p className="text-xs font-bold text-orange-700 uppercase">
-                          Warm Up
-                        </p>
-                      </div>
-                      <p className="text-2xl sm:text-3xl font-bold text-orange-600 mb-1">
-                        40 kg
-                      </p>
-                      <p className="text-xs sm:text-sm text-gray-600">
-                        2 sets × 10 reps
-                      </p>
-                    </div>
-
-                    <div className="bg-linear-to-br from-blue-50 to-blue-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-blue-200">
-                      <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                        <span className="text-xl sm:text-2xl">💪</span>
-                        <p className="text-xs font-bold text-blue-700 uppercase">
-                          Working
-                        </p>
-                      </div>
-                      <p className="text-2xl sm:text-3xl font-bold text-blue-600 mb-1">
-                        70 kg
-                      </p>
-                      <p className="text-xs sm:text-sm text-gray-600">
-                        4 sets × 6-8 reps
-                      </p>
-                    </div>
-
-                    <div className="bg-linear-to-br from-green-50 to-emerald-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-green-300 relative overflow-hidden">
-                      <div className="absolute top-0 right-0 w-20 h-20 bg-green-200 rounded-full blur-2xl opacity-50"></div>
-                      <div className="flex items-center gap-2 mb-2 sm:mb-3 relative z-10">
-                        <span className="text-xl sm:text-2xl">🏆</span>
-                        <p className="text-xs font-bold text-green-700 uppercase">
-                          Last PR
-                        </p>
-                      </div>
-                      <p className="text-2xl sm:text-3xl font-bold text-green-600 mb-1 relative z-10">
-                        85 kg
-                      </p>
-                      <p className="text-xs sm:text-sm text-gray-600 mb-1 relative z-10">
-                        📅 Dec 28, 2025
-                      </p>
-                      <p className="text-xs sm:text-sm font-bold text-red-600 relative z-10">
-                        ⏱️ 19 days ago
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="bg-linear-to-r from-yellow-50 to-amber-50 border-l-4 border-yellow-400 p-3 sm:p-4 rounded-lg">
-                    <p className="text-sm font-semibold text-yellow-900 flex items-start gap-2">
-                      <span className="text-lg">💡</span>
-                      <span>
-                        Keep your feet planted and maintain a slight arch
-                      </span>
-                    </p>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse table-fixed">
+                      <thead>
+                        <tr className="bg-gray-100">
+                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                            Warm Up
+                          </th>
+                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                            Working
+                          </th>
+                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                            Last PR
+                          </th>
+                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                            Last PR Date
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="hover:bg-gray-50">
+                          <td className="px-3 py-4 border-b border-gray-200">
+                            <div className="font-bold text-orange-600 text-lg">
+                              40 kg
+                            </div>
+                          </td>
+                          <td className="px-3 py-4 border-b border-gray-200">
+                            <div className="font-bold text-blue-600 text-lg">
+                              70 kg
+                            </div>
+                          </td>
+                          <td className="px-3 py-4 border-b border-gray-200">
+                            <div className="font-bold text-green-600 text-lg">
+                              85 kg
+                            </div>
+                          </td>
+                          <td className="px-3 py-4 border-b border-gray-200">
+                            <div className="text-sm text-gray-700">
+                              Dec 28, 2025
+                            </div>
+                            <div className="text-xs text-red-600 font-semibold">
+                              (19 days ago)
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
@@ -632,78 +604,63 @@ export default function GymTrackingPage() {
               {/* Cable Flyes */}
               <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-l-4 border-purple-500">
                 <div className="bg-linear-to-r from-purple-50 via-pink-50 to-purple-50 px-4 sm:px-6 py-3 sm:py-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
-                    <div>
-                      <h4 className="text-lg sm:text-xl font-bold text-gray-800 mb-1">
-                        Cable Flyes
-                      </h4>
-                      <span className="inline-block bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-bold">
-                        ISOLATION
-                      </span>
-                    </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <h4 className="text-lg sm:text-xl font-bold text-gray-800">
+                      Cable Flyes
+                    </h4>
+                    <span className="inline-block bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">
+                      ISOLATION
+                    </span>
                   </div>
                 </div>
 
                 <div className="p-4 sm:p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-3 sm:mb-4">
-                    <div className="bg-linear-to-br from-orange-50 to-orange-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-orange-200">
-                      <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                        <span className="text-xl sm:text-2xl">🔥</span>
-                        <p className="text-xs font-bold text-orange-700 uppercase">
-                          Warm Up
-                        </p>
-                      </div>
-                      <p className="text-2xl sm:text-3xl font-bold text-orange-600 mb-1">
-                        15 kg
-                      </p>
-                      <p className="text-xs sm:text-sm text-gray-600">
-                        1 set × 15 reps
-                      </p>
-                    </div>
-
-                    <div className="bg-linear-to-br from-blue-50 to-blue-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-blue-200">
-                      <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                        <span className="text-xl sm:text-2xl">💪</span>
-                        <p className="text-xs font-bold text-blue-700 uppercase">
-                          Working
-                        </p>
-                      </div>
-                      <p className="text-2xl sm:text-3xl font-bold text-blue-600 mb-1">
-                        25 kg
-                      </p>
-                      <p className="text-xs sm:text-sm text-gray-600">
-                        3 sets × 12-15 reps
-                      </p>
-                    </div>
-
-                    <div className="bg-linear-to-br from-green-50 to-emerald-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-green-300 relative overflow-hidden">
-                      <div className="absolute top-0 right-0 w-20 h-20 bg-green-200 rounded-full blur-2xl opacity-50"></div>
-                      <div className="flex items-center gap-2 mb-2 sm:mb-3 relative z-10">
-                        <span className="text-xl sm:text-2xl">🏆</span>
-                        <p className="text-xs font-bold text-green-700 uppercase">
-                          Last PR
-                        </p>
-                      </div>
-                      <p className="text-2xl sm:text-3xl font-bold text-green-600 mb-1 relative z-10">
-                        30 kg
-                      </p>
-                      <p className="text-xs sm:text-sm text-gray-600 mb-1 relative z-10">
-                        📅 Jan 9, 2026
-                      </p>
-                      <p className="text-xs sm:text-sm font-bold text-green-600 relative z-10">
-                        ⏱️ 7 days ago
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="bg-linear-to-r from-yellow-50 to-amber-50 border-l-4 border-yellow-400 p-4 rounded-lg">
-                    <p className="text-sm font-semibold text-yellow-900 flex items-start gap-2">
-                      <span className="text-lg">💡</span>
-                      <span>
-                        Squeeze at the peak contraction for maximum chest
-                        engagement
-                      </span>
-                    </p>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse table-fixed">
+                      <thead>
+                        <tr className="bg-gray-100">
+                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                            Warm Up
+                          </th>
+                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                            Working
+                          </th>
+                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                            Last PR
+                          </th>
+                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                            Last PR Date
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="hover:bg-gray-50">
+                          <td className="px-3 py-4 border-b border-gray-200">
+                            <div className="font-bold text-orange-600 text-lg">
+                              15 kg
+                            </div>
+                          </td>
+                          <td className="px-3 py-4 border-b border-gray-200">
+                            <div className="font-bold text-blue-600 text-lg">
+                              25 kg
+                            </div>
+                          </td>
+                          <td className="px-3 py-4 border-b border-gray-200">
+                            <div className="font-bold text-green-600 text-lg">
+                              30 kg
+                            </div>
+                          </td>
+                          <td className="px-3 py-4 border-b border-gray-200">
+                            <div className="text-sm text-gray-700">
+                              Jan 9, 2026
+                            </div>
+                            <div className="text-xs text-green-600 font-semibold">
+                              (7 days ago)
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
@@ -725,77 +682,63 @@ export default function GymTrackingPage() {
               {/* Tricep Pushdowns */}
               <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-l-4 border-red-500">
                 <div className="bg-linear-to-r from-red-50 via-pink-50 to-red-50 px-4 sm:px-6 py-3 sm:py-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
-                    <div>
-                      <h4 className="text-lg sm:text-xl font-bold text-gray-800 mb-1">
-                        Tricep Pushdowns
-                      </h4>
-                      <span className="inline-block bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-bold">
-                        ISOLATION
-                      </span>
-                    </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <h4 className="text-lg sm:text-xl font-bold text-gray-800">
+                      Tricep Pushdowns
+                    </h4>
+                    <span className="inline-block bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">
+                      ISOLATION
+                    </span>
                   </div>
                 </div>
 
                 <div className="p-4 sm:p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-3 sm:mb-4">
-                    <div className="bg-linear-to-br from-orange-50 to-orange-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-orange-200">
-                      <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                        <span className="text-xl sm:text-2xl">🔥</span>
-                        <p className="text-xs font-bold text-orange-700 uppercase">
-                          Warm Up
-                        </p>
-                      </div>
-                      <p className="text-2xl sm:text-3xl font-bold text-orange-600 mb-1">
-                        20 kg
-                      </p>
-                      <p className="text-xs sm:text-sm text-gray-600">
-                        2 sets × 15 reps
-                      </p>
-                    </div>
-
-                    <div className="bg-linear-to-br from-blue-50 to-blue-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-blue-200">
-                      <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                        <span className="text-xl sm:text-2xl">💪</span>
-                        <p className="text-xs font-bold text-blue-700 uppercase">
-                          Working
-                        </p>
-                      </div>
-                      <p className="text-2xl sm:text-3xl font-bold text-blue-600 mb-1">
-                        35 kg
-                      </p>
-                      <p className="text-xs sm:text-sm text-gray-600">
-                        3 sets × 10-12 reps
-                      </p>
-                    </div>
-
-                    <div className="bg-linear-to-br from-green-50 to-emerald-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-green-300 relative overflow-hidden">
-                      <div className="absolute top-0 right-0 w-20 h-20 bg-green-200 rounded-full blur-2xl opacity-50"></div>
-                      <div className="flex items-center gap-2 mb-2 sm:mb-3 relative z-10">
-                        <span className="text-xl sm:text-2xl">🏆</span>
-                        <p className="text-xs font-bold text-green-700 uppercase">
-                          Last PR
-                        </p>
-                      </div>
-                      <p className="text-2xl sm:text-3xl font-bold text-green-600 mb-1 relative z-10">
-                        42.5 kg
-                      </p>
-                      <p className="text-xs sm:text-sm text-gray-600 mb-1 relative z-10">
-                        📅 Jan 13, 2026
-                      </p>
-                      <p className="text-xs sm:text-sm font-bold text-green-600 relative z-10">
-                        ⏱️ 3 days ago
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="bg-linear-to-r from-yellow-50 to-amber-50 border-l-4 border-yellow-400 p-3 sm:p-4 rounded-lg">
-                    <p className="text-xs sm:text-sm font-semibold text-yellow-900 flex items-start gap-2">
-                      <span className="text-base sm:text-lg">💡</span>
-                      <span>
-                        Keep elbows tucked and fully extend at the bottom
-                      </span>
-                    </p>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse table-fixed">
+                      <thead>
+                        <tr className="bg-gray-100">
+                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                            Warm Up
+                          </th>
+                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                            Working
+                          </th>
+                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                            Last PR
+                          </th>
+                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                            Last PR Date
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="hover:bg-gray-50">
+                          <td className="px-3 py-4 border-b border-gray-200">
+                            <div className="font-bold text-orange-600 text-lg">
+                              20 kg
+                            </div>
+                          </td>
+                          <td className="px-3 py-4 border-b border-gray-200">
+                            <div className="font-bold text-blue-600 text-lg">
+                              35 kg
+                            </div>
+                          </td>
+                          <td className="px-3 py-4 border-b border-gray-200">
+                            <div className="font-bold text-green-600 text-lg">
+                              42.5 kg
+                            </div>
+                          </td>
+                          <td className="px-3 py-4 border-b border-gray-200">
+                            <div className="text-sm text-gray-700">
+                              Jan 13, 2026
+                            </div>
+                            <div className="text-xs text-green-600 font-semibold">
+                              (3 days ago)
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
@@ -803,77 +746,63 @@ export default function GymTrackingPage() {
               {/* Overhead Tricep Extension */}
               <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-l-4 border-pink-500">
                 <div className="bg-linear-to-r from-red-50 via-pink-50 to-red-50 px-4 sm:px-6 py-3 sm:py-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
-                    <div>
-                      <h4 className="text-lg sm:text-xl font-bold text-gray-800 mb-1">
-                        Overhead Tricep Extension
-                      </h4>
-                      <span className="inline-block bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-bold">
-                        ISOLATION
-                      </span>
-                    </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <h4 className="text-lg sm:text-xl font-bold text-gray-800">
+                      Overhead Tricep Extension
+                    </h4>
+                    <span className="inline-block bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">
+                      ISOLATION
+                    </span>
                   </div>
                 </div>
 
                 <div className="p-4 sm:p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-3 sm:mb-4">
-                    <div className="bg-linear-to-br from-orange-50 to-orange-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-orange-200">
-                      <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                        <span className="text-xl sm:text-2xl">🔥</span>
-                        <p className="text-xs font-bold text-orange-700 uppercase">
-                          Warm Up
-                        </p>
-                      </div>
-                      <p className="text-2xl sm:text-3xl font-bold text-orange-600 mb-1">
-                        12 kg
-                      </p>
-                      <p className="text-xs sm:text-sm text-gray-600">
-                        2 sets × 12 reps
-                      </p>
-                    </div>
-
-                    <div className="bg-linear-to-br from-blue-50 to-blue-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-blue-200">
-                      <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                        <span className="text-xl sm:text-2xl">💪</span>
-                        <p className="text-xs font-bold text-blue-700 uppercase">
-                          Working
-                        </p>
-                      </div>
-                      <p className="text-2xl sm:text-3xl font-bold text-blue-600 mb-1">
-                        20 kg
-                      </p>
-                      <p className="text-xs sm:text-sm text-gray-600">
-                        3 sets × 10-12 reps
-                      </p>
-                    </div>
-
-                    <div className="bg-linear-to-br from-green-50 to-emerald-100 rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 border-green-300 relative overflow-hidden">
-                      <div className="absolute top-0 right-0 w-20 h-20 bg-green-200 rounded-full blur-2xl opacity-50"></div>
-                      <div className="flex items-center gap-2 mb-2 sm:mb-3 relative z-10">
-                        <span className="text-xl sm:text-2xl">🏆</span>
-                        <p className="text-xs font-bold text-green-700 uppercase">
-                          Last PR
-                        </p>
-                      </div>
-                      <p className="text-2xl sm:text-3xl font-bold text-green-600 mb-1 relative z-10">
-                        25 kg
-                      </p>
-                      <p className="text-xs sm:text-sm text-gray-600 mb-1 relative z-10">
-                        📅 Jan 6, 2026
-                      </p>
-                      <p className="text-xs sm:text-sm font-bold text-red-600 relative z-10">
-                        ⏱️ 10 days ago
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="bg-linear-to-r from-yellow-50 to-amber-50 border-l-4 border-yellow-400 p-3 sm:p-4 rounded-lg">
-                    <p className="text-xs sm:text-sm font-semibold text-yellow-900 flex items-start gap-2">
-                      <span className="text-base sm:text-lg">💡</span>
-                      <span>
-                        Keep elbows stationary and focus on tricep stretch
-                      </span>
-                    </p>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse table-fixed">
+                      <thead>
+                        <tr className="bg-gray-100">
+                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                            Warm Up
+                          </th>
+                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                            Working
+                          </th>
+                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                            Last PR
+                          </th>
+                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                            Last PR Date
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="hover:bg-gray-50">
+                          <td className="px-3 py-4 border-b border-gray-200">
+                            <div className="font-bold text-orange-600 text-lg">
+                              12 kg
+                            </div>
+                          </td>
+                          <td className="px-3 py-4 border-b border-gray-200">
+                            <div className="font-bold text-blue-600 text-lg">
+                              20 kg
+                            </div>
+                          </td>
+                          <td className="px-3 py-4 border-b border-gray-200">
+                            <div className="font-bold text-green-600 text-lg">
+                              25 kg
+                            </div>
+                          </td>
+                          <td className="px-3 py-4 border-b border-gray-200">
+                            <div className="text-sm text-gray-700">
+                              Jan 6, 2026
+                            </div>
+                            <div className="text-xs text-red-600 font-semibold">
+                              (10 days ago)
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
