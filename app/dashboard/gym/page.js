@@ -11,6 +11,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  ReferenceLine,
 } from "recharts";
 
 export default function GymTrackingPage() {
@@ -289,7 +290,7 @@ export default function GymTrackingPage() {
                     { date: "Jan 5", weight: 86, fullDate: "Jan 5, 2026" },
                     { date: "Jan 16", weight: 90, fullDate: "Jan 16, 2026" },
                   ]}
-                  margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+                  margin={{ top: 20, right: 20, left: 0, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis
@@ -300,8 +301,8 @@ export default function GymTrackingPage() {
                   <YAxis
                     stroke="#6b7280"
                     style={{ fontSize: "12px", fontWeight: "600" }}
-                    domain={[84, 92]}
-                    ticks={[84, 86, 88, 90, 92]}
+                    domain={[72, 92]}
+                    ticks={[72, 75, 78, 81, 84, 87, 90]}
                     label={{
                       value: "Weight (kg)",
                       angle: -90,
@@ -329,6 +330,20 @@ export default function GymTrackingPage() {
                         { date: "Jan 16", fullDate: "Jan 16, 2026" },
                       ].find((d) => d.date === label);
                       return item ? item.fullDate : label;
+                    }}
+                  />
+                  <ReferenceLine
+                    y={75}
+                    stroke="#f97316"
+                    strokeWidth={2}
+                    strokeDasharray="6 6"
+                    label={{
+                      value: "Target: 75 kg",
+                      position: "insideTopRight",
+                      fill: "#f97316",
+                      fontSize: 11,
+                      fontWeight: "bold",
+                      offset: 10,
                     }}
                   />
                   <Line
@@ -367,7 +382,7 @@ export default function GymTrackingPage() {
             </div>
 
             {/* Stats Summary */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-4 sm:mt-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-4 sm:mt-6">
               <div className="bg-linear-to-br from-blue-50 to-blue-100 rounded-lg p-4 border-2 border-blue-200">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-xl sm:text-2xl">📊</span>
@@ -385,7 +400,7 @@ export default function GymTrackingPage() {
 
               <div className="bg-linear-to-br from-green-50 to-green-100 rounded-lg p-4 border-2 border-green-200">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xl sm:text-2xl">🎯</span>
+                  <span className="text-xl sm:text-2xl">⚖️</span>
                   <p className="text-xs font-bold text-green-700 uppercase">
                     Current Weight
                   </p>
@@ -395,6 +410,21 @@ export default function GymTrackingPage() {
                 </p>
                 <p className="text-xs sm:text-sm text-gray-600 mt-1">
                   Jan 16, 2026
+                </p>
+              </div>
+
+              <div className="bg-linear-to-br from-orange-50 to-orange-100 rounded-lg p-4 border-2 border-orange-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xl sm:text-2xl">🎯</span>
+                  <p className="text-xs font-bold text-orange-700 uppercase">
+                    Target Weight
+                  </p>
+                </div>
+                <p className="text-2xl sm:text-3xl font-bold text-orange-600">
+                  75 kg
+                </p>
+                <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                  15 kg to lose
                 </p>
               </div>
 
