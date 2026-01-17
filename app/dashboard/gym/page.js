@@ -23,10 +23,10 @@ export default function GymTrackingPage() {
   const [loading, setLoading] = useState(true);
   const [editingExercise, setEditingExercise] = useState(null);
   const [editFormData, setEditFormData] = useState({
-    warmUp: '',
-    working: '',
-    lastPR: '',
-    lastPRDate: ''
+    warmUp: "",
+    working: "",
+    lastPR: "",
+    lastPRDate: "",
   });
 
   useEffect(() => {
@@ -62,12 +62,32 @@ export default function GymTrackingPage() {
       }
 
       if (Array.isArray(scheduleData)) {
-        const validMuscleGroups = ["Chest", "Back", "Bicep", "Tricep", "Legs", "Forearms", "Shoulders", "Arms", "Rest Day"];
-        const dayOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+        const validMuscleGroups = [
+          "Chest",
+          "Back",
+          "Bicep",
+          "Tricep",
+          "Legs",
+          "Forearms",
+          "Shoulders",
+          "Arms",
+          "Rest Day",
+        ];
+        const dayOrder = [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday",
+        ];
         const filteredSchedule = scheduleData
-          .map(s => ({
+          .map((s) => ({
             ...s,
-            muscleGroups: (s.muscleGroups || []).filter(g => validMuscleGroups.includes(g))
+            muscleGroups: (s.muscleGroups || []).filter((g) =>
+              validMuscleGroups.includes(g)
+            ),
           }))
           .sort((a, b) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day));
         setWorkoutSchedule(filteredSchedule);
@@ -82,67 +102,111 @@ export default function GymTrackingPage() {
   const handleEditExercise = (exercise) => {
     setEditingExercise(exercise._id);
     setEditFormData({
-      warmUp: exercise.warmUp || '',
-      working: exercise.working || '',
-      lastPR: exercise.lastPR || '',
-      lastPRDate: exercise.lastPRDate || ''
+      warmUp: exercise.warmUp || "",
+      working: exercise.working || "",
+      lastPR: exercise.lastPR || "",
+      lastPRDate: exercise.lastPRDate || "",
     });
   };
 
   const handleSaveExercise = async (exerciseId) => {
     try {
       const res = await fetch(`/api/exercises/${exerciseId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editFormData)
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editFormData),
       });
 
       if (res.ok) {
         await fetchGymData();
         setEditingExercise(null);
       } else {
-        alert('Failed to update exercise');
+        alert("Failed to update exercise");
       }
     } catch (error) {
-      console.error('Error updating exercise:', error);
-      alert('Failed to update exercise');
+      console.error("Error updating exercise:", error);
+      alert("Failed to update exercise");
     }
   };
 
   const handleCancelEdit = () => {
     setEditingExercise(null);
     setEditFormData({
-      warmUp: '',
-      working: '',
-      lastPR: '',
-      lastPRDate: ''
+      warmUp: "",
+      working: "",
+      lastPR: "",
+      lastPRDate: "",
     });
+  };
+
+  const calculateDaysSince = (dateString) => {
+    if (!dateString) return null;
+    const prDate = new Date(dateString);
+    const today = new Date();
+    const diffTime = Math.abs(today - prDate);
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
   };
 
   const getMuscleGroupEmoji = (group) => {
     const emojiMap = {
-      Chest: "💪",
-      Back: "🏋️",
-      Bicep: "💪",
-      Tricep: "🔥",
-      Legs: "🦿",
-      Forearms: "💪",
-      Shoulders: "🦵",
-      Arms: "💪",
+      Chest: "",
+      Back: "",
+      Bicep: "",
+      Tricep: "",
+      Legs: "",
+      Forearms: "",
+      Shoulders: "",
+      Arms: "",
       "Rest Day": "😴",
     };
-    return emojiMap[group] || "🏋️";
+    return emojiMap[group] || "";
   };
 
   const getDayColors = (day) => {
     const colorMap = {
-      Monday: { bg: "from-blue-50 to-blue-100", border: "border-blue-200", textDark: "text-blue-900", textLight: "text-blue-800" },
-      Tuesday: { bg: "from-green-50 to-green-100", border: "border-green-200", textDark: "text-green-900", textLight: "text-green-800" },
-      Wednesday: { bg: "from-purple-50 to-purple-100", border: "border-purple-200", textDark: "text-purple-900", textLight: "text-purple-800" },
-      Thursday: { bg: "from-orange-50 to-orange-100", border: "border-orange-200", textDark: "text-orange-900", textLight: "text-orange-800" },
-      Friday: { bg: "from-pink-50 to-pink-100", border: "border-pink-200", textDark: "text-pink-900", textLight: "text-pink-800" },
-      Saturday: { bg: "from-teal-50 to-teal-100", border: "border-teal-200", textDark: "text-teal-900", textLight: "text-teal-800" },
-      Sunday: { bg: "from-gray-50 to-gray-100", border: "border-gray-200", textDark: "text-gray-900", textLight: "text-gray-800" },
+      Monday: {
+        bg: "from-blue-50 to-blue-100",
+        border: "border-blue-200",
+        textDark: "text-blue-900",
+        textLight: "text-blue-800",
+      },
+      Tuesday: {
+        bg: "from-green-50 to-green-100",
+        border: "border-green-200",
+        textDark: "text-green-900",
+        textLight: "text-green-800",
+      },
+      Wednesday: {
+        bg: "from-purple-50 to-purple-100",
+        border: "border-purple-200",
+        textDark: "text-purple-900",
+        textLight: "text-purple-800",
+      },
+      Thursday: {
+        bg: "from-orange-50 to-orange-100",
+        border: "border-orange-200",
+        textDark: "text-orange-900",
+        textLight: "text-orange-800",
+      },
+      Friday: {
+        bg: "from-pink-50 to-pink-100",
+        border: "border-pink-200",
+        textDark: "text-pink-900",
+        textLight: "text-pink-800",
+      },
+      Saturday: {
+        bg: "from-teal-50 to-teal-100",
+        border: "border-teal-200",
+        textDark: "text-teal-900",
+        textLight: "text-teal-800",
+      },
+      Sunday: {
+        bg: "from-gray-50 to-gray-100",
+        border: "border-gray-200",
+        textDark: "text-gray-900",
+        textLight: "text-gray-800",
+      },
     };
     return colorMap[day] || colorMap.Sunday;
   };
@@ -285,11 +349,14 @@ export default function GymTrackingPage() {
                   className={`bg-linear-to-br ${colors.bg} rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 ${colors.border} shadow-md hover:shadow-xl transition cursor-pointer`}
                 >
                   <div className="text-center">
-                    <div className={`text-base sm:text-lg lg:text-xl font-bold ${colors.textDark} mb-2`}>
+                    <div
+                      className={`text-base sm:text-lg lg:text-xl font-bold ${colors.textDark} mb-2`}
+                    >
                       {schedule.day}
                     </div>
                     <div className="space-y-1">
-                      {schedule.muscleGroups && schedule.muscleGroups.length > 0 ? (
+                      {schedule.muscleGroups &&
+                      schedule.muscleGroups.length > 0 ? (
                         schedule.muscleGroups.map((group, idx) => (
                           <div
                             key={idx}
@@ -299,7 +366,9 @@ export default function GymTrackingPage() {
                           </div>
                         ))
                       ) : (
-                        <div className={`bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-gray-500`}>
+                        <div
+                          className={`bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-gray-500`}
+                        >
                           No Workout
                         </div>
                       )}
@@ -485,14 +554,16 @@ export default function GymTrackingPage() {
         {/* Today's Workout Details */}
         <div className="bg-linear-to-br from-white to-gray-50 rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 lg:p-8 border border-gray-200">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-3">
-            <div>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-2 sm:gap-3">
-                <span className="text-3xl sm:text-4xl lg:text-5xl">💪</span>
-                Today's Workout
-              </h2>
-              <p className="text-sm sm:text-base lg:text-lg text-gray-600 mt-1 sm:mt-2 ml-10 sm:ml-12 lg:ml-14 font-semibold">
-                Monday Session
-              </p>
+            <div className="flex items-center gap-3 sm:gap-4">
+              <span className="text-4xl sm:text-5xl lg:text-6xl">💪</span>
+              <div>
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  Today's Workout
+                </h2>
+                <p className="text-sm sm:text-base lg:text-lg text-gray-600 mt-1 font-semibold">
+                  Monday Session
+                </p>
+              </div>
             </div>
             <span className="bg-linear-to-r from-blue-500 to-purple-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm shadow-lg">
               Chest & Triceps
@@ -502,167 +573,232 @@ export default function GymTrackingPage() {
           {/* Dynamic Exercises by Muscle Group */}
           {exercises.length > 0 && (
             <>
-              {[...new Set(exercises.map(ex => ex.muscleGroup))].map((muscleGroup) => {
-                const groupExercises = exercises.filter(ex => ex.muscleGroup === muscleGroup);
-                return (
-                  <div key={muscleGroup} className="mb-8">
-                    <div className="mb-4">
-                      <h3 className="text-2xl sm:text-3xl font-bold text-gray-800">
-                        {muscleGroup}
-                      </h3>
-                      <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                        {groupExercises.length} Exercise{groupExercises.length !== 1 ? 's' : ''}
-                      </p>
-                    </div>
+              {[...new Set(exercises.map((ex) => ex.muscleGroup))].map(
+                (muscleGroup) => {
+                  const groupExercises = exercises.filter(
+                    (ex) => ex.muscleGroup === muscleGroup
+                  );
+                  return (
+                    <div key={muscleGroup} className="mb-8">
+                      <div className="mb-4">
+                        <h3 className="text-2xl sm:text-3xl font-bold text-gray-800">
+                          {muscleGroup}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                          {groupExercises.length} Exercise
+                          {groupExercises.length !== 1 ? "s" : ""}
+                        </p>
+                      </div>
 
-                    <div className="space-y-4">
-                      {groupExercises.map((exercise) => (
-                        <div
-                          key={exercise._id}
-                          className={`bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-l-4 ${
-                            exercise.type === 'COMPOUND' ? 'border-blue-500' : 'border-red-500'
-                          }`}
-                        >
-                          <div className={`bg-linear-to-r ${
-                            exercise.type === 'COMPOUND' 
-                              ? 'from-blue-50 via-indigo-50 to-purple-50' 
-                              : 'from-red-50 via-pink-50 to-red-50'
-                          } px-4 sm:px-6 py-3 sm:py-4`}>
-                            <div className="flex items-center justify-between gap-2">
-                              <h4 className="text-lg sm:text-xl font-bold text-gray-800">
-                                {exercise.name}
-                              </h4>
-                              <span className={`inline-block ${
-                                exercise.type === 'COMPOUND' ? 'bg-blue-600' : 'bg-purple-600'
-                              } text-white px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap`}>
-                                {exercise.type}
-                              </span>
+                      <div className="space-y-4">
+                        {groupExercises.map((exercise) => (
+                          <div
+                            key={exercise._id}
+                            className={`bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-l-4 ${
+                              exercise.type === "COMPOUND"
+                                ? "border-blue-500"
+                                : "border-red-500"
+                            }`}
+                          >
+                            <div
+                              className={`bg-linear-to-r ${
+                                exercise.type === "COMPOUND"
+                                  ? "from-blue-50 via-indigo-50 to-purple-50"
+                                  : "from-red-50 via-pink-50 to-red-50"
+                              } px-4 sm:px-6 py-3 sm:py-4`}
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <h4 className="text-lg sm:text-xl font-bold text-gray-800">
+                                  {exercise.name}
+                                </h4>
+                                <span
+                                  className={`inline-block ${
+                                    exercise.type === "COMPOUND"
+                                      ? "bg-blue-600"
+                                      : "bg-purple-600"
+                                  } text-white px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap`}
+                                >
+                                  {exercise.type}
+                                </span>
+                              </div>
                             </div>
-                          </div>
 
-                          <div className="p-4 sm:p-6">
-                            <div className="overflow-x-auto">
-                              <table className="w-full border-collapse table-fixed">
-                                <thead>
-                                  <tr className="bg-gray-100">
-                                    <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                                      Warm Up
-                                    </th>
-                                    <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                                      Working
-                                    </th>
-                                    <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                                      Last PR
-                                    </th>
-                                    <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                                      Last PR Date
-                                    </th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  <tr className="hover:bg-gray-50">
-                                    <td className="px-3 py-4 border-b border-gray-200">
-                                      {editingExercise === exercise._id ? (
-                                        <input
-                                          type="number"
-                                          step="0.5"
-                                          value={editFormData.warmUp}
-                                          onChange={(e) => setEditFormData({...editFormData, warmUp: e.target.value})}
-                                          className="w-full px-2 py-1 border border-orange-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 font-bold text-orange-600 text-lg"
-                                          placeholder="20"
-                                        />
-                                      ) : (
-                                        <div className="font-bold text-orange-600 text-lg">
-                                          {exercise.warmUp ? `${exercise.warmUp} kg` : '-'}
-                                        </div>
-                                      )}
-                                    </td>
-                                    <td className="px-3 py-4 border-b border-gray-200">
-                                      {editingExercise === exercise._id ? (
-                                        <input
-                                          type="number"
-                                          step="0.5"
-                                          value={editFormData.working}
-                                          onChange={(e) => setEditFormData({...editFormData, working: e.target.value})}
-                                          className="w-full px-2 py-1 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-blue-600 text-lg"
-                                          placeholder="35"
-                                        />
-                                      ) : (
-                                        <div className="font-bold text-blue-600 text-lg">
-                                          {exercise.working ? `${exercise.working} kg` : '-'}
-                                        </div>
-                                      )}
-                                    </td>
-                                    <td className="px-3 py-4 border-b border-gray-200">
-                                      {editingExercise === exercise._id ? (
-                                        <input
-                                          type="number"
-                                          step="0.5"
-                                          value={editFormData.lastPR}
-                                          onChange={(e) => setEditFormData({...editFormData, lastPR: e.target.value})}
-                                          className="w-full px-2 py-1 border border-green-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500 font-bold text-green-600 text-lg"
-                                          placeholder="42.5"
-                                        />
-                                      ) : (
-                                        <div className="font-bold text-green-600 text-lg">
-                                          {exercise.lastPR ? `${exercise.lastPR} kg` : '-'}
-                                        </div>
-                                      )}
-                                    </td>
-                                    <td className="px-3 py-4 border-b border-gray-200">
-                                      {editingExercise === exercise._id ? (
-                                        <input
-                                          type="date"
-                                          value={editFormData.lastPRDate}
-                                          onChange={(e) => setEditFormData({...editFormData, lastPRDate: e.target.value})}
-                                          className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500 text-sm text-gray-700"
-                                        />
-                                      ) : (
-                                        <div className="text-sm text-gray-700">
-                                          {exercise.lastPRDate || '-'}
-                                        </div>
-                                      )}
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td colSpan="4" className="px-3 py-2 border-b border-gray-200">
-                                      <div className="flex justify-end gap-2">
+                            <div className="p-4 sm:p-6">
+                              <div className="overflow-x-auto">
+                                <table className="w-full border-collapse table-fixed">
+                                  <thead>
+                                    <tr className="bg-gray-100">
+                                      <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                                        Warm Up
+                                      </th>
+                                      <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                                        Working
+                                      </th>
+                                      <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                                        Last PR
+                                      </th>
+                                      <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                                        Last PR Date
+                                      </th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    <tr className="hover:bg-gray-50">
+                                      <td className="px-3 py-4 border-b border-gray-200">
                                         {editingExercise === exercise._id ? (
-                                          <>
-                                            <button
-                                              onClick={() => handleSaveExercise(exercise._id)}
-                                              className="bg-green-600 text-white px-4 py-1 rounded-lg hover:bg-green-700 text-sm font-semibold"
-                                            >
-                                              Save
-                                            </button>
-                                            <button
-                                              onClick={handleCancelEdit}
-                                              className="bg-gray-500 text-white px-4 py-1 rounded-lg hover:bg-gray-600 text-sm font-semibold"
-                                            >
-                                              Cancel
-                                            </button>
-                                          </>
+                                          <input
+                                            type="number"
+                                            step="0.5"
+                                            value={editFormData.warmUp}
+                                            onChange={(e) =>
+                                              setEditFormData({
+                                                ...editFormData,
+                                                warmUp: e.target.value,
+                                              })
+                                            }
+                                            className="w-full px-2 py-1 border border-orange-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 font-bold text-orange-600 text-lg"
+                                            placeholder="20"
+                                          />
                                         ) : (
-                                          <button
-                                            onClick={() => handleEditExercise(exercise)}
-                                            className="bg-blue-600 text-white px-4 py-1 rounded-lg hover:bg-blue-700 text-sm font-semibold"
-                                          >
-                                            Edit
-                                          </button>
+                                          <div className="font-bold text-orange-600 text-lg">
+                                            {exercise.warmUp
+                                              ? `${exercise.warmUp} kg`
+                                              : "-"}
+                                          </div>
                                         )}
-                                      </div>
-                                    </td>
-                                  </tr>
-                                </tbody>
-                              </table>
+                                      </td>
+                                      <td className="px-3 py-4 border-b border-gray-200">
+                                        {editingExercise === exercise._id ? (
+                                          <input
+                                            type="number"
+                                            step="0.5"
+                                            value={editFormData.working}
+                                            onChange={(e) =>
+                                              setEditFormData({
+                                                ...editFormData,
+                                                working: e.target.value,
+                                              })
+                                            }
+                                            className="w-full px-2 py-1 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-blue-600 text-lg"
+                                            placeholder="35"
+                                          />
+                                        ) : (
+                                          <div className="font-bold text-blue-600 text-lg">
+                                            {exercise.working
+                                              ? `${exercise.working} kg`
+                                              : "-"}
+                                          </div>
+                                        )}
+                                      </td>
+                                      <td className="px-3 py-4 border-b border-gray-200">
+                                        {editingExercise === exercise._id ? (
+                                          <input
+                                            type="number"
+                                            step="0.5"
+                                            value={editFormData.lastPR}
+                                            onChange={(e) =>
+                                              setEditFormData({
+                                                ...editFormData,
+                                                lastPR: e.target.value,
+                                              })
+                                            }
+                                            className="w-full px-2 py-1 border border-green-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500 font-bold text-green-600 text-lg"
+                                            placeholder="42.5"
+                                          />
+                                        ) : (
+                                          <div className="font-bold text-green-600 text-lg">
+                                            {exercise.lastPR
+                                              ? `${exercise.lastPR} kg`
+                                              : "-"}
+                                          </div>
+                                        )}
+                                      </td>
+                                      <td className="px-3 py-4 border-b border-gray-200">
+                                        {editingExercise === exercise._id ? (
+                                          <input
+                                            type="date"
+                                            value={editFormData.lastPRDate}
+                                            onChange={(e) =>
+                                              setEditFormData({
+                                                ...editFormData,
+                                                lastPRDate: e.target.value,
+                                              })
+                                            }
+                                            className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500 text-sm text-gray-700"
+                                          />
+                                        ) : (
+                                          <div className="text-sm text-gray-700">
+                                            {exercise.lastPRDate ? (
+                                              <div>
+                                                <div>{exercise.lastPRDate}</div>
+                                                <div className="text-xs text-gray-500 mt-1">
+                                                  {calculateDaysSince(
+                                                    exercise.lastPRDate
+                                                  ) === 0
+                                                    ? "Today"
+                                                    : calculateDaysSince(
+                                                          exercise.lastPRDate
+                                                        ) === 1
+                                                      ? "1 day ago"
+                                                      : `${calculateDaysSince(exercise.lastPRDate)} days ago`}
+                                                </div>
+                                              </div>
+                                            ) : (
+                                              "-"
+                                            )}
+                                          </div>
+                                        )}
+                                      </td>
+                                    </tr>
+                                    <tr>
+                                      <td
+                                        colSpan="4"
+                                        className="px-3 py-2 border-b border-gray-200"
+                                      >
+                                        <div className="flex justify-end gap-2">
+                                          {editingExercise === exercise._id ? (
+                                            <>
+                                              <button
+                                                onClick={() =>
+                                                  handleSaveExercise(
+                                                    exercise._id
+                                                  )
+                                                }
+                                                className="bg-green-600 text-white px-4 py-1 rounded-lg hover:bg-green-700 text-sm font-semibold"
+                                              >
+                                                Save
+                                              </button>
+                                              <button
+                                                onClick={handleCancelEdit}
+                                                className="bg-gray-500 text-white px-4 py-1 rounded-lg hover:bg-gray-600 text-sm font-semibold"
+                                              >
+                                                Cancel
+                                              </button>
+                                            </>
+                                          ) : (
+                                            <button
+                                              onClick={() =>
+                                                handleEditExercise(exercise)
+                                              }
+                                              className="bg-blue-600 text-white px-4 py-1 rounded-lg hover:bg-blue-700 text-sm font-semibold"
+                                            >
+                                              Edit
+                                            </button>
+                                          )}
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                }
+              )}
             </>
           )}
 
