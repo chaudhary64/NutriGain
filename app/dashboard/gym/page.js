@@ -18,6 +18,16 @@ export default function GymTrackingPage() {
   const { user, loading: authLoading, logout } = useAuth();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [exercises, setExercises] = useState([]);
+  const [workoutSchedule, setWorkoutSchedule] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editingExercise, setEditingExercise] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    warmUp: '',
+    working: '',
+    lastPR: '',
+    lastPRDate: ''
+  });
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -31,7 +41,113 @@ export default function GymTrackingPage() {
     }
   }, [user, router]);
 
-  if (authLoading) {
+  useEffect(() => {
+    if (user && !user.isAdmin) {
+      fetchGymData();
+    }
+  }, [user]);
+
+  const fetchGymData = async () => {
+    try {
+      const [exercisesRes, scheduleRes] = await Promise.all([
+        fetch("/api/exercises"),
+        fetch("/api/workout-schedule"),
+      ]);
+
+      const exercisesData = await exercisesRes.json();
+      const scheduleData = await scheduleRes.json();
+
+      if (Array.isArray(exercisesData)) {
+        setExercises(exercisesData);
+      }
+
+      if (Array.isArray(scheduleData)) {
+        const validMuscleGroups = ["Chest", "Back", "Bicep", "Tricep", "Legs", "Forearms", "Shoulders", "Arms", "Rest Day"];
+        const dayOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+        const filteredSchedule = scheduleData
+          .map(s => ({
+            ...s,
+            muscleGroups: (s.muscleGroups || []).filter(g => validMuscleGroups.includes(g))
+          }))
+          .sort((a, b) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day));
+        setWorkoutSchedule(filteredSchedule);
+      }
+    } catch (error) {
+      console.error("Error fetching gym data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditExercise = (exercise) => {
+    setEditingExercise(exercise._id);
+    setEditFormData({
+      warmUp: exercise.warmUp || '',
+      working: exercise.working || '',
+      lastPR: exercise.lastPR || '',
+      lastPRDate: exercise.lastPRDate || ''
+    });
+  };
+
+  const handleSaveExercise = async (exerciseId) => {
+    try {
+      const res = await fetch(`/api/exercises/${exerciseId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editFormData)
+      });
+
+      if (res.ok) {
+        await fetchGymData();
+        setEditingExercise(null);
+      } else {
+        alert('Failed to update exercise');
+      }
+    } catch (error) {
+      console.error('Error updating exercise:', error);
+      alert('Failed to update exercise');
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingExercise(null);
+    setEditFormData({
+      warmUp: '',
+      working: '',
+      lastPR: '',
+      lastPRDate: ''
+    });
+  };
+
+  const getMuscleGroupEmoji = (group) => {
+    const emojiMap = {
+      Chest: "💪",
+      Back: "🏋️",
+      Bicep: "💪",
+      Tricep: "🔥",
+      Legs: "🦿",
+      Forearms: "💪",
+      Shoulders: "🦵",
+      Arms: "💪",
+      "Rest Day": "😴",
+    };
+    return emojiMap[group] || "🏋️";
+  };
+
+  const getDayColors = (day) => {
+    const colorMap = {
+      Monday: { bg: "from-blue-50 to-blue-100", border: "border-blue-200", textDark: "text-blue-900", textLight: "text-blue-800" },
+      Tuesday: { bg: "from-green-50 to-green-100", border: "border-green-200", textDark: "text-green-900", textLight: "text-green-800" },
+      Wednesday: { bg: "from-purple-50 to-purple-100", border: "border-purple-200", textDark: "text-purple-900", textLight: "text-purple-800" },
+      Thursday: { bg: "from-orange-50 to-orange-100", border: "border-orange-200", textDark: "text-orange-900", textLight: "text-orange-800" },
+      Friday: { bg: "from-pink-50 to-pink-100", border: "border-pink-200", textDark: "text-pink-900", textLight: "text-pink-800" },
+      Saturday: { bg: "from-teal-50 to-teal-100", border: "border-teal-200", textDark: "text-teal-900", textLight: "text-teal-800" },
+      Sunday: { bg: "from-gray-50 to-gray-100", border: "border-gray-200", textDark: "text-gray-900", textLight: "text-gray-800" },
+    };
+    return colorMap[day] || colorMap.Sunday;
+  };
+
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-xl">Loading...</div>
@@ -161,115 +277,37 @@ export default function GymTrackingPage() {
           </h2>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3 sm:gap-4">
-            {/* Monday */}
-            <div className="bg-linear-to-br from-blue-50 to-blue-100 rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-blue-200 shadow-md hover:shadow-xl transition cursor-pointer">
-              <div className="text-center">
-                <div className="text-base sm:text-lg lg:text-xl font-bold text-blue-900 mb-2">
-                  Monday
-                </div>
-                <div className="space-y-1">
-                  <div className="bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-blue-800">
-                    💪 Chest
-                  </div>
-                  <div className="bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-blue-800">
-                    🔥 Triceps
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Tuesday */}
-            <div className="bg-linear-to-br from-green-50 to-green-100 rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-green-200 shadow-md hover:shadow-xl transition cursor-pointer">
-              <div className="text-center">
-                <div className="text-base sm:text-lg lg:text-xl font-bold text-green-900 mb-2">
-                  Tuesday
-                </div>
-                <div className="space-y-1">
-                  <div className="bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-green-800">
-                    🏋️ Back
-                  </div>
-                  <div className="bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-green-800">
-                    💪 Biceps
+            {workoutSchedule.map((schedule) => {
+              const colors = getDayColors(schedule.day);
+              return (
+                <div
+                  key={schedule.day}
+                  className={`bg-linear-to-br ${colors.bg} rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 ${colors.border} shadow-md hover:shadow-xl transition cursor-pointer`}
+                >
+                  <div className="text-center">
+                    <div className={`text-base sm:text-lg lg:text-xl font-bold ${colors.textDark} mb-2`}>
+                      {schedule.day}
+                    </div>
+                    <div className="space-y-1">
+                      {schedule.muscleGroups && schedule.muscleGroups.length > 0 ? (
+                        schedule.muscleGroups.map((group, idx) => (
+                          <div
+                            key={idx}
+                            className={`bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold ${colors.textLight}`}
+                          >
+                            {getMuscleGroupEmoji(group)} {group}
+                          </div>
+                        ))
+                      ) : (
+                        <div className={`bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-gray-500`}>
+                          No Workout
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Wednesday */}
-            <div className="bg-linear-to-br from-purple-50 to-purple-100 rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-purple-200 shadow-md hover:shadow-xl transition cursor-pointer">
-              <div className="text-center">
-                <div className="text-base sm:text-lg lg:text-xl font-bold text-purple-900 mb-2">
-                  Wednesday
-                </div>
-                <div className="space-y-1">
-                  <div className="bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-purple-800">
-                    🦵 Shoulders
-                  </div>
-                  <div className="bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-purple-800">
-                    🦿 Legs
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Thursday */}
-            <div className="bg-linear-to-br from-orange-50 to-orange-100 rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-orange-200 shadow-md hover:shadow-xl transition cursor-pointer">
-              <div className="text-center">
-                <div className="text-base sm:text-lg lg:text-xl font-bold text-orange-900 mb-2">
-                  Thursday
-                </div>
-                <div className="space-y-1">
-                  <div className="bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-orange-800">
-                    🔥 Cardio
-                  </div>
-                  <div className="bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-orange-800">
-                    🧘 Core
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Friday */}
-            <div className="bg-linear-to-br from-pink-50 to-pink-100 rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-pink-200 shadow-md hover:shadow-xl transition cursor-pointer">
-              <div className="text-center">
-                <div className="text-base sm:text-lg lg:text-xl font-bold text-pink-900 mb-2">
-                  Friday
-                </div>
-                <div className="space-y-1">
-                  <div className="bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-pink-800">
-                    🏋️ Full Body
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Saturday */}
-            <div className="bg-linear-to-br from-teal-50 to-teal-100 rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-teal-200 shadow-md hover:shadow-xl transition cursor-pointer">
-              <div className="text-center">
-                <div className="text-base sm:text-lg lg:text-xl font-bold text-teal-900 mb-2">
-                  Saturday
-                </div>
-                <div className="space-y-1">
-                  <div className="bg-white px-3 py-2 rounded-lg text-sm font-semibold text-teal-800">
-                    🎯 Active Recovery
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Sunday */}
-            <div className="bg-linear-to-br from-gray-50 to-gray-100 rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-gray-200 shadow-md hover:shadow-xl transition cursor-pointer">
-              <div className="text-center">
-                <div className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-2">
-                  Sunday
-                </div>
-                <div className="space-y-1">
-                  <div className="bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-gray-800">
-                    😴 Rest Day
-                  </div>
-                </div>
-              </div>
-            </div>
+              );
+            })}
           </div>
         </div>
 
@@ -461,353 +499,172 @@ export default function GymTrackingPage() {
             </span>
           </div>
 
-          {/* Chest Exercises */}
-          <div className="mb-8">
-            <div className="mb-4">
-              <h3 className="text-2xl sm:text-3xl font-bold text-gray-800">
-                Chest
-              </h3>
-              <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                3 Exercises
-              </p>
-            </div>
+          {/* Dynamic Exercises by Muscle Group */}
+          {exercises.length > 0 && (
+            <>
+              {[...new Set(exercises.map(ex => ex.muscleGroup))].map((muscleGroup) => {
+                const groupExercises = exercises.filter(ex => ex.muscleGroup === muscleGroup);
+                return (
+                  <div key={muscleGroup} className="mb-8">
+                    <div className="mb-4">
+                      <h3 className="text-2xl sm:text-3xl font-bold text-gray-800">
+                        {muscleGroup}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                        {groupExercises.length} Exercise{groupExercises.length !== 1 ? 's' : ''}
+                      </p>
+                    </div>
 
-            <div className="space-y-4">
-              {/* Incline Dumbbell Press */}
-              <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-l-4 border-blue-500">
-                <div className="bg-linear-to-r from-blue-50 via-indigo-50 to-purple-50 px-4 sm:px-6 py-3 sm:py-4">
-                  <div className="flex items-center justify-between gap-2">
-                    <h4 className="text-lg sm:text-xl font-bold text-gray-800">
-                      Incline Dumbbell Press
-                    </h4>
-                    <span className="inline-block bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">
-                      COMPOUND
-                    </span>
+                    <div className="space-y-4">
+                      {groupExercises.map((exercise) => (
+                        <div
+                          key={exercise._id}
+                          className={`bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-l-4 ${
+                            exercise.type === 'COMPOUND' ? 'border-blue-500' : 'border-red-500'
+                          }`}
+                        >
+                          <div className={`bg-linear-to-r ${
+                            exercise.type === 'COMPOUND' 
+                              ? 'from-blue-50 via-indigo-50 to-purple-50' 
+                              : 'from-red-50 via-pink-50 to-red-50'
+                          } px-4 sm:px-6 py-3 sm:py-4`}>
+                            <div className="flex items-center justify-between gap-2">
+                              <h4 className="text-lg sm:text-xl font-bold text-gray-800">
+                                {exercise.name}
+                              </h4>
+                              <span className={`inline-block ${
+                                exercise.type === 'COMPOUND' ? 'bg-blue-600' : 'bg-purple-600'
+                              } text-white px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap`}>
+                                {exercise.type}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="p-4 sm:p-6">
+                            <div className="overflow-x-auto">
+                              <table className="w-full border-collapse table-fixed">
+                                <thead>
+                                  <tr className="bg-gray-100">
+                                    <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                                      Warm Up
+                                    </th>
+                                    <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                                      Working
+                                    </th>
+                                    <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                                      Last PR
+                                    </th>
+                                    <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
+                                      Last PR Date
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr className="hover:bg-gray-50">
+                                    <td className="px-3 py-4 border-b border-gray-200">
+                                      {editingExercise === exercise._id ? (
+                                        <input
+                                          type="number"
+                                          step="0.5"
+                                          value={editFormData.warmUp}
+                                          onChange={(e) => setEditFormData({...editFormData, warmUp: e.target.value})}
+                                          className="w-full px-2 py-1 border border-orange-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 font-bold text-orange-600 text-lg"
+                                          placeholder="20"
+                                        />
+                                      ) : (
+                                        <div className="font-bold text-orange-600 text-lg">
+                                          {exercise.warmUp ? `${exercise.warmUp} kg` : '-'}
+                                        </div>
+                                      )}
+                                    </td>
+                                    <td className="px-3 py-4 border-b border-gray-200">
+                                      {editingExercise === exercise._id ? (
+                                        <input
+                                          type="number"
+                                          step="0.5"
+                                          value={editFormData.working}
+                                          onChange={(e) => setEditFormData({...editFormData, working: e.target.value})}
+                                          className="w-full px-2 py-1 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-blue-600 text-lg"
+                                          placeholder="35"
+                                        />
+                                      ) : (
+                                        <div className="font-bold text-blue-600 text-lg">
+                                          {exercise.working ? `${exercise.working} kg` : '-'}
+                                        </div>
+                                      )}
+                                    </td>
+                                    <td className="px-3 py-4 border-b border-gray-200">
+                                      {editingExercise === exercise._id ? (
+                                        <input
+                                          type="number"
+                                          step="0.5"
+                                          value={editFormData.lastPR}
+                                          onChange={(e) => setEditFormData({...editFormData, lastPR: e.target.value})}
+                                          className="w-full px-2 py-1 border border-green-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500 font-bold text-green-600 text-lg"
+                                          placeholder="42.5"
+                                        />
+                                      ) : (
+                                        <div className="font-bold text-green-600 text-lg">
+                                          {exercise.lastPR ? `${exercise.lastPR} kg` : '-'}
+                                        </div>
+                                      )}
+                                    </td>
+                                    <td className="px-3 py-4 border-b border-gray-200">
+                                      {editingExercise === exercise._id ? (
+                                        <input
+                                          type="date"
+                                          value={editFormData.lastPRDate}
+                                          onChange={(e) => setEditFormData({...editFormData, lastPRDate: e.target.value})}
+                                          className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500 text-sm text-gray-700"
+                                        />
+                                      ) : (
+                                        <div className="text-sm text-gray-700">
+                                          {exercise.lastPRDate || '-'}
+                                        </div>
+                                      )}
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td colSpan="4" className="px-3 py-2 border-b border-gray-200">
+                                      <div className="flex justify-end gap-2">
+                                        {editingExercise === exercise._id ? (
+                                          <>
+                                            <button
+                                              onClick={() => handleSaveExercise(exercise._id)}
+                                              className="bg-green-600 text-white px-4 py-1 rounded-lg hover:bg-green-700 text-sm font-semibold"
+                                            >
+                                              Save
+                                            </button>
+                                            <button
+                                              onClick={handleCancelEdit}
+                                              className="bg-gray-500 text-white px-4 py-1 rounded-lg hover:bg-gray-600 text-sm font-semibold"
+                                            >
+                                              Cancel
+                                            </button>
+                                          </>
+                                        ) : (
+                                          <button
+                                            onClick={() => handleEditExercise(exercise)}
+                                            className="bg-blue-600 text-white px-4 py-1 rounded-lg hover:bg-blue-700 text-sm font-semibold"
+                                          >
+                                            Edit
+                                          </button>
+                                        )}
+                                      </div>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-
-                <div className="p-4 sm:p-6">
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse table-fixed">
-                      <thead>
-                        <tr className="bg-gray-100">
-                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                            Warm Up
-                          </th>
-                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                            Working
-                          </th>
-                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                            Last PR
-                          </th>
-                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                            Last PR Date
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr className="hover:bg-gray-50">
-                          <td className="px-3 py-4 border-b border-gray-200">
-                            <div className="font-bold text-orange-600 text-lg">
-                              20 kg
-                            </div>
-                          </td>
-                          <td className="px-3 py-4 border-b border-gray-200">
-                            <div className="font-bold text-blue-600 text-lg">
-                              35 kg
-                            </div>
-                          </td>
-                          <td className="px-3 py-4 border-b border-gray-200">
-                            <div className="font-bold text-green-600 text-lg">
-                              42.5 kg
-                            </div>
-                          </td>
-                          <td className="px-3 py-4 border-b border-gray-200">
-                            <div className="text-sm text-gray-700">
-                              Jan 2, 2026
-                            </div>
-                            <div className="text-xs text-red-600 font-semibold">
-                              (14 days ago)
-                            </div>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-
-              {/* Flat Bench Press */}
-              <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-l-4 border-indigo-500">
-                <div className="bg-linear-to-r from-blue-50 via-indigo-50 to-purple-50 px-4 sm:px-6 py-3 sm:py-4">
-                  <div className="flex items-center justify-between gap-2">
-                    <h4 className="text-lg sm:text-xl font-bold text-gray-800">
-                      Flat Bench Press
-                    </h4>
-                    <span className="inline-block bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">
-                      COMPOUND
-                    </span>
-                  </div>
-                </div>
-
-                <div className="p-4 sm:p-6">
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse table-fixed">
-                      <thead>
-                        <tr className="bg-gray-100">
-                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                            Warm Up
-                          </th>
-                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                            Working
-                          </th>
-                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                            Last PR
-                          </th>
-                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                            Last PR Date
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr className="hover:bg-gray-50">
-                          <td className="px-3 py-4 border-b border-gray-200">
-                            <div className="font-bold text-orange-600 text-lg">
-                              40 kg
-                            </div>
-                          </td>
-                          <td className="px-3 py-4 border-b border-gray-200">
-                            <div className="font-bold text-blue-600 text-lg">
-                              70 kg
-                            </div>
-                          </td>
-                          <td className="px-3 py-4 border-b border-gray-200">
-                            <div className="font-bold text-green-600 text-lg">
-                              85 kg
-                            </div>
-                          </td>
-                          <td className="px-3 py-4 border-b border-gray-200">
-                            <div className="text-sm text-gray-700">
-                              Dec 28, 2025
-                            </div>
-                            <div className="text-xs text-red-600 font-semibold">
-                              (19 days ago)
-                            </div>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-
-              {/* Cable Flyes */}
-              <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-l-4 border-purple-500">
-                <div className="bg-linear-to-r from-purple-50 via-pink-50 to-purple-50 px-4 sm:px-6 py-3 sm:py-4">
-                  <div className="flex items-center justify-between gap-2">
-                    <h4 className="text-lg sm:text-xl font-bold text-gray-800">
-                      Cable Flyes
-                    </h4>
-                    <span className="inline-block bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">
-                      ISOLATION
-                    </span>
-                  </div>
-                </div>
-
-                <div className="p-4 sm:p-6">
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse table-fixed">
-                      <thead>
-                        <tr className="bg-gray-100">
-                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                            Warm Up
-                          </th>
-                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                            Working
-                          </th>
-                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                            Last PR
-                          </th>
-                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                            Last PR Date
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr className="hover:bg-gray-50">
-                          <td className="px-3 py-4 border-b border-gray-200">
-                            <div className="font-bold text-orange-600 text-lg">
-                              15 kg
-                            </div>
-                          </td>
-                          <td className="px-3 py-4 border-b border-gray-200">
-                            <div className="font-bold text-blue-600 text-lg">
-                              25 kg
-                            </div>
-                          </td>
-                          <td className="px-3 py-4 border-b border-gray-200">
-                            <div className="font-bold text-green-600 text-lg">
-                              30 kg
-                            </div>
-                          </td>
-                          <td className="px-3 py-4 border-b border-gray-200">
-                            <div className="text-sm text-gray-700">
-                              Jan 9, 2026
-                            </div>
-                            <div className="text-xs text-green-600 font-semibold">
-                              (7 days ago)
-                            </div>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Triceps Exercises */}
-          <div>
-            <div className="mb-4">
-              <h3 className="text-2xl sm:text-3xl font-bold text-gray-800">
-                Triceps
-              </h3>
-              <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                2 Exercises
-              </p>
-            </div>
-
-            <div className="space-y-6">
-              {/* Tricep Pushdowns */}
-              <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-l-4 border-red-500">
-                <div className="bg-linear-to-r from-red-50 via-pink-50 to-red-50 px-4 sm:px-6 py-3 sm:py-4">
-                  <div className="flex items-center justify-between gap-2">
-                    <h4 className="text-lg sm:text-xl font-bold text-gray-800">
-                      Tricep Pushdowns
-                    </h4>
-                    <span className="inline-block bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">
-                      ISOLATION
-                    </span>
-                  </div>
-                </div>
-
-                <div className="p-4 sm:p-6">
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse table-fixed">
-                      <thead>
-                        <tr className="bg-gray-100">
-                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                            Warm Up
-                          </th>
-                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                            Working
-                          </th>
-                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                            Last PR
-                          </th>
-                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                            Last PR Date
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr className="hover:bg-gray-50">
-                          <td className="px-3 py-4 border-b border-gray-200">
-                            <div className="font-bold text-orange-600 text-lg">
-                              20 kg
-                            </div>
-                          </td>
-                          <td className="px-3 py-4 border-b border-gray-200">
-                            <div className="font-bold text-blue-600 text-lg">
-                              35 kg
-                            </div>
-                          </td>
-                          <td className="px-3 py-4 border-b border-gray-200">
-                            <div className="font-bold text-green-600 text-lg">
-                              42.5 kg
-                            </div>
-                          </td>
-                          <td className="px-3 py-4 border-b border-gray-200">
-                            <div className="text-sm text-gray-700">
-                              Jan 13, 2026
-                            </div>
-                            <div className="text-xs text-green-600 font-semibold">
-                              (3 days ago)
-                            </div>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-
-              {/* Overhead Tricep Extension */}
-              <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-l-4 border-pink-500">
-                <div className="bg-linear-to-r from-red-50 via-pink-50 to-red-50 px-4 sm:px-6 py-3 sm:py-4">
-                  <div className="flex items-center justify-between gap-2">
-                    <h4 className="text-lg sm:text-xl font-bold text-gray-800">
-                      Overhead Tricep Extension
-                    </h4>
-                    <span className="inline-block bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">
-                      ISOLATION
-                    </span>
-                  </div>
-                </div>
-
-                <div className="p-4 sm:p-6">
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse table-fixed">
-                      <thead>
-                        <tr className="bg-gray-100">
-                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                            Warm Up
-                          </th>
-                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                            Working
-                          </th>
-                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                            Last PR
-                          </th>
-                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                            Last PR Date
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr className="hover:bg-gray-50">
-                          <td className="px-3 py-4 border-b border-gray-200">
-                            <div className="font-bold text-orange-600 text-lg">
-                              12 kg
-                            </div>
-                          </td>
-                          <td className="px-3 py-4 border-b border-gray-200">
-                            <div className="font-bold text-blue-600 text-lg">
-                              20 kg
-                            </div>
-                          </td>
-                          <td className="px-3 py-4 border-b border-gray-200">
-                            <div className="font-bold text-green-600 text-lg">
-                              25 kg
-                            </div>
-                          </td>
-                          <td className="px-3 py-4 border-b border-gray-200">
-                            <div className="text-sm text-gray-700">
-                              Jan 6, 2026
-                            </div>
-                            <div className="text-xs text-red-600 font-semibold">
-                              (10 days ago)
-                            </div>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+                );
+              })}
+            </>
+          )}
 
           {/* Action Buttons */}
           <div className="mt-8 flex flex-wrap gap-4">
