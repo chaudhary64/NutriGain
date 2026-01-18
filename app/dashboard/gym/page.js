@@ -63,15 +63,16 @@ export default function GymTrackingPage() {
 
       if (Array.isArray(scheduleData)) {
         const validMuscleGroups = [
-          "Chest",
+          "Abs",
+          "Arms",
           "Back",
           "Bicep",
-          "Tricep",
-          "Legs",
+          "Chest",
           "Forearms",
-          "Shoulders",
-          "Arms",
+          "Legs",
           "Rest Day",
+          "Shoulders",
+          "Tricep",
         ];
         const dayOrder = [
           "Monday",
@@ -86,7 +87,7 @@ export default function GymTrackingPage() {
           .map((s) => ({
             ...s,
             muscleGroups: (s.muscleGroups || []).filter((g) =>
-              validMuscleGroups.includes(g)
+              validMuscleGroups.includes(g),
             ),
           }))
           .sort((a, b) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day));
@@ -576,7 +577,7 @@ export default function GymTrackingPage() {
               {[...new Set(exercises.map((ex) => ex.muscleGroup))].map(
                 (muscleGroup) => {
                   const groupExercises = exercises.filter(
-                    (ex) => ex.muscleGroup === muscleGroup
+                    (ex) => ex.muscleGroup === muscleGroup,
                   );
                   return (
                     <div key={muscleGroup} className="mb-8">
@@ -733,11 +734,11 @@ export default function GymTrackingPage() {
                                                 <div>{exercise.lastPRDate}</div>
                                                 <div className="text-xs text-gray-500 mt-1">
                                                   {calculateDaysSince(
-                                                    exercise.lastPRDate
+                                                    exercise.lastPRDate,
                                                   ) === 0
                                                     ? "Today"
                                                     : calculateDaysSince(
-                                                          exercise.lastPRDate
+                                                          exercise.lastPRDate,
                                                         ) === 1
                                                       ? "1 day ago"
                                                       : `${calculateDaysSince(exercise.lastPRDate)} days ago`}
@@ -761,7 +762,7 @@ export default function GymTrackingPage() {
                                               <button
                                                 onClick={() =>
                                                   handleSaveExercise(
-                                                    exercise._id
+                                                    exercise._id,
                                                   )
                                                 }
                                                 className="bg-green-600 text-white px-4 py-1 rounded-lg hover:bg-green-700 text-sm font-semibold"
@@ -797,7 +798,7 @@ export default function GymTrackingPage() {
                       </div>
                     </div>
                   );
-                }
+                },
               )}
             </>
           )}

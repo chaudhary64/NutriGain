@@ -443,8 +443,13 @@ export default function AdminPage() {
 
       if (res.ok) {
         await fetchGymData();
-        setShowScheduleForm(false);
-        setEditingDay(null);
+        // Update editingDay to reflect the new muscle groups
+        if (editingDay && editingDay.day === day) {
+          setEditingDay({
+            ...editingDay,
+            muscleGroups: muscleGroups,
+          });
+        }
       } else {
         const data = await res.json();
         alert(data.error || "Failed to update schedule");
@@ -456,15 +461,15 @@ export default function AdminPage() {
   };
 
   const uniqueMuscleGroups = [
-    "Chest",
+    "Arms",
     "Back",
     "Bicep",
-    "Tricep",
-    "Legs",
+    "Chest",
     "Forearms",
-    "Shoulders",
-    "Arms",
+    "Legs",
     "Rest Day",
+    "Shoulders",
+    "Tricep",
   ];
 
   if (authLoading || loading) {
@@ -855,24 +860,25 @@ export default function AdminPage() {
                       >
                         <input
                           type="checkbox"
-                          defaultChecked={editingDay.muscleGroups.includes(
+                          checked={editingDay.muscleGroups.includes(
                             group
                           )}
                           onChange={(e) => {
                             const checked = e.target.checked;
-                            if (checked) {
-                              handleScheduleUpdate(editingDay.day, [
-                                ...editingDay.muscleGroups,
-                                group,
-                              ]);
-                            } else {
-                              handleScheduleUpdate(
-                                editingDay.day,
-                                editingDay.muscleGroups.filter(
+                            const updatedMuscleGroups = checked
+                              ? [...editingDay.muscleGroups, group]
+                              : editingDay.muscleGroups.filter(
                                   (g) => g !== group
-                                )
-                              );
-                            }
+                                );
+                            
+                            // Update local state without closing the form
+                            setEditingDay({
+                              ...editingDay,
+                              muscleGroups: updatedMuscleGroups,
+                            });
+                            
+                            // Save to backend
+                            handleScheduleUpdate(editingDay.day, updatedMuscleGroups);
                           }}
                         />
                         <span className="font-medium text-gray-800">
