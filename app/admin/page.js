@@ -13,7 +13,7 @@ const toTitleCase = (str) => {
 export default function AdminPage() {
   const { user, loading: authLoading, logout } = useAuth();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("meals"); // 'meals' or 'gym'
+  const [activeTab, setActiveTab] = useState("meals"); // 'meals', 'gym', or 'users'
   const [meals, setMeals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -27,6 +27,10 @@ export default function AdminPage() {
     fats: "",
     category: "general",
   });
+
+  // Users state
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   // Gym workout state
   const [workoutSchedule, setWorkoutSchedule] = useState([
@@ -173,8 +177,21 @@ export default function AdminPage() {
     if (user && user.isAdmin) {
       fetchMeals();
       fetchGymData();
+      fetchUsers();
     }
   }, [user]);
+
+  const fetchUsers = async () => {
+    try {
+      const res = await fetch("/api/users");
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setUsers(data);
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
 
   const fetchGymData = async () => {
     try {
@@ -545,6 +562,16 @@ export default function AdminPage() {
             }`}
           >
             💪 Gym Management
+          </button>
+          <button
+            onClick={() => setActiveTab("users")}
+            className={`flex-1 px-4 py-2 rounded-lg font-semibold transition ${
+              activeTab === "users"
+                ? "bg-purple-600 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            👥 Users
           </button>
         </div>
 
@@ -1078,6 +1105,102 @@ export default function AdminPage() {
                     </div>
                   ))}
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Users Management Section */}
+        {activeTab === "users" && (
+          <div>
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800">👥 Registered Users</h2>
+                  <p className="text-gray-600 mt-1">Total Users: {users.length}</p>
+                </div>
+              </div>
+
+              {/* Users Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {users.map((userData) => (
+                  <div
+                    key={userData._id}
+                    className="bg-linear-to-br from-purple-50 to-indigo-50 rounded-xl p-6 border-2 border-purple-200 hover:shadow-xl transition-all cursor-pointer"
+                    onClick={() => router.push(`/admin/user/${userData._id}`)}
+                  >
+                    {/* User Header */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center text-white text-xl font-bold">
+                          {userData.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-gray-800 text-lg">{userData.name}</h3>
+                          <p className="text-sm text-gray-600">{userData.email}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Stats Summary */}
+                    <div className="space-y-3">
+                      <div className="bg-white rounded-lg p-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-semibold text-gray-700">Days Logged:</span>
+                          <span className="text-lg font-bold text-purple-600">{userData.stats.daysLogged}</span>
+                        </div>
+                      </div>
+
+                      <div className="bg-white rounded-lg p-3">
+                        <div className="text-sm font-semibold text-gray-700 mb-2">Latest Log:</div>
+                        <div className="text-xs text-gray-600">
+                          {userData.stats.latestLogDate ? (
+                            <span>{userData.stats.latestLogDate}</span>
+                          ) : (
+                            <span className="text-gray-400">No logs yet</span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Average Macros */}
+                      {userData.stats.daysLogged > 0 && (
+                        <div className="bg-white rounded-lg p-3">
+                          <div className="text-sm font-semibold text-gray-700 mb-2">Average Daily Intake:</div>
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                              <span className="text-gray-600">Calories:</span>
+                              <span className="ml-1 font-bold text-orange-600">{userData.stats.averageMacros.calories}</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-600">Protein:</span>
+                              <span className="ml-1 font-bold text-blue-600">{userData.stats.averageMacros.protein}g</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-600">Carbs:</span>
+                              <span className="ml-1 font-bold text-green-600">{userData.stats.averageMacros.carbs}g</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-600">Fats:</span>
+                              <span className="ml-1 font-bold text-purple-600">{userData.stats.averageMacros.fats}g</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Member Since */}
+                      <div className="text-xs text-gray-500 text-center pt-2 border-t border-purple-200">
+                        Member since {new Date(userData.createdAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {users.length === 0 && (
+                <div className="text-center py-12">
+                  <div className="text-6xl mb-4">👤</div>
+                  <p className="text-gray-500 text-lg">No users registered yet</p>
+                </div>
+              )}
             </div>
           </div>
         )}
