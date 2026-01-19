@@ -63,7 +63,6 @@ export default function GymTrackingPage() {
 
       if (Array.isArray(scheduleData)) {
         const validMuscleGroups = [
-          "Abs",
           "Arms",
           "Back",
           "Bicep",
