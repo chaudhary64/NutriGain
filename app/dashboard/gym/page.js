@@ -28,6 +28,15 @@ export default function GymTrackingPage() {
     lastPR: "",
     lastPRDate: "",
   });
+  const [weightEntries, setWeightEntries] = useState([]);
+  const [targetWeight, setTargetWeight] = useState(75);
+  const [showWeightForm, setShowWeightForm] = useState(false);
+  const [newWeight, setNewWeight] = useState("");
+  const [newWeightDate, setNewWeightDate] = useState(
+    new Date().toISOString().split("T")[0],
+  );
+  const [showTargetForm, setShowTargetForm] = useState(false);
+  const [newTargetWeight, setNewTargetWeight] = useState("");
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -44,6 +53,7 @@ export default function GymTrackingPage() {
   useEffect(() => {
     if (user && !user.isAdmin) {
       fetchGymData();
+      fetchWeightData();
     }
   }, [user]);
 
@@ -96,6 +106,104 @@ export default function GymTrackingPage() {
       console.error("Error fetching gym data:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchWeightData = async () => {
+    try {
+      const res = await fetch("/api/weight");
+      if (res.ok) {
+        const data = await res.json();
+        setWeightEntries(data.weightEntries || []);
+        setTargetWeight(data.targetWeight || 75);
+      }
+    } catch (error) {
+      console.error("Error fetching weight data:", error);
+    }
+  };
+
+  const handleAddWeight = async (e) => {
+    e.preventDefault();
+    if (!newWeight || !newWeightDate) {
+      alert("Please enter both weight and date");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/weight", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          weight: parseFloat(newWeight),
+          date: newWeightDate,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setWeightEntries(data.weightEntries || []);
+        setNewWeight("");
+        setNewWeightDate(new Date().toISOString().split("T")[0]);
+        setShowWeightForm(false);
+      } else {
+        const error = await res.json();
+        alert(error.error || "Failed to add weight entry");
+      }
+    } catch (error) {
+      console.error("Error adding weight:", error);
+      alert("Failed to add weight entry");
+    }
+  };
+
+  const handleDeleteWeight = async (entryId) => {
+    if (!confirm("Are you sure you want to delete this weight entry?")) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/weight/${entryId}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setWeightEntries(data.weightEntries || []);
+      } else {
+        alert("Failed to delete weight entry");
+      }
+    } catch (error) {
+      console.error("Error deleting weight:", error);
+      alert("Failed to delete weight entry");
+    }
+  };
+
+  const handleUpdateTargetWeight = async (e) => {
+    e.preventDefault();
+    if (!newTargetWeight) {
+      alert("Please enter target weight");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/weight", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          targetWeight: parseFloat(newTargetWeight),
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setTargetWeight(data.targetWeight);
+        setNewTargetWeight("");
+        setShowTargetForm(false);
+      } else {
+        alert("Failed to update target weight");
+      }
+    } catch (error) {
+      console.error("Error updating target weight:", error);
+      alert("Failed to update target weight");
     }
   };
 
@@ -383,171 +491,383 @@ export default function GymTrackingPage() {
         {/* Body Weight Chart */}
         <div className="mb-6 sm:mb-8">
           <div className="bg-linear-to-br from-white to-blue-50 rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 lg:p-8 border border-blue-200">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2">
-              <span className="text-2xl sm:text-3xl">⚖️</span>
-              Body Weight Progress
-            </h2>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 sm:mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center gap-2">
+                <span className="text-2xl sm:text-3xl">⚖️</span>
+                Body Weight Progress
+              </h2>
+              <button
+                onClick={() => setShowWeightForm(!showWeightForm)}
+                className="bg-linear-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition shadow-md font-semibold text-sm"
+              >
+                {showWeightForm ? "Cancel" : "+ Add Weight"}
+              </button>
+            </div>
+
+            {/* Add Weight Form */}
+            {showWeightForm && (
+              <div className="bg-white rounded-lg p-4 mb-4 border-2 border-blue-300 shadow-lg">
+                <h3 className="text-lg font-bold text-gray-800 mb-3">
+                  Add Weight Entry
+                </h3>
+                <form onSubmit={handleAddWeight} className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">
+                        Weight (kg)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={newWeight}
+                        onChange={(e) => setNewWeight(e.target.value)}
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="75.5"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">
+                        Date
+                      </label>
+                      <input
+                        type="date"
+                        value={newWeightDate}
+                        onChange={(e) => setNewWeightDate(e.target.value)}
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      type="submit"
+                      className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-semibold"
+                    >
+                      Add Entry
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowWeightForm(false)}
+                      className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition font-semibold"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {/* Weight Entries List */}
+            {weightEntries.length > 0 && (
+              <div className="bg-white rounded-lg p-4 mb-4 max-h-60 overflow-y-auto">
+                <h3 className="text-lg font-bold text-gray-800 mb-3">
+                  Weight History
+                </h3>
+                <div className="space-y-2">
+                  {[...weightEntries]
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .map((entry) => (
+                      <div
+                        key={entry._id}
+                        className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
+                      >
+                        <div>
+                          <span className="font-bold text-gray-800 text-lg">
+                            {entry.weight} kg
+                          </span>
+                          <span className="text-gray-600 text-sm ml-3">
+                            {new Date(entry.date).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteWeight(entry._id)}
+                          className="text-red-600 hover:text-red-800 font-semibold text-sm"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
 
             {/* Chart Container */}
-            <div className="bg-white rounded-xl p-4 sm:p-6 shadow-lg">
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart
-                  data={[
-                    { date: "Jan 1", weight: 88, fullDate: "Jan 1, 2026" },
-                    { date: "Jan 5", weight: 86, fullDate: "Jan 5, 2026" },
-                    { date: "Jan 16", weight: 90, fullDate: "Jan 16, 2026" },
-                  ]}
-                  margin={{ top: 20, right: 20, left: 0, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis
-                    dataKey="date"
-                    stroke="#6b7280"
-                    style={{ fontSize: "12px", fontWeight: "600" }}
-                  />
-                  <YAxis
-                    stroke="#6b7280"
-                    style={{ fontSize: "12px", fontWeight: "600" }}
-                    domain={[72, 92]}
-                    ticks={[72, 75, 78, 81, 84, 87, 90]}
-                    label={{
-                      value: "Weight (kg)",
-                      angle: -90,
-                      position: "insideLeft",
-                      style: { fontSize: "14px", fontWeight: "700" },
-                    }}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#1f2937",
-                      border: "none",
-                      borderRadius: "8px",
-                      color: "#fff",
-                      padding: "10px 15px",
-                      fontWeight: "600",
-                    }}
-                    formatter={(value, name, props) => [
-                      `${value} kg`,
-                      "Weight",
-                    ]}
-                    labelFormatter={(label) => {
-                      const item = [
-                        { date: "Jan 1", fullDate: "Jan 1, 2026" },
-                        { date: "Jan 5", fullDate: "Jan 5, 2026" },
-                        { date: "Jan 16", fullDate: "Jan 16, 2026" },
-                      ].find((d) => d.date === label);
-                      return item ? item.fullDate : label;
-                    }}
-                  />
-                  <ReferenceLine
-                    y={75}
-                    stroke="#f97316"
-                    strokeWidth={2}
-                    strokeDasharray="6 6"
-                    label={{
-                      value: "Target: 75 kg",
-                      position: "insideTopRight",
-                      fill: "#f97316",
-                      fontSize: 11,
-                      fontWeight: "bold",
-                      offset: 10,
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="weight"
-                    stroke="url(#colorWeight)"
-                    strokeWidth={3}
-                    dot={{
-                      fill: "#8b5cf6",
-                      stroke: "#fff",
-                      strokeWidth: 2,
-                      r: 6,
-                    }}
-                    activeDot={{
-                      r: 8,
-                      fill: "#ec4899",
-                      stroke: "#fff",
-                      strokeWidth: 2,
-                    }}
-                  />
-                  <defs>
-                    <linearGradient
-                      id="colorWeight"
-                      x1="0"
-                      y1="0"
-                      x2="1"
-                      y2="0"
-                    >
-                      <stop offset="0%" stopColor="#3b82f6" />
-                      <stop offset="50%" stopColor="#8b5cf6" />
-                      <stop offset="100%" stopColor="#ec4899" />
-                    </linearGradient>
-                  </defs>
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            {weightEntries.length > 0 ? (
+              <div className="bg-white rounded-xl p-4 sm:p-6 shadow-lg">
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart
+                    data={weightEntries
+                      .sort((a, b) => new Date(a.date) - new Date(b.date))
+                      .map((entry) => ({
+                        date: new Date(entry.date).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                        }),
+                        weight: entry.weight,
+                        fullDate: new Date(entry.date).toLocaleDateString(
+                          "en-US",
+                          {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          },
+                        ),
+                      }))}
+                    margin={{ top: 20, right: 20, left: 0, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis
+                      dataKey="date"
+                      stroke="#6b7280"
+                      style={{ fontSize: "12px", fontWeight: "600" }}
+                    />
+                    <YAxis
+                      stroke="#6b7280"
+                      style={{ fontSize: "12px", fontWeight: "600" }}
+                      domain={[
+                        Math.min(
+                          ...weightEntries.map((e) => e.weight),
+                          targetWeight,
+                        ) - 5,
+                        Math.max(
+                          ...weightEntries.map((e) => e.weight),
+                          targetWeight,
+                        ) + 5,
+                      ]}
+                      label={{
+                        value: "Weight (kg)",
+                        angle: -90,
+                        position: "insideLeft",
+                        style: { fontSize: "14px", fontWeight: "700" },
+                      }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#1f2937",
+                        border: "none",
+                        borderRadius: "8px",
+                        color: "#fff",
+                        padding: "10px 15px",
+                        fontWeight: "600",
+                      }}
+                      formatter={(value) => [`${value} kg`, "Weight"]}
+                      labelFormatter={(label) => {
+                        const item = weightEntries.find(
+                          (e) =>
+                            new Date(e.date).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                            }) === label,
+                        );
+                        return item
+                          ? new Date(item.date).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })
+                          : label;
+                      }}
+                    />
+                    <ReferenceLine
+                      y={targetWeight}
+                      stroke="#f97316"
+                      strokeWidth={2}
+                      strokeDasharray="6 6"
+                      label={{
+                        value: `Target: ${targetWeight} kg`,
+                        position: "insideTopRight",
+                        fill: "#f97316",
+                        fontSize: 11,
+                        fontWeight: "bold",
+                        offset: 10,
+                      }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="weight"
+                      stroke="url(#colorWeight)"
+                      strokeWidth={3}
+                      dot={{
+                        fill: "#8b5cf6",
+                        stroke: "#fff",
+                        strokeWidth: 2,
+                        r: 6,
+                      }}
+                      activeDot={{
+                        r: 8,
+                        fill: "#ec4899",
+                        stroke: "#fff",
+                        strokeWidth: 2,
+                      }}
+                    />
+                    <defs>
+                      <linearGradient
+                        id="colorWeight"
+                        x1="0"
+                        y1="0"
+                        x2="1"
+                        y2="0"
+                      >
+                        <stop offset="0%" stopColor="#3b82f6" />
+                        <stop offset="50%" stopColor="#8b5cf6" />
+                        <stop offset="100%" stopColor="#ec4899" />
+                      </linearGradient>
+                    </defs>
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="bg-white rounded-xl p-8 text-center shadow-lg">
+                <p className="text-gray-600 text-lg">
+                  No weight entries yet. Click "Add Weight" to start tracking
+                  your progress!
+                </p>
+              </div>
+            )}
 
             {/* Stats Summary */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-4 sm:mt-6">
-              <div className="bg-linear-to-br from-blue-50 to-blue-100 rounded-lg p-4 border-2 border-blue-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xl sm:text-2xl">📊</span>
-                  <p className="text-xs font-bold text-blue-700 uppercase">
-                    Starting Weight
+            {weightEntries.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-4 sm:mt-6">
+                <div className="bg-linear-to-br from-blue-50 to-blue-100 rounded-lg p-4 border-2 border-blue-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xl sm:text-2xl">📊</span>
+                    <p className="text-xs font-bold text-blue-700 uppercase">
+                      Starting Weight
+                    </p>
+                  </div>
+                  <p className="text-2xl sm:text-3xl font-bold text-blue-600">
+                    {weightEntries[0]?.weight} kg
+                  </p>
+                  <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                    {new Date(weightEntries[0]?.date).toLocaleDateString(
+                      "en-US",
+                      {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      },
+                    )}
                   </p>
                 </div>
-                <p className="text-2xl sm:text-3xl font-bold text-blue-600">
-                  88 kg
-                </p>
-                <p className="text-xs sm:text-sm text-gray-600 mt-1">
-                  Jan 1, 2026
-                </p>
-              </div>
 
-              <div className="bg-linear-to-br from-green-50 to-green-100 rounded-lg p-4 border-2 border-green-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xl sm:text-2xl">⚖️</span>
-                  <p className="text-xs font-bold text-green-700 uppercase">
-                    Current Weight
+                <div className="bg-linear-to-br from-green-50 to-green-100 rounded-lg p-4 border-2 border-green-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xl sm:text-2xl">⚖️</span>
+                    <p className="text-xs font-bold text-green-700 uppercase">
+                      Current Weight
+                    </p>
+                  </div>
+                  <p className="text-2xl sm:text-3xl font-bold text-green-600">
+                    {weightEntries[weightEntries.length - 1]?.weight} kg
+                  </p>
+                  <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                    {new Date(
+                      weightEntries[weightEntries.length - 1]?.date,
+                    ).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
                   </p>
                 </div>
-                <p className="text-2xl sm:text-3xl font-bold text-green-600">
-                  90 kg
-                </p>
-                <p className="text-xs sm:text-sm text-gray-600 mt-1">
-                  Jan 16, 2026
-                </p>
-              </div>
 
-              <div className="bg-linear-to-br from-orange-50 to-orange-100 rounded-lg p-4 border-2 border-orange-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xl sm:text-2xl">🎯</span>
-                  <p className="text-xs font-bold text-orange-700 uppercase">
-                    Target Weight
-                  </p>
+                <div className="bg-linear-to-br from-orange-50 to-orange-100 rounded-lg p-4 border-2 border-orange-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xl sm:text-2xl">🎯</span>
+                    <p className="text-xs font-bold text-orange-700 uppercase">
+                      Target Weight
+                    </p>
+                    <button
+                      onClick={() => {
+                        setShowTargetForm(!showTargetForm);
+                        setNewTargetWeight(targetWeight);
+                      }}
+                      className="ml-auto text-orange-600 hover:text-orange-800 text-xs font-bold"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                  {showTargetForm ? (
+                    <form onSubmit={handleUpdateTargetWeight} className="mt-2">
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={newTargetWeight}
+                        onChange={(e) => setNewTargetWeight(e.target.value)}
+                        className="w-full px-2 py-1 border-2 border-orange-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg font-bold"
+                        required
+                      />
+                      <div className="flex gap-1 mt-2">
+                        <button
+                          type="submit"
+                          className="flex-1 bg-orange-600 text-white px-2 py-1 rounded text-xs font-semibold"
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowTargetForm(false)}
+                          className="px-2 py-1 bg-gray-300 text-gray-700 rounded text-xs font-semibold"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <>
+                      <p className="text-2xl sm:text-3xl font-bold text-orange-600">
+                        {targetWeight} kg
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                        {Math.abs(
+                          weightEntries[weightEntries.length - 1]?.weight -
+                            targetWeight,
+                        ).toFixed(1)}{" "}
+                        kg to{" "}
+                        {weightEntries[weightEntries.length - 1]?.weight >
+                        targetWeight
+                          ? "lose"
+                          : "gain"}
+                      </p>
+                    </>
+                  )}
                 </div>
-                <p className="text-2xl sm:text-3xl font-bold text-orange-600">
-                  75 kg
-                </p>
-                <p className="text-xs sm:text-sm text-gray-600 mt-1">
-                  15 kg to lose
-                </p>
-              </div>
 
-              <div className="bg-linear-to-br from-purple-50 to-purple-100 rounded-lg p-4 border-2 border-purple-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xl sm:text-2xl">📈</span>
-                  <p className="text-xs font-bold text-purple-700 uppercase">
-                    Total Change
+                <div className="bg-linear-to-br from-purple-50 to-purple-100 rounded-lg p-4 border-2 border-purple-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xl sm:text-2xl">📈</span>
+                    <p className="text-xs font-bold text-purple-700 uppercase">
+                      Total Change
+                    </p>
+                  </div>
+                  <p className="text-2xl sm:text-3xl font-bold text-purple-600">
+                    {weightEntries[weightEntries.length - 1]?.weight -
+                      weightEntries[0]?.weight >
+                    0
+                      ? "+"
+                      : ""}
+                    {(
+                      weightEntries[weightEntries.length - 1]?.weight -
+                      weightEntries[0]?.weight
+                    ).toFixed(1)}{" "}
+                    kg
+                  </p>
+                  <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                    {Math.floor(
+                      (new Date(weightEntries[weightEntries.length - 1]?.date) -
+                        new Date(weightEntries[0]?.date)) /
+                        (1000 * 60 * 60 * 24),
+                    )}{" "}
+                    days
                   </p>
                 </div>
-                <p className="text-2xl sm:text-3xl font-bold text-purple-600">
-                  +2 kg
-                </p>
-                <p className="text-xs sm:text-sm text-gray-600 mt-1">15 days</p>
               </div>
-            </div>
+            )}
           </div>
         </div>
 

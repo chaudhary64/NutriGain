@@ -1,5 +1,20 @@
 import mongoose from 'mongoose';
 
+const WeightEntrySchema = new mongoose.Schema({
+  weight: {
+    type: Number,
+    required: true,
+  },
+  date: {
+    type: Date,
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
 const UserSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -19,6 +34,11 @@ const UserSchema = new mongoose.Schema({
   isAdmin: {
     type: Boolean,
     default: false,
+  },
+  weightEntries: [WeightEntrySchema],
+  targetWeight: {
+    type: Number,
+    default: 75,
   },
   createdAt: {
     type: Date,
