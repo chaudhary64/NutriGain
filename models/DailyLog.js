@@ -58,6 +58,14 @@ const DailyLogSchema = new mongoose.Schema({
       default: 0,
     },
   },
+  gymStatus: {
+    type: String,
+    enum: ['not-completed', 'partially-completed', 'completed'],
+    default: 'not-completed',
+  },
+  gymCompletedAt: {
+    type: Date,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

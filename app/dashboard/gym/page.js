@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { ActivityCalendar } from "react-activity-calendar";
+import { format } from "date-fns";
 import {
   LineChart,
   Line,
@@ -37,6 +39,15 @@ export default function GymTrackingPage() {
   );
   const [showTargetForm, setShowTargetForm] = useState(false);
   const [newTargetWeight, setNewTargetWeight] = useState("");
+  const [gymHistory, setGymHistory] = useState([]);
+  const [currentStreak, setCurrentStreak] = useState(0);
+  const [longestStreak, setLongestStreak] = useState(0);
+  const [todayGymStatus, setTodayGymStatus] = useState("not-completed");
+  const [showGymLogDropdown, setShowGymLogDropdown] = useState(false);
+  const [tempGymStatus, setTempGymStatus] = useState("not-completed");
+  const [currentDate, setCurrentDate] = useState(
+    format(new Date(), "yyyy-MM-dd"),
+  );
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -54,8 +65,99 @@ export default function GymTrackingPage() {
     if (user && !user.isAdmin) {
       fetchGymData();
       fetchWeightData();
+      fetchGymHistory();
     }
-  }, [user]);
+  }, [user, currentDate]);
+
+  // Sync tempGymStatus with todayGymStatus on load
+  useEffect(() => {
+    setTempGymStatus(todayGymStatus);
+  }, [todayGymStatus]);
+
+  const fetchGymHistory = async () => {
+    try {
+      const res = await fetch(`/api/daily-log?date=${currentDate}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.gymHistory) {
+          setGymHistory(data.gymHistory);
+          calculateStreaks(data.gymHistory);
+        }
+        if (data.dailyLog) {
+          const status = data.dailyLog.gymStatus || "not-completed";
+          setTodayGymStatus(status);
+          setTempGymStatus(status);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching gym history:", error);
+    }
+  };
+
+  const calculateStreaks = (history) => {
+    if (!history || history.length === 0) {
+      setCurrentStreak(0);
+      setLongestStreak(0);
+      return;
+    }
+
+    // Create a set of completed dates (both fully and partially completed)
+    const completedDates = new Set(
+      history
+        .filter(
+          (log) =>
+            log.gymStatus === "completed" ||
+            log.gymStatus === "partially-completed",
+        )
+        .map((log) => log.date),
+    );
+
+    // Calculate current streak
+    let current = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (let i = 0; i < 365; i++) {
+      const checkDate = new Date(today);
+      checkDate.setDate(today.getDate() - i);
+      const dateStr = checkDate.toISOString().split("T")[0];
+
+      if (completedDates.has(dateStr)) {
+        current++;
+      } else if (i > 0) {
+        // Only break if it's not today (allow for not working out today yet)
+        break;
+      }
+    }
+
+    // Calculate longest streak
+    let longest = 0;
+    let tempStreak = 0;
+    const sortedDates = Array.from(completedDates).sort();
+
+    for (let i = 0; i < sortedDates.length; i++) {
+      if (i === 0) {
+        tempStreak = 1;
+      } else {
+        const prevDate = new Date(sortedDates[i - 1]);
+        const currDate = new Date(sortedDates[i]);
+        const diffDays = Math.round(
+          (currDate - prevDate) / (1000 * 60 * 60 * 24),
+        );
+
+        if (diffDays === 1) {
+          tempStreak++;
+        } else {
+          longest = Math.max(longest, tempStreak);
+          tempStreak = 1;
+        }
+      }
+    }
+    longest = Math.max(longest, tempStreak);
+
+    setCurrentStreak(current);
+    setLongestStreak(longest);
+  };
 
   const fetchGymData = async () => {
     try {
@@ -205,6 +307,171 @@ export default function GymTrackingPage() {
       console.error("Error updating target weight:", error);
       alert("Failed to update target weight");
     }
+  };
+
+  const handleGymStatusUpdate = async (status) => {
+    try {
+      console.log(
+        "[Update] Updating status to:",
+        status,
+        "for date:",
+        currentDate,
+      );
+      const res = await fetch("/api/daily-log", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          gymStatus: status,
+          date: currentDate,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        console.log("[Update] Response:", data.dailyLog?.gymStatus);
+
+        // Update states first
+        setTodayGymStatus(status);
+        setTempGymStatus(status);
+
+        // Close dropdown after saving
+        setShowGymLogDropdown(false);
+
+        // Update gym history from API response
+        if (data.gymHistory) {
+          setGymHistory(data.gymHistory);
+          calculateStreaks(data.gymHistory);
+        }
+
+        // Show success message after state updates
+        const messages = {
+          completed: "🎉 Awesome! Full workout completed!",
+          "partially-completed": "💪 Good effort! Partial workout logged!",
+          "not-completed": "📝 Workout status reset.",
+        };
+
+        // Small delay to ensure UI updates before alert
+        setTimeout(() => {
+          alert(messages[status]);
+        }, 100);
+      } else {
+        const errorData = await res.json();
+        console.error("[Frontend] Error response:", errorData);
+        alert("Failed to update workout status");
+      }
+    } catch (error) {
+      console.error("[Frontend] Error updating gym status:", error);
+      alert("Failed to update workout status");
+    }
+  };
+
+  const renderGymCalendar = () => {
+    // Transform gym history into the format required by react-activity-calendar
+    const today = new Date();
+    today.setHours(23, 59, 59, 999); // Set to end of day to include today
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(today.getFullYear() - 1);
+    oneYearAgo.setHours(0, 0, 0, 0); // Set to start of day
+
+    // Create a map of dates with their completion status
+    const statusMap = new Map();
+    gymHistory.forEach((log) => {
+      if (log.gymStatus === "completed") {
+        statusMap.set(log.date, 4); // Level 4 for completed
+      } else if (log.gymStatus === "partially-completed") {
+        statusMap.set(log.date, 2); // Level 2 for partially completed
+      } else if (log.gymStatus === "not-completed") {
+        statusMap.set(log.date, 0); // Level 0 for not completed
+      }
+    });
+
+    // Generate all dates for the past year
+    const data = [];
+    const currentDate = new Date(oneYearAgo);
+
+    while (currentDate <= today) {
+      // Format date in local timezone, not UTC
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+      const day = String(currentDate.getDate()).padStart(2, "0");
+      const dateStr = `${year}-${month}-${day}`;
+
+      const level = statusMap.get(dateStr) || 0;
+
+      data.push({
+        date: dateStr,
+        count: level,
+        level: level,
+      });
+
+      // Increment by one day and reset time to avoid timezone issues
+      currentDate.setDate(currentDate.getDate() + 1);
+      currentDate.setHours(0, 0, 0, 0);
+    }
+
+    // Debug: Check if today's data is in the array
+    const todayDate = new Date();
+    const todayStr = `${todayDate.getFullYear()}-${String(todayDate.getMonth() + 1).padStart(2, "0")}-${String(todayDate.getDate()).padStart(2, "0")}`;
+    const todayData = data.find((d) => d.date === todayStr);
+    console.log(
+      "[Calendar Debug] Today:",
+      todayStr,
+      "Data:",
+      todayData,
+      "Total entries:",
+      data.length,
+    );
+    console.log("[Calendar Debug] Last 3 entries:", data.slice(-3));
+
+    return (
+      <div className="bg-white rounded-xl p-4 sm:p-6 shadow-lg">
+        <div className="overflow-x-auto [&_text]:fill-gray-700 [&_text]:font-semibold [&>div>footer]:hidden!">
+          <style jsx>{`
+            div :global(footer) {
+              display: none !important;
+            }
+          `}</style>
+          <ActivityCalendar
+            data={data}
+            theme={{
+              light: ["#ebedf0", "#c6e48b", "#7bc96f", "#239a3b", "#196127"],
+            }}
+            labels={{
+              totalCount: "{{count}} workouts in the last year",
+            }}
+            showWeekdayLabels
+            blockSize={14}
+            blockMargin={4}
+            fontSize={14}
+            colorScheme="light"
+            hideTotalCount={true}
+            hideColorLegend={true}
+            style={{
+              width: "100%",
+              color: "#374151",
+            }}
+          />
+        </div>
+
+        {/* Legend */}
+        <div className="flex items-center justify-center flex-wrap gap-4 mt-4 text-xs">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-[#ebedf0] rounded-sm border border-gray-300"></div>
+            <span className="text-gray-700 font-semibold">Not Completed</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-[#7bc96f] rounded-sm"></div>
+            <span className="text-gray-700 font-semibold">
+              Partially Completed
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-[#196127] rounded-sm"></div>
+            <span className="text-gray-700 font-semibold">Completed</span>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   const handleEditExercise = (exercise) => {
@@ -411,6 +678,13 @@ export default function GymTrackingPage() {
 
             {/* Desktop Menu */}
             <div className="hidden sm:flex sm:flex-row items-center gap-2 sm:gap-3">
+              <input
+                type="date"
+                value={currentDate}
+                onChange={(e) => setCurrentDate(e.target.value)}
+                className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm text-gray-900 cursor-pointer text-sm"
+              />
+
               <button
                 onClick={() => router.push("/dashboard/meal")}
                 className="px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition font-medium text-sm flex items-center gap-1 cursor-pointer"
@@ -485,6 +759,139 @@ export default function GymTrackingPage() {
                 </div>
               );
             })}
+          </div>
+        </div>
+
+        {/* Gym Streak Section - LeetCode Style */}
+        <div className="mb-6 sm:mb-8">
+          <div className="bg-linear-to-br from-white to-green-50 rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 lg:p-8 border border-green-200">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2">
+              <span className="text-2xl sm:text-3xl">🔥</span>
+              Gym Streak
+            </h2>
+
+            {/* Streak Stats */}
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+              <div className="bg-white rounded-xl p-4 shadow-md border-2 border-orange-200">
+                <div className="text-orange-600 text-sm font-semibold mb-1">
+                  Current Streak
+                </div>
+                <div className="text-3xl sm:text-4xl font-bold text-orange-600">
+                  {currentStreak}
+                  <span className="text-lg ml-1">🔥</span>
+                </div>
+                <div className="text-xs text-gray-600 mt-1">
+                  {currentStreak === 1 ? "day" : "days"}
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl p-4 shadow-md border-2 border-purple-200">
+                <div className="text-purple-600 text-sm font-semibold mb-1">
+                  Longest Streak
+                </div>
+                <div className="text-3xl sm:text-4xl font-bold text-purple-600">
+                  {longestStreak}
+                  <span className="text-lg ml-1">🏆</span>
+                </div>
+                <div className="text-xs text-gray-600 mt-1">
+                  {longestStreak === 1 ? "day" : "days"}
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl p-4 shadow-md border-2 border-green-200 col-span-2 lg:col-span-1">
+                <div className="text-green-600 text-sm font-semibold mb-1">
+                  Today's Status
+                </div>
+                <div className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+                  {todayGymStatus === "completed" ? (
+                    <>
+                      <span>✅</span>
+                      <span className="text-lg text-green-600">Completed!</span>
+                    </>
+                  ) : todayGymStatus === "partially-completed" ? (
+                    <>
+                      <span>⚡</span>
+                      <span className="text-lg text-yellow-600">Partial!</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>⏳</span>
+                      <span className="text-lg text-gray-600">Pending</span>
+                    </>
+                  )}
+                </div>
+                <div className="text-xs text-gray-600 mt-1">
+                  {todayGymStatus === "completed"
+                    ? "Great job!"
+                    : todayGymStatus === "partially-completed"
+                      ? "Good effort!"
+                      : "Time to hit the gym!"}
+                </div>
+              </div>
+            </div>
+
+            {/* Activity Calendar */}
+            <div className="mb-4">
+              <h3 className="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2">
+                <span>📊</span>
+                Activity History
+              </h3>
+              {renderGymCalendar()}
+            </div>
+
+            {/* Log Today's Session - Simple Dropdown */}
+            <div className="mb-4">
+              <label className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                <span className="text-lg">💪</span>
+                Log Today's Workout
+              </label>
+
+              <div className="bg-white rounded-lg shadow-md border-2 border-gray-300 p-4 space-y-3">
+                <select
+                  value={tempGymStatus}
+                  onChange={(e) => setTempGymStatus(e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50 border-2 border-indigo-300 rounded-lg hover:border-indigo-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none text-gray-800 font-semibold cursor-pointer transition"
+                >
+                  <option value="not-completed">⏳ Not Completed</option>
+                  <option value="partially-completed">
+                    ⚡ Partially Completed
+                  </option>
+                  <option value="completed">✅ Full Workout Completed</option>
+                </select>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleGymStatusUpdate(tempGymStatus)}
+                    className="flex-1 bg-green-600 text-white px-4 py-2.5 rounded-lg hover:bg-green-700 transition shadow-sm font-semibold flex items-center justify-center gap-2"
+                  >
+                    <span>💾</span>
+                    Save
+                  </button>
+                  <button
+                    onClick={() => {
+                      setTempGymStatus("not-completed");
+                      handleGymStatusUpdate("not-completed");
+                    }}
+                    className="flex-1 bg-gray-500 text-white px-4 py-2.5 rounded-lg hover:bg-gray-600 transition shadow-sm font-semibold flex items-center justify-center gap-2"
+                  >
+                    <span>🔄</span>
+                    Reset
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Motivational Message */}
+            {currentStreak > 0 && (
+              <div className="bg-linear-to-r from-green-100 to-emerald-100 rounded-lg p-4 border-2 border-green-300">
+                <p className="text-green-800 font-semibold text-center">
+                  {currentStreak >= 7
+                    ? `🎉 Amazing! You've been consistent for ${currentStreak} days! Keep it up!`
+                    : currentStreak >= 3
+                      ? `💪 Great progress! ${currentStreak} days and counting!`
+                      : `🚀 You're building momentum! ${currentStreak} ${currentStreak === 1 ? "day" : "days"} down!`}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -1172,16 +1579,6 @@ export default function GymTrackingPage() {
               </>
             );
           })()}
-
-          {/* Action Buttons */}
-          <div className="mt-8 flex flex-wrap gap-4">
-            <button className="flex-1 bg-linear-to-r from-green-600 to-emerald-600 text-white px-6 py-3 rounded-lg hover:from-green-700 hover:to-emerald-700 transition shadow-md font-semibold">
-              ✅ Start Workout
-            </button>
-            <button className="flex-1 bg-linear-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition shadow-md font-semibold">
-              📊 View History
-            </button>
-          </div>
         </div>
       </div>
     </div>
