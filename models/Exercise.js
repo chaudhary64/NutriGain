@@ -16,22 +16,6 @@ const ExerciseSchema = new mongoose.Schema({
     required: [true, 'Please provide an exercise type'],
     enum: ['COMPOUND', 'ISOLATION'],
   },
-  warmUp: {
-    type: String,
-    default: '',
-  },
-  working: {
-    type: String,
-    default: '',
-  },
-  lastPR: {
-    type: String,
-    default: '',
-  },
-  lastPRDate: {
-    type: String,
-    default: '',
-  },
   createdAt: {
     type: Date,
     default: Date.now,
