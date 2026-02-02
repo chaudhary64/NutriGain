@@ -180,41 +180,61 @@ export default function MealTrackingPage() {
     return dailyLog.meals.filter((entry) => entry.mealType === type);
   };
 
-  const MacroMeter = ({ label, value, max, color }) => {
+  const MacroMeter = ({ label, value, max, color, icon, bgClass }) => {
     const percentage = Math.min((value / max) * 100, 100);
+    const isOverLimit = value > max;
 
     return (
-      <div className="mb-4">
-        <div className="flex justify-between mb-1">
-          <span className="text-sm font-medium text-gray-800">{label}</span>
-          <span className="text-sm font-medium text-gray-800">
-            {value} / {max}
+      <div className="mb-5 last:mb-0 group">
+        <div className="flex justify-between items-center mb-2">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center justify-center w-8 h-8 bg-white rounded-lg shadow-sm border border-gray-100 text-lg transition-transform group-hover:scale-110 duration-300">
+              {icon}
+            </span>
+            <span className="text-sm font-semibold text-gray-700">{label}</span>
+          </div>
+          <div className="text-right flex items-baseline gap-1">
+            <span
+              className={`text-sm font-bold ${
+                isOverLimit ? "text-red-500" : "text-gray-900"
+              }`}
+            >
+              {value}
+            </span>
+            <span className="text-xs text-gray-400 font-medium">/</span>
+            <span className="text-xs text-gray-500">{max}</span>
             {hasPreview &&
               value !==
                 previewMacros[
                   label.toLowerCase().split(" ")[0].replace("(g)", "")
                 ] && (
-                <span className="ml-2 text-green-600 font-bold">
-                  →{" "}
+                <span className="ml-1 text-green-600 font-bold animate-pulse text-xs">
+                  +
                   {label.includes("Calories")
-                    ? previewMacros.calories
+                    ? previewMacros.calories - value
                     : label.includes("Protein")
-                      ? previewMacros.protein
+                      ? Math.round((previewMacros.protein - value) * 10) / 10
                       : label.includes("Carbs")
-                        ? previewMacros.carbs
-                        : previewMacros.fats}
+                        ? Math.round((previewMacros.carbs - value) * 10) / 10
+                        : Math.round((previewMacros.fats - value) * 10) / 10}
                 </span>
               )}
-          </span>
+          </div>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-4 relative overflow-hidden">
+        <div
+          className={`w-full ${
+            bgClass || "bg-gray-100"
+          } rounded-full h-2.5 relative overflow-hidden ring-1 ring-inset ring-black/5`}
+        >
           <div
-            className={`h-4 rounded-full transition-all duration-300 ${color}`}
+            className={`h-full rounded-full transition-all duration-500 ease-out shadow-sm ${color} ${
+              isOverLimit ? "animate-pulse" : ""
+            }`}
             style={{ width: `${percentage}%` }}
           ></div>
           {hasPreview && (
             <div
-              className="h-4 rounded-full absolute top-0 left-0 opacity-40 transition-all duration-300 bg-green-400"
+              className={`h-full rounded-full absolute top-0 left-0 transition-all duration-300 opacity-30 bg-green-500`}
               style={{
                 width: `${Math.min(
                   ((label.includes("Calories")
@@ -286,285 +306,424 @@ export default function MealTrackingPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-100">
-      <nav className="bg-white shadow-lg border-b border-gray-200">
+      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center py-3 sm:py-0 sm:h-16 gap-3 sm:gap-4">
-            <div className="flex items-center justify-between w-full sm:w-auto">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="text-2xl sm:text-3xl">🍽️</div>
-                <h1 className="text-xl sm:text-2xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  Meal Tracking
-                </h1>
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xl shadow-lg shadow-indigo-200 text-white">
+                🍽️
+              </div>
+              <h1 className="text-xl font-bold bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent hidden sm:block">
+                NutriGain
+              </h1>
+            </div>
+
+            {/* Desktop Actions */}
+            <div className="hidden md:flex items-center gap-4">
+              <div className="relative group">
+                <input
+                  type="date"
+                  value={currentDate}
+                  onChange={(e) => setCurrentDate(e.target.value)}
+                  className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm font-medium text-gray-700 cursor-pointer hover:bg-white"
+                />
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="h-8 w-px bg-gray-200 mx-2"></div>
+
+              <div className="flex gap-1 bg-gray-100/50 p-1 rounded-xl border border-gray-200/50">
                 <button
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="sm:hidden text-gray-600 hover:text-gray-800 p-2"
-                  aria-label="Toggle menu"
+                  onClick={() => router.push("/dashboard/meal")}
+                  className="px-4 py-2 bg-white text-indigo-600 rounded-lg shadow-sm font-semibold text-sm flex items-center gap-2 transition-all"
+                >
+                  <span className="text-lg">🍽️</span> Meal
+                </button>
+                <button
+                  onClick={() => router.push("/dashboard/gym")}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-white/50 rounded-lg font-medium text-sm flex items-center gap-2 transition-all cursor-pointer"
+                >
+                  <span className="text-lg grayscale opacity-70">💪</span> Gym
+                </button>
+              </div>
+
+              <div className="flex items-center gap-3 pl-2">
+                <div className="text-right hidden lg:block">
+                  <p className="text-xs text-gray-400 font-medium">
+                    Welcome back
+                  </p>
+                  <p className="text-sm font-bold text-gray-800 leading-tight">
+                    {user.name}
+                  </p>
+                </div>
+                <button
+                  onClick={logout}
+                  className="w-10 h-10 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 flex items-center justify-center transition-all cursor-pointer"
+                  title="Logout"
                 >
                   <svg
-                    className="w-6 h-6"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-5 h-5"
                     fill="none"
-                    stroke="currentColor"
                     viewBox="0 0 24 24"
+                    stroke="currentColor"
                   >
-                    {mobileMenuOpen ? (
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    ) : (
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 6h16M4 12h16M4 18h16"
-                      />
-                    )}
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                    />
                   </svg>
                 </button>
               </div>
             </div>
 
-            {/* Mobile Menu */}
-            {mobileMenuOpen && (
-              <div className="sm:hidden w-full bg-gray-50 rounded-lg p-3 space-y-2">
+            {/* Mobile Toggle */}
+            <div className="flex md:hidden items-center gap-3">
+              {/* Mobile Date Picker (Simplified) */}
+              <input
+                type="date"
+                value={currentDate}
+                onChange={(e) => setCurrentDate(e.target.value)}
+                className="w-32 py-1.5 px-2 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-gray-700 focus:outline-none"
+              />
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  {mobileMenuOpen ? (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  ) : (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  )}
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-gray-100 bg-white/95 backdrop-blur-xl absolute w-full left-0 shadow-xl">
+            <div className="p-4 space-y-3">
+              <div className="flex items-center gap-3 px-2 mb-4">
+                <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p className="font-bold text-gray-900">{user.name}</p>
+                  <p className="text-xs text-gray-500">View Profile</p>
+                </div>
+              </div>
+
+              <div className="space-y-1">
                 <button
                   onClick={() => {
                     router.push("/dashboard/meal");
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full px-4 py-2 text-blue-600 bg-blue-50 rounded-lg font-medium text-sm flex items-center gap-2"
+                  className="w-full flex items-center gap-3 px-4 py-3 bg-indigo-50 text-indigo-700 rounded-xl font-semibold transition"
                 >
-                  🍽️ Meal Tracking
+                  <span>🍽️</span> Meal Tracking
                 </button>
                 <button
                   onClick={() => {
                     router.push("/dashboard/gym");
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-lg transition font-medium text-sm flex items-center gap-2 cursor-pointer"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium transition cursor-pointer"
                 >
-                  💪 Gym Tracking
+                  <span className="grayscale opacity-70">💪</span> Gym Tracking
                 </button>
+              </div>
+
+              <div className="pt-3 mt-3 border-t border-gray-100">
                 <button
                   onClick={() => {
                     logout();
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full px-4 py-2 bg-linear-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition font-medium text-sm flex items-center gap-2 cursor-pointer"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium transition cursor-pointer"
                 >
-                  🚪 Logout
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                    />
+                  </svg>
+                  Logout
                 </button>
               </div>
-            )}
-
-            {/* Desktop Menu */}
-            <div className="hidden sm:flex sm:flex-row items-center gap-2 sm:gap-3">
-              <input
-                type="date"
-                value={currentDate}
-                onChange={(e) => setCurrentDate(e.target.value)}
-                className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm text-gray-900 cursor-pointer text-sm"
-              />
-
-              <button
-                onClick={() => router.push("/dashboard/meal")}
-                className="px-4 py-2 text-blue-600 bg-blue-50 rounded-lg font-medium text-sm flex items-center gap-1 cursor-pointer"
-              >
-                🍽️ Meal
-              </button>
-
-              <button
-                onClick={() => router.push("/dashboard/gym")}
-                className="px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-lg transition font-medium text-sm flex items-center gap-1 cursor-pointer"
-              >
-                💪 Gym
-              </button>
-
-              <span className="hidden sm:inline text-gray-700 font-medium text-sm whitespace-nowrap">
-                Welcome, {user.name}!
-              </span>
-
-              <button
-                onClick={logout}
-                className="hidden sm:block bg-linear-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-lg hover:from-red-600 hover:to-red-700 transition shadow-md font-medium cursor-pointer text-sm"
-              >
-                Logout
-              </button>
             </div>
           </div>
-        </div>
+        )}
       </nav>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Macro Meters */}
           <div className="lg:col-span-1 order-2 lg:order-1">
-            <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg lg:sticky lg:top-6 border border-gray-100">
-              <div className="flex items-center gap-2 mb-4 sm:mb-6">
-                <span className="text-xl sm:text-2xl">📊</span>
-                <h2 className="text-lg sm:text-xl font-bold text-gray-800">
-                  Today's Macros
-                </h2>
+            <div className="bg-white/80 backdrop-blur-xl p-5 sm:p-6 rounded-2xl shadow-xl shadow-indigo-100/50 lg:sticky lg:top-6 border border-white/50 ring-1 ring-white/50">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="bg-indigo-100 p-2 rounded-xl text-indigo-600">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-6 h-6"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M3 3v18h18" />
+                      <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-gray-900">
+                      Today's Macros
+                    </h2>
+                    <p className="text-xs text-gray-400 font-medium">
+                      Daily Nutritional Goals
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              <MacroMeter
-                label="Calories"
-                value={totalMacros.calories}
-                max={goals.calories}
-                color="bg-linear-to-r from-blue-500 to-blue-600"
-              />
+              <div className="space-y-1">
+                <MacroMeter
+                  label="Calories"
+                  value={totalMacros.calories}
+                  max={goals.calories}
+                  color="bg-linear-to-r from-blue-500 to-blue-600"
+                  bgClass="bg-blue-50"
+                  icon="🔥"
+                />
 
-              <MacroMeter
-                label="Protein (g)"
-                value={totalMacros.protein}
-                max={goals.protein}
-                color="bg-linear-to-r from-red-500 to-pink-600"
-              />
+                <MacroMeter
+                  label="Protein"
+                  value={totalMacros.protein}
+                  max={goals.protein}
+                  color="bg-linear-to-r from-red-500 to-pink-600"
+                  bgClass="bg-red-50"
+                  icon="🍖"
+                />
 
-              <MacroMeter
-                label="Carbs (g)"
-                value={totalMacros.carbs}
-                max={goals.carbs}
-                color="bg-linear-to-r from-yellow-500 to-orange-600"
-              />
+                <MacroMeter
+                  label="Carbs"
+                  value={totalMacros.carbs}
+                  max={goals.carbs}
+                  color="bg-linear-to-r from-yellow-500 to-orange-600"
+                  bgClass="bg-orange-50"
+                  icon="🍞"
+                />
 
-              <MacroMeter
-                label="Fats (g)"
-                value={totalMacros.fats}
-                max={goals.fats}
-                color="bg-linear-to-r from-green-500 to-emerald-600"
-              />
+                <MacroMeter
+                  label="Fats"
+                  value={totalMacros.fats}
+                  max={goals.fats}
+                  color="bg-linear-to-r from-green-500 to-emerald-600"
+                  bgClass="bg-green-50"
+                  icon="🥑"
+                />
+              </div>
 
-              <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-linear-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
-                <h3 className="font-semibold text-gray-800 mb-2 sm:mb-3 flex items-center gap-2 text-sm sm:text-base">
-                  <span>📈</span>Summary
+              {/* Summary with 2x2 Grid */}
+              <div className="mt-6 pt-6 border-t border-gray-100">
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 pl-1">
+                  Remaining Intake
                 </h3>
-                <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-gray-800">
-                  <div className="flex justify-between">
-                    <span>
-                      Calories{" "}
-                      {totalMacros.calories > goals.calories
-                        ? "Exceeded:"
-                        : "Remaining:"}
-                    </span>
-                    <span
-                      className={`font-bold ${
-                        totalMacros.calories > goals.calories
-                          ? "text-red-600"
-                          : "text-green-600"
-                      }`}
-                    >
-                      {totalMacros.calories > goals.calories
-                        ? `+${totalMacros.calories - goals.calories}`
-                        : goals.calories - totalMacros.calories}{" "}
-                      kcal
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>
-                      Protein{" "}
-                      {totalMacros.protein > goals.protein
-                        ? "Exceeded:"
-                        : "Remaining:"}
-                    </span>
-                    <span
-                      className={`font-bold ${
-                        totalMacros.protein > goals.protein
-                          ? "text-red-600"
-                          : "text-green-600"
-                      }`}
-                    >
-                      {totalMacros.protein > goals.protein
-                        ? `+${(totalMacros.protein - goals.protein).toFixed(1)}`
-                        : (goals.protein - totalMacros.protein).toFixed(1)}
-                      g
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>
-                      Carbs{" "}
-                      {totalMacros.carbs > goals.carbs
-                        ? "Exceeded:"
-                        : "Remaining:"}
-                    </span>
-                    <span
-                      className={`font-bold ${
-                        totalMacros.carbs > goals.carbs
-                          ? "text-red-600"
-                          : "text-green-600"
-                      }`}
-                    >
-                      {totalMacros.carbs > goals.carbs
-                        ? `+${(totalMacros.carbs - goals.carbs).toFixed(1)}`
-                        : (goals.carbs - totalMacros.carbs).toFixed(1)}
-                      g
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>
-                      Fats{" "}
-                      {totalMacros.fats > goals.fats
-                        ? "Exceeded:"
-                        : "Remaining:"}
-                    </span>
-                    <span
-                      className={`font-bold ${
-                        totalMacros.fats > goals.fats
-                          ? "text-red-600"
-                          : "text-green-600"
-                      }`}
-                    >
-                      {totalMacros.fats > goals.fats
-                        ? `+${(totalMacros.fats - goals.fats).toFixed(1)}`
-                        : (goals.fats - totalMacros.fats).toFixed(1)}
-                      g
-                    </span>
-                  </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    {
+                      label: "Calories",
+                      val: goals.calories - totalMacros.calories,
+                      unit: "kcal",
+                      color: "text-blue-600",
+                      bg: "bg-blue-50",
+                    },
+                    {
+                      label: "Protein",
+                      val: (goals.protein - totalMacros.protein).toFixed(1),
+                      unit: "g",
+                      color: "text-red-600",
+                      bg: "bg-red-50",
+                    },
+                    {
+                      label: "Carbs",
+                      val: (goals.carbs - totalMacros.carbs).toFixed(1),
+                      unit: "g",
+                      color: "text-orange-600",
+                      bg: "bg-orange-50",
+                    },
+                    {
+                      label: "Fats",
+                      val: (goals.fats - totalMacros.fats).toFixed(1),
+                      unit: "g",
+                      color: "text-green-600",
+                      bg: "bg-green-50",
+                    },
+                  ].map((item, idx) => {
+                    const valNum = parseFloat(item.val);
+                    const isExceeded = valNum < 0;
+                    return (
+                      <div
+                        key={idx}
+                        className={`p-3 rounded-xl border border-transparent hover:border-gray-200 transition-colors ${item.bg} bg-opacity-40`}
+                      >
+                        <p className="text-xs font-semibold text-gray-500 mb-1">
+                          {item.label}
+                        </p>
+                        <p
+                          className={`text-lg font-bold ${
+                            isExceeded ? "text-red-500" : item.color
+                          }`}
+                        >
+                          {isExceeded
+                            ? `+${Math.abs(valNum).toFixed(
+                                item.label === "Calories" ? 0 : 1,
+                              )}`
+                            : `-${valNum}`}
+                          <span className="text-xs font-medium ml-0.5 opacity-70 text-gray-600">
+                            {item.unit}
+                          </span>
+                        </p>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
           </div>
 
           {/* Meal Sections */}
-          <div className="lg:col-span-2 space-y-4 sm:space-y-6 order-1 lg:order-2">
+          <div className="lg:col-span-2 space-y-6 order-1 lg:order-2">
             {/* Add Meal Form */}
-            <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-100">
-              <div className="flex items-center gap-2 mb-3 sm:mb-4">
-                <span className="text-xl sm:text-2xl">➕</span>
-                <h2 className="text-lg sm:text-xl font-bold text-gray-800">
-                  Add Meal
-                </h2>
+            <div className="bg-white/80 backdrop-blur-xl p-5 sm:p-6 rounded-2xl shadow-xl shadow-indigo-100/50 border border-white/50 ring-1 ring-white/50 relative z-20">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="bg-linear-to-br from-indigo-500 to-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-indigo-200">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900">Add Meal</h2>
+                  <p className="text-xs text-gray-500 font-medium">
+                    Log your daily nutrition
+                  </p>
+                </div>
               </div>
+
               <form
                 onSubmit={handleAddMeal}
-                className="grid grid-cols-1 gap-3 sm:gap-4"
+                className="grid grid-cols-1 md:grid-cols-12 gap-4"
               >
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+                <div className="md:col-span-3">
+                  <label className="block text-gray-700 font-bold mb-2 text-xs uppercase tracking-wider">
                     Meal Type
                   </label>
-                  <select
-                    value={selectedMealType}
-                    onChange={(e) => setSelectedMealType(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-gray-900 bg-white cursor-pointer text-sm sm:text-base"
-                  >
-                    <option value="breakfast">🌅 Breakfast</option>
-                    <option value="lunch">☀️ Lunch</option>
-                    <option value="dinner">🌙 Dinner</option>
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={selectedMealType}
+                      onChange={(e) => setSelectedMealType(e.target.value)}
+                      className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-gray-700 font-medium cursor-pointer appearance-none hover:bg-white"
+                    >
+                      <option value="breakfast">🌅 Breakfast</option>
+                      <option value="lunch">☀️ Lunch</option>
+                      <option value="dinner">🌙 Dinner</option>
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500">
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="meal-dropdown">
-                  <label className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+                <div className="meal-dropdown md:col-span-7 relative z-30">
+                  <label className="block text-gray-700 font-bold mb-2 text-xs uppercase tracking-wider">
                     Select Meal
                   </label>
                   <div className="flex gap-2">
                     <div className="flex-1 min-w-0 relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg
+                          className="h-5 w-5 text-gray-400"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                          />
+                        </svg>
+                      </div>
                       <input
                         type="text"
                         value={
@@ -596,19 +755,18 @@ export default function MealTrackingPage() {
                               setMealSearch("");
                               setShowMealDropdown(false);
                             } else if (filteredMeals.length > 1) {
-                              // If multiple matches, select the first one
                               setSelectedMeal(filteredMeals[0]._id);
                               setMealSearch("");
                               setShowMealDropdown(false);
                             }
                           }
                         }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-gray-900 text-sm sm:text-base"
-                        placeholder="Type to search meals..."
+                        className="w-full pl-10 pr-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-gray-700 placeholder-gray-400 font-medium hover:bg-white"
+                        placeholder="Search for food..."
                         required={!selectedMeal}
                       />
                       {showMealDropdown && (
-                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
+                        <div className="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-xl shadow-indigo-100/50 max-h-60 overflow-auto animate-in fade-in zoom-in-95 duration-200">
                           {meals
                             .filter((meal) =>
                               meal.name
@@ -623,9 +781,14 @@ export default function MealTrackingPage() {
                                   setMealSearch("");
                                   setShowMealDropdown(false);
                                 }}
-                                className="px-3 py-2 hover:bg-blue-50 cursor-pointer text-gray-900 text-sm sm:text-base"
+                                className="px-4 py-3 hover:bg-indigo-50 cursor-pointer text-gray-700 text-sm flex justify-between items-center group transition-colors border-b border-gray-50 last:border-0"
                               >
-                                {toTitleCase(meal.name)} ({meal.servingSize})
+                                <span className="font-medium group-hover:text-indigo-700">
+                                  {toTitleCase(meal.name)}
+                                </span>
+                                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-md group-hover:bg-white">
+                                  {meal.servingSize}
+                                </span>
                               </div>
                             ))}
                           {meals.filter((meal) =>
@@ -633,8 +796,9 @@ export default function MealTrackingPage() {
                               .toLowerCase()
                               .includes(mealSearch.toLowerCase()),
                           ).length === 0 && (
-                            <div className="px-3 py-2 text-gray-500 text-sm sm:text-base">
-                              No matching meals
+                            <div className="px-4 py-8 text-center text-gray-500 text-sm flex flex-col items-center gap-2">
+                              <span className="text-2xl opacity-50">🔍</span>
+                              No matching meals found
                             </div>
                           )}
                         </div>
@@ -644,17 +808,30 @@ export default function MealTrackingPage() {
                       type="button"
                       onClick={() => setShowMealStats(!showMealStats)}
                       disabled={!selectedMeal}
-                      className="shrink-0 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed font-medium cursor-pointer text-sm sm:text-base"
+                      className="shrink-0 w-12 bg-white border border-gray-200 text-gray-500 rounded-xl hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center shadow-sm"
                       title="Show meal stats"
                     >
-                      📊
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
                     </button>
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
-                    Quantity
+                <div className="md:col-span-2">
+                  <label className="block text-gray-700 font-bold mb-2 text-xs uppercase tracking-wider">
+                    Qty
                   </label>
                   <input
                     type="number"
@@ -662,75 +839,110 @@ export default function MealTrackingPage() {
                     min="0.5"
                     value={quantity}
                     onChange={(e) => setQuantity(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-gray-900 text-sm sm:text-base"
+                    className="w-full px-3 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-gray-700 font-medium text-center hover:bg-white"
                     required
                   />
                 </div>
 
-                <div>
+                <div className="md:col-span-12 mt-2">
                   <button
                     type="submit"
-                    className="w-full bg-linear-to-r from-blue-600 to-indigo-600 text-white py-2 sm:py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition shadow-md font-semibold cursor-pointer text-sm sm:text-base"
+                    className="w-full bg-linear-to-r from-indigo-600 to-blue-600 text-white py-3.5 rounded-xl hover:from-indigo-700 hover:to-blue-700 transition-all shadow-lg shadow-indigo-200 font-bold tracking-wide transform hover:-translate-y-0.5 active:translate-y-0 active:shadow-md flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    Add to Log
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                      />
+                    </svg>
+                    Add to Daily Log
                   </button>
                 </div>
               </form>
 
               {/* Meal Stats Display */}
               {showMealStats && selectedMeal && (
-                <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-linear-to-br from-green-50 to-emerald-50 rounded-lg border border-green-200">
-                  <div className="flex justify-between items-center mb-2 sm:mb-3">
-                    <h3 className="font-semibold text-gray-800 flex items-center gap-2 text-sm sm:text-base">
-                      <span>📊</span>
-                      Meal Nutritional Info
+                <div className="mt-6 p-4 bg-indigo-50/50 rounded-xl border border-indigo-100 animation-in slide-in-from-top-2 duration-300">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-bold text-gray-800 flex items-center gap-2 text-sm">
+                      <span className="text-lg">🍎</span>
+                      Nutritional Information
                     </h3>
                     <button
                       onClick={() => setShowMealStats(false)}
-                      className="text-gray-500 hover:text-gray-700 font-bold text-xl cursor-pointer"
+                      className="text-gray-400 hover:text-gray-600 w-6 h-6 flex items-center justify-center rounded-full hover:bg-black/5 transition cursor-pointer"
                     >
-                      ×
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-4 h-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
                     </button>
                   </div>
                   {(() => {
                     const meal = meals.find((m) => m._id === selectedMeal);
                     if (!meal) return null;
                     return (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
-                        <div className="bg-white p-3 rounded-lg shadow-sm">
-                          <span className="text-gray-600">Meal:</span>
-                          <p className="font-bold text-gray-800">
-                            {toTitleCase(meal.name)}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100/50">
+                          <span className="text-xs text-gray-500 uppercase tracking-wider font-bold block mb-1">
+                            Calories
+                          </span>
+                          <p className="font-bold text-gray-800 text-lg">
+                            {meal.macros.calories}
+                            <span className="text-xs font-normal text-gray-400 ml-1">
+                              kcal
+                            </span>
                           </p>
                         </div>
-                        <div className="bg-white p-3 rounded-lg shadow-sm">
-                          <span className="text-gray-600">Serving Size:</span>
-                          <p className="font-bold text-gray-800">
-                            {meal.servingSize}
+                        <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100/50">
+                          <span className="text-xs text-gray-500 uppercase tracking-wider font-bold block mb-1">
+                            Protein
+                          </span>
+                          <p className="font-bold text-gray-800 text-lg">
+                            {meal.macros.protein}
+                            <span className="text-xs font-normal text-gray-400 ml-1">
+                              g
+                            </span>
                           </p>
                         </div>
-                        <div className="bg-white p-3 rounded-lg shadow-sm">
-                          <span className="text-gray-600">Calories:</span>
-                          <p className="font-bold text-blue-600">
-                            {meal.macros.calories} kcal
+                        <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100/50">
+                          <span className="text-xs text-gray-500 uppercase tracking-wider font-bold block mb-1">
+                            Carbs
+                          </span>
+                          <p className="font-bold text-gray-800 text-lg">
+                            {meal.macros.carbs}
+                            <span className="text-xs font-normal text-gray-400 ml-1">
+                              g
+                            </span>
                           </p>
                         </div>
-                        <div className="bg-white p-3 rounded-lg shadow-sm">
-                          <span className="text-gray-600">Protein:</span>
-                          <p className="font-bold text-red-600">
-                            {meal.macros.protein}g
-                          </p>
-                        </div>
-                        <div className="bg-white p-3 rounded-lg shadow-sm">
-                          <span className="text-gray-600">Carbs:</span>
-                          <p className="font-bold text-yellow-600">
-                            {meal.macros.carbs}g
-                          </p>
-                        </div>
-                        <div className="bg-white p-3 rounded-lg shadow-sm">
-                          <span className="text-gray-600">Fats:</span>
-                          <p className="font-bold text-green-600">
-                            {meal.macros.fats}g
+                        <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100/50">
+                          <span className="text-xs text-gray-500 uppercase tracking-wider font-bold block mb-1">
+                            Fats
+                          </span>
+                          <p className="font-bold text-gray-800 text-lg">
+                            {meal.macros.fats}
+                            <span className="text-xs font-normal text-gray-400 ml-1">
+                              g
+                            </span>
                           </p>
                         </div>
                       </div>
@@ -784,42 +996,84 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
     }
   };
 
+  const getGradient = (title) => {
+    switch (title.toLowerCase()) {
+      case "breakfast":
+        return "from-orange-50/50 to-amber-50/50";
+      case "lunch":
+        return "from-blue-50/50 to-cyan-50/50";
+      case "dinner":
+        return "from-indigo-50/50 to-violet-50/50";
+      default:
+        return "from-gray-50/50 to-slate-50/50";
+    }
+  };
+
   return (
-    <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-100">
-      <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-gray-800 flex items-center gap-2">
-        <span className="text-xl sm:text-2xl">{getMealIcon(title)}</span>
-        {title}
-      </h2>
+    <div className="bg-white/80 backdrop-blur-xl p-5 sm:p-6 rounded-2xl shadow-xl shadow-indigo-100/50 border border-white/50 ring-1 ring-white/50 hover:shadow-indigo-200/50 transition-shadow duration-300">
+      <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+        <div className="flex items-center gap-3">
+          <span className="flex items-center justify-center w-10 h-10 bg-white rounded-xl shadow-sm border border-gray-100 text-xl">
+            {getMealIcon(title)}
+          </span>
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">{title}</h2>
+            <p className="text-xs text-gray-400 font-medium tracking-wide">
+              {meals.length} {meals.length === 1 ? "Item" : "Items"} Logged
+            </p>
+          </div>
+        </div>
+      </div>
 
       {meals.length === 0 ? (
-        <p className="text-gray-700 text-center py-6 sm:py-8 bg-gray-50 rounded-lg font-medium text-sm sm:text-base">
-          No meals added yet
-        </p>
+        <div className="text-center py-10 rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50/30 group hover:border-gray-300 transition-colors">
+          <span className="text-3xl block mb-2 opacity-20 grayscale group-hover:grayscale-0 transition-all duration-300 transform group-hover:scale-110">
+            {getMealIcon(title)}
+          </span>
+          <p className="text-gray-400 font-medium text-sm">
+            No meals logged for {title.toLowerCase()}
+          </p>
+        </div>
       ) : (
         <div className="space-y-3">
           {meals.map((entry) => {
             return (
               <div
                 key={entry._id}
-                className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 bg-linear-to-r from-gray-50 to-blue-50 rounded-lg border border-gray-200 hover:shadow-md transition gap-3 sm:gap-0"
+                className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-linear-to-r ${getGradient(
+                  title,
+                )} rounded-xl border border-gray-100/50 hover:border-indigo-200 hover:shadow-md transition-all duration-300 gap-4 group`}
               >
                 <div className="flex-1 w-full sm:w-auto">
-                  <h3 className="font-semibold text-gray-800 text-sm sm:text-base">
-                    {toTitleCase(entry.mealName)} (
-                    {entry.meal?.servingSize || "1 serving"})
-                  </h3>
-                  <div className="flex flex-wrap gap-2 sm:gap-4 mt-1 text-xs sm:text-sm text-gray-800">
-                    <span className="font-medium">
-                      {entry.meal?.macros?.calories || 0} cal
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-bold text-gray-800 text-sm sm:text-base">
+                      {toTitleCase(entry.mealName)}
+                    </h3>
+                    <span className="px-2 py-0.5 bg-white rounded-md text-xs text-gray-500 font-medium shadow-sm border border-gray-100">
+                      {entry.meal?.servingSize || "1 serving"}
                     </span>
-                    <span>🥩 {entry.meal?.macros?.protein || 0}g</span>
-                    <span>🍞 {entry.meal?.macros?.carbs || 0}g</span>
-                    <span>🥑 {entry.meal?.macros?.fats || 0}g</span>
+                  </div>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-600">
+                    <span className="font-bold text-gray-900 bg-white px-2 py-0.5 rounded-full shadow-sm">
+                      🔥 {entry.meal?.macros?.calories || 0} kcal
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                      {entry.meal?.macros?.protein || 0}g P
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>
+                      {entry.meal?.macros?.carbs || 0}g C
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                      {entry.meal?.macros?.fats || 0}g F
+                    </span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                  <div className="flex items-center gap-2 bg-white rounded-lg border border-gray-300 p-1 flex-1 sm:flex-none">
+                <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-3 sm:pt-0 border-gray-200/50 mt-2 sm:mt-0">
+                  <div className="flex items-center gap-1 bg-white rounded-lg border border-gray-200 p-1 shadow-sm">
                     <button
                       onClick={() =>
                         onUpdateQuantity(
@@ -827,7 +1081,7 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
                           Math.max(0.5, parseFloat(entry.quantity) - 0.5),
                         )
                       }
-                      className="w-8 h-8 bg-gray-200 rounded-md hover:bg-gray-300 transition flex items-center justify-center font-bold text-gray-700 cursor-pointer text-sm sm:text-base"
+                      className="w-7 h-7 bg-gray-50 rounded-md hover:bg-gray-100 transition flex items-center justify-center font-bold text-gray-600 cursor-pointer hover:text-indigo-600"
                     >
                       -
                     </button>
@@ -839,7 +1093,7 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
                       onChange={(e) =>
                         onUpdateQuantity(entry._id, parseFloat(e.target.value))
                       }
-                      className="w-12 sm:w-16 text-center px-1 sm:px-2 py-1 border-0 focus:outline-none font-medium text-gray-900 text-sm sm:text-base"
+                      className="w-10 text-center text-sm font-bold text-gray-800 focus:outline-none"
                     />
                     <button
                       onClick={() =>
@@ -848,7 +1102,7 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
                           parseFloat(entry.quantity) + 0.5,
                         )
                       }
-                      className="w-8 h-8 bg-gray-200 rounded-md hover:bg-gray-300 transition flex items-center justify-center font-bold text-gray-700 cursor-pointer text-sm sm:text-base"
+                      className="w-7 h-7 bg-gray-50 rounded-md hover:bg-gray-100 transition flex items-center justify-center font-bold text-gray-600 cursor-pointer hover:text-indigo-600"
                     >
                       +
                     </button>
@@ -856,7 +1110,7 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
 
                   <button
                     onClick={() => onDelete(entry._id)}
-                    className="p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 ring-1 ring-red-200 transition-all cursor-pointer shadow-sm hover:shadow"
+                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all cursor-pointer opacity-0 group-hover:opacity-100"
                     title="Delete entry"
                   >
                     <svg

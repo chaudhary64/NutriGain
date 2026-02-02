@@ -600,165 +600,297 @@ export default function GymTrackingPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-green-50 to-emerald-100">
-      <nav className="bg-white shadow-lg border-b border-gray-200">
+      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center py-3 sm:py-0 sm:h-16 gap-3 sm:gap-4">
-            <div className="flex items-center justify-between w-full sm:w-auto">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="text-2xl sm:text-3xl">💪</div>
-                <h1 className="text-xl sm:text-2xl font-bold bg-linear-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                  Gym Tracking
-                </h1>
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-linear-to-br from-green-500 to-emerald-600 flex items-center justify-center text-xl shadow-lg shadow-green-200 text-white">
+                💪
+              </div>
+              <h1 className="text-xl font-bold bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent hidden sm:block">
+                NutriGain
+              </h1>
+            </div>
+
+            {/* Desktop Actions */}
+            <div className="hidden md:flex items-center gap-4">
+              <div className="relative group">
+                <input
+                  type="date"
+                  value={currentDate}
+                  onChange={(e) => setCurrentDate(e.target.value)}
+                  className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all text-sm font-medium text-gray-700 cursor-pointer hover:bg-white"
+                />
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="h-8 w-px bg-gray-200 mx-2"></div>
+
+              <div className="flex gap-1 bg-gray-100/50 p-1 rounded-xl border border-gray-200/50">
                 <button
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="sm:hidden text-gray-600 hover:text-gray-800 p-2"
-                  aria-label="Toggle menu"
+                  onClick={() => router.push("/dashboard/meal")}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-white/50 rounded-lg font-medium text-sm flex items-center gap-2 transition-all cursor-pointer"
+                >
+                  <span className="text-lg grayscale opacity-70">🍽️</span> Meal
+                </button>
+                <button
+                  onClick={() => router.push("/dashboard/gym")}
+                  className="px-4 py-2 bg-white text-green-600 rounded-lg shadow-sm font-semibold text-sm flex items-center gap-2 transition-all"
+                >
+                  <span className="text-lg">💪</span> Gym
+                </button>
+              </div>
+
+              <div className="flex items-center gap-3 pl-2">
+                <div className="text-right hidden lg:block">
+                  <p className="text-xs text-gray-400 font-medium">
+                    Welcome back
+                  </p>
+                  <p className="text-sm font-bold text-gray-800 leading-tight">
+                    {user.name}
+                  </p>
+                </div>
+                <button
+                  onClick={logout}
+                  className="w-10 h-10 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 flex items-center justify-center transition-all cursor-pointer"
+                  title="Logout"
                 >
                   <svg
-                    className="w-6 h-6"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-5 h-5"
                     fill="none"
-                    stroke="currentColor"
                     viewBox="0 0 24 24"
+                    stroke="currentColor"
                   >
-                    {mobileMenuOpen ? (
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    ) : (
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 6h16M4 12h16M4 18h16"
-                      />
-                    )}
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                    />
                   </svg>
                 </button>
               </div>
             </div>
 
-            {/* Mobile Menu */}
-            {mobileMenuOpen && (
-              <div className="sm:hidden w-full bg-gray-50 rounded-lg p-3 space-y-2">
+            {/* Mobile Toggle */}
+            <div className="flex md:hidden items-center gap-3">
+              {/* Mobile Date Picker (Simplified) */}
+              <input
+                type="date"
+                value={currentDate}
+                onChange={(e) => setCurrentDate(e.target.value)}
+                className="w-32 py-1.5 px-2 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-gray-700 focus:outline-none"
+              />
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  {mobileMenuOpen ? (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  ) : (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  )}
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-gray-100 bg-white/95 backdrop-blur-xl absolute w-full left-0 shadow-xl">
+            <div className="p-4 space-y-3">
+              <div className="flex items-center gap-3 px-2 mb-4">
+                <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p className="font-bold text-gray-900">{user.name}</p>
+                  <p className="text-xs text-gray-500">View Profile</p>
+                </div>
+              </div>
+
+              <div className="space-y-1">
                 <button
                   onClick={() => {
                     router.push("/dashboard/meal");
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition font-medium text-sm flex items-center gap-2 cursor-pointer"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium transition cursor-pointer"
                 >
-                  🍽️ Meal Tracking
+                  <span className="grayscale opacity-70">🍽️</span> Meal Tracking
                 </button>
                 <button
                   onClick={() => {
                     router.push("/dashboard/gym");
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full px-4 py-2 text-green-600 bg-green-50 rounded-lg font-medium text-sm flex items-center gap-2"
+                  className="w-full flex items-center gap-3 px-4 py-3 bg-green-50 text-green-700 rounded-xl font-semibold transition"
                 >
-                  💪 Gym Tracking
+                  <span>💪</span> Gym Tracking
                 </button>
+              </div>
+
+              <div className="pt-3 mt-3 border-t border-gray-100">
                 <button
                   onClick={() => {
                     logout();
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full px-4 py-2 bg-linear-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition font-medium text-sm flex items-center gap-2 cursor-pointer"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium transition cursor-pointer"
                 >
-                  🚪 Logout
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                    />
+                  </svg>
+                  Logout
                 </button>
               </div>
-            )}
-
-            {/* Desktop Menu */}
-            <div className="hidden sm:flex sm:flex-row items-center gap-2 sm:gap-3">
-              <input
-                type="date"
-                value={currentDate}
-                onChange={(e) => setCurrentDate(e.target.value)}
-                className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm text-gray-900 cursor-pointer text-sm"
-              />
-
-              <button
-                onClick={() => router.push("/dashboard/meal")}
-                className="px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition font-medium text-sm flex items-center gap-1 cursor-pointer"
-              >
-                🍽️ Meal
-              </button>
-
-              <button
-                onClick={() => router.push("/dashboard/gym")}
-                className="px-4 py-2 text-green-600 bg-green-50 rounded-lg font-medium text-sm flex items-center gap-1 cursor-pointer"
-              >
-                💪 Gym
-              </button>
-
-              <span className="hidden sm:inline text-gray-700 font-medium text-sm whitespace-nowrap">
-                Welcome, {user.name}!
-              </span>
-
-              <button
-                onClick={logout}
-                className="hidden sm:block bg-linear-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-lg hover:from-red-600 hover:to-red-700 transition shadow-md font-medium cursor-pointer text-sm"
-              >
-                Logout
-              </button>
             </div>
           </div>
-        </div>
+        )}
       </nav>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
         {/* Weekly Schedule - Grid Layout */}
         <div className="mb-6 sm:mb-8">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
-            <span className="text-2xl sm:text-3xl">📅</span>
-            Weekly Workout Schedule
-          </h2>
+          <div className="bg-white/80 backdrop-blur-xl p-5 sm:p-6 rounded-2xl shadow-xl shadow-green-100/50 border border-white/50 ring-1 ring-white/50 relative z-10">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="bg-linear-to-br from-green-500 to-emerald-600 p-2.5 rounded-xl text-white shadow-lg shadow-green-200">
+                <span className="text-xl">📅</span>
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">
+                  Weekly Schedule
+                </h2>
+                <p className="text-xs text-gray-500 font-medium">
+                  Your personalized split
+                </p>
+              </div>
+            </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3 sm:gap-4">
-            {workoutSchedule.map((schedule) => {
-              const colors = getDayColors(schedule.day);
-              return (
-                <div
-                  key={schedule.day}
-                  className={`bg-linear-to-br ${colors.bg} rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 ${colors.border} shadow-md hover:shadow-xl transition cursor-pointer`}
-                >
-                  <div className="text-center">
-                    <div
-                      className={`text-base sm:text-lg lg:text-xl font-bold ${colors.textDark} mb-2`}
-                    >
-                      {schedule.day}
-                    </div>
-                    <div className="space-y-1">
-                      {schedule.muscleGroups &&
-                      schedule.muscleGroups.length > 0 ? (
-                        schedule.muscleGroups.map((group, idx) => (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3 sm:gap-4">
+              {workoutSchedule.map((schedule) => {
+                const colors = getDayColors(schedule.day);
+                const isToday =
+                  schedule.day ===
+                  new Date().toLocaleDateString("en-US", { weekday: "long" });
+
+                return (
+                  <div
+                    key={schedule.day}
+                    className={`relative overflow-hidden group rounded-xl p-3 sm:p-4 border transition-all duration-300 ${
+                      isToday
+                        ? "bg-white shadow-lg shadow-green-100 scale-105 ring-2 ring-green-500 border-transparent z-10"
+                        : `bg-linear-to-br ${colors.bg} border-transparent hover:shadow-md hover:-translate-y-1`
+                    }`}
+                  >
+                    {isToday && (
+                      <div className="absolute top-0 right-0 p-1.5">
+                        <span className="flex h-2 w-2 relative">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="text-center relative z-10">
+                      <div
+                        className={`text-sm sm:text-base font-bold uppercase tracking-wider mb-3 ${colors.textDark}`}
+                      >
+                        {schedule.day.slice(0, 3)}
+                        <span className="hidden sm:inline">
+                          {schedule.day.slice(3)}
+                        </span>
+                      </div>
+                      <div
+                        className={`flex flex-col ${
+                          schedule.muscleGroups.length >= 3
+                            ? "gap-1.5"
+                            : "gap-2"
+                        }`}
+                      >
+                        {schedule.muscleGroups &&
+                        schedule.muscleGroups.length > 0 ? (
+                          schedule.muscleGroups.map((group, idx) => (
+                            <div
+                              key={idx}
+                              className={`bg-white/80 backdrop-blur-sm px-2 ${
+                                schedule.muscleGroups.length >= 3
+                                  ? "py-1 text-xs"
+                                  : "py-2 text-xs sm:text-sm"
+                              } rounded-lg font-bold shadow-sm border border-black/5 ${
+                                colors.textLight
+                              } flex items-center justify-center gap-1.5 transition-transform hover:scale-[1.02]`}
+                              title={group}
+                            >
+                              <span
+                                className={
+                                  schedule.muscleGroups.length >= 3
+                                    ? "text-sm"
+                                    : "text-base"
+                                }
+                              >
+                                {getMuscleGroupEmoji(group)}
+                              </span>
+                              <span className="truncate">{group}</span>
+                            </div>
+                          ))
+                        ) : (
                           <div
-                            key={idx}
-                            className={`bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold ${colors.textLight}`}
+                            className={`px-2 py-1.5 rounded-lg text-xs font-medium text-gray-400 italic bg-black/5`}
                           >
-                            {getMuscleGroupEmoji(group)} {group}
+                            Rest Day
                           </div>
-                        ))
-                      ) : (
-                        <div
-                          className={`bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-gray-500`}
-                        >
-                          No Workout
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -896,31 +1028,46 @@ export default function GymTrackingPage() {
         </div>
 
         {/* Body Weight Chart */}
-        <div className="mb-6 sm:mb-8">
-          <div className="bg-linear-to-br from-white to-blue-50 rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 lg:p-8 border border-blue-200">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 sm:mb-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center gap-2">
-                <span className="text-2xl sm:text-3xl">⚖️</span>
-                Body Weight Progress
-              </h2>
+        <div className="mb-8">
+          <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl shadow-indigo-100/50 p-6 lg:p-8 border border-white/50 ring-1 ring-white/50">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-blue-500 blur-xl opacity-20 rounded-full"></div>
+                  <span className="text-5xl relative z-10">⚖️</span>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-black text-gray-900 tracking-tight">
+                    Weight Progress
+                  </h2>
+                  <p className="text-sm font-medium text-gray-500">
+                    Track your journey
+                  </p>
+                </div>
+              </div>
               <button
                 onClick={() => setShowWeightForm(!showWeightForm)}
-                className="bg-linear-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition shadow-md font-semibold text-sm"
+                className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg ${
+                  showWeightForm
+                    ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    : "bg-linear-to-r from-blue-600 to-indigo-600 text-white hover:shadow-blue-200 hover:scale-105"
+                }`}
               >
-                {showWeightForm ? "Cancel" : "+ Add Weight"}
+                {showWeightForm ? "Cancel" : "+ Add Entry"}
               </button>
             </div>
 
             {/* Add Weight Form */}
             {showWeightForm && (
-              <div className="bg-white rounded-lg p-4 mb-4 border-2 border-blue-300 shadow-lg">
-                <h3 className="text-lg font-bold text-gray-800 mb-3">
-                  Add Weight Entry
+              <div className="bg-gray-50/80 rounded-xl p-6 mb-8 border border-gray-100 animate-in fade-in slide-in-from-top-4 duration-300">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                  Add New Weight Entry
                 </h3>
-                <form onSubmit={handleAddWeight} className="space-y-3">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <form onSubmit={handleAddWeight} className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
                         Weight (kg)
                       </label>
                       <input
@@ -928,35 +1075,35 @@ export default function GymTrackingPage() {
                         step="0.1"
                         value={newWeight}
                         onChange={(e) => setNewWeight(e.target.value)}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="75.5"
+                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-bold text-gray-900 placeholder-gray-300 transition-all"
+                        placeholder="e.g., 75.5"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
                         Date
                       </label>
                       <input
                         type="date"
                         value={newWeightDate}
                         onChange={(e) => setNewWeightDate(e.target.value)}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-bold text-gray-900 transition-all"
                         required
                       />
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-3 pt-2">
                     <button
                       type="submit"
-                      className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-semibold"
+                      className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition font-bold shadow-lg shadow-blue-200"
                     >
-                      Add Entry
+                      Save Entry
                     </button>
                     <button
                       type="button"
                       onClick={() => setShowWeightForm(false)}
-                      className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition font-semibold"
+                      className="px-6 py-3 bg-white text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 transition font-bold"
                     >
                       Cancel
                     </button>
@@ -965,48 +1112,10 @@ export default function GymTrackingPage() {
               </div>
             )}
 
-            {/* Weight Entries List */}
-            {weightEntries.length > 0 && (
-              <div className="bg-white rounded-lg p-4 mb-4 max-h-60 overflow-y-auto">
-                <h3 className="text-lg font-bold text-gray-800 mb-3">
-                  Weight History
-                </h3>
-                <div className="space-y-2">
-                  {[...weightEntries]
-                    .sort((a, b) => new Date(b.date) - new Date(a.date))
-                    .map((entry) => (
-                      <div
-                        key={entry._id}
-                        className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
-                      >
-                        <div>
-                          <span className="font-bold text-gray-800 text-lg">
-                            {entry.weight} kg
-                          </span>
-                          <span className="text-gray-600 text-sm ml-3">
-                            {new Date(entry.date).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            })}
-                          </span>
-                        </div>
-                        <button
-                          onClick={() => handleDeleteWeight(entry._id)}
-                          className="text-red-600 hover:text-red-800 font-semibold text-sm"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    ))}
-                </div>
-              </div>
-            )}
-
-            {/* Chart Container */}
+            {/* Chart Section */}
             {weightEntries.length > 0 ? (
-              <div className="bg-white rounded-xl p-4 sm:p-6 shadow-lg">
-                <ResponsiveContainer width="100%" height={300}>
+              <div className="bg-white rounded-2xl p-2 sm:p-6 shadow-sm border border-gray-100 mb-8">
+                <ResponsiveContainer width="100%" height={350}>
                   <LineChart
                     data={weightEntries
                       .sort((a, b) => new Date(a.date) - new Date(b.date))
@@ -1019,97 +1128,81 @@ export default function GymTrackingPage() {
                         fullDate: new Date(entry.date).toLocaleDateString(
                           "en-US",
                           {
-                            month: "short",
+                            month: "long",
                             day: "numeric",
                             year: "numeric",
                           },
                         ),
                       }))}
-                    margin={{ top: 20, right: 20, left: 0, bottom: 5 }}
+                    margin={{ top: 20, right: 20, left: -20, bottom: 0 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="#f3f4f6"
+                      vertical={false}
+                    />
                     <XAxis
                       dataKey="date"
-                      stroke="#6b7280"
-                      style={{ fontSize: "12px", fontWeight: "600" }}
+                      stroke="#9ca3af"
+                      tick={{ fontSize: 12, fontWeight: 600 }}
+                      tickLine={false}
+                      axisLine={false}
+                      dy={10}
                     />
                     <YAxis
-                      stroke="#6b7280"
-                      style={{ fontSize: "12px", fontWeight: "600" }}
-                      domain={[
-                        Math.min(
-                          ...weightEntries.map((e) => e.weight),
-                          targetWeight,
-                        ) - 5,
-                        Math.max(
-                          ...weightEntries.map((e) => e.weight),
-                          targetWeight,
-                        ) + 5,
-                      ]}
-                      label={{
-                        value: "Weight (kg)",
-                        angle: -90,
-                        position: "insideLeft",
-                        style: { fontSize: "14px", fontWeight: "700" },
-                      }}
+                      stroke="#9ca3af"
+                      tick={{ fontSize: 12, fontWeight: 600 }}
+                      tickLine={false}
+                      axisLine={false}
+                      domain={["auto", "auto"]}
+                      padding={{ top: 20, bottom: 20 }}
                     />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: "#1f2937",
-                        border: "none",
-                        borderRadius: "8px",
-                        color: "#fff",
-                        padding: "10px 15px",
+                        backgroundColor: "rgba(255, 255, 255, 0.95)",
+                        border: "1px solid #e5e7eb",
+                        borderRadius: "12px",
+                        boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                        padding: "12px",
+                      }}
+                      itemStyle={{ color: "#4f46e5", fontWeight: "bold" }}
+                      labelStyle={{
+                        color: "#6b7280",
+                        marginBottom: "4px",
+                        fontSize: "12px",
                         fontWeight: "600",
                       }}
                       formatter={(value) => [`${value} kg`, "Weight"]}
-                      labelFormatter={(label) => {
-                        const item = weightEntries.find(
-                          (e) =>
-                            new Date(e.date).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                            }) === label,
-                        );
-                        return item
-                          ? new Date(item.date).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            })
-                          : label;
-                      }}
                     />
                     <ReferenceLine
                       y={targetWeight}
                       stroke="#f97316"
-                      strokeWidth={2}
-                      strokeDasharray="6 6"
+                      strokeDasharray="4 4"
                       label={{
-                        value: `Target: ${targetWeight} kg`,
+                        value: `Goal: ${targetWeight} kg`,
                         position: "insideTopRight",
                         fill: "#f97316",
-                        fontSize: 11,
+                        fontSize: 12,
                         fontWeight: "bold",
-                        offset: 10,
+                        dy: -10,
                       }}
                     />
                     <Line
                       type="monotone"
                       dataKey="weight"
                       stroke="url(#colorWeight)"
-                      strokeWidth={3}
+                      strokeWidth={4}
                       dot={{
-                        fill: "#8b5cf6",
-                        stroke: "#fff",
-                        strokeWidth: 2,
+                        fill: "#fff",
+                        stroke: "#6366f1",
+                        strokeWidth: 3,
                         r: 6,
                       }}
                       activeDot={{
                         r: 8,
-                        fill: "#ec4899",
+                        fill: "#6366f1",
                         stroke: "#fff",
-                        strokeWidth: 2,
+                        strokeWidth: 3,
                       }}
                     />
                     <defs>
@@ -1121,58 +1214,55 @@ export default function GymTrackingPage() {
                         y2="0"
                       >
                         <stop offset="0%" stopColor="#3b82f6" />
-                        <stop offset="50%" stopColor="#8b5cf6" />
-                        <stop offset="100%" stopColor="#ec4899" />
+                        <stop offset="100%" stopColor="#8b5cf6" />
                       </linearGradient>
                     </defs>
                   </LineChart>
                 </ResponsiveContainer>
               </div>
             ) : (
-              <div className="bg-white rounded-xl p-8 text-center shadow-lg">
-                <p className="text-gray-600 text-lg">
-                  No weight entries yet. Click "Add Weight" to start tracking
-                  your progress!
+              <div className="bg-gray-50 rounded-2xl p-12 text-center border-2 border-dashed border-gray-200 mb-8">
+                <div className="text-4xl mb-3 opacity-50">📊</div>
+                <p className="text-gray-500 font-medium">
+                  No weight entries yet. Start tracking your progress!
                 </p>
               </div>
             )}
 
-            {/* Stats Summary */}
+            {/* Stats Cards */}
             {weightEntries.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-4 sm:mt-6">
-                <div className="bg-linear-to-br from-blue-50 to-blue-100 rounded-lg p-4 border-2 border-blue-200">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xl sm:text-2xl">📊</span>
-                    <p className="text-xs font-bold text-blue-700 uppercase">
-                      Starting Weight
-                    </p>
-                  </div>
-                  <p className="text-2xl sm:text-3xl font-bold text-blue-600">
-                    {weightEntries[0]?.weight} kg
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Starting Stats */}
+                <div className="bg-blue-50/50 rounded-2xl p-5 border border-blue-100 hover:shadow-md transition-shadow">
+                  <p className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">
+                    Starting
                   </p>
-                  <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                  <p className="text-3xl font-black text-gray-900 mb-1">
+                    {weightEntries[0]?.weight}
+                    <span className="text-lg text-gray-400 font-bold ml-1">
+                      kg
+                    </span>
+                  </p>
+                  <p className="text-xs font-semibold text-blue-400">
                     {new Date(weightEntries[0]?.date).toLocaleDateString(
                       "en-US",
-                      {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      },
+                      { month: "short", day: "numeric", year: "numeric" },
                     )}
                   </p>
                 </div>
 
-                <div className="bg-linear-to-br from-green-50 to-green-100 rounded-lg p-4 border-2 border-green-200">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xl sm:text-2xl">⚖️</span>
-                    <p className="text-xs font-bold text-green-700 uppercase">
-                      Current Weight
-                    </p>
-                  </div>
-                  <p className="text-2xl sm:text-3xl font-bold text-green-600">
-                    {weightEntries[weightEntries.length - 1]?.weight} kg
+                {/* Current Stats */}
+                <div className="bg-emerald-50/50 rounded-2xl p-5 border border-emerald-100 hover:shadow-md transition-shadow">
+                  <p className="text-xs font-bold text-emerald-500 uppercase tracking-wider mb-2">
+                    Current
                   </p>
-                  <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                  <p className="text-3xl font-black text-gray-900 mb-1">
+                    {weightEntries[weightEntries.length - 1]?.weight}
+                    <span className="text-lg text-gray-400 font-bold ml-1">
+                      kg
+                    </span>
+                  </p>
+                  <p className="text-xs font-semibold text-emerald-500">
                     {new Date(
                       weightEntries[weightEntries.length - 1]?.date,
                     ).toLocaleDateString("en-US", {
@@ -1183,43 +1273,57 @@ export default function GymTrackingPage() {
                   </p>
                 </div>
 
-                <div className="bg-linear-to-br from-orange-50 to-orange-100 rounded-lg p-4 border-2 border-orange-200">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xl sm:text-2xl">🎯</span>
-                    <p className="text-xs font-bold text-orange-700 uppercase">
-                      Target Weight
-                    </p>
-                    <button
-                      onClick={() => {
-                        setShowTargetForm(!showTargetForm);
-                        setNewTargetWeight(targetWeight);
-                      }}
-                      className="ml-auto text-orange-600 hover:text-orange-800 text-xs font-bold"
+                {/* Target Stats */}
+                <div className="bg-orange-50/50 rounded-2xl p-5 border border-orange-100 hover:shadow-md transition-shadow relative overflow-hidden group">
+                  <button
+                    onClick={() => {
+                      setShowTargetForm(!showTargetForm);
+                      setNewTargetWeight(targetWeight);
+                    }}
+                    className="absolute top-3 right-3 text-orange-400 hover:text-orange-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="lucide lucide-pencil"
                     >
-                      Edit
-                    </button>
-                  </div>
+                      <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                      <path d="m15 5 4 4" />
+                    </svg>
+                  </button>
+                  <p className="text-xs font-bold text-orange-400 uppercase tracking-wider mb-2">
+                    Goal
+                  </p>
                   {showTargetForm ? (
-                    <form onSubmit={handleUpdateTargetWeight} className="mt-2">
-                      <input
-                        type="number"
-                        step="0.1"
-                        value={newTargetWeight}
-                        onChange={(e) => setNewTargetWeight(e.target.value)}
-                        className="w-full px-2 py-1 border-2 border-orange-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg font-bold"
-                        required
-                      />
+                    <form onSubmit={handleUpdateTargetWeight} className="mt-1">
+                      <div className="flex gap-2">
+                        <input
+                          type="number"
+                          step="0.1"
+                          autoFocus
+                          value={newTargetWeight}
+                          onChange={(e) => setNewTargetWeight(e.target.value)}
+                          className="w-full px-2 py-1 bg-white border border-orange-200 rounded-lg text-lg font-bold focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        />
+                      </div>
                       <div className="flex gap-1 mt-2">
                         <button
                           type="submit"
-                          className="flex-1 bg-orange-600 text-white px-2 py-1 rounded text-xs font-semibold"
+                          className="bg-orange-500 text-white px-2 py-1 rounded text-xs font-bold w-full"
                         >
                           Save
                         </button>
                         <button
                           type="button"
                           onClick={() => setShowTargetForm(false)}
-                          className="px-2 py-1 bg-gray-300 text-gray-700 rounded text-xs font-semibold"
+                          className="bg-gray-200 text-gray-600 px-2 py-1 rounded text-xs font-bold w-full"
                         >
                           Cancel
                         </button>
@@ -1227,10 +1331,13 @@ export default function GymTrackingPage() {
                     </form>
                   ) : (
                     <>
-                      <p className="text-2xl sm:text-3xl font-bold text-orange-600">
-                        {targetWeight} kg
+                      <p className="text-3xl font-black text-gray-900 mb-1">
+                        {targetWeight}
+                        <span className="text-lg text-gray-400 font-bold ml-1">
+                          kg
+                        </span>
                       </p>
-                      <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                      <p className="text-xs font-semibold text-orange-500">
                         {Math.abs(
                           weightEntries[weightEntries.length - 1]?.weight -
                             targetWeight,
@@ -1245,14 +1352,12 @@ export default function GymTrackingPage() {
                   )}
                 </div>
 
-                <div className="bg-linear-to-br from-purple-50 to-purple-100 rounded-lg p-4 border-2 border-purple-200">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xl sm:text-2xl">📈</span>
-                    <p className="text-xs font-bold text-purple-700 uppercase">
-                      Total Change
-                    </p>
-                  </div>
-                  <p className="text-2xl sm:text-3xl font-bold text-purple-600">
+                {/* Total Move */}
+                <div className="bg-purple-50/50 rounded-2xl p-5 border border-purple-100 hover:shadow-md transition-shadow">
+                  <p className="text-xs font-bold text-purple-400 uppercase tracking-wider mb-2">
+                    Total Change
+                  </p>
+                  <p className="text-3xl font-black text-gray-900 mb-1">
                     {weightEntries[weightEntries.length - 1]?.weight -
                       weightEntries[0]?.weight >
                     0
@@ -1261,10 +1366,13 @@ export default function GymTrackingPage() {
                     {(
                       weightEntries[weightEntries.length - 1]?.weight -
                       weightEntries[0]?.weight
-                    ).toFixed(1)}{" "}
-                    kg
+                    ).toFixed(1)}
+                    <span className="text-lg text-gray-400 font-bold ml-1">
+                      kg
+                    </span>
                   </p>
-                  <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                  <p className="text-xs font-semibold text-purple-500">
+                    Over{" "}
                     {Math.floor(
                       (new Date(weightEntries[weightEntries.length - 1]?.date) -
                         new Date(weightEntries[0]?.date)) /
@@ -1279,9 +1387,9 @@ export default function GymTrackingPage() {
         </div>
 
         {/* Today's Workout Details */}
-        <div className="bg-linear-to-br from-white to-gray-50 rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 lg:p-8 border border-gray-200">
+        <div className="bg-white/80 backdrop-blur-xl rounded-xl sm:rounded-2xl shadow-xl shadow-indigo-100/50 p-4 sm:p-6 lg:p-8 border border-white/50 ring-1 ring-white/50">
           {(() => {
-            // Get current day
+            // Get current day from currentDate state
             const daysOfWeek = [
               "Sunday",
               "Monday",
@@ -1291,7 +1399,18 @@ export default function GymTrackingPage() {
               "Friday",
               "Saturday",
             ];
-            const today = daysOfWeek[new Date().getDay()];
+
+            // Note: currentDate is yyyy-MM-dd string
+            // Create date object and adjust for timezone to get correct day of week
+            const dateObj = new Date(currentDate);
+            // new Date("yyyy-MM-dd") returns UTC midnight, daysOfWeek[day] might be off depending on timezone
+            // Better to use a small helper or just the weekday from date string
+            // Let's rely on creating date with time set to ensure local day
+            const year = parseInt(currentDate.split("-")[0]);
+            const month = parseInt(currentDate.split("-")[1]) - 1;
+            const day = parseInt(currentDate.split("-")[2]);
+            const localDate = new Date(year, month, day);
+            const today = daysOfWeek[localDate.getDay()];
 
             // Find today's workout schedule
             const todaySchedule = workoutSchedule.find((s) => s.day === today);
@@ -1304,28 +1423,46 @@ export default function GymTrackingPage() {
 
             return (
               <>
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-3">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 sm:mb-8 pb-6 border-b border-gray-100 gap-4 sm:gap-6">
                   <div className="flex items-center gap-3 sm:gap-4">
-                    <span className="text-4xl sm:text-5xl lg:text-6xl">💪</span>
+                    <div className="relative shrink-0">
+                      <div className="absolute inset-0 bg-blue-500 blur-xl opacity-20 rounded-full"></div>
+                      <span className="text-4xl sm:text-5xl lg:text-6xl relative z-10">
+                        💪
+                      </span>
+                    </div>
                     <div>
-                      <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                      <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 tracking-tight leading-none">
                         Today's Workout
                       </h2>
-                      <p className="text-sm sm:text-base lg:text-lg text-gray-600 mt-1 font-semibold">
-                        {today} Session
-                      </p>
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5 sm:mt-1">
+                        <span className="text-sm sm:text-lg font-bold text-indigo-600">
+                          {today}'s Session
+                        </span>
+                        <span className="hidden sm:inline-block w-1 h-1 bg-gray-300 rounded-full"></span>
+                        <span className="text-xs sm:text-sm font-medium text-gray-500 w-full sm:w-auto">
+                          {todayExercises.length} Exercises
+                        </span>
+                      </div>
                     </div>
                   </div>
                   {todayMuscleGroups.length > 0 && (
-                    <span className="bg-linear-to-r from-blue-500 to-purple-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm shadow-lg">
-                      {todayMuscleGroups.join(" & ")}
-                    </span>
+                    <div className="flex flex-wrap gap-2 w-full md:w-auto pl-14 sm:pl-0">
+                      {todayMuscleGroups.map((group, idx) => (
+                        <span
+                          key={idx}
+                          className="bg-indigo-50 text-indigo-700 border border-indigo-100 px-3 py-1 rounded-lg font-bold text-xs sm:text-sm"
+                        >
+                          {group}
+                        </span>
+                      ))}
+                    </div>
                   )}
                 </div>
 
                 {/* Dynamic Exercises by Muscle Group */}
                 {todayExercises.length > 0 ? (
-                  <>
+                  <div className="space-y-10">
                     {todayMuscleGroups.map((muscleGroup) => {
                       const groupExercises = todayExercises.filter(
                         (ex) => ex.muscleGroup === muscleGroup,
@@ -1334,225 +1471,271 @@ export default function GymTrackingPage() {
                       if (groupExercises.length === 0) return null;
 
                       return (
-                        <div key={muscleGroup} className="mb-8">
-                          <div className="mb-4">
-                            <h3 className="text-2xl sm:text-3xl font-bold text-gray-800">
+                        <div key={muscleGroup}>
+                          <div className="flex items-center gap-3 mb-5">
+                            <h3 className="text-2xl font-bold text-gray-900">
                               {muscleGroup}
                             </h3>
-                            <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                              {groupExercises.length} Exercise
-                              {groupExercises.length !== 1 ? "s" : ""}
-                            </p>
+                            <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider">
+                              {groupExercises.length} Exercises
+                            </span>
+                            <div className="h-px bg-gray-100 flex-1 ml-2"></div>
                           </div>
 
-                          <div className="space-y-4">
+                          <div className="grid grid-cols-1 gap-6">
                             {groupExercises.map((exercise) => (
                               <div
                                 key={exercise._id}
-                                className={`bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-l-4 ${
-                                  exercise.type === "COMPOUND"
-                                    ? "border-blue-500"
-                                    : "border-red-500"
-                                }`}
+                                className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md hover:border-indigo-100 transition-all duration-300 overflow-hidden group"
                               >
-                                <div
-                                  className={`bg-linear-to-r ${
-                                    exercise.type === "COMPOUND"
-                                      ? "from-blue-50 via-indigo-50 to-purple-50"
-                                      : "from-red-50 via-pink-50 to-red-50"
-                                  } px-4 sm:px-6 py-3 sm:py-4`}
-                                >
-                                  <div className="flex items-center justify-between gap-2">
-                                    <h4 className="text-lg sm:text-xl font-bold text-gray-800">
-                                      {exercise.name}
-                                    </h4>
-                                    <span
-                                      className={`inline-block ${
+                                {/** Card Header **/}
+                                <div className="bg-gray-50/50 px-4 py-3 sm:px-5 sm:py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 group-hover:bg-indigo-50/30 transition-colors">
+                                  <div className="flex items-start gap-3 w-full sm:w-auto">
+                                    {/** Indicator Bar **/}
+                                    <div
+                                      className={`w-1 h-8 rounded-full shrink-0 mt-1 sm:mt-0 ${
                                         exercise.type === "COMPOUND"
-                                          ? "bg-blue-600"
-                                          : "bg-purple-600"
-                                      } text-white px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap`}
+                                          ? "bg-blue-500"
+                                          : "bg-purple-500"
+                                      }`}
+                                    ></div>
+
+                                    {/** Exercise Name & Type **/}
+                                    <div className="flex-1 min-w-0">
+                                      <h4 className="text-base sm:text-lg font-bold text-gray-900 leading-snug wrap-normalbreak-words">
+                                        {exercise.name}
+                                      </h4>
+                                      <span
+                                        className={`text-[10px] font-black tracking-widest uppercase mt-0.5 inline-block ${
+                                          exercise.type === "COMPOUND"
+                                            ? "text-blue-600"
+                                            : "text-purple-600"
+                                        }`}
+                                      >
+                                        {exercise.type} MOVEMENT
+                                      </span>
+                                    </div>
+
+                                    {/** Mobile Edit Button (Top Right) **/}
+                                    <div className="sm:hidden shrink-0">
+                                      <button
+                                        onClick={() =>
+                                          editingExercise === exercise._id
+                                            ? handleSaveExercise(exercise._id)
+                                            : handleEditExercise(exercise)
+                                        }
+                                        className={`p-2 rounded-lg transition-all ${
+                                          editingExercise === exercise._id
+                                            ? "bg-green-100 text-green-700"
+                                            : "bg-white border border-gray-200 text-gray-500"
+                                        }`}
+                                      >
+                                        {editingExercise === exercise._id
+                                          ? "💾"
+                                          : "✏️"}
+                                      </button>
+                                    </div>
+                                  </div>
+
+                                  {/** Desktop Edit Button Row **/}
+                                  <div className="hidden sm:flex gap-2">
+                                    <button
+                                      onClick={() =>
+                                        editingExercise === exercise._id
+                                          ? handleSaveExercise(exercise._id)
+                                          : handleEditExercise(exercise)
+                                      }
+                                      className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
+                                        editingExercise === exercise._id
+                                          ? "bg-green-600 text-white hover:bg-green-700 shadow-md shadow-green-200"
+                                          : "bg-white text-gray-700 border border-gray-200 hover:border-indigo-300 hover:text-indigo-600"
+                                      }`}
                                     >
-                                      {exercise.type}
-                                    </span>
+                                      {editingExercise === exercise._id
+                                        ? "Save"
+                                        : "Edit"}
+                                    </button>
+                                    {editingExercise === exercise._id && (
+                                      <button
+                                        onClick={handleCancelEdit}
+                                        className="px-4 py-1.5 rounded-lg text-sm font-bold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all"
+                                      >
+                                        Cancel
+                                      </button>
+                                    )}
                                   </div>
                                 </div>
 
-                                <div className="p-4 sm:p-6">
-                                  <div className="overflow-x-auto">
-                                    <table className="w-full border-collapse table-fixed">
-                                      <thead>
-                                        <tr className="bg-gray-100">
-                                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                                            Warm Up
-                                          </th>
-                                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                                            Working
-                                          </th>
-                                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                                            Last PR
-                                          </th>
-                                          <th className="w-1/4 px-3 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b-2 border-gray-300">
-                                            Last PR Date
-                                          </th>
-                                        </tr>
-                                      </thead>
-                                      <tbody>
-                                        <tr className="hover:bg-gray-50">
-                                          <td className="px-3 py-4 border-b border-gray-200">
-                                            {editingExercise ===
-                                            exercise._id ? (
-                                              <input
-                                                type="number"
-                                                step="0.5"
-                                                value={editFormData.warmUp}
-                                                onChange={(e) =>
-                                                  setEditFormData({
-                                                    ...editFormData,
-                                                    warmUp: e.target.value,
-                                                  })
-                                                }
-                                                className="w-full px-2 py-1 border border-orange-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 font-bold text-orange-600 text-lg"
-                                                placeholder="20"
-                                              />
-                                            ) : (
-                                              <div className="font-bold text-orange-600 text-lg">
-                                                {exercise.warmUp
-                                                  ? `${exercise.warmUp} kg`
-                                                  : "-"}
-                                              </div>
-                                            )}
-                                          </td>
-                                          <td className="px-3 py-4 border-b border-gray-200">
-                                            {editingExercise ===
-                                            exercise._id ? (
-                                              <input
-                                                type="number"
-                                                step="0.5"
-                                                value={editFormData.working}
-                                                onChange={(e) =>
-                                                  setEditFormData({
-                                                    ...editFormData,
-                                                    working: e.target.value,
-                                                  })
-                                                }
-                                                className="w-full px-2 py-1 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-blue-600 text-lg"
-                                                placeholder="35"
-                                              />
-                                            ) : (
-                                              <div className="font-bold text-blue-600 text-lg">
-                                                {exercise.working
-                                                  ? `${exercise.working} kg`
-                                                  : "-"}
-                                              </div>
-                                            )}
-                                          </td>
-                                          <td className="px-3 py-4 border-b border-gray-200">
-                                            {editingExercise ===
-                                            exercise._id ? (
-                                              <input
-                                                type="number"
-                                                step="0.5"
-                                                value={editFormData.lastPR}
-                                                onChange={(e) =>
-                                                  setEditFormData({
-                                                    ...editFormData,
-                                                    lastPR: e.target.value,
-                                                  })
-                                                }
-                                                className="w-full px-2 py-1 border border-green-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500 font-bold text-green-600 text-lg"
-                                                placeholder="42.5"
-                                              />
-                                            ) : (
-                                              <div className="font-bold text-green-600 text-lg">
-                                                {exercise.lastPR
-                                                  ? `${exercise.lastPR} kg`
-                                                  : "-"}
-                                              </div>
-                                            )}
-                                          </td>
-                                          <td className="px-3 py-4 border-b border-gray-200">
-                                            {editingExercise ===
-                                            exercise._id ? (
-                                              <input
-                                                type="date"
-                                                value={editFormData.lastPRDate}
-                                                onChange={(e) =>
-                                                  setEditFormData({
-                                                    ...editFormData,
-                                                    lastPRDate: e.target.value,
-                                                  })
-                                                }
-                                                className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500 text-sm text-gray-700"
-                                              />
-                                            ) : (
-                                              <div className="text-sm text-gray-700">
-                                                {exercise.lastPRDate ? (
-                                                  <div>
-                                                    <div>
-                                                      {exercise.lastPRDate}
-                                                    </div>
-                                                    <div className="text-xs text-gray-500 mt-1">
-                                                      {calculateDaysSince(
-                                                        exercise.lastPRDate,
-                                                      ) === 0
-                                                        ? "Today"
-                                                        : calculateDaysSince(
-                                                              exercise.lastPRDate,
-                                                            ) === 1
-                                                          ? "1 day ago"
-                                                          : `${calculateDaysSince(exercise.lastPRDate)} days ago`}
-                                                    </div>
-                                                  </div>
-                                                ) : (
-                                                  "-"
-                                                )}
-                                              </div>
-                                            )}
-                                          </td>
-                                        </tr>
-                                        <tr>
-                                          <td
-                                            colSpan="4"
-                                            className="px-3 py-2 border-b border-gray-200"
-                                          >
-                                            <div className="flex justify-end gap-2">
-                                              {editingExercise ===
-                                              exercise._id ? (
-                                                <>
-                                                  <button
-                                                    onClick={() =>
-                                                      handleSaveExercise(
-                                                        exercise._id,
-                                                      )
-                                                    }
-                                                    className="bg-green-600 text-white px-4 py-1 rounded-lg hover:bg-green-700 text-sm font-semibold"
-                                                  >
-                                                    Save
-                                                  </button>
-                                                  <button
-                                                    onClick={handleCancelEdit}
-                                                    className="bg-gray-500 text-white px-4 py-1 rounded-lg hover:bg-gray-600 text-sm font-semibold"
-                                                  >
-                                                    Cancel
-                                                  </button>
-                                                </>
-                                              ) : (
-                                                <button
-                                                  onClick={() =>
-                                                    handleEditExercise(exercise)
-                                                  }
-                                                  className="bg-blue-600 text-white px-4 py-1 rounded-lg hover:bg-blue-700 text-sm font-semibold"
-                                                >
-                                                  Edit
-                                                </button>
-                                              )}
-                                            </div>
-                                          </td>
-                                        </tr>
-                                      </tbody>
-                                    </table>
+                                {/** Stats Grid **/}
+                                <div className="p-4 sm:p-5">
+                                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                                    {/** Warm Up **/}
+                                    <div className="bg-gray-50 sm:bg-transparent rounded-lg p-3 sm:p-0 border border-gray-100 sm:border-0 col-span-1">
+                                      <p className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+                                        Warm Up
+                                      </p>
+                                      {editingExercise === exercise._id ? (
+                                        <input
+                                          type="number"
+                                          step="0.5"
+                                          value={editFormData.warmUp}
+                                          onChange={(e) =>
+                                            setEditFormData({
+                                              ...editFormData,
+                                              warmUp: e.target.value,
+                                            })
+                                          }
+                                          className="w-full bg-orange-50 border border-orange-200 rounded-lg px-2 py-1.5 font-bold text-orange-700 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        />
+                                      ) : (
+                                        <p className="text-lg sm:text-xl font-bold text-gray-700">
+                                          {exercise.warmUp ? (
+                                            <>
+                                              {exercise.warmUp}
+                                              <span className="text-xs font-medium text-gray-400 ml-0.5">
+                                                kg
+                                              </span>
+                                            </>
+                                          ) : (
+                                            <span className="text-gray-300">
+                                              -
+                                            </span>
+                                          )}
+                                        </p>
+                                      )}
+                                    </div>
+
+                                    {/** Working **/}
+                                    <div className="bg-blue-50/50 sm:bg-transparent rounded-lg p-3 sm:p-0 border border-blue-100 sm:border-0 col-span-1">
+                                      <p className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+                                        Working
+                                      </p>
+                                      {editingExercise === exercise._id ? (
+                                        <input
+                                          type="number"
+                                          step="0.5"
+                                          value={editFormData.working}
+                                          onChange={(e) =>
+                                            setEditFormData({
+                                              ...editFormData,
+                                              working: e.target.value,
+                                            })
+                                          }
+                                          className="w-full bg-blue-50 border border-blue-200 rounded-lg px-2 py-1.5 font-bold text-blue-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                      ) : (
+                                        <p className="text-lg sm:text-xl font-bold text-blue-600">
+                                          {exercise.working ? (
+                                            <>
+                                              {exercise.working}
+                                              <span className="text-xs font-medium text-blue-400 ml-0.5">
+                                                kg
+                                              </span>
+                                            </>
+                                          ) : (
+                                            <span className="text-gray-300">
+                                              -
+                                            </span>
+                                          )}
+                                        </p>
+                                      )}
+                                    </div>
+
+                                    {/** PR **/}
+                                    <div className="bg-green-50/50 sm:bg-transparent rounded-lg p-3 sm:p-0 border border-green-100 sm:border-0 col-span-1">
+                                      <p className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+                                        PR
+                                      </p>
+                                      {editingExercise === exercise._id ? (
+                                        <input
+                                          type="number"
+                                          step="0.5"
+                                          value={editFormData.lastPR}
+                                          onChange={(e) =>
+                                            setEditFormData({
+                                              ...editFormData,
+                                              lastPR: e.target.value,
+                                            })
+                                          }
+                                          className="w-full bg-green-50 border border-green-200 rounded-lg px-2 py-1.5 font-bold text-green-700 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        />
+                                      ) : (
+                                        <p className="text-lg sm:text-xl font-bold text-green-600">
+                                          {exercise.lastPR ? (
+                                            <>
+                                              {exercise.lastPR}
+                                              <span className="text-xs font-medium text-green-400 ml-0.5">
+                                                kg
+                                              </span>
+                                            </>
+                                          ) : (
+                                            <span className="text-gray-300">
+                                              -
+                                            </span>
+                                          )}
+                                        </p>
+                                      )}
+                                    </div>
+
+                                    {/** Last PR Date **/}
+                                    <div className="bg-gray-50 sm:bg-transparent rounded-lg p-3 sm:p-0 border border-gray-100 sm:border-0 col-span-1">
+                                      <p className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+                                        Last PR
+                                      </p>
+                                      {editingExercise === exercise._id ? (
+                                        <input
+                                          type="date"
+                                          value={editFormData.lastPRDate}
+                                          onChange={(e) =>
+                                            setEditFormData({
+                                              ...editFormData,
+                                              lastPRDate: e.target.value,
+                                            })
+                                          }
+                                          className="w-full bg-gray-50 border border-gray-200 rounded-lg px-1 py-1 text-[10px] focus:outline-none focus:ring-2 focus:ring-gray-400"
+                                        />
+                                      ) : (
+                                        <div>
+                                          <p className="text-sm font-semibold text-gray-700 truncate">
+                                            {exercise.lastPRDate || "-"}
+                                          </p>
+                                          {exercise.lastPRDate && (
+                                            <p className="text-[10px] text-gray-400 font-medium truncate">
+                                              {calculateDaysSince(
+                                                exercise.lastPRDate,
+                                              ) === 0
+                                                ? "Today"
+                                                : calculateDaysSince(
+                                                      exercise.lastPRDate,
+                                                    ) === 1
+                                                  ? "1 day ago"
+                                                  : `${calculateDaysSince(exercise.lastPRDate)} days ago`}
+                                            </p>
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
+
+                                  {/** Mobile Actions (Cancel/Save when editing) **/}
+                                  {editingExercise === exercise._id && (
+                                    <div className="mt-4 pt-4 border-t border-gray-100 sm:hidden flex gap-2">
+                                      <button
+                                        onClick={() =>
+                                          handleSaveExercise(exercise._id)
+                                        }
+                                        className="flex-1 bg-green-600 text-white py-2 rounded-lg text-sm font-bold shadow-sm"
+                                      >
+                                        Save Changes
+                                      </button>
+                                      <button
+                                        onClick={handleCancelEdit}
+                                        className="flex-1 bg-gray-100 text-gray-600 py-2 rounded-lg text-sm font-bold"
+                                      >
+                                        Cancel
+                                      </button>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             ))}
@@ -1560,19 +1743,19 @@ export default function GymTrackingPage() {
                         </div>
                       );
                     })}
-                  </>
+                  </div>
                 ) : (
-                  <div className="text-center py-12">
-                    <div className="text-6xl mb-4">😴</div>
-                    <h3 className="text-2xl font-bold text-gray-700 mb-2">
+                  <div className="text-center py-16 bg-gray-50/50 rounded-xl border-2 border-dashed border-gray-200">
+                    <div className="text-6xl mb-4 grayscale opacity-50">😴</div>
+                    <h3 className="text-xl font-bold text-gray-800 mb-2">
                       {todayMuscleGroups.includes("Rest Day")
                         ? "Rest Day"
                         : "No Workout Scheduled"}
                     </h3>
-                    <p className="text-gray-600">
+                    <p className="text-gray-500 max-w-sm mx-auto text-sm">
                       {todayMuscleGroups.includes("Rest Day")
-                        ? "Take a well-deserved break and let your muscles recover!"
-                        : "No exercises found for today's muscle groups. Contact your trainer."}
+                        ? "Take a well-deserved break and let your muscles recover for big gains!"
+                        : "No exercises found for today's muscle groups."}
                     </p>
                   </div>
                 )}
