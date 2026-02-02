@@ -4,7 +4,7 @@ const ExerciseSchema = new mongoose.Schema({
   muscleGroup: {
     type: String,
     required: [true, 'Please provide a muscle group'],
-    enum: ['Chest', 'Back', 'Bicep', 'Tricep', 'Legs', 'Forearms', 'Shoulders', 'Arms'],
+    enum: ['Abs', 'Arms', 'Back', 'Bicep', 'Chest', 'Forearms', 'Legs', 'Shoulders', 'Tricep'],
   },
   name: {
     type: String,

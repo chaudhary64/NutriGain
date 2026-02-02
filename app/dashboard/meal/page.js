@@ -22,9 +22,22 @@ export default function MealTrackingPage() {
   const [quantity, setQuantity] = useState(1);
   const [showMealStats, setShowMealStats] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mealSearch, setMealSearch] = useState("");
+  const [showMealDropdown, setShowMealDropdown] = useState(false);
   const [currentDate, setCurrentDate] = useState(
-    format(new Date(), "yyyy-MM-dd")
+    format(new Date(), "yyyy-MM-dd"),
   );
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showMealDropdown && !event.target.closest(".meal-dropdown")) {
+        setShowMealDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showMealDropdown]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -63,7 +76,7 @@ export default function MealTrackingPage() {
       const data = await res.json();
       // Sort meals alphabetically by name
       const sortedMeals = data.meals.sort((a, b) =>
-        a.name.localeCompare(b.name)
+        a.name.localeCompare(b.name),
       );
       setMeals(sortedMeals);
     } catch (error) {
@@ -96,6 +109,8 @@ export default function MealTrackingPage() {
         setDailyLog(data.dailyLog);
         setSelectedMeal("");
         setQuantity(1);
+        setMealSearch("");
+        setShowMealDropdown(false);
       } else {
         const data = await res.json();
         alert(data.error || "Failed to add meal");
@@ -184,10 +199,10 @@ export default function MealTrackingPage() {
                   {label.includes("Calories")
                     ? previewMacros.calories
                     : label.includes("Protein")
-                    ? previewMacros.protein
-                    : label.includes("Carbs")
-                    ? previewMacros.carbs
-                    : previewMacros.fats}
+                      ? previewMacros.protein
+                      : label.includes("Carbs")
+                        ? previewMacros.carbs
+                        : previewMacros.fats}
                 </span>
               )}
           </span>
@@ -205,13 +220,13 @@ export default function MealTrackingPage() {
                   ((label.includes("Calories")
                     ? previewMacros.calories
                     : label.includes("Protein")
-                    ? previewMacros.protein
-                    : label.includes("Carbs")
-                    ? previewMacros.carbs
-                    : previewMacros.fats) /
+                      ? previewMacros.protein
+                      : label.includes("Carbs")
+                        ? previewMacros.carbs
+                        : previewMacros.fats) /
                     max) *
                     100,
-                  100
+                  100,
                 )}%`,
               }}
             ></div>
@@ -544,24 +559,87 @@ export default function MealTrackingPage() {
                   </select>
                 </div>
 
-                <div>
+                <div className="meal-dropdown">
                   <label className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
                     Select Meal
                   </label>
                   <div className="flex gap-2">
-                    <select
-                      value={selectedMeal}
-                      onChange={(e) => setSelectedMeal(e.target.value)}
-                      className="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-gray-900 bg-white cursor-pointer text-sm sm:text-base"
-                      required
-                    >
-                      <option value="">Choose a meal...</option>
-                      {meals.map((meal) => (
-                        <option key={meal._id} value={meal._id}>
-                          {toTitleCase(meal.name)} ({meal.servingSize})
-                        </option>
-                      ))}
-                    </select>
+                    <div className="flex-1 min-w-0 relative">
+                      <input
+                        type="text"
+                        value={
+                          mealSearch ||
+                          (selectedMeal
+                            ? meals.find((m) => m._id === selectedMeal)?.name
+                              ? toTitleCase(
+                                  meals.find((m) => m._id === selectedMeal)
+                                    .name,
+                                )
+                              : ""
+                            : "")
+                        }
+                        onChange={(e) => {
+                          setMealSearch(e.target.value);
+                          setShowMealDropdown(true);
+                        }}
+                        onFocus={() => setShowMealDropdown(true)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            const filteredMeals = meals.filter((meal) =>
+                              meal.name
+                                .toLowerCase()
+                                .includes(mealSearch.toLowerCase()),
+                            );
+                            if (filteredMeals.length === 1) {
+                              setSelectedMeal(filteredMeals[0]._id);
+                              setMealSearch("");
+                              setShowMealDropdown(false);
+                            } else if (filteredMeals.length > 1) {
+                              // If multiple matches, select the first one
+                              setSelectedMeal(filteredMeals[0]._id);
+                              setMealSearch("");
+                              setShowMealDropdown(false);
+                            }
+                          }
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-gray-900 text-sm sm:text-base"
+                        placeholder="Type to search meals..."
+                        required={!selectedMeal}
+                      />
+                      {showMealDropdown && (
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
+                          {meals
+                            .filter((meal) =>
+                              meal.name
+                                .toLowerCase()
+                                .includes(mealSearch.toLowerCase()),
+                            )
+                            .map((meal) => (
+                              <div
+                                key={meal._id}
+                                onClick={() => {
+                                  setSelectedMeal(meal._id);
+                                  setMealSearch("");
+                                  setShowMealDropdown(false);
+                                }}
+                                className="px-3 py-2 hover:bg-blue-50 cursor-pointer text-gray-900 text-sm sm:text-base"
+                              >
+                                {toTitleCase(meal.name)} ({meal.servingSize})
+                              </div>
+                            ))}
+                          {meals.filter((meal) =>
+                            meal.name
+                              .toLowerCase()
+                              .includes(mealSearch.toLowerCase()),
+                          ).length === 0 && (
+                            <div className="px-3 py-2 text-gray-500 text-sm sm:text-base">
+                              No matching meals
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                     <button
                       type="button"
                       onClick={() => setShowMealStats(!showMealStats)}
@@ -746,7 +824,7 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
                       onClick={() =>
                         onUpdateQuantity(
                           entry._id,
-                          Math.max(0.5, parseFloat(entry.quantity) - 0.5)
+                          Math.max(0.5, parseFloat(entry.quantity) - 0.5),
                         )
                       }
                       className="w-8 h-8 bg-gray-200 rounded-md hover:bg-gray-300 transition flex items-center justify-center font-bold text-gray-700 cursor-pointer text-sm sm:text-base"
@@ -767,7 +845,7 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
                       onClick={() =>
                         onUpdateQuantity(
                           entry._id,
-                          parseFloat(entry.quantity) + 0.5
+                          parseFloat(entry.quantity) + 0.5,
                         )
                       }
                       className="w-8 h-8 bg-gray-200 rounded-md hover:bg-gray-300 transition flex items-center justify-center font-bold text-gray-700 cursor-pointer text-sm sm:text-base"
@@ -778,9 +856,23 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
 
                   <button
                     onClick={() => onDelete(entry._id)}
-                    className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition cursor-pointer text-sm sm:text-base"
+                    className="p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 ring-1 ring-red-200 transition-all cursor-pointer shadow-sm hover:shadow"
+                    title="Delete entry"
                   >
-                    🗑️
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
                   </button>
                 </div>
               </div>

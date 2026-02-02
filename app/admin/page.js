@@ -166,6 +166,21 @@ export default function AdminPage() {
 
   const [showScheduleForm, setShowScheduleForm] = useState(false);
   const [editingDay, setEditingDay] = useState(null);
+  
+  // Searchable dropdown state
+  const [muscleGroupSearch, setMuscleGroupSearch] = useState("");
+  const [showMuscleGroupDropdown, setShowMuscleGroupDropdown] = useState(false);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showMuscleGroupDropdown && !event.target.closest('.muscle-group-dropdown')) {
+        setShowMuscleGroupDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showMuscleGroupDropdown]);
 
   useEffect(() => {
     if (!authLoading && (!user || !user.isAdmin)) {
@@ -268,7 +283,7 @@ export default function AdminPage() {
           .map((s) => ({
             ...s,
             muscleGroups: (s.muscleGroups || []).filter((g) =>
-              validMuscleGroups.includes(g)
+              validMuscleGroups.includes(g),
             ),
             colorClasses: colorMap[s.day] || colorMap.Sunday,
           }))
@@ -286,7 +301,7 @@ export default function AdminPage() {
       const data = await res.json();
       // Sort meals alphabetically by name
       const sortedMeals = data.meals.sort((a, b) =>
-        a.name.localeCompare(b.name)
+        a.name.localeCompare(b.name),
       );
       setMeals(sortedMeals);
     } catch (error) {
@@ -443,6 +458,8 @@ export default function AdminPage() {
     });
     setEditingExercise(null);
     setShowExerciseForm(false);
+    setMuscleGroupSearch("");
+    setShowMuscleGroupDropdown(false);
   };
 
   const handleEditSchedule = (daySchedule) => {
@@ -478,6 +495,7 @@ export default function AdminPage() {
   };
 
   const uniqueMuscleGroups = [
+    "Abs",
     "Arms",
     "Back",
     "Bicep",
@@ -887,25 +905,26 @@ export default function AdminPage() {
                       >
                         <input
                           type="checkbox"
-                          checked={editingDay.muscleGroups.includes(
-                            group
-                          )}
+                          checked={editingDay.muscleGroups.includes(group)}
                           onChange={(e) => {
                             const checked = e.target.checked;
                             const updatedMuscleGroups = checked
                               ? [...editingDay.muscleGroups, group]
                               : editingDay.muscleGroups.filter(
-                                  (g) => g !== group
+                                  (g) => g !== group,
                                 );
-                            
+
                             // Update local state without closing the form
                             setEditingDay({
                               ...editingDay,
                               muscleGroups: updatedMuscleGroups,
                             });
-                            
+
                             // Save to backend
-                            handleScheduleUpdate(editingDay.day, updatedMuscleGroups);
+                            handleScheduleUpdate(
+                              editingDay.day,
+                              updatedMuscleGroups,
+                            );
                           }}
                         />
                         <span className="font-medium text-gray-800">
@@ -946,30 +965,68 @@ export default function AdminPage() {
               {/* Exercise Form */}
               {showExerciseForm && (
                 <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-                  <h4 className="text-lg font-bold mb-4">
+                  <h4 className="text-lg font-bold mb-4 text-gray-800">
                     {editingExercise ? "Edit Exercise" : "Add New Exercise"}
                   </h4>
                   <form
                     onSubmit={handleExerciseSubmit}
                     className="grid grid-cols-1 sm:grid-cols-2 gap-4"
                   >
-                    <div>
+                    <div className="relative muscle-group-dropdown">
                       <label className="block text-gray-700 font-medium mb-2">
                         Muscle Group *
                       </label>
                       <input
                         type="text"
-                        value={exerciseFormData.muscleGroup}
-                        onChange={(e) =>
-                          setExerciseFormData({
-                            ...exerciseFormData,
-                            muscleGroup: e.target.value,
-                          })
-                        }
+                        value={muscleGroupSearch || exerciseFormData.muscleGroup}
+                        onChange={(e) => {
+                          setMuscleGroupSearch(e.target.value);
+                          setShowMuscleGroupDropdown(true);
+                        }}
+                        onFocus={() => setShowMuscleGroupDropdown(true)}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-900"
-                        placeholder="e.g., Chest, Back, Shoulders"
-                        required
+                        placeholder="Type to search or select..."
+                        required={!exerciseFormData.muscleGroup}
                       />
+                      {showMuscleGroupDropdown && (
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
+                          {uniqueMuscleGroups
+                            .filter((group) => group !== "Rest Day")
+                            .filter((group) =>
+                              group.toLowerCase().includes(muscleGroupSearch.toLowerCase())
+                            )
+                            .map((group) => (
+                              <div
+                                key={group}
+                                onClick={() => {
+                                  setExerciseFormData({
+                                    ...exerciseFormData,
+                                    muscleGroup: group,
+                                  });
+                                  setMuscleGroupSearch("");
+                                  setShowMuscleGroupDropdown(false);
+                                }}
+                                className="px-4 py-2 hover:bg-green-50 cursor-pointer text-gray-900"
+                              >
+                                {group}
+                              </div>
+                            ))}
+                          {uniqueMuscleGroups
+                            .filter((group) => group !== "Rest Day")
+                            .filter((group) =>
+                              group.toLowerCase().includes(muscleGroupSearch.toLowerCase())
+                            ).length === 0 && (
+                            <div className="px-4 py-2 text-gray-500">
+                              No matching muscle groups
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {exerciseFormData.muscleGroup && !showMuscleGroupDropdown && (
+                        <div className="mt-2 text-sm text-gray-600">
+                          Selected: <span className="font-semibold text-green-600">{exerciseFormData.muscleGroup}</span>
+                        </div>
+                      )}
                     </div>
 
                     <div>
@@ -1115,8 +1172,12 @@ export default function AdminPage() {
             <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-800">👥 Registered Users</h2>
-                  <p className="text-gray-600 mt-1">Total Users: {users.length}</p>
+                  <h2 className="text-2xl font-bold text-gray-800">
+                    👥 Registered Users
+                  </h2>
+                  <p className="text-gray-600 mt-1">
+                    Total Users: {users.length}
+                  </p>
                 </div>
               </div>
 
@@ -1135,8 +1196,12 @@ export default function AdminPage() {
                           {userData.name.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <h3 className="font-bold text-gray-800 text-lg">{userData.name}</h3>
-                          <p className="text-sm text-gray-600">{userData.email}</p>
+                          <h3 className="font-bold text-gray-800 text-lg">
+                            {userData.name}
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            {userData.email}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -1145,13 +1210,19 @@ export default function AdminPage() {
                     <div className="space-y-3">
                       <div className="bg-white rounded-lg p-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-semibold text-gray-700">Days Logged:</span>
-                          <span className="text-lg font-bold text-purple-600">{userData.stats.daysLogged}</span>
+                          <span className="text-sm font-semibold text-gray-700">
+                            Days Logged:
+                          </span>
+                          <span className="text-lg font-bold text-purple-600">
+                            {userData.stats.daysLogged}
+                          </span>
                         </div>
                       </div>
 
                       <div className="bg-white rounded-lg p-3">
-                        <div className="text-sm font-semibold text-gray-700 mb-2">Latest Log:</div>
+                        <div className="text-sm font-semibold text-gray-700 mb-2">
+                          Latest Log:
+                        </div>
                         <div className="text-xs text-gray-600">
                           {userData.stats.latestLogDate ? (
                             <span>{userData.stats.latestLogDate}</span>
@@ -1164,23 +1235,33 @@ export default function AdminPage() {
                       {/* Average Macros */}
                       {userData.stats.daysLogged > 0 && (
                         <div className="bg-white rounded-lg p-3">
-                          <div className="text-sm font-semibold text-gray-700 mb-2">Average Daily Intake:</div>
+                          <div className="text-sm font-semibold text-gray-700 mb-2">
+                            Average Daily Intake:
+                          </div>
                           <div className="grid grid-cols-2 gap-2 text-xs">
                             <div>
                               <span className="text-gray-600">Calories:</span>
-                              <span className="ml-1 font-bold text-orange-600">{userData.stats.averageMacros.calories}</span>
+                              <span className="ml-1 font-bold text-orange-600">
+                                {userData.stats.averageMacros.calories}
+                              </span>
                             </div>
                             <div>
                               <span className="text-gray-600">Protein:</span>
-                              <span className="ml-1 font-bold text-blue-600">{userData.stats.averageMacros.protein}g</span>
+                              <span className="ml-1 font-bold text-blue-600">
+                                {userData.stats.averageMacros.protein}g
+                              </span>
                             </div>
                             <div>
                               <span className="text-gray-600">Carbs:</span>
-                              <span className="ml-1 font-bold text-green-600">{userData.stats.averageMacros.carbs}g</span>
+                              <span className="ml-1 font-bold text-green-600">
+                                {userData.stats.averageMacros.carbs}g
+                              </span>
                             </div>
                             <div>
                               <span className="text-gray-600">Fats:</span>
-                              <span className="ml-1 font-bold text-purple-600">{userData.stats.averageMacros.fats}g</span>
+                              <span className="ml-1 font-bold text-purple-600">
+                                {userData.stats.averageMacros.fats}g
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -1188,7 +1269,8 @@ export default function AdminPage() {
 
                       {/* Member Since */}
                       <div className="text-xs text-gray-500 text-center pt-2 border-t border-purple-200">
-                        Member since {new Date(userData.createdAt).toLocaleDateString()}
+                        Member since{" "}
+                        {new Date(userData.createdAt).toLocaleDateString()}
                       </div>
                     </div>
                   </div>
@@ -1198,7 +1280,9 @@ export default function AdminPage() {
               {users.length === 0 && (
                 <div className="text-center py-12">
                   <div className="text-6xl mb-4">👤</div>
-                  <p className="text-gray-500 text-lg">No users registered yet</p>
+                  <p className="text-gray-500 text-lg">
+                    No users registered yet
+                  </p>
                 </div>
               )}
             </div>
