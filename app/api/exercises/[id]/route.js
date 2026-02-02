@@ -64,10 +64,16 @@ export async function DELETE(request, { params }) {
     }
     
     // Only admins can delete exercise definitions
-    // For now, just delete the user's data for this exercise
-    await UserExerciseData.findOneAndDelete({ userId: user.id, exerciseId: id });
-    
-    return NextResponse.json({ message: "Exercise data deleted successfully" });
+    if (user.isAdmin) {
+      // Admin: delete the exercise itself and all associated user data
+      await Exercise.findByIdAndDelete(id);
+      await UserExerciseData.deleteMany({ exerciseId: id });
+      return NextResponse.json({ message: "Exercise deleted successfully" });
+    } else {
+      // Regular user: just delete their data for this exercise
+      await UserExerciseData.findOneAndDelete({ userId: user.id, exerciseId: id });
+      return NextResponse.json({ message: "Exercise data deleted successfully" });
+    }
   } catch (error) {
     if (error.message === 'Authentication required') {
       return NextResponse.json({ error: error.message }, { status: 401 });
