@@ -1110,7 +1110,7 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
 
                   <button
                     onClick={() => onDelete(entry._id)}
-                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all cursor-pointer opacity-0 group-hover:opacity-100"
+                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all cursor-pointer"
                     title="Delete entry"
                   >
                     <svg
