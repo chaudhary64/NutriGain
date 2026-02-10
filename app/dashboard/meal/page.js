@@ -723,20 +723,13 @@ export default function MealTrackingPage() {
                       <div>
                         <div className="flex items-center gap-2 mb-2">
                           <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm ring-1 ring-white/30">
-                            Daily Focus
+                           Protein Plan 
                           </span>
                           <span className="text-white/90 text-sm font-semibold">
                             {new Date(y, m - 1, d).toLocaleDateString("en-US", {
                               weekday: "long",
                             })}
                           </span>
-                          <button
-                            onClick={() => checkAuth()}
-                            className="ml-2 bg-white/10 hover:bg-white/20 px-2 py-0.5 rounded text-xs transition-colors"
-                            title="Refresh schedule"
-                          >
-                            🔄
-                          </button>
                         </div>
                         <h2 className="text-3xl font-black tracking-tight mb-1 text-white shadow-sm">
                           {isChickenDay ? "Chicken Day" : "Paneer Day"}
