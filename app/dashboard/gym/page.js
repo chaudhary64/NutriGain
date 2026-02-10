@@ -844,7 +844,7 @@ export default function GymTrackingPage() {
                           alt="Rest and Recovery"
                           className="w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform duration-700 ease-out grayscale group-hover:grayscale-0"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/60 to-transparent"></div>
+                        <div className="absolute inset-0 bg-linear-to-t from-neutral-950 via-neutral-950/60 to-transparent"></div>
                       </div>
                       <div className="relative z-10 text-center p-8 max-w-lg mx-auto">
                         <div className="mb-6 inline-block p-4 rounded-full bg-lime-500/10 border border-lime-500/20 text-lime-500 backdrop-blur-sm animate-pulse">
