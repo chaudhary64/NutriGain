@@ -723,7 +723,7 @@ export default function MealTrackingPage() {
                       <div className="text-center sm:text-left">
                         <div className="flex items-center justify-center sm:justify-start gap-3 mb-3">
                           <span className="bg-lime-500 text-black px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest">
-                            Daily Plan
+                            Protein Plan
                           </span>
                           <span className="text-neutral-400 text-sm font-bold uppercase tracking-wider">
                             {new Date(y, m - 1, d).toLocaleDateString("en-US", {

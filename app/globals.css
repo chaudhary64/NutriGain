@@ -26,7 +26,41 @@ body {
 }
 
 /* Apply Playfair Display to headings */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-playfair), Georgia, serif;
   font-weight: 700;
+}
+
+/* Custom Global Scrollbar */
+::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+::-webkit-scrollbar-track {
+  background: #171717 !important;
+  /* neutral-900 */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4d7c0f !important;
+  /* lime-700 */
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #84cc16 !important;
+  /* lime-500 */
+}
+
+/* Firefox compatibility */
+html {
+  scrollbar-width: thin !important;
+  scrollbar-color: #4d7c0f #171717 !important;
 }

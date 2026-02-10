@@ -240,7 +240,7 @@ export default function DashboardPage() {
 
             {/* Content */}
             <div className="absolute bottom-0 left-0 p-8 w-full z-10 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-              <div className="w-16 h-1 bg-lime-500 mb-6 w-0 group-hover:w-16 transition-all duration-500 delay-100"></div>
+              <div className="h-1 bg-lime-500 mb-6 w-0 group-hover:w-16 transition-all duration-500 delay-100"></div>
               <div className="flex items-end justify-between">
                 <div>
                   <h4 className="text-3xl font-black text-white uppercase tracking-tighter mb-2">
@@ -288,7 +288,7 @@ export default function DashboardPage() {
 
             {/* Content */}
             <div className="absolute bottom-0 left-0 p-8 w-full z-10 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-              <div className="w-16 h-1 bg-lime-500 mb-6 w-0 group-hover:w-16 transition-all duration-500 delay-100"></div>
+              <div className="h-1 bg-lime-500 mb-6 w-0 group-hover:w-16 transition-all duration-500 delay-100"></div>
               <div className="flex items-end justify-between">
                 <div>
                   <h4 className="text-3xl font-black text-white uppercase tracking-tighter mb-2">
