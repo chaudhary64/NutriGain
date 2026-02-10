@@ -216,7 +216,7 @@ export default function DashboardPage() {
           </h2>
           <h3 className="text-4xl md:text-6xl font-black text-white italic tracking-tighter">
             CHOOSE YOUR{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-lime-600 pr-2">
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-lime-400 to-lime-600 pr-2">
               GRIND
             </span>
           </h3>
@@ -235,7 +235,7 @@ export default function DashboardPage() {
                 alt="Meal Planning"
                 className="w-full h-full object-cover opacity-40 group-hover:opacity-60 group-hover:scale-110 transition-all duration-700"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/60 to-transparent"></div>
+              <div className="absolute inset-0 bg-linear-to-t from-neutral-950 via-neutral-950/60 to-transparent"></div>
             </div>
 
             {/* Content */}
@@ -283,7 +283,7 @@ export default function DashboardPage() {
                 alt="Gym Workout"
                 className="w-full h-full object-cover opacity-40 group-hover:opacity-60 group-hover:scale-110 transition-all duration-700"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/60 to-transparent"></div>
+              <div className="absolute inset-0 bg-linear-to-t from-neutral-950 via-neutral-950/60 to-transparent"></div>
             </div>
 
             {/* Content */}

@@ -224,30 +224,32 @@ export default function MealTrackingPage() {
     const isOverLimit = value > max;
 
     return (
-      <div className="mb-5 last:mb-0 group">
+      <div className="mb-6 last:mb-0 group">
         <div className="flex justify-between items-center mb-2">
           <div className="flex items-center gap-3">
-            <span className="flex items-center justify-center w-8 h-8 bg-white rounded-lg shadow-sm border border-gray-100 text-lg transition-transform group-hover:scale-110 duration-300">
+            <span className="flex items-center justify-center w-8 h-8 bg-neutral-800 rounded-lg text-lg border border-neutral-700">
               {icon}
             </span>
-            <span className="text-sm font-semibold text-gray-700">{label}</span>
+            <span className="text-sm font-bold text-neutral-300 uppercase tracking-wide">
+              {label}
+            </span>
           </div>
           <div className="text-right flex items-baseline gap-1">
             <span
               className={`text-sm font-bold ${
-                isOverLimit ? "text-red-500" : "text-gray-900"
+                isOverLimit ? "text-red-500" : "text-white"
               }`}
             >
               {value}
             </span>
-            <span className="text-xs text-gray-400 font-medium">/</span>
-            <span className="text-xs text-gray-500">{max}</span>
+            <span className="text-xs text-neutral-600 font-medium">/</span>
+            <span className="text-xs text-neutral-500">{max}</span>
             {hasPreview &&
               value !==
                 previewMacros[
                   label.toLowerCase().split(" ")[0].replace("(g)", "")
                 ] && (
-                <span className="ml-1 text-green-600 font-bold animate-pulse text-xs">
+                <span className="ml-1 text-lime-500 font-bold animate-pulse text-xs">
                   +
                   {label.includes("Calories")
                     ? previewMacros.calories - value
@@ -261,19 +263,17 @@ export default function MealTrackingPage() {
           </div>
         </div>
         <div
-          className={`w-full ${
-            bgClass || "bg-gray-100"
-          } rounded-full h-2.5 relative overflow-hidden ring-1 ring-inset ring-black/5`}
+          className={`w-full bg-neutral-950 rounded-full h-2 relative overflow-hidden border border-neutral-800`}
         >
           <div
-            className={`h-full rounded-full transition-all duration-500 ease-out shadow-sm ${color} ${
+            className={`h-full rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(0,0,0,0.5)] ${color} ${
               isOverLimit ? "animate-pulse" : ""
             }`}
             style={{ width: `${percentage}%` }}
           ></div>
           {hasPreview && (
             <div
-              className={`h-full rounded-full absolute top-0 left-0 transition-all duration-300 opacity-30 bg-green-500`}
+              className={`h-full rounded-full absolute top-0 left-0 transition-all duration-300 opacity-30 bg-lime-500`}
               style={{
                 width: `${Math.min(
                   ((label.includes("Calories")
@@ -297,8 +297,32 @@ export default function MealTrackingPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-neutral-950 text-lime-500">
+        <div className="flex flex-col items-center gap-4">
+          <svg
+            className="animate-spin h-10 w-10"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            ></circle>
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          <div className="text-xl font-bold tracking-widest uppercase">
+            Loading...
+          </div>
+        </div>
       </div>
     );
   }
@@ -344,89 +368,103 @@ export default function MealTrackingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-100">
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100 shadow-sm">
+    <div className="min-h-screen bg-neutral-950 text-white font-sans selection:bg-lime-500 selection:text-black">
+      {/* Navigation */}
+      <nav className="sticky top-0 z-50 bg-neutral-950/80 backdrop-blur-md border-b border-neutral-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center h-20">
+            {/* Logo */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xl shadow-lg shadow-indigo-200 text-white">
-                🍽️
+              <div className="w-10 h-10 bg-lime-500 rounded-lg flex items-center justify-center shadow-[0_0_10px_rgba(132,204,22,0.3)]">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2.5}
+                  stroke="black"
+                  className="w-6 h-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"
+                  />
+                </svg>
               </div>
-              <h1 className="text-xl font-bold bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent hidden sm:block">
-                NutriGain
+              <h1 className="text-2xl font-black tracking-tighter uppercase hidden sm:block">
+                Nutri<span className="text-lime-500">Gain</span>
               </h1>
             </div>
 
             {/* Desktop Actions */}
-            <div className="hidden md:flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-6">
+              {/* Date Picker */}
               <div className="relative group">
                 <input
                   type="date"
                   value={currentDate}
                   onChange={(e) => setCurrentDate(e.target.value)}
-                  className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm font-medium text-gray-700 cursor-pointer hover:bg-white"
+                  className="pl-10 pr-4 py-2 bg-neutral-900 border border-neutral-800 rounded-xl focus:outline-none focus:border-lime-500 text-sm font-bold text-white cursor-pointer hover:bg-neutral-800 transition-colors"
                 />
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-lime-500">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="w-4 h-4"
                     fill="none"
                     viewBox="0 0 24 24"
+                    strokeWidth={2}
                     stroke="currentColor"
+                    className="w-4 h-4"
                   >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
                     />
                   </svg>
                 </div>
               </div>
 
-              <div className="h-8 w-px bg-gray-200 mx-2"></div>
+              <div className="h-6 w-px bg-neutral-800"></div>
 
-              <div className="flex gap-1 bg-gray-100/50 p-1 rounded-xl border border-gray-200/50">
+              <div className="flex gap-1 bg-neutral-900 p-1 rounded-xl border border-neutral-800">
                 <button
                   onClick={() => router.push("/dashboard/meal")}
-                  className="px-4 py-2 bg-white text-indigo-600 rounded-lg shadow-sm font-semibold text-sm flex items-center gap-2 transition-all"
+                  className="px-4 py-2 bg-lime-500 text-black rounded-lg shadow-lg shadow-lime-500/20 font-bold text-sm flex items-center gap-2 transition-all uppercase tracking-wide"
                 >
-                  <span className="text-lg">🍽️</span> Meal
+                  Meal
                 </button>
                 <button
                   onClick={() => router.push("/dashboard/gym")}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-white/50 rounded-lg font-medium text-sm flex items-center gap-2 transition-all cursor-pointer"
+                  className="px-4 py-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg font-bold text-sm flex items-center gap-2 transition-all cursor-pointer uppercase tracking-wide"
                 >
-                  <span className="text-lg grayscale opacity-70">💪</span> Gym
+                  Gym
                 </button>
               </div>
 
-              <div className="flex items-center gap-3 pl-2">
+              <div className="flex items-center gap-4 pl-2">
                 <div className="text-right hidden lg:block">
-                  <p className="text-xs text-gray-400 font-medium">
-                    Welcome back
+                  <p className="text-xs text-neutral-400 uppercase tracking-widest font-bold">
+                    Logged in as
                   </p>
-                  <p className="text-sm font-bold text-gray-800 leading-tight">
-                    {user.name}
-                  </p>
+                  <p className="text-sm font-bold text-white">{user.name}</p>
                 </div>
                 <button
                   onClick={logout}
-                  className="w-10 h-10 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 flex items-center justify-center transition-all cursor-pointer"
+                  className="text-neutral-500 hover:text-red-500 transition-colors"
                   title="Logout"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="w-5 h-5"
                     fill="none"
                     viewBox="0 0 24 24"
+                    strokeWidth={2}
                     stroke="currentColor"
+                    className="w-6 h-6"
                   >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                      d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"
                     />
                   </svg>
                 </button>
@@ -435,16 +473,9 @@ export default function MealTrackingPage() {
 
             {/* Mobile Toggle */}
             <div className="flex md:hidden items-center gap-3">
-              {/* Mobile Date Picker (Simplified) */}
-              <input
-                type="date"
-                value={currentDate}
-                onChange={(e) => setCurrentDate(e.target.value)}
-                className="w-32 py-1.5 px-2 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-gray-700 focus:outline-none"
-              />
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+                className="p-2 text-white hover:bg-neutral-800 rounded-lg transition"
               >
                 <svg
                   className="w-6 h-6"
@@ -475,61 +506,58 @@ export default function MealTrackingPage() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-100 bg-white/95 backdrop-blur-xl absolute w-full left-0 shadow-xl">
-            <div className="p-4 space-y-3">
+          <div className="md:hidden border-b border-neutral-800 bg-neutral-900">
+            <div className="p-4 space-y-4">
               <div className="flex items-center gap-3 px-2 mb-4">
-                <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
                 <div>
-                  <p className="font-bold text-gray-900">{user.name}</p>
-                  <p className="text-xs text-gray-500">View Profile</p>
+                  <p className="text-xs text-neutral-400 uppercase tracking-widest font-bold">
+                    User
+                  </p>
+                  <p className="text-lg font-bold text-white">{user.name}</p>
                 </div>
               </div>
 
-              <div className="space-y-1">
+              <div className="pb-4">
+                <p className="text-xs text-neutral-400 uppercase tracking-widest font-bold mb-2">
+                  Select Date
+                </p>
+                <input
+                  type="date"
+                  value={currentDate}
+                  onChange={(e) => setCurrentDate(e.target.value)}
+                  className="w-full py-3 px-4 bg-neutral-950 border border-neutral-800 rounded-xl text-white font-medium focus:outline-none focus:border-lime-500"
+                />
+              </div>
+
+              <div className="space-y-2">
                 <button
                   onClick={() => {
                     router.push("/dashboard/meal");
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 bg-indigo-50 text-indigo-700 rounded-xl font-semibold transition"
+                  className="w-full flex items-center justify-between px-4 py-3 bg-neutral-800 text-white rounded-xl font-bold uppercase tracking-wider"
                 >
-                  <span>🍽️</span> Meal Tracking
+                  Meal Tracker <span className="text-lime-500">●</span>
                 </button>
                 <button
                   onClick={() => {
                     router.push("/dashboard/gym");
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium transition cursor-pointer"
+                  className="w-full flex items-center justify-between px-4 py-3 text-neutral-400 hover:bg-neutral-800 rounded-xl font-bold uppercase tracking-wider"
                 >
-                  <span className="grayscale opacity-70">💪</span> Gym Tracking
+                  Gym Tracker
                 </button>
               </div>
 
-              <div className="pt-3 mt-3 border-t border-gray-100">
+              <div className="pt-3 mt-3 border-t border-neutral-800">
                 <button
                   onClick={() => {
                     logout();
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium transition cursor-pointer"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-900/20 rounded-xl font-bold uppercase tracking-wider"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                    />
-                  </svg>
                   Logout
                 </button>
               </div>
@@ -538,14 +566,14 @@ export default function MealTrackingPage() {
         )}
       </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Macro Meters */}
           <div className="lg:col-span-1 order-2 lg:order-1">
-            <div className="bg-white/80 backdrop-blur-xl p-5 sm:p-6 rounded-2xl shadow-xl shadow-indigo-100/50 lg:sticky lg:top-6 border border-white/50 ring-1 ring-white/50">
-              <div className="flex items-center justify-between mb-6">
+            <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl shadow-xl lg:sticky lg:top-24">
+              <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
-                  <div className="bg-indigo-100 p-2 rounded-xl text-indigo-600">
+                  <div className="bg-lime-500/10 p-2 rounded-lg text-lime-500 border border-lime-500/20">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="w-6 h-6"
@@ -561,23 +589,22 @@ export default function MealTrackingPage() {
                     </svg>
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold text-gray-900">
-                      Today's Macros
+                    <h2 className="text-xl font-black text-white uppercase tracking-tighter">
+                      Macros
                     </h2>
-                    <p className="text-xs text-gray-400 font-medium">
-                      Daily Nutritional Goals
+                    <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest">
+                      Daily Targets
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-4">
                 <MacroMeter
                   label="Calories"
                   value={totalMacros.calories}
                   max={goals.calories}
-                  color="bg-linear-to-r from-blue-500 to-blue-600"
-                  bgClass="bg-blue-50"
+                  color="bg-blue-500"
                   icon="🔥"
                 />
 
@@ -585,8 +612,7 @@ export default function MealTrackingPage() {
                   label="Protein"
                   value={totalMacros.protein}
                   max={goals.protein}
-                  color="bg-linear-to-r from-red-500 to-pink-600"
-                  bgClass="bg-red-50"
+                  color="bg-lime-500"
                   icon="🍖"
                 />
 
@@ -594,25 +620,23 @@ export default function MealTrackingPage() {
                   label="Carbs"
                   value={totalMacros.carbs}
                   max={goals.carbs}
-                  color="bg-linear-to-r from-yellow-500 to-orange-600"
-                  bgClass="bg-orange-50"
-                  icon="🍞"
+                  color="bg-amber-500"
+                  icon="🥔"
                 />
 
                 <MacroMeter
                   label="Fats"
                   value={totalMacros.fats}
                   max={goals.fats}
-                  color="bg-linear-to-r from-green-500 to-emerald-600"
-                  bgClass="bg-green-50"
+                  color="bg-purple-500"
                   icon="🥑"
                 />
               </div>
 
               {/* Summary with 2x2 Grid */}
-              <div className="mt-6 pt-6 border-t border-gray-100">
-                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 pl-1">
-                  Remaining Intake
+              <div className="mt-8 pt-6 border-t border-neutral-800">
+                <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-4">
+                  Remaining
                 </h3>
                 <div className="grid grid-cols-2 gap-3">
                   {[
@@ -620,29 +644,29 @@ export default function MealTrackingPage() {
                       label: "Calories",
                       val: goals.calories - totalMacros.calories,
                       unit: "kcal",
-                      color: "text-blue-600",
-                      bg: "bg-blue-50",
+                      color: "text-blue-500",
+                      borderColor: "group-hover:border-blue-500/50",
                     },
                     {
                       label: "Protein",
                       val: (goals.protein - totalMacros.protein).toFixed(1),
                       unit: "g",
-                      color: "text-red-600",
-                      bg: "bg-red-50",
+                      color: "text-lime-500",
+                      borderColor: "group-hover:border-lime-500/50",
                     },
                     {
                       label: "Carbs",
                       val: (goals.carbs - totalMacros.carbs).toFixed(1),
                       unit: "g",
-                      color: "text-orange-600",
-                      bg: "bg-orange-50",
+                      color: "text-amber-500",
+                      borderColor: "group-hover:border-amber-500/50",
                     },
                     {
                       label: "Fats",
                       val: (goals.fats - totalMacros.fats).toFixed(1),
                       unit: "g",
-                      color: "text-green-600",
-                      bg: "bg-green-50",
+                      color: "text-purple-500",
+                      borderColor: "group-hover:border-purple-500/50",
                     },
                   ].map((item, idx) => {
                     const valNum = parseFloat(item.val);
@@ -650,22 +674,22 @@ export default function MealTrackingPage() {
                     return (
                       <div
                         key={idx}
-                        className={`p-3 rounded-xl border border-transparent hover:border-gray-200 transition-colors ${item.bg} bg-opacity-40`}
+                        className={`p-4 rounded-xl border border-neutral-800 bg-neutral-950/50 transition-colors group ${item.borderColor}`}
                       >
-                        <p className="text-xs font-semibold text-gray-500 mb-1">
+                        <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-1">
                           {item.label}
                         </p>
                         <p
-                          className={`text-lg font-bold ${
-                            isExceeded ? "text-red-500" : item.color
+                          className={`text-xl font-black ${
+                            isExceeded ? "text-red-500" : "text-white"
                           }`}
                         >
                           {isExceeded
                             ? `+${Math.abs(valNum).toFixed(
                                 item.label === "Calories" ? 0 : 1,
                               )}`
-                            : `-${valNum}`}
-                          <span className="text-xs font-medium ml-0.5 opacity-70 text-gray-600">
+                            : valNum}
+                          <span className="text-xs font-bold ml-1 opacity-50 text-neutral-400">
                             {item.unit}
                           </span>
                         </p>
@@ -688,59 +712,38 @@ export default function MealTrackingPage() {
                 const isChickenDay = dayType === "Chicken";
 
                 return (
-                  <div
-                    className={`p-6 rounded-2xl shadow-xl relative overflow-hidden group transition-all duration-500 hover:shadow-2xl border border-white/20 ${
-                      isChickenDay
-                        ? "bg-linear-to-br from-orange-500 via-red-500 to-rose-600 shadow-orange-500/20"
-                        : "bg-linear-to-br from-emerald-500 via-green-500 to-teal-600 shadow-emerald-500/20"
-                    }`}
-                  >
-                    {/* Decorative Elements */}
-                    <div className="absolute top-0 right-0 p-8 opacity-10 transform translate-x-4 -translate-y-4">
-                      <svg
-                        width="100"
-                        height="100"
-                        viewBox="0 0 100 100"
-                        fill="currentColor"
-                        className="text-white"
-                      >
-                        <circle cx="50" cy="50" r="50" />
-                      </svg>
-                    </div>
-                    <div className="absolute bottom-0 left-0 p-8 opacity-10 transform -translate-x-4 translate-y-4">
-                      <svg
-                        width="60"
-                        height="60"
-                        viewBox="0 0 100 100"
-                        fill="currentColor"
-                        className="text-white"
-                      >
-                        <rect width="100" height="100" rx="20" />
-                      </svg>
-                    </div>
+                  <div className="relative p-8 rounded-2xl overflow-hidden group border border-neutral-800 transition-all duration-300 hover:border-lime-500/50">
+                    {/* Background */}
+                    <div
+                      className={`absolute inset-0 bg-neutral-900 ${isChickenDay ? "bg-linear-to-br from-orange-950/40 to-neutral-900" : "bg-linear-to-br from-lime-950/40 to-neutral-900"} z-0`}
+                    ></div>
+                    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 z-0"></div>
 
-                    <div className="relative z-10 flex items-center justify-between text-white">
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm ring-1 ring-white/30">
-                           Protein Plan 
+                    <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between text-white gap-6">
+                      <div className="text-center sm:text-left">
+                        <div className="flex items-center justify-center sm:justify-start gap-3 mb-3">
+                          <span className="bg-lime-500 text-black px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest">
+                            Daily Plan
                           </span>
-                          <span className="text-white/90 text-sm font-semibold">
+                          <span className="text-neutral-400 text-sm font-bold uppercase tracking-wider">
                             {new Date(y, m - 1, d).toLocaleDateString("en-US", {
                               weekday: "long",
                             })}
                           </span>
                         </div>
-                        <h2 className="text-3xl font-black tracking-tight mb-1 text-white shadow-sm">
-                          {isChickenDay ? "Chicken Day" : "Paneer Day"}
+                        <h2 className="text-4xl sm:text-5xl font-black tracking-tighter text-white mb-2 uppercase italic">
+                          {isChickenDay ? "Chicken" : "Paneer"}{" "}
+                          <span className="text-transparent bg-clip-text pr-2 bg-linear-to-r from-lime-500 to-lime-200">
+                            Day
+                          </span>
                         </h2>
-                        <p className="text-blue-50/90 font-medium text-sm">
+                        <p className="text-neutral-400 font-medium text-sm max-w-md">
                           {isChickenDay
-                            ? "Fuel your muscles with lean protein!"
-                            : "Rich protein & healthy fats day!"}
+                            ? "Focus on lean protein consumption today to maximize muscle recovery."
+                            : "Healthy fats and vegetarian protein sources are prioritized today."}
                         </p>
                       </div>
-                      <div className="text-6xl drop-shadow-xl filter backdrop-brightness-110 transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-300">
+                      <div className="text-7xl sm:text-8xl filter drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">
                         {isChickenDay ? "🍗" : "🧀"}
                       </div>
                     </div>
@@ -749,51 +752,38 @@ export default function MealTrackingPage() {
               })()}
 
             {/* Add Meal Form */}
-            <div className="bg-white/80 backdrop-blur-xl p-5 sm:p-6 rounded-2xl shadow-xl shadow-indigo-100/50 border border-white/50 ring-1 ring-white/50 relative z-20">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="bg-linear-to-br from-indigo-500 to-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-indigo-200">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-                </div>
+            <div className="bg-neutral-900 p-6 sm:p-8 rounded-2xl border border-neutral-800 relative z-20">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="h-10 w-1 bg-lime-500 rounded-full"></div>
                 <div>
-                  <h2 className="text-lg font-bold text-gray-900">Add Meal</h2>
-                  <p className="text-xs text-gray-500 font-medium">
-                    Log your daily nutrition
+                  <h2 className="text-2xl font-black text-white uppercase tracking-tighter">
+                    Add Meal
+                  </h2>
+                  <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest">
+                    Log your intake
                   </p>
                 </div>
               </div>
 
               <form
                 onSubmit={handleAddMeal}
-                className="grid grid-cols-1 md:grid-cols-12 gap-4"
+                className="grid grid-cols-1 md:grid-cols-12 gap-6"
               >
                 <div className="md:col-span-3">
-                  <label className="block text-gray-700 font-bold mb-2 text-xs uppercase tracking-wider">
-                    Meal Type
+                  <label className="block text-neutral-500 font-bold mb-2 text-[10px] uppercase tracking-widest">
+                    Type
                   </label>
                   <div className="relative">
                     <select
                       value={selectedMealType}
                       onChange={(e) => setSelectedMealType(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-gray-700 font-medium cursor-pointer appearance-none hover:bg-white"
+                      className="w-full h-14 px-4 bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-lime-500 focus:ring-1 focus:ring-lime-500 transition-all text-white font-bold cursor-pointer appearance-none uppercase text-sm tracking-wider"
                     >
-                      <option value="breakfast">🌅 Breakfast</option>
-                      <option value="lunch">☀️ Lunch</option>
-                      <option value="dinner">🌙 Dinner</option>
+                      <option value="breakfast">Breakfast</option>
+                      <option value="lunch">Lunch</option>
+                      <option value="dinner">Dinner</option>
                     </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500">
+                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-lime-500">
                       <svg
                         className="w-4 h-4"
                         fill="none"
@@ -812,14 +802,14 @@ export default function MealTrackingPage() {
                 </div>
 
                 <div className="meal-dropdown md:col-span-7 relative z-30">
-                  <label className="block text-gray-700 font-bold mb-2 text-xs uppercase tracking-wider">
-                    Select Meal
+                  <label className="block text-neutral-500 font-bold mb-2 text-[10px] uppercase tracking-widest">
+                    Item
                   </label>
                   <div className="flex gap-2">
                     <div className="flex-1 min-w-0 relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                         <svg
-                          className="h-5 w-5 text-gray-400"
+                          className="h-5 w-5 text-neutral-500"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -869,12 +859,12 @@ export default function MealTrackingPage() {
                             }
                           }
                         }}
-                        className="w-full pl-10 pr-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-gray-700 placeholder-gray-400 font-medium hover:bg-white"
-                        placeholder="Search for food..."
+                        className="w-full h-14 pl-11 pr-4 bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-lime-500 focus:ring-1 focus:ring-lime-500 transition-all text-white placeholder-neutral-600 font-medium text-sm"
+                        placeholder="Search database..."
                         required={!selectedMeal}
                       />
                       {showMealDropdown && (
-                        <div className="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-xl shadow-indigo-100/50 max-h-60 overflow-auto animate-in fade-in zoom-in-95 duration-200">
+                        <div className="absolute z-50 w-full mt-2 bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl max-h-60 overflow-auto animate-in fade-in zoom-in-95 duration-200 custom-scrollbar">
                           {meals
                             .filter((meal) =>
                               meal.name
@@ -889,12 +879,12 @@ export default function MealTrackingPage() {
                                   setMealSearch("");
                                   setShowMealDropdown(false);
                                 }}
-                                className="px-4 py-3 hover:bg-indigo-50 cursor-pointer text-gray-700 text-sm flex justify-between items-center group transition-colors border-b border-gray-50 last:border-0"
+                                className="px-4 py-3 hover:bg-neutral-800 cursor-pointer text-gray-300 text-sm flex justify-between items-center group transition-colors border-b border-neutral-800 last:border-0"
                               >
-                                <span className="font-medium group-hover:text-indigo-700">
+                                <span className="font-bold text-white group-hover:text-lime-500 transition-colors">
                                   {toTitleCase(meal.name)}
                                 </span>
-                                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-md group-hover:bg-white">
+                                <span className="text-[10px] text-neutral-500 font-bold uppercase bg-neutral-950 px-2 py-1 rounded">
                                   {meal.servingSize}
                                 </span>
                               </div>
@@ -904,8 +894,8 @@ export default function MealTrackingPage() {
                               .toLowerCase()
                               .includes(mealSearch.toLowerCase()),
                           ).length === 0 && (
-                            <div className="px-4 py-8 text-center text-gray-500 text-sm flex flex-col items-center gap-2">
-                              <span className="text-2xl opacity-50">🔍</span>
+                            <div className="px-4 py-8 text-center text-neutral-500 text-sm flex flex-col items-center gap-2">
+                              <span className="text-2xl opacity-20">🔍</span>
                               No matching meals found
                             </div>
                           )}
@@ -916,29 +906,16 @@ export default function MealTrackingPage() {
                       type="button"
                       onClick={() => setShowMealStats(!showMealStats)}
                       disabled={!selectedMeal}
-                      className="shrink-0 w-12 bg-white border border-gray-200 text-gray-500 rounded-xl hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center shadow-sm"
-                      title="Show meal stats"
+                      className="shrink-0 w-14 bg-neutral-800 border border-neutral-700 text-neutral-400 rounded-xl hover:bg-neutral-700 hover:text-white transition-all disabled:opacity-20 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center"
+                      title="Show info"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
+                      <span className="text-lg">ℹ️</span>
                     </button>
                   </div>
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-gray-700 font-bold mb-2 text-xs uppercase tracking-wider">
+                  <label className="block text-neutral-500 font-bold mb-2 text-[10px] uppercase tracking-widest">
                     Qty
                   </label>
                   <input
@@ -947,15 +924,15 @@ export default function MealTrackingPage() {
                     min="0.5"
                     value={quantity}
                     onChange={(e) => setQuantity(e.target.value)}
-                    className="w-full px-3 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-gray-700 font-medium text-center hover:bg-white"
+                    className="w-full h-14 px-3 bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-lime-500 focus:ring-1 focus:ring-lime-500 transition-all text-white font-bold text-center text-sm"
                     required
                   />
                 </div>
 
-                <div className="md:col-span-12 mt-2">
+                <div className="md:col-span-12">
                   <button
                     type="submit"
-                    className="w-full bg-linear-to-r from-indigo-600 to-blue-600 text-white py-3.5 rounded-xl hover:from-indigo-700 hover:to-blue-700 transition-all shadow-lg shadow-indigo-200 font-bold tracking-wide transform hover:-translate-y-0.5 active:translate-y-0 active:shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full bg-lime-500 text-black py-4 rounded-xl hover:bg-lime-400 transition-all shadow-[0_0_20px_rgba(132,204,22,0.2)] hover:shadow-[0_0_30px_rgba(132,204,22,0.4)] font-black uppercase tracking-wider transform active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -963,7 +940,7 @@ export default function MealTrackingPage() {
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
-                      strokeWidth={2}
+                      strokeWidth={3}
                     >
                       <path
                         strokeLinecap="round"
@@ -971,22 +948,21 @@ export default function MealTrackingPage() {
                         d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                       />
                     </svg>
-                    Add to Daily Log
+                    ADD ENTRY
                   </button>
                 </div>
               </form>
 
               {/* Meal Stats Display */}
               {showMealStats && selectedMeal && (
-                <div className="mt-6 p-4 bg-indigo-50/50 rounded-xl border border-indigo-100 animation-in slide-in-from-top-2 duration-300">
+                <div className="mt-6 p-4 bg-neutral-950 rounded-xl border border-neutral-800 animation-in slide-in-from-top-2 duration-300">
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="font-bold text-gray-800 flex items-center gap-2 text-sm">
-                      <span className="text-lg">🍎</span>
-                      Nutritional Information
+                    <h3 className="font-bold text-white flex items-center gap-2 text-xs uppercase tracking-wider">
+                      Nutritional Data (Per Unit)
                     </h3>
                     <button
                       onClick={() => setShowMealStats(false)}
-                      className="text-gray-400 hover:text-gray-600 w-6 h-6 flex items-center justify-center rounded-full hover:bg-black/5 transition cursor-pointer"
+                      className="text-neutral-500 hover:text-white"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -1008,50 +984,38 @@ export default function MealTrackingPage() {
                     const meal = meals.find((m) => m._id === selectedMeal);
                     if (!meal) return null;
                     return (
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100/50">
-                          <span className="text-xs text-gray-500 uppercase tracking-wider font-bold block mb-1">
-                            Calories
+                      <div className="grid grid-cols-4 gap-3">
+                        <div className="bg-neutral-900 p-3 rounded-lg border border-neutral-800 text-center">
+                          <span className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold block mb-1">
+                            Cal
                           </span>
-                          <p className="font-bold text-gray-800 text-lg">
+                          <span className="font-bold text-white text-lg">
                             {meal.macros.calories}
-                            <span className="text-xs font-normal text-gray-400 ml-1">
-                              kcal
-                            </span>
-                          </p>
-                        </div>
-                        <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100/50">
-                          <span className="text-xs text-gray-500 uppercase tracking-wider font-bold block mb-1">
-                            Protein
                           </span>
-                          <p className="font-bold text-gray-800 text-lg">
+                        </div>
+                        <div className="bg-neutral-900 p-3 rounded-lg border border-neutral-800 text-center">
+                          <span className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold block mb-1">
+                            Pro
+                          </span>
+                          <span className="font-bold text-lime-500 text-lg">
                             {meal.macros.protein}
-                            <span className="text-xs font-normal text-gray-400 ml-1">
-                              g
-                            </span>
-                          </p>
-                        </div>
-                        <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100/50">
-                          <span className="text-xs text-gray-500 uppercase tracking-wider font-bold block mb-1">
-                            Carbs
                           </span>
-                          <p className="font-bold text-gray-800 text-lg">
+                        </div>
+                        <div className="bg-neutral-900 p-3 rounded-lg border border-neutral-800 text-center">
+                          <span className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold block mb-1">
+                            Carb
+                          </span>
+                          <span className="font-bold text-amber-500 text-lg">
                             {meal.macros.carbs}
-                            <span className="text-xs font-normal text-gray-400 ml-1">
-                              g
-                            </span>
-                          </p>
-                        </div>
-                        <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100/50">
-                          <span className="text-xs text-gray-500 uppercase tracking-wider font-bold block mb-1">
-                            Fats
                           </span>
-                          <p className="font-bold text-gray-800 text-lg">
+                        </div>
+                        <div className="bg-neutral-900 p-3 rounded-lg border border-neutral-800 text-center">
+                          <span className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold block mb-1">
+                            Fat
+                          </span>
+                          <span className="font-bold text-purple-500 text-lg">
                             {meal.macros.fats}
-                            <span className="text-xs font-normal text-gray-400 ml-1">
-                              g
-                            </span>
-                          </p>
+                          </span>
                         </div>
                       </div>
                     );
@@ -1104,29 +1068,18 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
     }
   };
 
-  const getGradient = (title) => {
-    switch (title.toLowerCase()) {
-      case "breakfast":
-        return "from-orange-50/50 to-amber-50/50";
-      case "lunch":
-        return "from-blue-50/50 to-cyan-50/50";
-      case "dinner":
-        return "from-indigo-50/50 to-violet-50/50";
-      default:
-        return "from-gray-50/50 to-slate-50/50";
-    }
-  };
-
   return (
-    <div className="bg-white/80 backdrop-blur-xl p-5 sm:p-6 rounded-2xl shadow-xl shadow-indigo-100/50 border border-white/50 ring-1 ring-white/50 hover:shadow-indigo-200/50 transition-shadow duration-300">
-      <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
-        <div className="flex items-center gap-3">
-          <span className="flex items-center justify-center w-10 h-10 bg-white rounded-xl shadow-sm border border-gray-100 text-xl">
+    <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 hover:border-neutral-700 transition-colors duration-300">
+      <div className="flex items-center justify-between mb-6 pb-4 border-b border-neutral-800">
+        <div className="flex items-center gap-4">
+          <span className="flex items-center justify-center w-12 h-12 bg-neutral-800 rounded-xl text-2xl border border-neutral-700 shadow-inner">
             {getMealIcon(title)}
           </span>
           <div>
-            <h2 className="text-lg font-bold text-gray-900">{title}</h2>
-            <p className="text-xs text-gray-400 font-medium tracking-wide">
+            <h2 className="text-xl font-black text-white uppercase tracking-tighter">
+              {title}
+            </h2>
+            <p className="text-xs text-neutral-500 font-bold uppercase tracking-widest">
               {meals.length} {meals.length === 1 ? "Item" : "Items"} Logged
             </p>
           </div>
@@ -1134,12 +1087,9 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
       </div>
 
       {meals.length === 0 ? (
-        <div className="text-center py-10 rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50/30 group hover:border-gray-300 transition-colors">
-          <span className="text-3xl block mb-2 opacity-20 grayscale group-hover:grayscale-0 transition-all duration-300 transform group-hover:scale-110">
-            {getMealIcon(title)}
-          </span>
-          <p className="text-gray-400 font-medium text-sm">
-            No meals logged for {title.toLowerCase()}
+        <div className="text-center py-10 rounded-xl bg-neutral-950/50 border border-dashed border-neutral-800">
+          <p className="text-neutral-600 font-bold text-sm uppercase tracking-wider">
+            No meals logged
           </p>
         </div>
       ) : (
@@ -1148,40 +1098,41 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
             return (
               <div
                 key={entry._id}
-                className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-linear-to-r ${getGradient(
-                  title,
-                )} rounded-xl border border-gray-100/50 hover:border-indigo-200 hover:shadow-md transition-all duration-300 gap-4 group`}
+                className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-neutral-950 rounded-xl border border-neutral-800 hover:border-lime-500/30 transition-all duration-300 gap-4 group"
               >
                 <div className="flex-1 w-full sm:w-auto">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-bold text-gray-800 text-sm sm:text-base">
-                      {toTitleCase(entry.mealName)}
-                    </h3>
-                    <span className="px-2 py-0.5 bg-white rounded-md text-xs text-gray-500 font-medium shadow-sm border border-gray-100">
-                      {entry.meal?.servingSize || "1 serving"}
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-600">
-                    <span className="font-bold text-gray-900 bg-white px-2 py-0.5 rounded-full shadow-sm">
-                      🔥 {entry.meal?.macros?.calories || 0} kcal
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                      {entry.meal?.macros?.protein || 0}g P
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>
-                      {entry.meal?.macros?.carbs || 0}g C
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                      {entry.meal?.macros?.fats || 0}g F
-                    </span>
+                  <div className="flex justify-between sm:justify-start items-start w-full">
+                    <div>
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="font-bold text-white text-lg">
+                          {toTitleCase(entry.mealName)}
+                        </h3>
+                        <span className="px-2 py-0.5 bg-neutral-900 rounded-md text-[10px] text-neutral-400 font-bold border border-neutral-800 uppercase tracking-wider">
+                          {entry.meal?.servingSize || "1 unit"}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-3 text-xs">
+                        <span className="font-bold text-neutral-300">
+                          {entry.meal?.macros?.calories || 0}{" "}
+                          <span className="text-neutral-600">kcal</span>
+                        </span>
+                        <span className="w-px h-3 bg-neutral-800 my-auto"></span>
+                        <span className="font-bold text-lime-500">
+                          {entry.meal?.macros?.protein || 0}g P
+                        </span>
+                        <span className="font-bold text-amber-500">
+                          {entry.meal?.macros?.carbs || 0}g C
+                        </span>
+                        <span className="font-bold text-purple-500">
+                          {entry.meal?.macros?.fats || 0}g F
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-3 sm:pt-0 border-gray-200/50 mt-2 sm:mt-0">
-                  <div className="flex items-center gap-1 bg-white rounded-lg border border-gray-200 p-1 shadow-sm">
+                <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-3 sm:pt-0 border-neutral-800 mt-2 sm:mt-0">
+                  <div className="flex items-center gap-1 bg-neutral-900 rounded-lg border border-neutral-800 p-1">
                     <button
                       onClick={() =>
                         onUpdateQuantity(
@@ -1189,7 +1140,7 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
                           Math.max(0.5, parseFloat(entry.quantity) - 0.5),
                         )
                       }
-                      className="w-7 h-7 bg-gray-50 rounded-md hover:bg-gray-100 transition flex items-center justify-center font-bold text-gray-600 cursor-pointer hover:text-indigo-600"
+                      className="w-8 h-8 rounded hover:bg-neutral-800 transition flex items-center justify-center font-bold text-neutral-400 cursor-pointer hover:text-white"
                     >
                       -
                     </button>
@@ -1201,7 +1152,7 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
                       onChange={(e) =>
                         onUpdateQuantity(entry._id, parseFloat(e.target.value))
                       }
-                      className="w-10 text-center text-sm font-bold text-gray-800 focus:outline-none"
+                      className="w-10 text-center text-sm font-bold text-white bg-transparent focus:outline-none"
                     />
                     <button
                       onClick={() =>
@@ -1210,7 +1161,7 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
                           parseFloat(entry.quantity) + 0.5,
                         )
                       }
-                      className="w-7 h-7 bg-gray-50 rounded-md hover:bg-gray-100 transition flex items-center justify-center font-bold text-gray-600 cursor-pointer hover:text-indigo-600"
+                      className="w-8 h-8 rounded hover:bg-neutral-800 transition flex items-center justify-center font-bold text-neutral-400 cursor-pointer hover:text-white"
                     >
                       +
                     </button>
@@ -1218,7 +1169,7 @@ function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
 
                   <button
                     onClick={() => onDelete(entry._id)}
-                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all cursor-pointer"
+                    className="p-2 text-neutral-600 hover:text-red-500 hover:bg-red-950/30 rounded-lg transition-all cursor-pointer"
                     title="Delete entry"
                   >
                     <svg
