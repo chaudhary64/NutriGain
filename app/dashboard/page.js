@@ -11,20 +11,44 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push("/login");
+      router.push("/login"); // Redirect to login if not authenticated
     }
   }, [user, authLoading, router]);
 
   useEffect(() => {
     if (user && user.isAdmin) {
-      router.push("/admin");
+      router.push("/admin"); // Redirect admin users
     }
   }, [user, router]);
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-neutral-950 text-lime-500">
+        <div className="flex flex-col items-center gap-4">
+          <svg
+            className="animate-spin h-10 w-10"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            ></circle>
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          <div className="text-xl font-bold tracking-widest uppercase">
+            Loading...
+          </div>
+        </div>
       </div>
     );
   }
@@ -34,162 +58,268 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-100">
-      <nav className="bg-white shadow-lg border-b border-gray-200">
+    <div className="min-h-screen bg-neutral-950 text-white font-sans selection:bg-lime-500 selection:text-black">
+      {/* Navigation */}
+      <nav className="fixed top-0 w-full z-50 bg-neutral-950/80 backdrop-blur-md border-b border-neutral-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-3 lg:py-0 lg:h-16">
-            <div className="flex items-center justify-between w-full lg:w-auto">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="text-2xl sm:text-3xl">🎯</div>
-                <h1 className="text-xl sm:text-2xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  NutriGain
-                </h1>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="lg:hidden text-gray-600 hover:text-gray-800 p-2"
-                  aria-label="Toggle menu"
+          <div className="flex justify-between items-center h-20">
+            {/* Logo */}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-lime-500 rounded-lg flex items-center justify-center shadow-[0_0_10px_rgba(132,204,22,0.3)]">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2.5}
+                  stroke="black"
+                  className="w-6 h-6"
                 >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    {mobileMenuOpen ? (
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    ) : (
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 6h16M4 12h16M4 18h16"
-                      />
-                    )}
-                  </svg>
-                </button>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"
+                  />
+                </svg>
               </div>
+              <h1 className="text-2xl font-black tracking-tighter uppercase">
+                Nutri<span className="text-lime-500">Gain</span>
+              </h1>
             </div>
 
-            {/* Desktop Menu */}
-            <div className="hidden lg:flex lg:flex-row items-center gap-3">
-              <button
-                onClick={() => router.push("/dashboard/meal")}
-                className="px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition font-medium text-sm flex items-center gap-1 cursor-pointer whitespace-nowrap"
-              >
-                🍽️ Meal
-              </button>
-
-              <button
-                onClick={() => router.push("/dashboard/gym")}
-                className="px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-lg transition font-medium text-sm flex items-center gap-1 cursor-pointer whitespace-nowrap"
-              >
-                💪 Gym
-              </button>
-
-              <span className="text-gray-700 font-medium text-sm whitespace-nowrap">
-                Welcome, {user.name}!
-              </span>
-
+            {/* Desktop Actions */}
+            <div className="hidden lg:flex items-center gap-8">
+              <div className="text-right">
+                <p className="text-xs text-neutral-400 uppercase tracking-widest font-bold">
+                  Logged in as
+                </p>
+                <p className="text-sm font-bold text-white">{user.name}</p>
+              </div>
+              <div className="h-8 w-px bg-neutral-800"></div>
               <button
                 onClick={logout}
-                className="bg-linear-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-lg hover:from-red-600 hover:to-red-700 transition shadow-md font-medium cursor-pointer text-sm whitespace-nowrap"
+                className="group flex items-center gap-2 text-neutral-400 hover:text-white transition-colors duration-200"
               >
-                Logout
+                <span className="text-sm font-bold uppercase tracking-wider group-hover:text-red-500 transition-colors">
+                  Logout
+                </span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-5 h-5 group-hover:text-red-500 transition-colors"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="flex items-center lg:hidden">
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="text-white p-2 hover:bg-neutral-800 rounded-lg transition"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-8 h-8"
+                >
+                  {mobileMenuOpen ? (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  ) : (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                    />
+                  )}
+                </svg>
               </button>
             </div>
           </div>
+        </div>
 
-          {/* Mobile Menu */}
-          {mobileMenuOpen && (
-            <div className="lg:hidden w-full bg-gray-50 rounded-lg p-3 mb-3 space-y-2">
+        {/* Mobile Menu Dropdown */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden bg-neutral-900 border-b border-neutral-800">
+            <div className="px-4 py-6 space-y-4">
+              <div className="pb-4 border-b border-neutral-800">
+                <p className="text-xs text-neutral-400 uppercase tracking-widest font-bold mb-1">
+                  User
+                </p>
+                <p className="text-lg font-bold text-white">{user.name}</p>
+              </div>
               <button
                 onClick={() => {
                   router.push("/dashboard/meal");
                   setMobileMenuOpen(false);
                 }}
-                className="w-full px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition font-medium text-sm flex items-center gap-2 cursor-pointer"
+                className="w-full text-left px-4 py-3 rounded-xl bg-neutral-800 text-white font-bold uppercase tracking-wider hover:bg-neutral-700 transition"
               >
-                🍽️ Meal Tracking
+                Meal Tracker
               </button>
               <button
                 onClick={() => {
                   router.push("/dashboard/gym");
                   setMobileMenuOpen(false);
                 }}
-                className="w-full px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-lg transition font-medium text-sm flex items-center gap-2 cursor-pointer"
+                className="w-full text-left px-4 py-3 rounded-xl bg-neutral-800 text-white font-bold uppercase tracking-wider hover:bg-neutral-700 transition"
               >
-                💪 Gym Tracking
+                Gym Tracker
               </button>
               <button
                 onClick={() => {
                   logout();
                   setMobileMenuOpen(false);
                 }}
-                className="w-full px-4 py-2 bg-linear-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition font-medium text-sm flex items-center gap-2 cursor-pointer"
+                className="w-full text-left px-4 py-3 rounded-xl border border-red-900/50 text-red-500 font-bold uppercase tracking-wider hover:bg-red-900/20 transition flex items-center justify-between"
               >
-                🚪 Logout
+                Logout
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"
+                  />
+                </svg>
               </button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </nav>
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
-        <div className="text-center mb-6 sm:mb-8 lg:mb-12 px-2">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-2 sm:mb-3">
-            Welcome to Your Dashboard
+      {/* Main Content */}
+      <main className="pt-28 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto min-h-screen flex flex-col justify-center">
+        <div className="text-center mb-16">
+          <h2 className="text-sm font-bold text-lime-500 uppercase tracking-[0.2em] mb-4">
+            Dashboard
           </h2>
-          <p className="text-gray-600 text-sm sm:text-base md:text-lg">
-            Choose a category to track your progress
-          </p>
+          <h3 className="text-4xl md:text-6xl font-black text-white italic tracking-tighter">
+            CHOOSE YOUR{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-lime-600 pr-2">
+              GRIND
+            </span>
+          </h3>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 max-w-5xl mx-auto">
-          {/* Meal Tracking Box */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto w-full">
+          {/* Meal Tracking Card */}
           <div
             onClick={() => router.push("/dashboard/meal")}
-            className="bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer active:scale-95 sm:hover:scale-105 border-2 border-transparent hover:border-blue-500 p-6 sm:p-8 lg:p-12"
+            className="group relative h-96 w-full rounded-2xl overflow-hidden cursor-pointer border border-neutral-800 hover:border-lime-500/50 transition-all duration-500 ease-out"
           >
-            <div className="flex flex-col items-center text-center">
-              <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl mb-4 sm:mb-6">
-                🍽️
+            {/* Background Image */}
+            <div className="absolute inset-0 bg-neutral-900">
+              <img
+                src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&q=80&w=800"
+                alt="Meal Planning"
+                className="w-full h-full object-cover opacity-40 group-hover:opacity-60 group-hover:scale-110 transition-all duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/60 to-transparent"></div>
+            </div>
+
+            {/* Content */}
+            <div className="absolute bottom-0 left-0 p-8 w-full z-10 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+              <div className="w-16 h-1 bg-lime-500 mb-6 w-0 group-hover:w-16 transition-all duration-500 delay-100"></div>
+              <div className="flex items-end justify-between">
+                <div>
+                  <h4 className="text-3xl font-black text-white uppercase tracking-tighter mb-2">
+                    Nutrition Log
+                  </h4>
+                  <p className="text-neutral-400 font-medium group-hover:text-white transition-colors delay-100 max-w-xs">
+                    Track macros, calories, and daily meals to fuel your body
+                    perfectly.
+                  </p>
+                </div>
+                <div className="bg-lime-500 p-3 rounded-full opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 delay-200">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2.5}
+                    stroke="black"
+                    className="w-6 h-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                    />
+                  </svg>
+                </div>
               </div>
-              <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2 sm:mb-3">
-                Meal Tracking
-              </h3>
-              <p className="text-gray-600 text-sm sm:text-base md:text-lg leading-relaxed">
-                Track your daily meals and monitor your nutrition intake
-              </p>
             </div>
           </div>
 
-          {/* Gym Tracking Box */}
+          {/* Gym Tracking Card */}
           <div
             onClick={() => router.push("/dashboard/gym")}
-            className="bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer active:scale-95 sm:hover:scale-105 border-2 border-transparent hover:border-green-500 p-6 sm:p-8 lg:p-12"
+            className="group relative h-96 w-full rounded-2xl overflow-hidden cursor-pointer border border-neutral-800 hover:border-lime-500/50 transition-all duration-500 ease-out"
           >
-            <div className="flex flex-col items-center text-center">
-              <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl mb-4 sm:mb-6">
-                💪
+            {/* Background Image */}
+            <div className="absolute inset-0 bg-neutral-900">
+              <img
+                src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&q=80&w=800"
+                alt="Gym Workout"
+                className="w-full h-full object-cover opacity-40 group-hover:opacity-60 group-hover:scale-110 transition-all duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/60 to-transparent"></div>
+            </div>
+
+            {/* Content */}
+            <div className="absolute bottom-0 left-0 p-8 w-full z-10 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+              <div className="w-16 h-1 bg-lime-500 mb-6 w-0 group-hover:w-16 transition-all duration-500 delay-100"></div>
+              <div className="flex items-end justify-between">
+                <div>
+                  <h4 className="text-3xl font-black text-white uppercase tracking-tighter mb-2">
+                    Workout Log
+                  </h4>
+                  <p className="text-neutral-400 font-medium group-hover:text-white transition-colors delay-100 max-w-xs">
+                    Record exercises, sets, reps, and track your strength
+                    progress.
+                  </p>
+                </div>
+                <div className="bg-lime-500 p-3 rounded-full opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 delay-200">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2.5}
+                    stroke="black"
+                    className="w-6 h-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                    />
+                  </svg>
+                </div>
               </div>
-              <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2 sm:mb-3">
-                Gym Tracking
-              </h3>
-              <p className="text-gray-600 text-sm sm:text-base md:text-lg leading-relaxed">
-                Log your workouts and track your fitness progress
-              </p>
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
