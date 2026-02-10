@@ -311,12 +311,6 @@ export default function GymTrackingPage() {
 
   const handleGymStatusUpdate = async (status) => {
     try {
-      console.log(
-        "[Update] Updating status to:",
-        status,
-        "for date:",
-        currentDate,
-      );
       const res = await fetch("/api/daily-log", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -328,7 +322,6 @@ export default function GymTrackingPage() {
 
       if (res.ok) {
         const data = await res.json();
-        console.log("[Update] Response:", data.dailyLog?.gymStatus);
 
         // Update states first
         setTodayGymStatus(status);
@@ -413,15 +406,6 @@ export default function GymTrackingPage() {
     const todayDate = new Date();
     const todayStr = `${todayDate.getFullYear()}-${String(todayDate.getMonth() + 1).padStart(2, "0")}-${String(todayDate.getDate()).padStart(2, "0")}`;
     const todayData = data.find((d) => d.date === todayStr);
-    console.log(
-      "[Calendar Debug] Today:",
-      todayStr,
-      "Data:",
-      todayData,
-      "Total entries:",
-      data.length,
-    );
-    console.log("[Calendar Debug] Last 3 entries:", data.slice(-3));
 
     return (
       <div className="bg-white rounded-xl p-4 sm:p-6 shadow-lg">

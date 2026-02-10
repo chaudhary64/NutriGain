@@ -11,7 +11,7 @@ const toTitleCase = (str) => {
 };
 
 export default function AdminPage() {
-  const { user, loading: authLoading, logout } = useAuth();
+  const { user, loading: authLoading, logout, checkAuth } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("meals"); // 'meals', 'gym', or 'users'
   const [meals, setMeals] = useState([]);
@@ -27,6 +27,54 @@ export default function AdminPage() {
     fats: "",
     category: "general",
   });
+
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [tempSchedule, setTempSchedule] = useState([
+    "Paneer",
+    "Chicken",
+    "Paneer",
+    "Chicken",
+    "Paneer",
+    "Chicken",
+    "Paneer",
+  ]);
+
+  useEffect(() => {
+    const fetchSchedule = async () => {
+      try {
+        const res = await fetch("/api/settings/meal-schedule");
+        if (res.ok) {
+          const data = await res.json();
+          setTempSchedule(data.mealDays);
+        }
+      } catch (error) {
+        console.error("Error fetching schedule:", error);
+      }
+    };
+    if (showScheduleModal) {
+      fetchSchedule();
+    }
+  }, [showScheduleModal]);
+
+  const handleSaveSchedule = async () => {
+    try {
+      const res = await fetch("/api/settings/meal-schedule", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mealDays: tempSchedule }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setShowScheduleModal(false);
+      } else {
+        alert("Failed to update schedule");
+      }
+    } catch (error) {
+      console.error("Error updating schedule:", error);
+      alert("Failed to update schedule");
+    }
+  };
 
   // Users state
   const [users, setUsers] = useState([]);
@@ -673,7 +721,14 @@ export default function AdminPage() {
         {activeTab === "meals" && (
           <div>
             {!showForm && (
-              <div className="mb-6 sm:mb-8 flex justify-end">
+              <div className="mb-6 sm:mb-8 flex justify-end gap-3">
+                <button
+                  onClick={() => setShowScheduleModal(true)}
+                  className="group flex items-center justify-center gap-2 bg-white text-indigo-600 border border-indigo-200 px-5 py-2.5 rounded-xl hover:bg-indigo-50 hover:border-indigo-300 transition-all duration-300 font-medium w-full sm:w-auto cursor-pointer shadow-sm hover:shadow-md"
+                >
+                  <span className="text-xl">📅</span>
+                  Manage Days
+                </button>
                 <button
                   onClick={() => setShowForm(!showForm)}
                   className="group flex items-center justify-center gap-2 bg-linear-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 active:scale-95 font-medium w-full sm:w-auto cursor-pointer"
@@ -2163,6 +2218,105 @@ export default function AdminPage() {
           </div>
         )}
       </div>
+
+      {showScheduleModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">
+                  Manage Weekly Schedule
+                </h3>
+                <p className="text-sm text-gray-500">
+                  Assign Chicken or Paneer days
+                </p>
+              </div>
+              <button
+                onClick={() => setShowScheduleModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+              {[
+                "Sunday",
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+              ].map((day, index) => (
+                <div
+                  key={day}
+                  className="flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-gray-50/30 hover:bg-white hover:border-gray-200 hover:shadow-sm transition-all"
+                >
+                  <span className="font-semibold text-gray-700">{day}</span>
+                  <div className="flex bg-gray-200/50 p-1 rounded-lg">
+                    <button
+                      onClick={() => {
+                        const newSchedule = [...tempSchedule];
+                        newSchedule[index] = "Chicken";
+                        setTempSchedule(newSchedule);
+                      }}
+                      className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${
+                        tempSchedule[index] === "Chicken"
+                          ? "bg-white text-orange-600 shadow-sm"
+                          : "text-gray-500 hover:text-gray-700"
+                      }`}
+                    >
+                      🍗 Chicken
+                    </button>
+                    <button
+                      onClick={() => {
+                        const newSchedule = [...tempSchedule];
+                        newSchedule[index] = "Paneer";
+                        setTempSchedule(newSchedule);
+                      }}
+                      className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${
+                        tempSchedule[index] === "Paneer"
+                          ? "bg-white text-emerald-600 shadow-sm"
+                          : "text-gray-500 hover:text-gray-700"
+                      }`}
+                    >
+                      🧀 Paneer
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="p-6 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3">
+              <button
+                onClick={() => setShowScheduleModal(false)}
+                className="px-5 py-2.5 text-gray-600 font-semibold hover:bg-gray-100 rounded-xl transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveSchedule}
+                className="px-5 py-2.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all flex items-center gap-2"
+              >
+                <span>Save Schedule</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

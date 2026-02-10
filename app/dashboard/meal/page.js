@@ -12,7 +12,7 @@ const toTitleCase = (str) => {
 };
 
 export default function MealTrackingPage() {
-  const { user, loading: authLoading, logout } = useAuth();
+  const { user, loading: authLoading, logout, checkAuth } = useAuth();
   const router = useRouter();
   const [dailyLog, setDailyLog] = useState(null);
   const [meals, setMeals] = useState([]);
@@ -27,6 +27,45 @@ export default function MealTrackingPage() {
   const [currentDate, setCurrentDate] = useState(
     format(new Date(), "yyyy-MM-dd"),
   );
+  const [globalSchedule, setGlobalSchedule] = useState([
+    "Paneer",
+    "Chicken",
+    "Paneer",
+    "Chicken",
+    "Paneer",
+    "Chicken",
+    "Paneer",
+  ]);
+
+  // Fetch global meal schedule
+  const fetchGlobalSchedule = async () => {
+    try {
+      const res = await fetch(`/api/settings/meal-schedule?_=${Date.now()}`);
+      if (res.ok) {
+        const data = await res.json();
+        setGlobalSchedule(data.mealDays);
+      }
+    } catch (error) {
+      console.error("Error fetching global schedule:", error);
+    }
+  };
+
+  // Refresh user data and schedule when component mounts or becomes visible
+  useEffect(() => {
+    checkAuth();
+    fetchGlobalSchedule();
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        checkAuth();
+        fetchGlobalSchedule();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -640,6 +679,82 @@ export default function MealTrackingPage() {
 
           {/* Meal Sections */}
           <div className="lg:col-span-2 space-y-6 order-1 lg:order-2">
+            {/* Day Type Banner */}
+            {user &&
+              (() => {
+                const [y, m, d] = currentDate.split("-").map(Number);
+                const dayIndex = new Date(y, m - 1, d).getDay();
+                const dayType = globalSchedule[dayIndex] || "Paneer";
+                const isChickenDay = dayType === "Chicken";
+
+                return (
+                  <div
+                    className={`p-6 rounded-2xl shadow-xl relative overflow-hidden group transition-all duration-500 hover:shadow-2xl border border-white/20 ${
+                      isChickenDay
+                        ? "bg-linear-to-br from-orange-500 via-red-500 to-rose-600 shadow-orange-500/20"
+                        : "bg-linear-to-br from-emerald-500 via-green-500 to-teal-600 shadow-emerald-500/20"
+                    }`}
+                  >
+                    {/* Decorative Elements */}
+                    <div className="absolute top-0 right-0 p-8 opacity-10 transform translate-x-4 -translate-y-4">
+                      <svg
+                        width="100"
+                        height="100"
+                        viewBox="0 0 100 100"
+                        fill="currentColor"
+                        className="text-white"
+                      >
+                        <circle cx="50" cy="50" r="50" />
+                      </svg>
+                    </div>
+                    <div className="absolute bottom-0 left-0 p-8 opacity-10 transform -translate-x-4 translate-y-4">
+                      <svg
+                        width="60"
+                        height="60"
+                        viewBox="0 0 100 100"
+                        fill="currentColor"
+                        className="text-white"
+                      >
+                        <rect width="100" height="100" rx="20" />
+                      </svg>
+                    </div>
+
+                    <div className="relative z-10 flex items-center justify-between text-white">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm ring-1 ring-white/30">
+                            Daily Focus
+                          </span>
+                          <span className="text-white/90 text-sm font-semibold">
+                            {new Date(y, m - 1, d).toLocaleDateString("en-US", {
+                              weekday: "long",
+                            })}
+                          </span>
+                          <button
+                            onClick={() => checkAuth()}
+                            className="ml-2 bg-white/10 hover:bg-white/20 px-2 py-0.5 rounded text-xs transition-colors"
+                            title="Refresh schedule"
+                          >
+                            🔄
+                          </button>
+                        </div>
+                        <h2 className="text-3xl font-black tracking-tight mb-1 text-white shadow-sm">
+                          {isChickenDay ? "Chicken Day" : "Paneer Day"}
+                        </h2>
+                        <p className="text-blue-50/90 font-medium text-sm">
+                          {isChickenDay
+                            ? "Fuel your muscles with lean protein!"
+                            : "Rich protein & healthy fats day!"}
+                        </p>
+                      </div>
+                      <div className="text-6xl drop-shadow-xl filter backdrop-brightness-110 transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-300">
+                        {isChickenDay ? "🍗" : "🧀"}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
             {/* Add Meal Form */}
             <div className="bg-white/80 backdrop-blur-xl p-5 sm:p-6 rounded-2xl shadow-xl shadow-indigo-100/50 border border-white/50 ring-1 ring-white/50 relative z-20">
               <div className="flex items-center gap-3 mb-6">

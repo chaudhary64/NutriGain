@@ -16,9 +16,18 @@ export function AuthProvider({ children }) {
 
   const checkAuth = async () => {
     try {
-      const res = await fetch('/api/auth/me');
+      // Add timestamp to prevent caching
+      const timestamp = new Date().getTime();
+      const res = await fetch(`/api/auth/me?_=${timestamp}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
       if (res.ok) {
         const data = await res.json();
+        console.log('[AuthContext] User data fetched:', data.user.mealDays);
         setUser(data.user);
       } else {
         setUser(null);

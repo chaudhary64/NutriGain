@@ -40,10 +40,20 @@ const UserSchema = new mongoose.Schema({
     type: Number,
     default: 75,
   },
+  mealDays: {
+    type: [String],
+    default: ["Paneer", "Chicken", "Paneer", "Chicken", "Paneer", "Chicken", "Paneer"], // 0=Sun, 1=Mon, ...
+  },
   createdAt: {
     type: Date,
     default: Date.now,
   },
 });
+
+// Force complete model recompilation in development to ensure schema changes are recognized
+if (process.env.NODE_ENV !== 'production' && mongoose.models.User) {
+  delete mongoose.models.User;
+  delete mongoose.connection.models.User;
+}
 
 export default mongoose.models.User || mongoose.model('User', UserSchema);
