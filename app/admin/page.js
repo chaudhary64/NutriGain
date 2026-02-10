@@ -2233,7 +2233,7 @@ export default function AdminPage() {
               </div>
               <button
                 onClick={() => setShowScheduleModal(false)}
-                className="p-2 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
+                className="p-2 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
               >
                 <svg
                   className="w-5 h-5"
@@ -2273,7 +2273,7 @@ export default function AdminPage() {
                         newSchedule[index] = "Chicken";
                         setTempSchedule(newSchedule);
                       }}
-                      className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${
+                      className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all cursor-pointer ${
                         tempSchedule[index] === "Chicken"
                           ? "bg-white text-orange-600 shadow-sm"
                           : "text-gray-500 hover:text-gray-700"
@@ -2287,7 +2287,7 @@ export default function AdminPage() {
                         newSchedule[index] = "Paneer";
                         setTempSchedule(newSchedule);
                       }}
-                      className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${
+                      className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all cursor-pointer ${
                         tempSchedule[index] === "Paneer"
                           ? "bg-white text-emerald-600 shadow-sm"
                           : "text-gray-500 hover:text-gray-700"
@@ -2303,13 +2303,13 @@ export default function AdminPage() {
             <div className="p-6 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3">
               <button
                 onClick={() => setShowScheduleModal(false)}
-                className="px-5 py-2.5 text-gray-600 font-semibold hover:bg-gray-100 rounded-xl transition-colors"
+                className="px-5 py-2.5 text-gray-600 font-semibold hover:bg-gray-100 rounded-xl transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveSchedule}
-                className="px-5 py-2.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all flex items-center gap-2"
+                className="px-5 py-2.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all flex items-center gap-2 cursor-pointer"
               >
                 <span>Save Schedule</span>
               </button>
