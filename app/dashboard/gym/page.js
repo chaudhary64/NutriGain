@@ -837,10 +837,40 @@ export default function GymTrackingPage() {
                   todaySchedule.muscleGroups.includes("Rest Day")
                 ) {
                   return (
-                    <div className="p-10 rounded-2xl bg-neutral-900 border border-dashed border-neutral-800 text-center">
-                      <p className="text-neutral-500 font-bold uppercase tracking-widest">
-                        Rest Day / No Exercises Configured
-                      </p>
+                    <div className="relative rounded-2xl overflow-hidden group border border-neutral-800 h-96 flex items-center justify-center">
+                      <div className="absolute inset-0 z-0">
+                        <img
+                          src="https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=1470&auto=format&fit=crop"
+                          alt="Rest and Recovery"
+                          className="w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform duration-700 ease-out grayscale group-hover:grayscale-0"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/60 to-transparent"></div>
+                      </div>
+                      <div className="relative z-10 text-center p-8 max-w-lg mx-auto">
+                        <div className="mb-6 inline-block p-4 rounded-full bg-lime-500/10 border border-lime-500/20 text-lime-500 backdrop-blur-sm animate-pulse">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-10 h-10"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={1.5}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"
+                            />
+                          </svg>
+                        </div>
+                        <h3 className="text-4xl font-black text-white uppercase italic tracking-tighter mb-4">
+                          Recharge & Recovery
+                        </h3>
+                        <p className="text-neutral-300 font-medium text-lg leading-relaxed">
+                          "Micro-tears build muscle, but rest repairs them. Take
+                          today to fuel up and prepare for tomorrow's grind."
+                        </p>
+                      </div>
                     </div>
                   );
                 }
