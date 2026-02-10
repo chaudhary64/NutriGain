@@ -570,7 +570,7 @@ export default function MealTrackingPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Macro Meters */}
           <div className="lg:col-span-1 order-2 lg:order-1">
-            <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl shadow-xl lg:sticky lg:top-24">
+            <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl shadow-xl">
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
                   <div className="bg-lime-500/10 p-2 rounded-lg text-lime-500 border border-lime-500/20">
