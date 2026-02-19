@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { ActivityCalendar } from "react-activity-calendar";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import {
   LineChart,
   Line,
@@ -688,7 +688,7 @@ export default function GymTrackingPage() {
                     <XAxis
                       dataKey="date"
                       tick={{ fill: "#525252", fontSize: 10 }}
-                      tickFormatter={(str) => format(new Date(str), "MMM d")}
+                      tickFormatter={(str) => format(parseISO(str), "MMM d")}
                     />
                     <YAxis
                       domain={["dataMin - 1", "dataMax + 1"]}
@@ -702,6 +702,9 @@ export default function GymTrackingPage() {
                       }}
                       itemStyle={{ color: "#84cc16" }}
                       labelStyle={{ color: "#a3a3a3" }}
+                      labelFormatter={(label) =>
+                        format(parseISO(label), "MMMM d, yyyy")
+                      }
                     />
                     <ReferenceLine
                       y={targetWeight}
