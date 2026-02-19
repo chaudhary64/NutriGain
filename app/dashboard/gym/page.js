@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, cloneElement } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { ActivityCalendar } from "react-activity-calendar";
+import { Tooltip as ReactTooltip } from "react-tooltip";
+import "react-tooltip/dist/react-tooltip.css";
 import { format, parseISO } from "date-fns";
 import {
   LineChart,
@@ -350,11 +352,9 @@ export default function GymTrackingPage() {
 
   // Render Helpers
   const renderCalendar = () => {
-    const today = new Date();
-    today.setHours(23, 59, 59, 999);
-    const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(today.getFullYear() - 1);
-    oneYearAgo.setHours(0, 0, 0, 0);
+    const currentYear = new Date().getFullYear();
+    const startDate = new Date(currentYear, 0, 1);
+    const endDate = new Date(currentYear, 11, 31);
 
     const statusMap = new Map();
     gymHistory.forEach((log) => {
@@ -365,8 +365,8 @@ export default function GymTrackingPage() {
     });
 
     const data = [];
-    let curr = new Date(oneYearAgo);
-    while (curr <= today) {
+    let curr = new Date(startDate);
+    while (curr <= endDate) {
       const dateStr = format(curr, "yyyy-MM-dd");
       data.push({
         date: dateStr,
@@ -377,19 +377,35 @@ export default function GymTrackingPage() {
     }
 
     return (
-      <ActivityCalendar
-        data={data}
-        theme={{
-          light: ["#262626", "#3f6212", "#4d7c0f", "#65a30d", "#84cc16"], // neutral-800 to lime-500
-          dark: ["#262626", "#3f6212", "#4d7c0f", "#65a30d", "#84cc16"],
-        }}
-        blockSize={10}
-        blockMargin={4}
-        colorScheme="dark"
-        hideTotalCount
-        hideColorLegend
-        style={{ width: "100%", minWidth: "800px" }}
-      />
+      <>
+        <ActivityCalendar
+          data={data}
+          theme={{
+            light: ["#262626", "#3f6212", "#4d7c0f", "#65a30d", "#84cc16"], // neutral-800 to lime-500
+            dark: ["#262626", "#3f6212", "#4d7c0f", "#65a30d", "#84cc16"],
+          }}
+          blockSize={10}
+          blockMargin={4}
+          colorScheme="dark"
+          hideTotalCount
+          hideColorLegend
+          showWeekdayLabels={["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]}
+          style={{ width: "100%", minWidth: "800px" }}
+          renderBlock={(block, activity) =>
+            cloneElement(block, {
+              "data-tooltip-id": "react-tooltip",
+              "data-tooltip-content": `${format(parseISO(activity.date), "d MMMM yyyy")} • ${
+                activity.level === 4
+                  ? "Completed"
+                  : activity.level === 2
+                    ? "Partially Completed"
+                    : "No Activity"
+              }`,
+            })
+          }
+        />
+        <ReactTooltip id="react-tooltip" />
+      </>
     );
   };
 
@@ -589,6 +605,45 @@ export default function GymTrackingPage() {
                     User
                   </p>
                   <p className="text-lg font-bold text-white">{user.name}</p>
+                </div>
+              </div>
+
+              {/* Mobile Status Controls */}
+              <div className="px-2 mb-6">
+                <p className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-2">
+                  Today's Status
+                </p>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    {
+                      val: "completed",
+                      label: "Done",
+                      colors: "bg-lime-500 text-black border-lime-500",
+                    },
+                    {
+                      val: "partially-completed",
+                      label: "Part",
+                      colors: "bg-amber-500 text-black border-amber-500",
+                    },
+                    {
+                      val: "not-completed",
+                      label: "No",
+                      colors:
+                        "bg-neutral-800 text-neutral-400 border-neutral-700 hover:text-white",
+                    },
+                  ].map((opt) => (
+                    <button
+                      key={opt.val}
+                      onClick={() => handleGymStatusUpdate(opt.val)}
+                      className={`px-2 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border ${
+                        todayGymStatus === opt.val
+                          ? opt.colors
+                          : "bg-neutral-900/50 text-neutral-600 border-neutral-800 hover:bg-neutral-800"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
                 </div>
               </div>
 
@@ -962,7 +1017,7 @@ export default function GymTrackingPage() {
                                       lastPRDate: ex.lastPRDate || "",
                                     });
                                   }}
-                                  className="p-2 text-neutral-400 hover:text-lime-500 transition opacity-0 group-hover:opacity-100 cursor-pointer"
+                                  className="p-2 text-neutral-400 hover:text-lime-500 transition cursor-pointer"
                                 >
                                   <svg
                                     xmlns="http://www.w3.org/2000/svg"
