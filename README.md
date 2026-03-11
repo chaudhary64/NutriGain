@@ -155,9 +155,7 @@ nutrigain/
 - `PUT /api/daily-log/[id]` - Update meal quantity
 - `DELETE /api/daily-log/[id]?date=YYYY-MM-DD` - Remove meal from log
 
-## License
 
-MIT
 
 ## Contributing
 
