@@ -1,240 +1,251 @@
-# ⚡ NutriGain
+<div align="center">
 
-> **Track Your Macros. Dominate Your Goals.**
+<br/>
 
-NutriGain is a full-stack fitness tracking web application built for people who take their nutrition and gym performance seriously. It combines a **daily macro / meal tracker** with a **gym workout tracker** — all behind a sleek, dark-mode dashboard that gives you a real-time view of your progress.
+# 🎯 NutriGain
+
+### *Track Your Macros. Dominate Your Goals.*
+
+**A full-stack fitness tracking hub for athletes who take their nutrition and lifting seriously — monitor calories, log gym sessions, and visualize consistency through a premium, data-driven interface.**
+
+<br/>
+
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-47A248?style=for-the-badge&logo=mongodb)](https://www.mongodb.com/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
+[![GSAP](https://img.shields.io/badge/GSAP-3-88CE02?style=for-the-badge&logo=greensock)](https://gsap.com/)
+[![Recharts](https://img.shields.io/badge/Recharts-3-FF6384?style=for-the-badge&logo=chartdotjs)](https://recharts.org/)
+
+<br/>
+
+</div>
 
 ---
 
-## 🧩 What is NutriGain?
+## 📖 What Is NutriGain?
 
-NutriGain is designed for fitness enthusiasts who want a single, clean place to:
+Most fitness apps either track food *or* training — NutriGain does both, and does them beautifully. Designed for athletes who obsess over the details, **NutriGain** is a precision-first fitness tracking platform built to eliminate guesswork from your diet and training.
 
-- Log their daily meals and automatically calculate calorie & macro (protein, carbs, fats) intake
-- Track gym workout sessions, mark daily gym status, and visualize consistency via a GitHub-style activity calendar
-- Monitor body weight over time with a visual line chart trending toward a target weight
-- Follow a customizable weekly protein plan (e.g., Chicken vs Paneer days)
-- Manage exercises grouped by muscle group with warm-up weights, working weights, and personal records (PRs)
-- Access an Admin panel to manage the meal database, exercise library, and workout schedule
+Instead of scattered spreadsheets and basic calorie counters, NutriGain gives you a unified, data-rich dashboard where you can:
+
+- **Hit your macros** — track calories, protein, carbs, and fats in real time with a curated meal database
+- **Log your lifts** — record personal records and working weights, organized by muscle group and exercise type
+- **Stay consistent** — a GitHub-style gym activity heatmap makes your habits impossible to ignore
+- **See progress** — visualize body weight trends over time with interactive charts
+- **Stay accountable** — a day-level daily log ties nutrition and gym sessions together in one place
 
 ---
 
-## 🛠 Tech Stack
+## ✨ Features
+
+| Feature | Description |
+|---|---|
+| 🎯 **Macro Tracking** | Real-time calorie, protein, carb, and fat monitoring with visual progress meters |
+| 🍽️ **Meal Database** | Searchable database of meals with accurate macro breakdowns per 100g |
+| 🏋️ **Gym Log & PR Tracking** | Log personal records and working weights categorized by muscle group |
+| 📆 **Weekly Workout Schedules** | Define which muscle groups to train on which days of the week |
+| 🔥 **Activity Heatmap** | GitHub-style heatmap to visualize gym consistency across the calendar year |
+| 📊 **Weight Progression Charts** | Interactive Recharts graphs to track body weight trends over time |
+| 📅 **Daily Log** | Unified per-day log linking meals (breakfast, lunch, dinner) with gym status |
+| 🔒 **Secure Auth** | Passwords hashed with `bcryptjs`, sessions managed via JWT in `httpOnly` cookies |
+| 📱 **Fully Responsive** | Fluid layout with a polished mobile experience |
+| 🛡️ **Admin Panel** | Manage the global meal and exercise database from a dedicated admin interface |
+
+---
+
+## 🛠️ Tech Stack
 
 ### Frontend
-| Technology | Purpose |
-|---|---|
-| **Next.js 16** | React framework with App Router, server-side rendering, and API routes |
-| **React 19** | Component-based UI with hooks |
-| **Tailwind CSS v4** | Utility-first CSS framework for rapid, consistent styling |
-| **Recharts** | Responsive line charts for body weight progression |
-| **react-activity-calendar** | GitHub-style heatmap calendar for gym consistency |
-| **react-tooltip** | Tooltips on the activity calendar |
-| **date-fns** | Date formatting and manipulation |
-| **Google Fonts (Inter, Playfair Display)** | Premium typography |
+- **[Next.js 16](https://nextjs.org/)** — App Router, file-based routing, server-side rendering
+- **[React 19](https://react.dev/)** — UI library with hooks and context
+- **[Tailwind CSS 4](https://tailwindcss.com/)** — Utility-first styling with dark, premium aesthetics
+- **[GSAP 3](https://gsap.com/)** — High-performance animations (hero reveals, scroll triggers, cursor glow)
+- **[Recharts 3](https://recharts.org/)** — Composable data visualization for weight charts
+- **[react-activity-calendar](https://www.npmjs.com/package/react-activity-calendar)** — GitHub-style gym heatmap
+- **[react-tooltip](https://www.npmjs.com/package/react-tooltip)** — Contextual tooltips for heatmap cells
+- **[date-fns](https://date-fns.org/)** — Lightweight date utility library
 
-### Backend
-| Technology | Purpose |
-|---|---|
-| **Next.js API Routes** | Serverless REST API endpoints (no separate backend needed) |
-| **MongoDB** | NoSQL database for storing users, meals, logs, and exercises |
-| **Mongoose** | ODM for MongoDB schema definitions and queries |
-| **bcryptjs** | Password hashing for secure credential storage |
-| **JSON Web Tokens (jsonwebtoken)** | Stateless authentication via JWT stored in cookies |
+### Backend & Database
+- **[Next.js API Routes](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)** — Serverless REST API endpoints
+- **[MongoDB](https://www.mongodb.com/) + [Mongoose 8](https://mongoosejs.com/)** — NoSQL database with schema validation
+- **[bcryptjs](https://www.npmjs.com/package/bcryptjs)** — Password hashing
+- **[jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken)** — JWT-based session management
+- **[next-auth](https://next-auth.js.org/)** — Auth utilities and session handling helpers
 
-### Dev & Config
-| Technology | Purpose |
-|---|---|
-| **ESLint** | Code linting with Next.js rules |
-| **PostCSS** | CSS processing pipeline for Tailwind |
-| **jsconfig.json** | Path aliases (`@/` maps to project root) |
-| **`.env.local`** | Environment variables for DB connection, JWT secret, and macro goals |
+### Dev Tools
+- **ESLint** — Code linting with Next.js config
+- **PostCSS** — CSS processing pipeline
 
 ---
 
-## 📁 Project Structure
+## 🗂️ Project Structure
 
 ```
 NutriGain/
 ├── app/
-│   ├── page.js                  # Landing / Home page
-│   ├── layout.js                # Root layout with AuthProvider
-│   ├── globals.css              # Global styles
-│   ├── login/page.js            # Login page
-│   ├── register/page.js         # Registration page
+│   ├── api/
+│   │   ├── auth/               # POST login/register, GET me, POST logout
+│   │   ├── daily-log/          # GET/POST/PUT daily log with meals & gym status
+│   │   ├── exercises/          # GET/POST/PUT/DELETE exercise library
+│   │   ├── meals/              # GET/POST/PUT/DELETE meal database
+│   │   ├── settings/           # GET/PUT user macro settings & targets
+│   │   ├── users/              # GET all users (admin)
+│   │   ├── weight/             # GET/POST body weight entries
+│   │   ├── workout-schedule/   # GET/PUT weekly per-day muscle group schedule
+│   │   └── ...                 # (migration & debug utilities)
+│   ├── admin/                  # Admin panel — manage meals, exercises, users
 │   ├── dashboard/
-│   │   ├── page.js              # Dashboard hub (choose Meal or Gym)
-│   │   ├── meal/page.js         # Meal tracking page
-│   │   └── gym/page.js          # Gym tracking page
-│   ├── admin/
-│   │   ├── page.js              # Admin panel (manage meals, exercises, schedule)
-│   │   └── user/                # Per-user admin views
-│   └── api/
-│       ├── auth/                # Login & register endpoints
-│       ├── daily-log/           # CRUD for daily meal logs
-│       ├── meals/               # Meal database CRUD
-│       ├── exercises/           # Exercise library CRUD
-│       ├── workout-schedule/    # Weekly workout schedule
-│       ├── weight/              # Weight entry CRUD
-│       ├── settings/            # Meal schedule settings
-│       ├── users/               # User management (admin)
-│       ├── init-admin/          # One-time admin seed
-│       └── migrate-*/           # Data migration scripts
-├── models/
-│   ├── User.js                  # User schema (auth, weight entries, meal plan)
-│   ├── DailyLog.js              # Daily meal + gym status log
-│   ├── Meal.js                  # Meal with macros schema
-│   ├── Exercise.js              # Exercise with muscle group & type
-│   ├── WorkoutSchedule.js       # Weekly day → muscle group mapping
-│   ├── UserExerciseData.js      # Per-user exercise PR data
-│   └── Settings.js              # App-wide settings
+│   │   ├── gym/                # Gym tracking: PRs, heatmap, workout log
+│   │   ├── meal/               # Meal logging: search, add, daily macros
+│   │   └── page.js             # Main dashboard overview
+│   ├── login/                  # Login page
+│   ├── register/               # Sign-up page
+│   ├── globals.css             # Global design tokens & base styles
+│   ├── layout.js               # Root layout with fonts & auth provider
+│   └── page.js                 # Landing page with GSAP scroll animations
 ├── context/
-│   └── AuthContext.js           # React context for auth state (login/logout/checkAuth)
-├── public/                      # Static assets (favicons, PWA icons)
-├── .env.local                   # Environment variables (not committed)
-├── next.config.mjs              # Next.js configuration
-└── package.json                 # Dependencies and scripts
+│   └── AuthContext.js          # Global auth state via React context
+├── lib/
+│   ├── auth.js                 # JWT utility (sign / verify)
+│   └── mongodb.js              # Mongoose connection singleton
+├── models/
+│   ├── DailyLog.js             # Per-day log: meals, macros, gym status
+│   ├── Exercise.js             # Exercise library (muscle group, compound/isolation)
+│   ├── Meal.js                 # Meal schema (name, macros per 100g)
+│   ├── Settings.js             # User macro targets & preferences
+│   ├── User.js                 # User schema (name, email, hashed password, role)
+│   ├── UserExerciseData.js     # Per-user PR & working weight history
+│   └── WorkoutSchedule.js      # Weekly day → muscle group mapping
+├── public/
+├── .env.local.example
+├── package.json
+├── next.config.mjs
+└── jsconfig.json
 ```
 
 ---
 
-## 🌊 Website Flow
+## 🌐 Application Flow
 
-### 1. 🏠 Landing Page (`/`)
-The public-facing home page. It introduces NutriGain with:
-- A bold hero section: *"Track Your Macros. Dominate Your Goals."*
-- Feature highlight cards: Macro Tracking, Meal Database, Real-time Updates
-- A **Get Started** CTA (→ `/register`) and a **Login** link (→ `/login`)
-- If already logged in, the nav shows the user's name with links to Dashboard and Logout
+```
+1. Landing Page (/)
+   └── GSAP-animated hero with scroll sections
+       ├── "Get Started Free" → /register
+       └── "Login" → /login
 
----
+2. Auth (/login, /register)
+   ├── Register: POST /api/auth/register → creates User + Settings, sets JWT cookie
+   └── Login:    POST /api/auth/login    → validates credentials, sets JWT cookie
 
-### 2. 🔐 Authentication (`/login`, `/register`)
-- **Login page**: Split-panel layout — left side has a gym motivational background image, right side has the login form. Authentication is done via a custom JWT-based system.
-- **Register page**: User signs up with name, email, and password. Password is hashed with bcryptjs before storage.
-- On success, the user is redirected:
-  - Regular user → `/dashboard`
-  - Admin user → `/admin`
-- Auth state is managed globally via `AuthContext` using React Context API.
+3. Dashboard (/dashboard)
+   ├── Overview of today's macros, gym status, and streaks
+   ├── Quick-navigate to Meal or Gym sub-dashboards
+   └── Date navigation for past logs
 
----
+4. Meal Dashboard (/dashboard/meal)
+   ├── Search the meal database → add entries at breakfast, lunch, or dinner
+   ├── Real-time macro countdown meters (calories, protein, carbs, fats)
+   └── Daily log backed by GET/POST /api/daily-log
 
-### 3. 📊 Dashboard Hub (`/dashboard`)
-After login, users arrive at the main dashboard with two clickable cards:
+5. Gym Dashboard (/dashboard/gym)
+   ├── Log today's exercises: select muscle group → exercise → sets/reps/weight
+   ├── View personal records (PRs) per exercise
+   ├── Activity heatmap showing gym sessions over the past year
+   ├── Body weight chart via Recharts (GET /api/weight)
+   └── Mark workout as completed → updates gymStatus in DailyLog
 
-| Card | Destination |
-|---|---|
-| 🥗 **Nutrition Log** | `/dashboard/meal` — track meals and macros |
-| 🏋️ **Workout Log** | `/dashboard/gym` — track gym sessions and exercises |
+6. Admin Panel (/admin)
+   ├── Manage the global meal database (add, edit, delete meals)
+   ├── Manage the exercise library (add, edit, delete exercises)
+   └── View registered users
 
----
-
-### 4. 🥗 Meal Tracker (`/dashboard/meal`)
-The core nutrition tracking page. Features:
-
-- **Date picker** in the nav to browse any day's log (defaults to today)
-- **Protein Plan banner**: Indicates whether today is a *Chicken Day* 🍗 or *Paneer Day* 🧀 based on the global weekly schedule
-- **Macro Meter sidebar**: Real-time progress bars for Calories, Protein, Carbs, and Fats against configurable daily goals (set via env variables). Shows a live preview when a meal is selected before logging.
-- **Add Meal form**: Search and filter from the meal database, pick meal type (Breakfast/Lunch/Dinner), set quantity, and submit. Macros update instantly.
-- **Meal sections**: Logged meals grouped by Breakfast, Lunch, and Dinner. Each entry shows macros and allows quantity editing or deletion.
-- **Remaining macros** grid: Shows how many calories/grams are left in each macro for the day.
-
----
-
-### 5. 🏋️ Gym Tracker (`/dashboard/gym`)
-The workout tracking page. Features:
-
-- **Today's gym status** (in nav): A dropdown to mark the day as *Completed*, *Partial*, or *Not Done*. Color-coded (lime/amber/grey).
-- **Activity Calendar**: A GitHub-style contribution heatmap showing all gym days in the current year. Hovering shows the date and completion status.
-- **Streak stats**: Current streak and longest streak displayed as big numbers.
-- **Weight Tracker**: Log daily body weight with a searchable line chart. A red dashed reference line shows the target weight goal.
-- **Exercise Library (tabs)**:
-  - *Exercises* tab: All exercises grouped by muscle group (Chest, Back, Bicep, Tricep, Legs, Shoulders, etc.). Each exercise shows type (Compound/Isolation), warm-up weight, working weight, personal record (PR), and PR date. Inline editing available.
-  - *Schedule* tab: The weekly workout plan (Mon–Sun) with the muscle groups assigned to each day.
-
----
-
-### 6. 🛠 Admin Panel (`/admin`)
-Only accessible to users with `isAdmin: true`. Allows:
-
-- **Meal Management**: Add, edit, and delete meals with full macro data
-- **Exercise Management**: Add exercises to the library, assign muscle groups and types
-- **Workout Schedule**: Configure which muscle groups are trained on each day of the week
-- **User Management**: Browse registered users and manage their data
-- **Global Meal Schedule**: Set the weekly Chicken/Paneer rotation used in the Meal Tracker
-
----
-
-## ⚙️ Environment Variables
-
-Create a `.env.local` file in the project root. See `.env.local.example` for the full template:
-
-```env
-MONGODB_URI=mongodb+srv://...        # MongoDB connection string
-JWT_SECRET=your_jwt_secret           # Secret for signing JWTs
-
-# Daily macro goals (shown as targets on the Meal Tracker)
-NEXT_PUBLIC_GOAL_CALORIES=1900
-NEXT_PUBLIC_GOAL_PROTEIN=120
-NEXT_PUBLIC_GOAL_CARBS=170
-NEXT_PUBLIC_GOAL_FATS=60
+7. Sign Out
+   └── POST /api/auth/logout → clears JWT cookie → redirect to /
 ```
 
 ---
 
 ## 🚀 Getting Started
 
+### Prerequisites
+
+- **Node.js** v18 or higher
+- A **MongoDB** instance (local or [MongoDB Atlas](https://www.mongodb.com/cloud/atlas))
+
+### 1. Clone the repository
+
 ```bash
-# 1. Clone the repo
-git clone https://github.com/your-username/NutriGain.git
-cd NutriGain
+git clone https://github.com/your-username/nutrigain.git
+cd nutrigain
+```
 
-# 2. Install dependencies
+### 2. Install dependencies
+
+```bash
 npm install
+```
 
-# 3. Set up environment variables
-cp .env.local.example .env.local
-# Fill in your MongoDB URI and JWT secret
+### 3. Configure environment variables
 
-# 4. Run the development server
+Create a `.env.local` file in the project root (see `.env.local.example` for reference):
+
+```env
+# MongoDB connection string
+MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/nutrigain?retryWrites=true&w=majority
+
+# JWT secret — use a long, random string
+JWT_SECRET=your-super-secret-jwt-key-here
+
+# Node environment
+NODE_ENV=development
+```
+
+> ⚠️ **Never commit `.env.local` to version control.** It is already listed in `.gitignore`.
+
+### 4. Run the development server
+
+```bash
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
----
+### 5. (Optional) Seed the admin account
 
-## 📦 Available Scripts
+After registering your first account, you can promote it to admin directly in MongoDB by setting the `role` field on the `User` document to `"admin"`, then access the admin panel at `/admin`.
 
-| Script | Description |
-|---|---|
-| `npm run dev` | Start the development server |
-| `npm run build` | Build for production |
-| `npm run start` | Start the production server |
-| `npm run lint` | Run ESLint |
+### 6. Build for production
 
----
-
-## 🗃️ Data Models
-
-| Model | Key Fields |
-|---|---|
-| `User` | `name`, `email`, `password`, `isAdmin`, `weightEntries[]`, `targetWeight`, `mealDays[]` |
-| `DailyLog` | `user`, `date`, `meals[]`, `totalMacros`, `gymStatus` |
-| `Meal` | `name`, `servingSize`, `macros { calories, protein, carbs, fats }`, `category` |
-| `Exercise` | `muscleGroup`, `name`, `type (COMPOUND/ISOLATION)` |
-| `WorkoutSchedule` | `day`, `muscleGroups[]` |
-| `UserExerciseData` | Per-user warm-up weight, working weight, last PR, last PR date |
+```bash
+npm run build
+npm run start
+```
 
 ---
 
-## 🎨 Design System
+## 🤝 Contributing
 
-- **Color palette**: Dark neutral backgrounds (`neutral-950/900/800`) with **lime-500** (`#84cc16`) as the primary accent
-- **Typography**: Inter (body/UI) + Playfair Display (headings), loaded via `next/font/google`
-- **Theme**: Dark mode throughout with glassmorphism nav bars (`backdrop-blur`), glow shadows on CTAs, and hover micro-animations
-- **Layout**: Responsive — mobile hamburger menu collapses the full nav; desktop uses a persistent sticky navbar
+Contributions are welcome! Please open an issue first to discuss what you would like to change.
+
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feature/my-new-feature`
+3. Commit your changes: `git commit -m 'feat: add some feature'`
+4. Push to the branch: `git push origin feature/my-new-feature`
+5. Open a Pull Request
 
 ---
 
-*Built with 💪 for athletes who obsess over the details.*
+## 📜 License
+
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+
+---
+
+<div align="center">
+
+Made with ❤️ and lots of ☕
+
+*© 2026 NutriGain. Built for athletes.*
+
+</div>
