@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import Lenis from "lenis";
 
 // Helper function to convert text to title case
 const toTitleCase = (str) => {
@@ -13,6 +14,26 @@ const toTitleCase = (str) => {
 export default function AdminPage() {
   const { user, loading: authLoading, logout, checkAuth } = useAuth();
   const router = useRouter();
+  const lenisRef = useRef(null);
+  const mealFormRef = useRef(null);
+  const exerciseFormRef = useRef(null);
+
+  useEffect(() => {
+    const lenis = new Lenis();
+    lenisRef.current = lenis;
+
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+
+    requestAnimationFrame(raf);
+
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
+
   const [activeTab, setActiveTab] = useState("meals"); // 'meals', 'gym', or 'users'
   const [meals, setMeals] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -412,6 +433,15 @@ export default function AdminPage() {
       category: meal.category,
     });
     setShowForm(true);
+
+    // Scroll to the form with Lenis
+    setTimeout(() => {
+      if (mealFormRef.current && lenisRef.current) {
+        lenisRef.current.scrollTo(mealFormRef.current, { offset: -100, duration: 1.2 });
+      } else if (lenisRef.current) {
+        lenisRef.current.scrollTo(0, { duration: 1.2 });
+      }
+    }, 100);
   };
 
   const handleDelete = async (id) => {
@@ -478,6 +508,15 @@ export default function AdminPage() {
     setEditingExercise(exercise);
     setExerciseFormData(exercise);
     setShowExerciseForm(true);
+
+    // Scroll to the form with Lenis
+    setTimeout(() => {
+      if (exerciseFormRef.current && lenisRef.current) {
+        lenisRef.current.scrollTo(exerciseFormRef.current, { offset: -100, duration: 1.2 });
+      } else if (lenisRef.current) {
+        lenisRef.current.scrollTo(0, { duration: 1.2 });
+      }
+    }, 100);
   };
 
   const handleDeleteExercise = async (id) => {
@@ -659,10 +698,9 @@ export default function AdminPage() {
             onClick={() => setActiveTab("meals")}
             className={`
               flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-black uppercase tracking-wider transition-all cursor-pointer
-              ${
-                activeTab === "meals"
-                  ? "bg-lime-500 text-black shadow-lg shadow-lime-500/20"
-                  : "text-neutral-400 hover:text-white hover:bg-neutral-800"
+              ${activeTab === "meals"
+                ? "bg-lime-500 text-black shadow-lg shadow-lime-500/20"
+                : "text-neutral-400 hover:text-white hover:bg-neutral-800"
               }
             `}
           >
@@ -673,10 +711,9 @@ export default function AdminPage() {
             onClick={() => setActiveTab("gym")}
             className={`
               flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-black uppercase tracking-wider transition-all cursor-pointer
-              ${
-                activeTab === "gym"
-                  ? "bg-lime-500 text-black shadow-lg shadow-lime-500/20"
-                  : "text-neutral-400 hover:text-white hover:bg-neutral-800"
+              ${activeTab === "gym"
+                ? "bg-lime-500 text-black shadow-lg shadow-lime-500/20"
+                : "text-neutral-400 hover:text-white hover:bg-neutral-800"
               }
             `}
           >
@@ -687,10 +724,9 @@ export default function AdminPage() {
             onClick={() => setActiveTab("users")}
             className={`
               flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-black uppercase tracking-wider transition-all cursor-pointer
-              ${
-                activeTab === "users"
-                  ? "bg-lime-500 text-black shadow-lg shadow-lime-500/20"
-                  : "text-neutral-400 hover:text-white hover:bg-neutral-800"
+              ${activeTab === "users"
+                ? "bg-lime-500 text-black shadow-lg shadow-lime-500/20"
+                : "text-neutral-400 hover:text-white hover:bg-neutral-800"
               }
             `}
           >
@@ -719,7 +755,7 @@ export default function AdminPage() {
             )}
 
             {showForm && (
-              <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 animate-in fade-in slide-in-from-top-4 duration-300">
+              <div ref={mealFormRef} className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 animate-in fade-in slide-in-from-top-4 duration-300">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">
                     {editingMeal ? "Edit Meal" : "Add New Meal"}
@@ -960,21 +996,20 @@ export default function AdminPage() {
                         </td>
                         <td className="px-6 py-4 hidden lg:table-cell">
                           <span
-                            className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide border ${
-                              meal.category === "breakfast"
-                                ? "text-amber-500 border-amber-500/20 bg-amber-500/10"
-                                : meal.category === "lunch"
-                                  ? "text-emerald-500 border-emerald-500/20 bg-emerald-500/10"
-                                  : meal.category === "dinner"
-                                    ? "text-purple-500 border-purple-500/20 bg-purple-500/10"
-                                    : "text-blue-500 border-blue-500/20 bg-blue-500/10"
-                            }`}
+                            className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide border ${meal.category === "breakfast"
+                              ? "text-amber-500 border-amber-500/20 bg-amber-500/10"
+                              : meal.category === "lunch"
+                                ? "text-emerald-500 border-emerald-500/20 bg-emerald-500/10"
+                                : meal.category === "dinner"
+                                  ? "text-purple-500 border-purple-500/20 bg-purple-500/10"
+                                  : "text-blue-500 border-blue-500/20 bg-blue-500/10"
+                              }`}
                           >
                             {meal.category}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center justify-end gap-2 transition-opacity">
                             <button
                               onClick={() => handleEdit(meal)}
                               className="p-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
@@ -1121,10 +1156,9 @@ export default function AdminPage() {
                         key={group}
                         className={`
                           relative flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all duration-300 border
-                          ${
-                            isSelected
-                              ? "bg-lime-500/10 border-lime-500/20"
-                              : "bg-neutral-950 border-neutral-800 hover:border-neutral-700"
+                          ${isSelected
+                            ? "bg-lime-500/10 border-lime-500/20"
+                            : "bg-neutral-950 border-neutral-800 hover:border-neutral-700"
                           }
                         `}
                       >
@@ -1137,8 +1171,8 @@ export default function AdminPage() {
                             const updatedMuscleGroups = checked
                               ? [...editingDay.muscleGroups, group]
                               : editingDay.muscleGroups.filter(
-                                  (g) => g !== group,
-                                );
+                                (g) => g !== group,
+                              );
 
                             setEditingDay({
                               ...editingDay,
@@ -1203,7 +1237,7 @@ export default function AdminPage() {
 
               {/* Exercise Form */}
               {showExerciseForm && (
-                <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 mb-8 relative animate-in fade-in slide-in-from-top-4 duration-300">
+                <div ref={exerciseFormRef} className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 mb-8 relative animate-in fade-in slide-in-from-top-4 duration-300">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-lime-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
 
                   <div className="relative z-10 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -1417,11 +1451,10 @@ export default function AdminPage() {
                                   </td>
                                   <td className="px-6 py-4">
                                     <span
-                                      className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${
-                                        exercise.type === "COMPOUND"
-                                          ? "bg-lime-500/10 text-lime-500 border-lime-500/20"
-                                          : "bg-neutral-800 text-neutral-400 border-neutral-700"
-                                      }`}
+                                      className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${exercise.type === "COMPOUND"
+                                        ? "bg-lime-500/10 text-lime-500 border-lime-500/20"
+                                        : "bg-neutral-800 text-neutral-400 border-neutral-700"
+                                        }`}
                                     >
                                       {exercise.type === "COMPOUND" && (
                                         <span className="w-1.5 h-1.5 rounded-full bg-lime-500 shadow-[0_0_5px_rgba(132,204,22,0.5)]"></span>
@@ -1495,15 +1528,15 @@ export default function AdminPage() {
                             {exercises.filter(
                               (ex) => ex.muscleGroup === muscleGroup,
                             ).length === 0 && (
-                              <tr>
-                                <td
-                                  colSpan="3"
-                                  className="px-6 py-12 text-center text-neutral-500 text-sm font-medium bg-neutral-950/20"
-                                >
-                                  No exercises added yet for {muscleGroup}.
-                                </td>
-                              </tr>
-                            )}
+                                <tr>
+                                  <td
+                                    colSpan="3"
+                                    className="px-6 py-12 text-center text-neutral-500 text-sm font-medium bg-neutral-950/20"
+                                  >
+                                    No exercises added yet for {muscleGroup}.
+                                  </td>
+                                </tr>
+                              )}
                           </tbody>
                         </table>
                       </div>
@@ -1523,11 +1556,10 @@ export default function AdminPage() {
                                     {exercise.name}
                                   </h5>
                                   <span
-                                    className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${
-                                      exercise.type === "COMPOUND"
-                                        ? "bg-lime-500/10 text-lime-500 border-lime-500/20"
-                                        : "bg-neutral-800 text-neutral-400 border-neutral-700"
-                                    }`}
+                                    className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${exercise.type === "COMPOUND"
+                                      ? "bg-lime-500/10 text-lime-500 border-lime-500/20"
+                                      : "bg-neutral-800 text-neutral-400 border-neutral-700"
+                                      }`}
                                   >
                                     {exercise.type === "COMPOUND" && (
                                       <span className="w-1.5 h-1.5 rounded-full bg-lime-500 shadow-[0_0_5px_rgba(132,204,22,0.5)]"></span>
@@ -1586,10 +1618,10 @@ export default function AdminPage() {
                         {exercises.filter(
                           (ex) => ex.muscleGroup === muscleGroup,
                         ).length === 0 && (
-                          <div className="p-6 text-center text-xs font-bold text-neutral-500 italic bg-neutral-950/20">
-                            No exercises added yet.
-                          </div>
-                        )}
+                            <div className="p-6 text-center text-xs font-bold text-neutral-500 italic bg-neutral-950/20">
+                              No exercises added yet.
+                            </div>
+                          )}
                       </div>
                     </div>
                   ))}
@@ -1877,11 +1909,10 @@ export default function AdminPage() {
                         newSchedule[index] = "Chicken";
                         setTempSchedule(newSchedule);
                       }}
-                      className={`px-4 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
-                        tempSchedule[index] === "Chicken"
-                          ? "bg-orange-500 text-black shadow-lg shadow-orange-500/20"
-                          : "text-neutral-500 hover:text-neutral-300"
-                      }`}
+                      className={`px-4 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${tempSchedule[index] === "Chicken"
+                        ? "bg-orange-500 text-black shadow-lg shadow-orange-500/20"
+                        : "text-neutral-500 hover:text-neutral-300"
+                        }`}
                     >
                       🍗 Chicken
                     </button>
@@ -1891,11 +1922,10 @@ export default function AdminPage() {
                         newSchedule[index] = "Paneer";
                         setTempSchedule(newSchedule);
                       }}
-                      className={`px-4 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
-                        tempSchedule[index] === "Paneer"
-                          ? "bg-lime-500 text-black shadow-lg shadow-lime-500/20"
-                          : "text-neutral-500 hover:text-neutral-300"
-                      }`}
+                      className={`px-4 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${tempSchedule[index] === "Paneer"
+                        ? "bg-lime-500 text-black shadow-lg shadow-lime-500/20"
+                        : "text-neutral-500 hover:text-neutral-300"
+                        }`}
                     >
                       🧀 Paneer
                     </button>
