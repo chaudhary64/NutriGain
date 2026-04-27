@@ -864,7 +864,7 @@ export default function MealTrackingPage() {
                         required={!selectedMeal}
                       />
                       {showMealDropdown && (
-                        <div className="absolute z-50 w-full mt-2 bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl max-h-60 overflow-auto animate-in fade-in zoom-in-95 duration-200 custom-scrollbar">
+                        <div className="absolute z-50 w-full mt-2 bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl max-h-60 overflow-auto animate-in fade-in zoom-in-95 duration-200 custom-scrollbar" data-lenis-prevent="true">
                           {meals
                             .filter((meal) =>
                               meal.name

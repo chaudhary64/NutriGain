@@ -675,44 +675,98 @@ export default function AdminPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Tabs */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-8 p-1 bg-neutral-900 rounded-xl border border-neutral-800">
+        {/* Tabs / Master Controls */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-10">
           <button
             onClick={() => setActiveTab("meals")}
             className={`
-              flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-black uppercase tracking-wider transition-all cursor-pointer
+              group relative flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 overflow-hidden text-left cursor-pointer
               ${activeTab === "meals"
-                ? "bg-lime-500 text-black shadow-lg shadow-lime-500/20"
-                : "text-neutral-400 hover:text-white hover:bg-neutral-800"
+                ? "bg-lime-500/5 border-lime-500/40 shadow-[0_4px_20px_-5px_rgba(132,204,22,0.15)]"
+                : "bg-neutral-900/40 border-neutral-800/60 hover:bg-neutral-900 hover:border-neutral-700"
               }
             `}
           >
-            <span>Meal Management</span>
+            {activeTab === "meals" && (
+              <div className="absolute left-0 top-0 w-1 h-full bg-lime-500 shadow-[0_0_15px_rgba(132,204,22,0.8)]"></div>
+            )}
+            <div className={`
+              p-3 rounded-xl transition-all duration-300 shrink-0
+              ${activeTab === "meals"
+                ? "bg-lime-500 text-black shadow-[0_0_15px_rgba(132,204,22,0.4)]"
+                : "bg-neutral-950 text-neutral-500 border border-neutral-800 group-hover:text-neutral-300 group-hover:border-neutral-600 group-hover:bg-neutral-900"}
+            `}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`${activeTab === 'meals' ? 'scale-110' : 'group-hover:scale-110'} transition-transform duration-300`}>
+                <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
+                <path d="M7 2v20" />
+                <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
+              </svg>
+            </div>
+            <div>
+              <h3 className={`font-black uppercase tracking-widest text-[11px] sm:text-xs mb-0.5 ${activeTab === 'meals' ? 'text-lime-500' : 'text-white'}`}>Meals</h3>
+              <p className="text-[9px] sm:text-[10px] font-bold text-neutral-500 uppercase tracking-wider">Database</p>
+            </div>
           </button>
 
           <button
             onClick={() => setActiveTab("gym")}
             className={`
-              flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-black uppercase tracking-wider transition-all cursor-pointer
+              group relative flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 overflow-hidden text-left cursor-pointer
               ${activeTab === "gym"
-                ? "bg-lime-500 text-black shadow-lg shadow-lime-500/20"
-                : "text-neutral-400 hover:text-white hover:bg-neutral-800"
+                ? "bg-lime-500/5 border-lime-500/40 shadow-[0_4px_20px_-5px_rgba(132,204,22,0.15)]"
+                : "bg-neutral-900/40 border-neutral-800/60 hover:bg-neutral-900 hover:border-neutral-700"
               }
             `}
           >
-            <span>Gym Management</span>
+            {activeTab === "gym" && (
+              <div className="absolute left-0 top-0 w-1 h-full bg-lime-500 shadow-[0_0_15px_rgba(132,204,22,0.8)]"></div>
+            )}
+            <div className={`
+              p-3 rounded-xl transition-all duration-300 shrink-0
+              ${activeTab === "gym"
+                ? "bg-lime-500 text-black shadow-[0_0_15px_rgba(132,204,22,0.4)]"
+                : "bg-neutral-950 text-neutral-500 border border-neutral-800 group-hover:text-neutral-300 group-hover:border-neutral-600 group-hover:bg-neutral-900"}
+            `}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`${activeTab === 'gym' ? 'scale-110' : 'group-hover:scale-110'} transition-transform duration-300`}>
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+              </svg>
+            </div>
+            <div>
+              <h3 className={`font-black uppercase tracking-widest text-[11px] sm:text-xs mb-0.5 ${activeTab === 'gym' ? 'text-lime-500' : 'text-white'}`}>Gym</h3>
+              <p className="text-[9px] sm:text-[10px] font-bold text-neutral-500 uppercase tracking-wider">Library</p>
+            </div>
           </button>
 
           <button
             onClick={() => setActiveTab("users")}
             className={`
-              flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-black uppercase tracking-wider transition-all cursor-pointer
+              group relative flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 overflow-hidden text-left cursor-pointer
               ${activeTab === "users"
-                ? "bg-lime-500 text-black shadow-lg shadow-lime-500/20"
-                : "text-neutral-400 hover:text-white hover:bg-neutral-800"
+                ? "bg-lime-500/5 border-lime-500/40 shadow-[0_4px_20px_-5px_rgba(132,204,22,0.15)]"
+                : "bg-neutral-900/40 border-neutral-800/60 hover:bg-neutral-900 hover:border-neutral-700"
               }
             `}
           >
-            <span>Users</span>
+            {activeTab === "users" && (
+              <div className="absolute left-0 top-0 w-1 h-full bg-lime-500 shadow-[0_0_15px_rgba(132,204,22,0.8)]"></div>
+            )}
+            <div className={`
+              p-3 rounded-xl transition-all duration-300 shrink-0
+              ${activeTab === "users"
+                ? "bg-lime-500 text-black shadow-[0_0_15px_rgba(132,204,22,0.4)]"
+                : "bg-neutral-950 text-neutral-500 border border-neutral-800 group-hover:text-neutral-300 group-hover:border-neutral-600 group-hover:bg-neutral-900"}
+            `}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`${activeTab === 'users' ? 'scale-110' : 'group-hover:scale-110'} transition-transform duration-300`}>
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+            </div>
+            <div>
+              <h3 className={`font-black uppercase tracking-widest text-[11px] sm:text-xs mb-0.5 ${activeTab === 'users' ? 'text-lime-500' : 'text-white'}`}>Users</h3>
+              <p className="text-[9px] sm:text-[10px] font-bold text-neutral-500 uppercase tracking-wider">Directory</p>
+            </div>
           </button>
         </div>
 
@@ -907,78 +961,87 @@ export default function AdminPage() {
               </div>
             )}
 
-            <div className="bg-neutral-900 rounded-2xl border border-neutral-800 overflow-hidden shadow-xl">
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-neutral-800">
-                  <thead className="bg-neutral-950">
-                    <tr>
-                      <th className="px-6 py-4 text-left text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
+            <div className="bg-neutral-900/50 backdrop-blur-xl rounded-[1.25rem] border border-neutral-800/80 overflow-hidden shadow-2xl relative">
+              <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none"></div>
+              <div className="overflow-x-auto relative">
+                <table className="min-w-full divide-y divide-neutral-800/50">
+                  <thead className="bg-neutral-950/80 backdrop-blur-md border-b border-neutral-800/80 sticky top-0 z-10">
+                    <tr className="divide-x divide-neutral-800/50">
+                      <th className="px-6 py-5 text-left text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em]">
                         Name
                       </th>
-                      <th className="px-6 py-4 text-left text-[10px] font-bold text-neutral-500 uppercase tracking-widest hidden sm:table-cell">
+                      <th className="px-6 py-5 text-left text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] hidden sm:table-cell">
                         Serving
                       </th>
-                      <th className="px-6 py-4 text-left text-[10px] font-bold text-neutral-500 uppercase tracking-widest hidden sm:table-cell">
+                      <th className="px-6 py-5 text-left text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] hidden sm:table-cell">
                         Calories
                       </th>
-                      <th className="px-6 py-4 text-left text-[10px] font-bold text-neutral-500 uppercase tracking-widest hidden md:table-cell">
+                      <th className="px-6 py-5 text-left text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] hidden md:table-cell">
                         Protein
                       </th>
-                      <th className="px-6 py-4 text-left text-[10px] font-bold text-neutral-500 uppercase tracking-widest hidden md:table-cell">
+                      <th className="px-6 py-5 text-left text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] hidden md:table-cell">
                         Carbs
                       </th>
-                      <th className="px-6 py-4 text-left text-[10px] font-bold text-neutral-500 uppercase tracking-widest hidden md:table-cell">
+                      <th className="px-6 py-5 text-left text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] hidden md:table-cell">
                         Fats
                       </th>
-                      <th className="px-6 py-4 text-left text-[10px] font-bold text-neutral-500 uppercase tracking-widest hidden lg:table-cell">
+                      <th className="px-6 py-5 text-left text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] hidden lg:table-cell">
                         Category
                       </th>
-                      <th className="px-6 py-4 text-right text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
+                      <th className="px-6 py-5 text-right text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em]">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-neutral-800">
+                  <tbody className="divide-y divide-neutral-800/50 relative z-0">
                     {meals.map((meal) => (
                       <tr
                         key={meal._id}
-                        className="hover:bg-neutral-800/50 transition-colors group"
+                        className="group border-b border-neutral-800/50 hover:bg-neutral-800/40 hover:shadow-inner transition-all duration-300 divide-x divide-neutral-800/50"
                       >
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-5">
                           <div className="flex flex-col">
-                            <span className="font-bold text-white text-sm group-hover:text-lime-500 transition-colors">
+                            <span className="font-bold text-neutral-300 text-sm group-hover:text-white transition-colors">
                               {toTitleCase(meal.name)}
                             </span>
                             {/* Mobile Only Details */}
-                            <div className="sm:hidden mt-2 space-y-1">
-                              <div className="text-xs text-neutral-400">
-                                {meal.servingSize} • {meal.macros.calories}kcal
-                              </div>
-                              <div className="text-xs font-mono text-lime-500">
-                                P:{meal.macros.protein}g C:{meal.macros.carbs}g
-                                F:{meal.macros.fats}g
+                            <div className="sm:hidden mt-2 flex flex-col gap-2">
+                              <span className="text-xs text-neutral-400">
+                                {meal.servingSize} • <span className="text-white font-mono font-bold">{meal.macros.calories}</span>kcal
+                              </span>
+                              <div className="flex gap-1.5 flex-wrap">
+                                <span className="px-1.5 py-0.5 rounded bg-lime-500/10 text-lime-500 border border-lime-500/20 font-mono text-[10px] font-bold">P: {meal.macros.protein}g</span>
+                                <span className="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 font-mono text-[10px] font-bold">C: {meal.macros.carbs}g</span>
+                                <span className="px-1.5 py-0.5 rounded bg-red-500/10 text-red-500 border border-red-500/20 font-mono text-[10px] font-bold">F: {meal.macros.fats}g</span>
                               </div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-sm font-medium text-neutral-400 hidden sm:table-cell">
+                        <td className="px-6 py-5 text-sm font-medium text-neutral-400 hidden sm:table-cell group-hover:text-neutral-300 transition-colors">
                           {meal.servingSize}
                         </td>
-                        <td className="px-6 py-4 text-sm font-bold text-white hidden sm:table-cell">
-                          {meal.macros.calories}
+                        <td className="px-6 py-5 text-sm hidden sm:table-cell">
+                          <span className="font-mono font-bold text-neutral-300 group-hover:text-white transition-colors">{meal.macros.calories}</span>
+                          <span className="text-[10px] font-bold text-neutral-600 ml-1 uppercase tracking-widest">kcal</span>
                         </td>
-                        <td className="px-6 py-4 text-sm font-bold text-lime-500 hidden md:table-cell">
-                          {meal.macros.protein}g
+                        <td className="px-6 py-5 hidden md:table-cell">
+                          <span className="inline-flex items-center px-2 py-1 rounded bg-lime-500/10 text-lime-500 border border-lime-500/20 font-mono text-xs font-bold">
+                            {meal.macros.protein}g
+                          </span>
                         </td>
-                        <td className="px-6 py-4 text-sm font-bold text-neutral-400 hidden md:table-cell">
-                          {meal.macros.carbs}g
+                        <td className="px-6 py-5 hidden md:table-cell">
+                          <span className="inline-flex items-center px-2 py-1 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 font-mono text-xs font-bold">
+                            {meal.macros.carbs}g
+                          </span>
                         </td>
-                        <td className="px-6 py-4 text-sm font-bold text-neutral-400 hidden md:table-cell">
-                          {meal.macros.fats}g
+                        <td className="px-6 py-5 hidden md:table-cell">
+                          <span className="inline-flex items-center px-2 py-1 rounded bg-red-500/10 text-red-500 border border-red-500/20 font-mono text-xs font-bold">
+                            {meal.macros.fats}g
+                          </span>
                         </td>
-                        <td className="px-6 py-4 hidden lg:table-cell">
+                        <td className="px-6 py-5 hidden lg:table-cell">
                           <span
-                            className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide border ${meal.category === "breakfast"
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border ${meal.category === "breakfast"
                               ? "text-amber-500 border-amber-500/20 bg-amber-500/10"
                               : meal.category === "lunch"
                                 ? "text-emerald-500 border-emerald-500/20 bg-emerald-500/10"
@@ -987,47 +1050,28 @@ export default function AdminPage() {
                                   : "text-blue-500 border-blue-500/20 bg-blue-500/10"
                               }`}
                           >
+                            <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
                             {meal.category}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2 transition-opacity">
+                        <td className="px-6 py-5 text-right">
+                          <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => handleEdit(meal)}
-                              className="p-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
+                              className="p-2 bg-neutral-900/80 text-neutral-400 border border-neutral-800 hover:text-white hover:bg-neutral-800 hover:border-neutral-600 hover:shadow-lg rounded-lg transition-all duration-300 cursor-pointer"
+                              title="Edit Meal"
                             >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="w-4 h-4"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                strokeWidth={2}
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                                />
+                              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                               </svg>
                             </button>
                             <button
                               onClick={() => handleDelete(meal._id)}
-                              className="p-2 text-neutral-400 hover:text-red-500 hover:bg-neutral-800 rounded-lg transition-colors"
+                              className="p-2 bg-neutral-900/80 text-neutral-400 border border-neutral-800 hover:text-red-500 hover:bg-red-500/10 hover:border-red-500/30 hover:shadow-lg rounded-lg transition-all duration-300 cursor-pointer"
+                              title="Delete Meal"
                             >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="w-4 h-4"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                strokeWidth={2}
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                />
+                              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                               </svg>
                             </button>
                           </div>
@@ -1074,7 +1118,7 @@ export default function AdminPage() {
                         </span>
                         <button
                           onClick={() => handleEditSchedule(schedule)}
-                          className="text-neutral-600 hover:text-lime-500 transition-colors"
+                          className="text-neutral-600 hover:text-lime-500 transition-colors cursor-pointer"
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -1273,7 +1317,7 @@ export default function AdminPage() {
                           required={!exerciseFormData.muscleGroup}
                         />
                         {showMuscleGroupDropdown && (
-                          <div className="absolute z-50 w-full mt-2 bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl max-h-60 overflow-auto custom-scrollbar">
+                          <div className="absolute z-50 w-full mt-2 bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl max-h-60 overflow-auto custom-scrollbar" data-lenis-prevent="true">
                             {uniqueMuscleGroups
                               .filter((group) => group !== "Rest Day")
                               .filter((group) =>
@@ -1867,7 +1911,7 @@ export default function AdminPage() {
               </button>
             </div>
 
-            <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
+            <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar" data-lenis-prevent="true">
               {[
                 "Sunday",
                 "Monday",
