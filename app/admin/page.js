@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import Lenis from "lenis";
 
 // Helper function to convert text to title case
 const toTitleCase = (str) => {
@@ -14,25 +13,8 @@ const toTitleCase = (str) => {
 export default function AdminPage() {
   const { user, loading: authLoading, logout, checkAuth } = useAuth();
   const router = useRouter();
-  const lenisRef = useRef(null);
   const mealFormRef = useRef(null);
   const exerciseFormRef = useRef(null);
-
-  useEffect(() => {
-    const lenis = new Lenis();
-    lenisRef.current = lenis;
-
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    requestAnimationFrame(raf);
-
-    return () => {
-      lenis.destroy();
-    };
-  }, []);
 
   const [activeTab, setActiveTab] = useState("meals"); // 'meals', 'gym', or 'users'
   const [meals, setMeals] = useState([]);
@@ -436,10 +418,10 @@ export default function AdminPage() {
 
     // Scroll to the form with Lenis
     setTimeout(() => {
-      if (mealFormRef.current && lenisRef.current) {
-        lenisRef.current.scrollTo(mealFormRef.current, { offset: -100, duration: 1.2 });
-      } else if (lenisRef.current) {
-        lenisRef.current.scrollTo(0, { duration: 1.2 });
+      if (mealFormRef.current && window.lenis) {
+        window.lenis.scrollTo(mealFormRef.current, { offset: -100, duration: 1.2 });
+      } else if (window.lenis) {
+        window.lenis.scrollTo(0, { duration: 1.2 });
       }
     }, 100);
   };
@@ -511,10 +493,10 @@ export default function AdminPage() {
 
     // Scroll to the form with Lenis
     setTimeout(() => {
-      if (exerciseFormRef.current && lenisRef.current) {
-        lenisRef.current.scrollTo(exerciseFormRef.current, { offset: -100, duration: 1.2 });
-      } else if (lenisRef.current) {
-        lenisRef.current.scrollTo(0, { duration: 1.2 });
+      if (exerciseFormRef.current && window.lenis) {
+        window.lenis.scrollTo(exerciseFormRef.current, { offset: -100, duration: 1.2 });
+      } else if (window.lenis) {
+        window.lenis.scrollTo(0, { duration: 1.2 });
       }
     }, 100);
   };

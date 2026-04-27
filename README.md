@@ -61,6 +61,7 @@ Instead of scattered spreadsheets and basic calorie counters, NutriGain gives yo
 - **[React 19](https://react.dev/)** — UI library with hooks and context
 - **[Tailwind CSS 4](https://tailwindcss.com/)** — Utility-first styling with dark, premium aesthetics
 - **[GSAP 3](https://gsap.com/)** — High-performance animations (hero reveals, scroll triggers, cursor glow)
+- **[Lenis](https://lenis.studiofreight.com/)** — Buttery smooth scrolling across the entire app
 - **[Recharts 3](https://recharts.org/)** — Composable data visualization for weight charts
 - **[react-activity-calendar](https://www.npmjs.com/package/react-activity-calendar)** — GitHub-style gym heatmap
 - **[react-tooltip](https://www.npmjs.com/package/react-tooltip)** — Contextual tooltips for heatmap cells
