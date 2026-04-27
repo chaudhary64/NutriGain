@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, useParams } from "next/navigation";
+import Loader from "@/components/Loader";
 import {
   LineChart,
   Line,
@@ -79,11 +80,7 @@ export default function UserDetailPage() {
   };
 
   if (authLoading || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">Loading...</div>
-      </div>
-    );
+    return <Loader />;
   }
 
   if (!authUser || !authUser.isAdmin || !userData) {

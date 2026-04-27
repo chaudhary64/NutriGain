@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
+import Loader from "@/components/Loader";
 
 // Helper function to convert text to title case
 const toTitleCase = (str) => {
@@ -236,9 +237,8 @@ export default function MealTrackingPage() {
           </div>
           <div className="text-right flex items-baseline gap-1">
             <span
-              className={`text-sm font-bold ${
-                isOverLimit ? "text-red-500" : "text-white"
-              }`}
+              className={`text-sm font-bold ${isOverLimit ? "text-red-500" : "text-white"
+                }`}
             >
               {value}
             </span>
@@ -246,9 +246,9 @@ export default function MealTrackingPage() {
             <span className="text-xs text-neutral-500">{max}</span>
             {hasPreview &&
               value !==
-                previewMacros[
-                  label.toLowerCase().split(" ")[0].replace("(g)", "")
-                ] && (
+              previewMacros[
+              label.toLowerCase().split(" ")[0].replace("(g)", "")
+              ] && (
                 <span className="ml-1 text-lime-500 font-bold animate-pulse text-xs">
                   +
                   {label.includes("Calories")
@@ -266,9 +266,8 @@ export default function MealTrackingPage() {
           className={`w-full bg-neutral-950 rounded-full h-2 relative overflow-hidden border border-neutral-800`}
         >
           <div
-            className={`h-full rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(0,0,0,0.5)] ${color} ${
-              isOverLimit ? "animate-pulse" : ""
-            }`}
+            className={`h-full rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(0,0,0,0.5)] ${color} ${isOverLimit ? "animate-pulse" : ""
+              }`}
             style={{ width: `${percentage}%` }}
           ></div>
           {hasPreview && (
@@ -284,7 +283,7 @@ export default function MealTrackingPage() {
                         ? previewMacros.carbs
                         : previewMacros.fats) /
                     max) *
-                    100,
+                  100,
                   100,
                 )}%`,
               }}
@@ -296,35 +295,7 @@ export default function MealTrackingPage() {
   };
 
   if (authLoading || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-950 text-lime-500">
-        <div className="flex flex-col items-center gap-4">
-          <svg
-            className="animate-spin h-10 w-10"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            ></circle>
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
-          </svg>
-          <div className="text-xl font-bold tracking-widest uppercase">
-            Loading...
-          </div>
-        </div>
-      </div>
-    );
+    return <Loader />;
   }
 
   if (!user || user.isAdmin) {
@@ -404,9 +375,9 @@ export default function MealTrackingPage() {
                   type="date"
                   value={currentDate}
                   onChange={(e) => setCurrentDate(e.target.value)}
-                  className="pl-10 pr-4 py-2 bg-neutral-900 border border-neutral-800 rounded-xl focus:outline-none focus:border-lime-500 text-sm font-bold text-white cursor-pointer hover:bg-neutral-800 transition-colors"
+                  className="pl-10 pr-4 py-2.5 bg-neutral-900/50 backdrop-blur-md border border-neutral-800 rounded-xl focus:outline-none focus:border-lime-500 focus:ring-2 focus:ring-lime-500/20 text-sm font-bold text-neutral-300 group-hover:text-white cursor-pointer hover:bg-neutral-800 hover:border-neutral-700 transition-all shadow-lg [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer relative z-10 uppercase tracking-widest"
                 />
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-lime-500">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 group-hover:text-lime-500 transition-colors z-20 pointer-events-none">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -517,16 +488,34 @@ export default function MealTrackingPage() {
                 </div>
               </div>
 
-              <div className="pb-4">
+              <div className="pb-4 relative group">
                 <p className="text-xs text-neutral-400 uppercase tracking-widest font-bold mb-2">
                   Select Date
                 </p>
-                <input
-                  type="date"
-                  value={currentDate}
-                  onChange={(e) => setCurrentDate(e.target.value)}
-                  className="w-full py-3 px-4 bg-neutral-950 border border-neutral-800 rounded-xl text-white font-medium focus:outline-none focus:border-lime-500"
-                />
+                <div className="relative">
+                  <input
+                    type="date"
+                    value={currentDate}
+                    onChange={(e) => setCurrentDate(e.target.value)}
+                    className="w-full py-3 pl-11 pr-4 bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-lime-500 focus:ring-2 focus:ring-lime-500/20 text-white font-bold cursor-pointer hover:border-neutral-700 transition-all [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer relative z-10 uppercase tracking-widest"
+                  />
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 group-hover:text-lime-500 transition-colors z-20 pointer-events-none">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2}
+                      stroke="currentColor"
+                      className="w-5 h-5"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
+                      />
+                    </svg>
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -680,14 +669,13 @@ export default function MealTrackingPage() {
                           {item.label}
                         </p>
                         <p
-                          className={`text-xl font-black ${
-                            isExceeded ? "text-red-500" : "text-white"
-                          }`}
+                          className={`text-xl font-black ${isExceeded ? "text-red-500" : "text-white"
+                            }`}
                         >
                           {isExceeded
                             ? `+${Math.abs(valNum).toFixed(
-                                item.label === "Calories" ? 0 : 1,
-                              )}`
+                              item.label === "Calories" ? 0 : 1,
+                            )}`
                             : valNum}
                           <span className="text-xs font-bold ml-1 opacity-50 text-neutral-400">
                             {item.unit}
@@ -829,9 +817,9 @@ export default function MealTrackingPage() {
                           (selectedMeal
                             ? meals.find((m) => m._id === selectedMeal)?.name
                               ? toTitleCase(
-                                  meals.find((m) => m._id === selectedMeal)
-                                    .name,
-                                )
+                                meals.find((m) => m._id === selectedMeal)
+                                  .name,
+                              )
                               : ""
                             : "")
                         }
@@ -894,11 +882,11 @@ export default function MealTrackingPage() {
                               .toLowerCase()
                               .includes(mealSearch.toLowerCase()),
                           ).length === 0 && (
-                            <div className="px-4 py-8 text-center text-neutral-500 text-sm flex flex-col items-center gap-2">
-                              <span className="text-2xl opacity-20">🔍</span>
-                              No matching meals found
-                            </div>
-                          )}
+                              <div className="px-4 py-8 text-center text-neutral-500 text-sm flex flex-col items-center gap-2">
+                                <span className="text-2xl opacity-20">🔍</span>
+                                No matching meals found
+                              </div>
+                            )}
                         </div>
                       )}
                     </div>
