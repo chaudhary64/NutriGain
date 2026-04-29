@@ -410,6 +410,12 @@ export default function MealTrackingPage() {
                 >
                   Gym
                 </button>
+                <button
+                  onClick={() => router.push("/dashboard/profile")}
+                  className="px-4 py-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg font-bold text-sm flex items-center gap-2 transition-all cursor-pointer uppercase tracking-wide"
+                >
+                  Profile
+                </button>
               </div>
 
               <div className="flex items-center gap-4 pl-2">
@@ -536,6 +542,15 @@ export default function MealTrackingPage() {
                   className="w-full flex items-center justify-between px-4 py-3 text-neutral-400 hover:bg-neutral-800 rounded-xl font-bold uppercase tracking-wider"
                 >
                   Gym Tracker
+                </button>
+                <button
+                  onClick={() => {
+                    router.push("/dashboard/profile");
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center justify-between px-4 py-3 text-neutral-400 hover:bg-neutral-800 rounded-xl font-bold uppercase tracking-wider"
+                >
+                  Profile
                 </button>
               </div>
 

@@ -68,6 +68,27 @@ export default function DashboardPage() {
                 <p className="text-sm font-bold text-white">{user.name}</p>
               </div>
               <div className="h-8 w-px bg-neutral-800"></div>
+              <div className="flex gap-1 bg-neutral-900 p-1 rounded-xl border border-neutral-800">
+                <button
+                  onClick={() => router.push("/dashboard/meal")}
+                  className="px-4 py-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg font-bold text-sm transition-all cursor-pointer uppercase tracking-wide"
+                >
+                  Meal
+                </button>
+                <button
+                  onClick={() => router.push("/dashboard/gym")}
+                  className="px-4 py-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg font-bold text-sm transition-all cursor-pointer uppercase tracking-wide"
+                >
+                  Gym
+                </button>
+                <button
+                  onClick={() => router.push("/dashboard/profile")}
+                  className="px-4 py-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg font-bold text-sm transition-all cursor-pointer uppercase tracking-wide"
+                >
+                  Profile
+                </button>
+              </div>
+              <div className="h-8 w-px bg-neutral-800"></div>
               <button
                 onClick={logout}
                 className="group flex items-center gap-2 text-neutral-400 hover:text-white transition-colors duration-200"
@@ -152,6 +173,15 @@ export default function DashboardPage() {
                 className="w-full text-left px-4 py-3 rounded-xl bg-neutral-800 text-white font-bold uppercase tracking-wider hover:bg-neutral-700 transition"
               >
                 Gym Tracker
+              </button>
+              <button
+                onClick={() => {
+                  router.push("/dashboard/profile");
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full text-left px-4 py-3 rounded-xl bg-neutral-800 text-white font-bold uppercase tracking-wider hover:bg-neutral-700 transition"
+              >
+                Profile
               </button>
               <button
                 onClick={() => {

@@ -1,6 +1,7 @@
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import { UserSettingsProvider } from "@/context/UserSettingsContext";
 import LenisProvider from "@/components/LenisProvider";
 const inter = Inter({
   variable: "--font-inter",
@@ -37,9 +38,11 @@ export default function RootLayout({ children }) {
         className={`${inter.variable} ${playfair.variable} antialiased`}
         suppressHydrationWarning
       >
-        <LenisProvider>
-          <AuthProvider>{children}</AuthProvider>
-        </LenisProvider>
+        <UserSettingsProvider>
+          <LenisProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </LenisProvider>
+        </UserSettingsProvider>
       </body>
     </html>
   );

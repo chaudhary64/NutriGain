@@ -1,26 +1,51 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import Lenis from "lenis";
+import { useUserSettings } from "@/context/UserSettingsContext";
 
 export default function LenisProvider({ children }) {
-  useEffect(() => {
-    const lenis = new Lenis();
+  const { smoothScroll, mounted } = useUserSettings();
+  const lenisRef = useRef(null);
+  const rafRef = useRef(null);
 
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
+  useEffect(() => {
+    if (!mounted) return;
+
+    if (smoothScroll) {
+      const lenis = new Lenis({ lerp: 0.08, smoothWheel: true });
+      lenisRef.current = lenis;
+      window.lenis = lenis;
+
+      function raf(time) {
+        lenis.raf(time);
+        rafRef.current = requestAnimationFrame(raf);
+      }
+      rafRef.current = requestAnimationFrame(raf);
+    } else {
+      if (lenisRef.current) {
+        lenisRef.current.destroy();
+        lenisRef.current = null;
+        delete window.lenis;
+      }
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
     }
 
-    requestAnimationFrame(raf);
-    
-    window.lenis = lenis;
-
     return () => {
-      lenis.destroy();
-      delete window.lenis;
+      if (lenisRef.current) {
+        lenisRef.current.destroy();
+        lenisRef.current = null;
+        delete window.lenis;
+      }
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
     };
-  }, []);
+  }, [smoothScroll, mounted]);
 
   return <>{children}</>;
 }
