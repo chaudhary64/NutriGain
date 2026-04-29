@@ -44,6 +44,10 @@ const UserSchema = new mongoose.Schema({
     type: [String],
     default: ["Paneer", "Chicken", "Paneer", "Chicken", "Paneer", "Chicken", "Paneer"], // 0=Sun, 1=Mon, ...
   },
+  smoothScroll: {
+    type: Boolean,
+    default: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

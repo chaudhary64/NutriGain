@@ -38,11 +38,11 @@ export default function RootLayout({ children }) {
         className={`${inter.variable} ${playfair.variable} antialiased`}
         suppressHydrationWarning
       >
-        <UserSettingsProvider>
-          <LenisProvider>
-            <AuthProvider>{children}</AuthProvider>
-          </LenisProvider>
-        </UserSettingsProvider>
+        <AuthProvider>
+          <UserSettingsProvider>
+            <LenisProvider>{children}</LenisProvider>
+          </UserSettingsProvider>
+        </AuthProvider>
       </body>
     </html>
   );
