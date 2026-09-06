@@ -30,8 +30,8 @@ Most fitness apps either track food *or* training — NutriGain does both, and d
 Instead of scattered spreadsheets and basic calorie counters, NutriGain gives you a unified, data-rich dashboard where you can:
 
 - **Hit your macros** — track calories, protein, carbs, and fats in real time with a curated meal database
-- **Log your lifts** — record personal records and working weights, organized by muscle group and exercise type
-- **Stay consistent** — a GitHub-style gym activity heatmap makes your habits impossible to ignore
+- **Log your lifts** — record every set as real numbers (kg × reps) per exercise, with automatic PR detection and progression charts
+- **Stay consistent** — a GitHub-style activity heatmap, fed by real training volume, makes your habits impossible to ignore
 - **See progress** — visualize body weight trends over time with interactive charts
 - **Stay accountable** — a day-level daily log ties nutrition and gym sessions together in one place
 
@@ -43,9 +43,11 @@ Instead of scattered spreadsheets and basic calorie counters, NutriGain gives yo
 |---|---|
 | 🎯 **Macro Tracking** | Real-time calorie, protein, carb, and fat monitoring with visual progress meters |
 | 🍽️ **Meal Database** | Searchable database of meals with macro breakdowns per serving |
-| 🏋️ **Gym Log & PR Tracking** | Log personal records and working weights categorized by muscle group |
+| 🏋️ **Numeric Set Logging** | Log every working set as kg × reps per exercise; sessions are stored per day and merge as you train |
+| 🏆 **Auto PR Detection** | Personal records update automatically when you log a heavier set — no manual entry |
+| 📈 **PR Progression Charts** | Per-exercise top-set weight chart over the last 6 months |
 | 📆 **Weekly Workout Schedules** | Define which muscle groups to train on which days of the week |
-| 🔥 **Activity Heatmap** | GitHub-style heatmap to visualize gym consistency across the calendar year |
+| 🔥 **Activity Heatmap** | GitHub-style heatmap of the calendar year, fed by real training sessions and showing daily volume (kg lifted) |
 | 📊 **Weight Progression Charts** | Interactive Recharts graphs to track body weight trends over time |
 | 📅 **Daily Log** | Unified per-day log linking meals (breakfast, lunch, dinner) with gym status |
 | 🔒 **Secure Auth** | Passwords hashed with `bcryptjs`, JWT sessions in `httpOnly` cookies, route guards via a Next.js proxy, login rate limiting, and server-side input validation |
@@ -62,7 +64,7 @@ Instead of scattered spreadsheets and basic calorie counters, NutriGain gives yo
 - **[Tailwind CSS 4](https://tailwindcss.com/)** — Utility-first styling with dark, premium aesthetics
 - **[GSAP 3](https://gsap.com/)** — High-performance animations (hero reveals, scroll triggers, cursor glow)
 - **[Lenis](https://lenis.studiofreight.com/)** — Buttery smooth scrolling across the entire app
-- **[Recharts 3](https://recharts.org/)** — Composable data visualization for weight charts
+- **[Recharts 3](https://recharts.org/)** — Composable data visualization for weight trends and PR progression
 - **[react-activity-calendar](https://www.npmjs.com/package/react-activity-calendar)** — GitHub-style gym heatmap
 - **[react-tooltip](https://www.npmjs.com/package/react-tooltip)** — Contextual tooltips for heatmap cells
 - **[date-fns](https://date-fns.org/)** — Lightweight date utility library
@@ -93,10 +95,11 @@ NutriGain/
 │   │   ├── settings/           # GET/PUT global meal schedule (admin)
 │   │   ├── users/              # GET all users & details (admin)
 │   │   ├── weight/             # GET/POST/PUT/DELETE body weight entries
-│   │   └── workout-schedule/   # GET weekly schedule, PUT single day (admin)
+│   │   ├── workout-schedule/   # GET weekly schedule, PUT single day (admin)
+│   │   └── workout-sessions/   # GET day/range/PR-series/summary, PUT merge-upsert, DELETE
 │   ├── admin/                  # Admin panel — manage meals, exercises, users
 │   ├── dashboard/
-│   │   ├── gym/                # Gym tracking: PRs, heatmap, workout log
+│   │   ├── gym/                # Gym tracking: numeric set logging, PRs, heatmap
 │   │   ├── meal/               # Meal logging: search, add, daily macros
 │   │   └── profile/            # Profile: preferences & settings
 │   ├── login/                  # Login page
@@ -105,19 +108,24 @@ NutriGain/
 │   ├── layout.js               # Root layout with fonts & providers
 │   └── page.js                 # Landing page with GSAP scroll animations
 ├── components/
+│   ├── AppShell.js             # Shared nav shell (dashboard/admin variants, slot support)
 │   ├── LenisProvider.js        # Global smooth-scroll provider
 │   └── Loader.js               # Full-screen loading state
 ├── context/
 │   ├── AuthContext.js          # Global auth state via React context
 │   └── UserSettingsContext.js  # Smooth-scroll & UI preferences
 ├── lib/
-│   ├── auth.js                 # JWT sign/verify, cookie options, auth helpers
+│   ├── auth.js                 # JWT sign/verify, cookie options, withAuth wrapper
+│   ├── goals.js                # Per-user macro goal seeding from env defaults
+│   ├── heatmap.js              # Session → heatmap merge (client-safe)
 │   ├── mongodb.js              # Mongoose connection singleton
 │   ├── rate-limit.js           # Login rate limiting
-│   └── validation.js           # Server-side input validation helpers
-├── models/                     # Mongoose schemas (User, Meal, DailyLog, ...)
+│   ├── validation.js           # Server-side input validation helpers
+│   └── workout-session.js      # Session validation, merge modes, auto-PR logic
+├── models/                     # Mongoose schemas (User, Meal, DailyLog, WorkoutSession, ...)
 ├── proxy.js                    # Route guard for protected pages & APIs
 ├── scripts/
+│   ├── migrate-sets.js         # Legacy lift strings → numeric sets (pnpm run migrate-sets)
 │   └── seed-admin.js           # Manual admin seeding (pnpm run seed)
 ├── public/                     # Icons & web manifest
 ├── .env.local.example          # Environment variable template
@@ -149,9 +157,11 @@ NutriGain/
    └── Daily log backed by GET/POST /api/daily-log
 
 5. Gym Dashboard (/dashboard/gym)
-   ├── Log today's exercises: select muscle group → exercise → sets/reps/weight
-   ├── View personal records (PRs) per exercise
-   ├── Activity heatmap showing gym sessions over the past year
+   ├── Today's scheduled muscle groups → inline kg × reps editor per exercise
+   ├── Log Sets → PUT /api/workout-sessions (merge-upsert per day)
+   ├── Heavier set logged → PR auto-updates with a 🏆 badge
+   ├── PR progression chart per exercise (top-set weight, last 6 months)
+   ├── Activity heatmap with real training volume in the tooltips
    ├── Body weight chart via Recharts (GET /api/weight)
    └── Mark workout as completed → updates gymStatus in DailyLog
 
@@ -232,7 +242,20 @@ SEED_ADMIN_PASSWORD=choose-a-strong-password
 
 Then access the admin panel at `/admin`.
 
-### 6. Build for production
+### 6. (Optional) Migrate legacy lift data
+
+If your database was created before numeric set logging, parse the old
+weight strings into the numeric set fields — dry-run first, then write:
+
+```bash
+pnpm run migrate-sets            # preview what would change
+pnpm run migrate-sets -- --write # persist
+```
+
+The migration is additive: legacy string fields are never modified, so it is
+safe to re-run.
+
+### 7. Build for production
 
 ```bash
 pnpm run build

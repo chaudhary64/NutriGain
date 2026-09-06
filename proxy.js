@@ -21,6 +21,7 @@ const PROTECTED_API_PREFIXES = [
   '/api/users',
   '/api/workout-schedule',
   '/api/exercises',
+  '/api/workout-sessions',
 ];
 
 // JWT_SECRET is read via getJwtSecret() per request so misconfiguration is
@@ -78,5 +79,6 @@ export const config = {
     '/api/users/:path*',
     '/api/workout-schedule/:path*',
     '/api/exercises/:path*',
+    '/api/workout-sessions/:path*',
   ],
 };

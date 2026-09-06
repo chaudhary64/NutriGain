@@ -20,8 +20,11 @@ export const GET = withAuth(async (request, user) => {
     userDataMap.set(data.exerciseId.toString(), {
       warmUp: data.warmUp,
       working: data.working,
+      warmUpSets: data.warmUpSets || [],
+      workingSets: data.workingSets || [],
       lastPR: data.lastPR,
       lastPRDate: data.lastPRDate,
+      prWeight: data.prWeight ?? null,
     });
   });
 

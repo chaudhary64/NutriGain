@@ -19,6 +19,16 @@ const UserExerciseDataSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  // Numeric set templates (legacy `warmUp`/`working` strings stay for
+  // backwards compatibility; the migration copies parsed values here).
+  warmUpSets: {
+    type: [{ weight: { type: Number, min: 0 }, reps: { type: Number, min: 0 } }],
+    default: undefined,
+  },
+  workingSets: {
+    type: [{ weight: { type: Number, min: 0 }, reps: { type: Number, min: 0 } }],
+    default: undefined,
+  },
   lastPR: {
     type: String,
     default: '',
@@ -26,6 +36,12 @@ const UserExerciseDataSchema = new mongoose.Schema({
   lastPRDate: {
     type: String,
     default: '',
+  },
+  // Numeric PR (legacy `lastPR` string stays for backwards compatibility).
+  prWeight: {
+    type: Number,
+    min: 0,
+    default: undefined,
   },
   createdAt: {
     type: Date,

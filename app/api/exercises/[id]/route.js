@@ -22,16 +22,40 @@ export const PUT = withAuth(async (request, user, { params }) => {
 
   const body = await request.json().catch(() => ({}));
 
-  // Whitelist user-data fields — these strings belong to the caller only.
+  /** Numeric set arrays: [{weight, reps}] — validated, capped at 20. */
+  const parseSetArray = (raw) => {
+    if (!Array.isArray(raw) || raw.length === 0) return undefined;
+    if (raw.length > 20) return undefined;
+    const sets = [];
+    for (const s of raw) {
+      const weight = Number(s?.weight);
+      const reps = Number(s?.reps);
+      if (!Number.isFinite(weight) || weight < 0 || weight > 1000) return undefined;
+      if (!Number.isInteger(reps) || reps < 0 || reps > 500) return undefined;
+      sets.push({ weight: Math.round(weight * 100) / 100, reps });
+    }
+    return sets;
+  };
+
+  // Whitelist user-data fields — these belong to the caller only.
   const userDataFields = {
     warmUp: typeof body?.warmUp === "string" ? body.warmUp.slice(0, 200) : undefined,
     working: typeof body?.working === "string" ? body.working.slice(0, 200) : undefined,
+    warmUpSets: parseSetArray(body?.warmUpSets),
+    workingSets: parseSetArray(body?.workingSets),
+    prWeight:
+      body?.prWeight === null
+        ? null
+        : Number.isFinite(Number(body?.prWeight)) && Number(body?.prWeight) >= 0
+          ? Number(body?.prWeight)
+          : undefined,
     lastPR: typeof body?.lastPR === "string" ? body.lastPR.slice(0, 100) : undefined,
     lastPRDate: typeof body?.lastPRDate === "string" ? body.lastPRDate.slice(0, 40) : undefined,
     updatedAt: Date.now(),
   };
 
-  // Update or create user-specific exercise data
+  // Update or create user-specific exercise data. Mongo ignores $set keys
+  // whose value is `undefined`, so unset optional fields never clobber data.
   const userExerciseData = await UserExerciseData.findOneAndUpdate(
     { userId: user.id, exerciseId: id },
     { $set: userDataFields },
@@ -46,8 +70,11 @@ export const PUT = withAuth(async (request, user, { params }) => {
     type: exercise.type,
     warmUp: userExerciseData.warmUp,
     working: userExerciseData.working,
+    warmUpSets: userExerciseData.warmUpSets || [],
+    workingSets: userExerciseData.workingSets || [],
     lastPR: userExerciseData.lastPR,
     lastPRDate: userExerciseData.lastPRDate,
+    prWeight: userExerciseData.prWeight ?? null,
   });
 });
 

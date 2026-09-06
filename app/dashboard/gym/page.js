@@ -2,11 +2,12 @@
 
 import { useEffect, useState, cloneElement } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
 import { ActivityCalendar } from "react-activity-calendar";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, startOfYear } from "date-fns";
+import { mergeSessionsIntoHeatmap } from "@/lib/heatmap";
+import AppShell from "@/components/AppShell";
 import Loader from "@/components/Loader";
 import {
   LineChart,
@@ -26,9 +27,7 @@ const toTitleCase = (str) => {
 };
 
 export default function GymTrackingPage() {
-  const { user, loading: authLoading, logout, checkAuth } = useAuth();
-  const router = useRouter();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, checkAuth } = useAuth();
 
   // Data State
   const [exercises, setExercises] = useState([]);
@@ -38,6 +37,12 @@ export default function GymTrackingPage() {
 
   // UI State
   const [loading, setLoading] = useState(true);
+  const [todaySession, setTodaySession] = useState(null);
+  const [yearSessions, setYearSessions] = useState([]); // lean sessions feeding the heatmap
+  const [setDrafts, setSetDrafts] = useState({}); // exerciseId -> [{weight, reps}]
+  const [savingExercise, setSavingExercise] = useState(null); // exerciseId being saved
+  const [savedExercises, setSavedExercises] = useState({}); // exerciseId -> true (flash)
+  const [newPRs, setNewPRs] = useState({}); // exerciseId -> { newPR, previousPR }
   const [currentDate, setCurrentDate] = useState(
     format(new Date(), "yyyy-MM-dd"),
   );
@@ -54,14 +59,9 @@ export default function GymTrackingPage() {
   const [newWeightDate, setNewWeightDate] = useState(
     new Date().toISOString().split("T")[0],
   );
-  const [editFormData, setEditFormData] = useState({
-    warmUp: "",
-    working: "",
-    lastPR: "",
-    lastPRDate: "",
-  });
-  const [editingExercise, setEditingExercise] = useState(null);
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
+  const [prExercise, setPrExercise] = useState(null); // exerciseId whose PR chart is open
+  const [prSeries, setPrSeries] = useState([]);
 
   // Initial Fetch Setup
   useEffect(() => {
@@ -93,7 +93,7 @@ export default function GymTrackingPage() {
     // Only set loading on initial mount
     if (loading) setLoading(true);
 
-    await Promise.all([fetchGymData(), fetchWeightData(), fetchGymHistory()]);
+    await Promise.all([fetchGymData(), fetchWeightData(), fetchGymHistory(), fetchSession(), fetchYearSessions()]);
 
     setLoading(false);
   };
@@ -161,6 +161,32 @@ export default function GymTrackingPage() {
       }
     } catch (error) {
       console.error("Error fetching gym data:", error);
+    }
+  };
+
+  const fetchSession = async () => {
+    try {
+      const res = await fetch(`/api/workout-sessions?date=${currentDate}`);
+      if (res.ok) {
+        const data = await res.json();
+        setTodaySession(data.session || null);
+      }
+    } catch (error) {
+      console.error("Error fetching workout session:", error);
+    }
+  };
+
+  const fetchYearSessions = async () => {
+    try {
+      const from = format(startOfYear(new Date()), "yyyy-MM-dd");
+      const to = format(new Date(), "yyyy-MM-dd");
+      const res = await fetch(`/api/workout-sessions?from=${from}&to=${to}`);
+      if (res.ok) {
+        const data = await res.json();
+        setYearSessions(data.sessions || []);
+      }
+    } catch (error) {
+      console.error("Error fetching year sessions:", error);
     }
   };
 
@@ -300,28 +326,145 @@ export default function GymTrackingPage() {
     }
   };
 
-  const handleSaveExercise = async (exerciseId) => {
+  // ---------- Workout sessions (numeric sets) ----------
+
+  const getSetsFor = (exerciseId) => {
+    if (setDrafts[exerciseId] !== undefined) return setDrafts[exerciseId];
+    const logged = (todaySession?.exercises || []).find(
+      (e) => e.exercise === exerciseId || e.exercise?.toString() === exerciseId,
+    );
+    return logged?.sets?.length ? [...logged.sets] : [{ weight: "", reps: "" }];
+  };
+
+  const updateSet = (exerciseId, index, field, value) => {
+    setSetDrafts((prev) => {
+      const base = prev[exerciseId] !== undefined ? prev[exerciseId] : getSetsFor(exerciseId);
+      const sets = base.map((s, i) => (i === index ? { ...s, [field]: value } : s));
+      return { ...prev, [exerciseId]: sets };
+    });
+  };
+
+  const addSetRow = (exerciseId) => {
+    setSetDrafts((prev) => {
+      const base = prev[exerciseId] !== undefined ? prev[exerciseId] : getSetsFor(exerciseId);
+      return { ...prev, [exerciseId]: [...base, { weight: "", reps: "" }] };
+    });
+  };
+
+  const removeSetRow = (exerciseId, index) => {
+    setSetDrafts((prev) => {
+      const base = prev[exerciseId] !== undefined ? prev[exerciseId] : getSetsFor(exerciseId);
+      const sets = base.filter((_, i) => i !== index);
+      return { ...prev, [exerciseId]: sets.length > 0 ? sets : [{ weight: "", reps: "" }] };
+    });
+  };
+
+  const handleSaveSessionSets = async (exerciseId) => {
+    setSavingExercise(exerciseId);
     try {
-      const res = await fetch(`/api/exercises/${exerciseId}`, {
+      const draft = setDrafts[exerciseId] ?? getSetsFor(exerciseId);
+      const sets = draft
+        .map((s) => ({ weight: parseFloat(s.weight), reps: parseInt(s.reps, 10) }))
+        .filter(
+          (s) =>
+            Number.isFinite(s.weight) && s.weight >= 0 && Number.isInteger(s.reps) && s.reps >= 0,
+        );
+
+      if (sets.length === 0) {
+        alert("Add at least one set with a valid weight and reps.");
+        return;
+      }
+
+      const res = await fetch("/api/workout-sessions", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editFormData),
+        body: JSON.stringify({
+          date: currentDate,
+          mode: "replace",
+          exercises: [{ exercise: exerciseId, sets }],
+        }),
       });
 
+      const data = await res.json();
       if (res.ok) {
-        await fetchGymData();
-        setEditingExercise(null);
+        setTodaySession(data.session || null);
+        setSetDrafts((prev) => {
+          const next = { ...prev };
+          delete next[exerciseId];
+          return next;
+        });
+        setSavedExercises((prev) => ({ ...prev, [exerciseId]: true }));
+        setTimeout(() => setSavedExercises((prev) => ({ ...prev, [exerciseId]: false })), 2500);
+
+        if (data.prs && data.prs.length > 0) {
+          const pr = data.prs.find((p) => p.exerciseId === exerciseId);
+          if (pr) setNewPRs((prev) => ({ ...prev, [exerciseId]: pr }));
+          // Refresh plan/PR data and the heatmap so the new PR shows everywhere.
+          fetchGymData();
+          fetchGymHistory();
+        }
+        fetchYearSessions();
+      } else {
+        alert(data.error || "Failed to save sets");
       }
     } catch (error) {
-      console.error("Error updating exercise:", error);
+      console.error("Error saving sets:", error);
+      alert("Network error. Please try again.");
+    } finally {
+      setSavingExercise(null);
     }
   };
 
-  if (authLoading || loading) {
+  const handleClearSession = async () => {
+    if (!confirm("Clear all logged sets for this day?")) return;
+    try {
+      const res = await fetch(`/api/workout-sessions?date=${currentDate}`, { method: "DELETE" });
+      if (res.ok) {
+        setTodaySession(null);
+        setSetDrafts({});
+        setNewPRs({});
+        fetchGymHistory();
+        fetchYearSessions();
+      }
+    } catch (error) {
+      console.error("Error clearing session:", error);
+    }
+  };
+
+  const handleOpenPRChart = async (exerciseId) => {
+    if (prExercise === exerciseId) {
+      setPrExercise(null);
+      return;
+    }
+    setPrExercise(exerciseId);
+    try {
+      const res = await fetch(`/api/workout-sessions?exerciseId=${exerciseId}&months=6`);
+      if (res.ok) {
+        const data = await res.json();
+        setPrSeries(data.series || []);
+      }
+    } catch (error) {
+      console.error("Error fetching PR series:", error);
+      setPrSeries([]);
+    }
+  };
+
+  /** "2× 60kg · 50kg" style summary of a numeric sets array. */
+  const formatSetsDisplay = (sets) => {
+    if (!sets || sets.length === 0) return "";
+    const grouped = {};
+    for (const s of sets) {
+      const key = `${s.weight}kg`;
+      grouped[key] = (grouped[key] || 0) + 1;
+    }
+    return Object.entries(grouped)
+      .map(([weight, count]) => (count > 1 ? `${count}× ${weight}` : weight))
+      .join(" · ");
+  };
+
+  if (loading) {
     return <Loader />;
   }
-
-  if (!user || user.isAdmin) return null;
 
   // Render Helpers
   const renderCalendar = () => {
@@ -329,22 +472,23 @@ export default function GymTrackingPage() {
     const startDate = new Date(currentYear, 0, 1);
     const endDate = new Date(currentYear, 11, 31);
 
-    const statusMap = new Map();
-    gymHistory.forEach((log) => {
-      let level = 0;
-      if (log.gymStatus === "completed") level = 4;
-      else if (log.gymStatus === "partially-completed") level = 2;
-      statusMap.set(log.date, level);
-    });
+    // Real training data (sessions with numeric sets) merged under the
+    // self-reported gym status — sessions only ever raise a day's level.
+    const merged = mergeSessionsIntoHeatmap(gymHistory, yearSessions);
+    const statusMap = new Map(merged.map((day) => [day.date, day]));
 
     const data = [];
     let curr = new Date(startDate);
     while (curr <= endDate) {
       const dateStr = format(curr, "yyyy-MM-dd");
+      const day = statusMap.get(dateStr);
       data.push({
         date: dateStr,
-        count: statusMap.get(dateStr) || 0,
-        level: statusMap.get(dateStr) || 0,
+        count: day?.level || 0,
+        level: day?.level || 0,
+        volume: day?.volume || 0,
+        hasSession: Boolean(day?.hasSession),
+        gymStatus: day?.gymStatus || "not-completed",
       });
       curr.setDate(curr.getDate() + 1);
     }
@@ -368,11 +512,15 @@ export default function GymTrackingPage() {
             cloneElement(block, {
               "data-tooltip-id": "react-tooltip",
               "data-tooltip-content": `${format(parseISO(activity.date), "d MMMM yyyy")} • ${
-                activity.level === 4
-                  ? "Completed"
-                  : activity.level === 2
-                    ? "Partially Completed"
-                    : "No Activity"
+                activity.hasSession && activity.volume > 0
+                  ? `${activity.volume.toLocaleString()} kg volume`
+                  : activity.level === 4
+                    ? "Completed"
+                    : activity.level === 2
+                      ? "Partially Completed"
+                      : activity.level >= 1
+                        ? "Trained"
+                        : "No Activity"
               }`,
             })
           }
@@ -391,274 +539,121 @@ export default function GymTrackingPage() {
   const muscleGroups = getTodayMuscleGroups();
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white font-sans selection:bg-lime-500 selection:text-black">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-neutral-950/80 backdrop-blur-md border-b border-neutral-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            {/* Logo */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-lime-500 rounded-lg flex items-center justify-center shadow-[0_0_10px_rgba(132,204,22,0.3)]">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2.5}
-                  stroke="black"
-                  className="w-6 h-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"
-                  />
-                </svg>
-              </div>
-              <h1 className="text-2xl font-black tracking-tighter uppercase hidden sm:block">
-                Nutri<span className="text-lime-500">Gain</span>
-              </h1>
-            </div>
-
-            {/* Desktop Actions */}
-            <div className="hidden md:flex items-center gap-6">
-              <div className="bg-neutral-900 px-4 py-2 rounded-lg border border-neutral-800 flex items-center gap-3">
-                <span className="text-xs font-bold text-neutral-500 uppercase tracking-widest">
-                  Today's Status
-                </span>
-                <div className="relative">
-                  <button
-                    onClick={() => setShowStatusDropdown(!showStatusDropdown)}
-                    className={`flex items-center gap-2 px-3 py-1 rounded-md text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
-                      todayGymStatus === "completed"
-                        ? "bg-lime-500 text-black shadow-[0_0_10px_rgba(132,204,22,0.3)]"
-                        : todayGymStatus === "partially-completed"
-                          ? "bg-amber-500 text-black shadow-[0_0_10px_rgba(245,158,11,0.3)]"
-                          : "bg-neutral-800 text-neutral-400 hover:text-white"
-                    }`}
-                  >
-                    {todayGymStatus === "completed"
-                      ? "Completed"
-                      : todayGymStatus === "partially-completed"
-                        ? "Partial"
-                        : "Pending"}
-                    <svg
-                      className="w-3 h-3"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </button>
-
-                  {showStatusDropdown && (
-                    <div className="absolute top-full right-0 mt-2 w-48 bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl overflow-hidden z-20">
-                      {[
-                        {
-                          val: "completed",
-                          label: "Completed",
-                          color: "text-lime-500",
-                        },
-                        {
-                          val: "partially-completed",
-                          label: "Partial",
-                          color: "text-amber-500",
-                        },
-                        {
-                          val: "not-completed",
-                          label: "Not Done",
-                          color: "text-neutral-400",
-                        },
-                      ].map((opt) => (
-                        <button
-                          key={opt.val}
-                          onClick={() => handleGymStatusUpdate(opt.val)}
-                          className={`w-full text-left px-4 py-3 text-xs font-bold uppercase tracking-wider hover:bg-neutral-800 transition-colors cursor-pointer ${opt.color}`}
-                        >
-                          {opt.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="h-6 w-px bg-neutral-800"></div>
-
-              <div className="flex gap-1 bg-neutral-900 p-1 rounded-xl border border-neutral-800">
-                <button
-                  onClick={() => router.push("/dashboard/meal")}
-                  className="px-4 py-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg font-bold text-sm flex items-center gap-2 transition-all cursor-pointer uppercase tracking-wide"
-                >
-                  Meal
-                </button>
-                <button
-                  onClick={() => router.push("/dashboard/gym")}
-                  className="px-4 py-2 bg-lime-500 text-black rounded-lg shadow-lg shadow-lime-500/20 font-bold text-sm flex items-center gap-2 transition-all uppercase tracking-wide"
-                >
-                  Gym
-                </button>
-                <button
-                  onClick={() => router.push("/dashboard/profile")}
-                  className="px-4 py-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg font-bold text-sm flex items-center gap-2 transition-all cursor-pointer uppercase tracking-wide"
-                >
-                  Profile
-                </button>
-              </div>
-
-              <div className="flex items-center gap-4 pl-2">
-                <div className="text-right hidden lg:block">
-                  <p className="text-xs text-neutral-400 uppercase tracking-widest font-bold">
-                    Logged in as
-                  </p>
-                  <p className="text-sm font-bold text-white">{user.name}</p>
-                </div>
-                <button
-                  onClick={logout}
-                  className="text-neutral-500 hover:text-red-500 transition-colors cursor-pointer"
-                  title="Logout"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2}
-                    stroke="currentColor"
-                    className="w-6 h-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            {/* Mobile Toggle */}
-            <div className="flex md:hidden items-center gap-3">
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 text-white hover:bg-neutral-800 rounded-lg transition"
+    <AppShell
+      navSlot={
+        <>
+        {/* Today's Status */}
+        <div className="bg-neutral-900 px-4 py-2 rounded-lg border border-neutral-800 flex items-center gap-3">
+          <span className="text-xs font-bold text-neutral-500 uppercase tracking-widest">
+            Today's Status
+          </span>
+          <div className="relative">
+            <button
+              onClick={() => setShowStatusDropdown(!showStatusDropdown)}
+              className={`flex items-center gap-2 px-3 py-1 rounded-md text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                todayGymStatus === "completed"
+                  ? "bg-lime-500 text-black shadow-[0_0_10px_rgba(132,204,22,0.3)]"
+                  : todayGymStatus === "partially-completed"
+                    ? "bg-amber-500 text-black shadow-[0_0_10px_rgba(245,158,11,0.3)]"
+                    : "bg-neutral-800 text-neutral-400 hover:text-white"
+              }`}
+            >
+              {todayGymStatus === "completed"
+                ? "Completed"
+                : todayGymStatus === "partially-completed"
+                  ? "Partial"
+                  : "Pending"}
+              <svg
+                className="w-3 h-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  {mobileMenuOpen ? (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  ) : (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6h16M4 12h16M4 18h16"
-                    />
-                  )}
-                </svg>
-              </button>
-            </div>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
+
+            {showStatusDropdown && (
+              <div className="absolute top-full right-0 mt-2 w-48 bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl overflow-hidden z-20">
+                {[
+                  {
+                    val: "completed",
+                    label: "Completed",
+                    color: "text-lime-500",
+                  },
+                  {
+                    val: "partially-completed",
+                    label: "Partial",
+                    color: "text-amber-500",
+                  },
+                  {
+                    val: "not-completed",
+                    label: "Not Done",
+                    color: "text-neutral-400",
+                  },
+                ].map((opt) => (
+                  <button
+                    key={opt.val}
+                    onClick={() => handleGymStatusUpdate(opt.val)}
+                    className={`w-full text-left px-4 py-3 text-xs font-bold uppercase tracking-wider hover:bg-neutral-800 transition-colors cursor-pointer ${opt.color}`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
-
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-b border-neutral-800 bg-neutral-900">
-            <div className="p-4 space-y-4">
-              <div className="flex items-center gap-3 px-2 mb-4">
-                <div>
-                  <p className="text-xs text-neutral-400 uppercase tracking-widest font-bold">
-                    User
-                  </p>
-                  <p className="text-lg font-bold text-white">{user.name}</p>
-                </div>
-              </div>
-
-              {/* Mobile Status Controls */}
-              <div className="px-2 mb-6">
-                <p className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-2">
-                  Today's Status
-                </p>
-                <div className="grid grid-cols-3 gap-2">
-                  {[
-                    {
-                      val: "completed",
-                      label: "Done",
-                      colors: "bg-lime-500 text-black border-lime-500",
-                    },
-                    {
-                      val: "partially-completed",
-                      label: "Part",
-                      colors: "bg-amber-500 text-black border-amber-500",
-                    },
-                    {
-                      val: "not-completed",
-                      label: "No",
-                      colors:
-                        "bg-neutral-800 text-neutral-400 border-neutral-700 hover:text-white",
-                    },
-                  ].map((opt) => (
-                    <button
-                      key={opt.val}
-                      onClick={() => handleGymStatusUpdate(opt.val)}
-                      className={`px-2 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border ${
-                        todayGymStatus === opt.val
-                          ? opt.colors
-                          : "bg-neutral-900/50 text-neutral-600 border-neutral-800 hover:bg-neutral-800"
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <button
-                  onClick={() => {
-                    router.push("/dashboard/meal");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full flex items-center justify-between px-4 py-3 text-neutral-400 hover:bg-neutral-800 rounded-xl font-bold uppercase tracking-wider"
-                >
-                  Meal Tracker
-                </button>
-                <button
-                  onClick={() => {
-                    router.push("/dashboard/gym");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full flex items-center justify-between px-4 py-3 bg-neutral-800 text-white rounded-xl font-bold uppercase tracking-wider"
-                >
-                  Gym Tracker <span className="text-lime-500">●</span>
-                </button>
-                <button
-                  onClick={() => {
-                    router.push("/dashboard/profile");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full flex items-center justify-between px-4 py-3 text-neutral-400 hover:bg-neutral-800 rounded-xl font-bold uppercase tracking-wider"
-                >
-                  Profile
-                </button>
-              </div>
-            </div>
+        </>
+      }
+      mobileSlot={
+        <>
+        {/* Mobile Status Controls */}
+        <div className="px-2 mb-6">
+          <p className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-2">
+            Today's Status
+          </p>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              {
+                val: "completed",
+                label: "Done",
+                colors: "bg-lime-500 text-black border-lime-500",
+              },
+              {
+                val: "partially-completed",
+                label: "Part",
+                colors: "bg-amber-500 text-black border-amber-500",
+              },
+              {
+                val: "not-completed",
+                label: "No",
+                colors:
+                  "bg-neutral-800 text-neutral-400 border-neutral-700 hover:text-white",
+              },
+            ].map((opt) => (
+              <button
+                key={opt.val}
+                onClick={() => handleGymStatusUpdate(opt.val)}
+                className={`px-2 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border ${
+                  todayGymStatus === opt.val
+                    ? opt.colors
+                    : "bg-neutral-900/50 text-neutral-600 border-neutral-800 hover:bg-neutral-800"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
           </div>
-        )}
-      </nav>
+        </div>
+        </>
+      }
+    >
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -680,7 +675,7 @@ export default function GymTrackingPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-2 gap-4 mb-4">
                 <div className="bg-neutral-950 p-4 rounded-xl border border-neutral-800 text-center">
                   <p className="text-3xl font-black text-white">
                     {currentStreak}
@@ -698,6 +693,41 @@ export default function GymTrackingPage() {
                   </p>
                 </div>
               </div>
+
+              {(() => {
+                const yearVolume = yearSessions.reduce(
+                  (total, s) =>
+                    total +
+                    (s.exercises || []).reduce(
+                      (t, ex) =>
+                        t + (ex.sets || []).reduce((sum, set) => sum + set.weight * set.reps, 0),
+                      0,
+                    ),
+                  0,
+                );
+                const trainedDays = yearSessions.length;
+                if (trainedDays === 0) return null;
+                return (
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="bg-neutral-950 p-4 rounded-xl border border-neutral-800 text-center">
+                      <p className="text-3xl font-black text-white">
+                        {trainedDays}
+                      </p>
+                      <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
+                        Trained Days
+                      </p>
+                    </div>
+                    <div className="bg-neutral-950 p-4 rounded-xl border border-neutral-800 text-center">
+                      <p className="text-3xl font-black text-lime-500">
+                        {Math.round(yearVolume).toLocaleString()}
+                      </p>
+                      <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
+                        Kg Lifted
+                      </p>
+                    </div>
+                  </div>
+                );
+              })()}
 
               <div className="overflow-x-auto pb-2">{renderCalendar()}</div>
             </div>
@@ -954,95 +984,62 @@ export default function GymTrackingPage() {
                                 <h4 className="text-xl font-bold text-white mb-1">
                                   {toTitleCase(ex.name)}
                                 </h4>
+                                {newPRs[ex._id] && (
+                                  <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mt-1">
+                                    🏆 New PR: {newPRs[ex._id].newPR} kg
+                                    {newPRs[ex._id].previousPR != null &&
+                                      ` (was ${newPRs[ex._id].previousPR} kg)`}
+                                  </p>
+                                )}
                               </div>
-                              {editingExercise === ex._id ? (
-                                <div className="flex gap-2">
-                                  <button
-                                    onClick={() => handleSaveExercise(ex._id)}
-                                    className="p-2 bg-lime-500 text-black rounded-lg hover:bg-lime-400 transition"
-                                  >
-                                    <svg
-                                      className="w-4 h-4"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      viewBox="0 0 24 24"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M5 13l4 4L19 7"
-                                      />
-                                    </svg>
-                                  </button>
-                                  <button
-                                    onClick={() => setEditingExercise(null)}
-                                    className="p-2 bg-neutral-800 text-white rounded-lg hover:bg-neutral-700 transition"
-                                  >
-                                    <svg
-                                      className="w-4 h-4"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      viewBox="0 0 24 24"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                      />
-                                    </svg>
-                                  </button>
-                                </div>
-                              ) : (
+                              <div className="flex items-center gap-2">
                                 <button
-                                  onClick={() => {
-                                    setEditingExercise(ex._id);
-                                    setEditFormData({
-                                      warmUp: ex.warmUp || "",
-                                      working: ex.working || "",
-                                      lastPR: ex.lastPR || "",
-                                      lastPRDate: ex.lastPRDate || "",
-                                    });
-                                  }}
-                                  className="p-2 text-neutral-400 hover:text-lime-500 transition cursor-pointer"
+                                  onClick={() => handleOpenPRChart(ex._id)}
+                                  className={`p-2 rounded-lg transition cursor-pointer ${
+                                    prExercise === ex._id
+                                      ? "text-amber-500 bg-amber-500/10"
+                                      : "text-neutral-400 hover:text-amber-500"
+                                  }`}
+                                  title="PR progression"
                                 >
                                   <svg
-                                    xmlns="http://www.w3.org/2000/svg"
                                     className="w-5 h-5"
                                     fill="none"
-                                    viewBox="0 0 24 24"
                                     stroke="currentColor"
-                                    strokeWidth={2}
+                                    viewBox="0 0 24 24"
                                   >
                                     <path
                                       strokeLinecap="round"
                                       strokeLinejoin="round"
-                                      d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                                      strokeWidth="2"
+                                      d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
                                     />
                                   </svg>
                                 </button>
-                              )}
+                                <button
+                                  onClick={() => handleSaveSessionSets(ex._id)}
+                                  disabled={savingExercise === ex._id}
+                                  className="px-4 py-2 bg-lime-500 text-black rounded-lg hover:bg-lime-400 transition font-black text-xs uppercase tracking-widest disabled:opacity-50 cursor-pointer"
+                                >
+                                  {savingExercise === ex._id
+                                    ? "Saving..."
+                                    : savedExercises[ex._id]
+                                      ? "Saved ✓"
+                                      : "Log Sets"}
+                                </button>
+                              </div>
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                              {/* Warm Up */}
+                              {/* Warm Up (planned template) */}
                               <div className="bg-neutral-950 p-4 rounded-xl border border-neutral-800">
                                 <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest mb-2">
                                   Warm Up
                                 </p>
-                                {editingExercise === ex._id ? (
-                                  <input
-                                    type="text"
-                                    value={editFormData.warmUp}
-                                    onChange={(e) =>
-                                      setEditFormData({
-                                        ...editFormData,
-                                        warmUp: e.target.value,
-                                      })
-                                    }
-                                    className="w-full bg-neutral-900 border border-neutral-800 rounded px-2 py-1 text-sm font-bold text-white focus:border-lime-500 focus:outline-none"
-                                  />
+                                {ex.warmUpSets?.length > 0 ? (
+                                  <p className="text-sm font-bold text-neutral-300">
+                                    {formatSetsDisplay(ex.warmUpSets)}
+                                  </p>
                                 ) : (
                                   <p className="text-sm font-bold text-neutral-300">
                                     {ex.warmUp || "Not set"}
@@ -1050,31 +1047,51 @@ export default function GymTrackingPage() {
                                 )}
                               </div>
 
-                              {/* Working Sets */}
+                              {/* Working Sets (logged, numeric) */}
                               <div className="bg-neutral-950 p-4 rounded-xl border border-neutral-800">
                                 <p className="text-[10px] text-lime-500 font-bold uppercase tracking-widest mb-2">
                                   Working Sets
                                 </p>
-                                {editingExercise === ex._id ? (
-                                  <input
-                                    type="text"
-                                    value={editFormData.working}
-                                    onChange={(e) =>
-                                      setEditFormData({
-                                        ...editFormData,
-                                        working: e.target.value,
-                                      })
-                                    }
-                                    className="w-full bg-neutral-900 border border-neutral-800 rounded px-2 py-1 text-sm font-bold text-white focus:border-lime-500 focus:outline-none"
-                                  />
-                                ) : (
-                                  <p className="text-sm font-bold text-white">
-                                    {ex.working || "Not set"}
-                                  </p>
-                                )}
+                                <div className="space-y-2">
+                                  {getSetsFor(ex._id).map((set, idx) => (
+                                    <div key={idx} className="flex items-center gap-2">
+                                      <input
+                                        type="number"
+                                        step="0.5"
+                                        min="0"
+                                        placeholder="kg"
+                                        value={set.weight}
+                                        onChange={(e) => updateSet(ex._id, idx, "weight", e.target.value)}
+                                        className="w-full min-w-0 bg-neutral-900 border border-neutral-800 rounded px-2 py-1.5 text-sm font-bold text-white focus:border-lime-500 focus:outline-none"
+                                      />
+                                      <span className="text-neutral-600 text-xs font-black">×</span>
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        placeholder="reps"
+                                        value={set.reps}
+                                        onChange={(e) => updateSet(ex._id, idx, "reps", e.target.value)}
+                                        className="w-full min-w-0 bg-neutral-900 border border-neutral-800 rounded px-2 py-1.5 text-sm font-bold text-white focus:border-lime-500 focus:outline-none"
+                                      />
+                                      <button
+                                        onClick={() => removeSetRow(ex._id, idx)}
+                                        className="text-neutral-600 hover:text-red-500 transition"
+                                        title="Remove set"
+                                      >
+                                        ×
+                                      </button>
+                                    </div>
+                                  ))}
+                                  <button
+                                    onClick={() => addSetRow(ex._id)}
+                                    className="text-xs font-bold text-lime-500 hover:text-lime-400 transition cursor-pointer"
+                                  >
+                                    + Add set
+                                  </button>
+                                </div>
                               </div>
 
-                              {/* PR */}
+                              {/* PR (numeric, auto-updated) */}
                               <div className="bg-neutral-950 p-4 rounded-xl border border-neutral-800 relative overflow-hidden">
                                 <div className="absolute top-0 right-0 p-2 opacity-80">
                                   <span className="text-2xl">🏆</span>
@@ -1082,55 +1099,72 @@ export default function GymTrackingPage() {
                                 <p className="text-[10px] text-amber-500 font-bold uppercase tracking-widest mb-2">
                                   Personal Best
                                 </p>
-                                {editingExercise === ex._id ? (
-                                  <div className="space-y-2">
-                                    <input
-                                      type="text"
-                                      value={editFormData.lastPR}
-                                      placeholder="Weight"
-                                      onChange={(e) =>
-                                        setEditFormData({
-                                          ...editFormData,
-                                          lastPR: e.target.value,
-                                        })
-                                      }
-                                      className="w-full bg-neutral-900 border border-neutral-800 rounded px-2 py-1 text-sm font-bold text-white focus:border-lime-500 focus:outline-none"
-                                    />
-                                    <input
-                                      type="date"
-                                      value={
-                                        editFormData.lastPRDate
-                                          ? new Date(editFormData.lastPRDate)
-                                              .toISOString()
-                                              .split("T")[0]
-                                          : ""
-                                      }
-                                      onChange={(e) =>
-                                        setEditFormData({
-                                          ...editFormData,
-                                          lastPRDate: e.target.value,
-                                        })
-                                      }
-                                      className="w-full bg-neutral-900 border border-neutral-800 rounded px-2 py-1 text-[10px] font-bold text-white focus:border-lime-500 focus:outline-none"
-                                    />
-                                  </div>
-                                ) : (
-                                  <div>
-                                    <p className="text-sm font-bold text-white mb-1">
-                                      {ex.lastPR || "None"}
+                                <div>
+                                  <p className="text-sm font-bold text-white mb-1">
+                                    {ex.prWeight != null
+                                      ? `${ex.prWeight} kg`
+                                      : ex.lastPR
+                                        ? ex.lastPR
+                                        : "None"}
+                                  </p>
+                                  {ex.lastPRDate && (
+                                    <p className="text-[10px] text-neutral-500 font-mono">
+                                      {format(new Date(ex.lastPRDate), "MMM d, yyyy")}
                                     </p>
-                                    {ex.lastPRDate && (
-                                      <p className="text-[10px] text-neutral-500 font-mono">
-                                        {format(
-                                          new Date(ex.lastPRDate),
-                                          "MMM d, yyyy",
-                                        )}
-                                      </p>
-                                    )}
-                                  </div>
-                                )}
+                                  )}
+                                </div>
                               </div>
                             </div>
+
+                            {/* PR Progression Chart */}
+                            {prExercise === ex._id && (
+                              <div className="mt-4 bg-neutral-950 p-4 rounded-xl border border-amber-500/20">
+                                <p className="text-[10px] text-amber-500 font-black uppercase tracking-widest mb-4">
+                                  Top Set Weight — Last 6 Months
+                                </p>
+                                {prSeries.length === 0 ? (
+                                  <p className="text-sm text-neutral-500 font-bold">
+                                    No sets logged yet — save your working sets to build history.
+                                  </p>
+                                ) : (
+                                  <ResponsiveContainer width="100%" height={200}>
+                                    <LineChart data={prSeries}>
+                                      <CartesianGrid stroke="#262626" strokeDasharray="3 3" />
+                                      <XAxis
+                                        dataKey="date"
+                                        stroke="#525252"
+                                        tick={{ fill: "#a3a3a3", fontSize: 11 }}
+                                        tickFormatter={(d) => format(new Date(d), "MMM d")}
+                                      />
+                                      <YAxis
+                                        stroke="#525252"
+                                        tick={{ fill: "#a3a3a3", fontSize: 11 }}
+                                        domain={[0, "dataMax + 5"]}
+                                      />
+                                      <Tooltip
+                                        contentStyle={{
+                                          backgroundColor: "#171717",
+                                          border: "1px solid #404040",
+                                          borderRadius: "0.5rem",
+                                          color: "#fff",
+                                        }}
+                                        formatter={(value, name) => [
+                                          name === "weight" ? `${value} kg` : value,
+                                          name === "weight" ? "Top set" : name,
+                                        ]}
+                                      />
+                                      <Line
+                                        type="monotone"
+                                        dataKey="weight"
+                                        stroke="#f59e0b"
+                                        strokeWidth={2}
+                                        dot={{ r: 3, fill: "#f59e0b" }}
+                                      />
+                                    </LineChart>
+                                  </ResponsiveContainer>
+                                )}
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -1142,6 +1176,6 @@ export default function GymTrackingPage() {
           </div>
         </div>
       </div>
-    </div>
+    </AppShell>
   );
 }
