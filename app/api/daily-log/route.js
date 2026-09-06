@@ -3,95 +3,57 @@ import dbConnect from '@/lib/mongodb';
 import DailyLog from '@/models/DailyLog';
 import Meal from '@/models/Meal';
 import { requireAuth } from '@/lib/auth';
-import { format } from 'date-fns';
+import {
+  calculateEntryMacros,
+  createEmptyDailyLog,
+  oneYearAgoDateString,
+  recalculateTotals,
+  todayDateString,
+} from '@/lib/daily-log';
 import { isValidDateString, validateDailyLogMeal, validateGymStatus } from '@/lib/validation';
 
-// GET daily log
+// GET daily log (read-only — never creates documents or mutates data)
 export async function GET(request) {
   try {
     const user = requireAuth(request);
     const { searchParams } = new URL(request.url);
-    const date = searchParams.get('date') || format(new Date(), 'yyyy-MM-dd');
+    const date = searchParams.get('date') || todayDateString();
+
+    if (!isValidDateString(date)) {
+      return NextResponse.json(
+        { error: 'date must be a valid yyyy-MM-dd string' },
+        { status: 400 }
+      );
+    }
 
     await dbConnect();
 
-    let dailyLog = await DailyLog.findOne({
+    const dailyLog = await DailyLog.findOne({ user: user.id, date }).populate(
+      'meals.meal'
+    );
+
+    // Return an ephemeral empty log instead of creating one — a log is only
+    // persisted when the user actually adds a meal or marks their gym status.
+    const dailyLogResponse = dailyLog || {
+      ...createEmptyDailyLog(user.id, date),
+      _id: null,
+      createdAt: null,
+      updatedAt: null,
+    };
+
+    // Gym history for the calendar (last 365 days) — lean projection.
+    const gymHistory = await DailyLog.find({
       user: user.id,
-      date,
-    }).populate('meals.meal');
+      date: { $gte: oneYearAgoDateString() },
+    })
+      .sort({ date: 1 })
+      .select('date gymStatus gymCompletedAt')
+      .lean();
 
-    if (!dailyLog) {
-      dailyLog = await DailyLog.create({
-        user: user.id,
-        date,
-        meals: [],
-        totalMacros: {
-          calories: 0,
-          protein: 0,
-          carbs: 0,
-          fats: 0,
-        },
-        gymStatus: 'not-completed',
-      });
-    }
-
-    // Fetch all gym logs for streak calculation (last 365 days)
-    const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-    const allGymLogs = await DailyLog.find({
-      user: user.id,
-      date: { $gte: format(oneYearAgo, 'yyyy-MM-dd') },
-    }).sort({ date: 1 });
-
-    // Bulk migrate all documents with old gymCompleted field
-    const docsToMigrate = allGymLogs.filter(log => log.gymCompleted !== undefined);
-    if (docsToMigrate.length > 0) {
-      await Promise.all(
-        docsToMigrate.map(async (log) => {
-          const newStatus = log.gymCompleted ? 'completed' : 'not-completed';
-          await DailyLog.updateOne(
-            { _id: log._id },
-            {
-              $set: { gymStatus: newStatus },
-              $unset: { gymCompleted: "" }
-            }
-          );
-        })
-      );
-      // Re-fetch after migration
-      const updatedLogs = await DailyLog.find({
-        user: user.id,
-        date: { $gte: format(oneYearAgo, 'yyyy-MM-dd') },
-      }).sort({ date: 1 });
-      allGymLogs.splice(0, allGymLogs.length, ...updatedLogs);
-    }
-
-    // Also migrate the current dailyLog if it has old field
-    if (dailyLog && dailyLog.gymCompleted !== undefined) {
-      const newStatus = dailyLog.gymCompleted ? 'completed' : 'not-completed';
-      await DailyLog.updateOne(
-        { _id: dailyLog._id },
-        { 
-          $set: { gymStatus: newStatus },
-          $unset: { gymCompleted: "" }
-        }
-      );
-      // Refresh to get updated document
-      dailyLog = await DailyLog.findById(dailyLog._id).populate('meals.meal');
-    }
-
-    // Map gym logs - all should now have gymStatus after migration
-    const mappedGymHistory = allGymLogs.map(log => ({
-      _id: log._id,
-      date: log.date,
-      gymStatus: log.gymStatus || 'not-completed',
-      gymCompletedAt: log.gymCompletedAt,
-    }));
-
-    return NextResponse.json({ 
-      dailyLog,
-      gymHistory: mappedGymHistory,
-    }, { status: 200 });
+    return NextResponse.json(
+      { dailyLog: dailyLogResponse, gymHistory },
+      { status: 200 }
+    );
   } catch (error) {
     if (error.message === 'Authentication required') {
       return NextResponse.json({ error: error.message }, { status: 401 });
@@ -124,35 +86,11 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Meal not found' }, { status: 404 });
     }
 
-    const logDate = date || format(new Date(), 'yyyy-MM-dd');
-
-    // Calculate macros based on quantity
-    const calculatedMacros = {
-      calories: Math.round(meal.macros.calories * quantity),
-      protein: Math.round(meal.macros.protein * quantity * 10) / 10,
-      carbs: Math.round(meal.macros.carbs * quantity * 10) / 10,
-      fats: Math.round(meal.macros.fats * quantity * 10) / 10,
-    };
-
-    let dailyLog = await DailyLog.findOne({
-      user: user.id,
-      date: logDate,
-    });
-
-    if (!dailyLog) {
-      dailyLog = await DailyLog.create({
-        user: user.id,
-        date: logDate,
-        meals: [],
-        totalMacros: {
-          calories: 0,
-          protein: 0,
-          carbs: 0,
-          fats: 0,
-        },
-        gymStatus: 'not-completed',
-      });
-    }
+    const dailyLog = await DailyLog.findOneAndUpdate(
+      { user: user.id, date },
+      { $setOnInsert: createEmptyDailyLog(user.id, date) },
+      { new: true, upsert: true }
+    );
 
     // Add meal entry
     dailyLog.meals.push({
@@ -160,15 +98,11 @@ export async function POST(request) {
       mealName: meal.name,
       quantity,
       mealType,
-      macros: calculatedMacros,
+      macros: calculateEntryMacros(meal, quantity),
     });
 
-    // Update total macros
-    dailyLog.totalMacros.calories += calculatedMacros.calories;
-    dailyLog.totalMacros.protein = Math.round((dailyLog.totalMacros.protein + calculatedMacros.protein) * 10) / 10;
-    dailyLog.totalMacros.carbs = Math.round((dailyLog.totalMacros.carbs + calculatedMacros.carbs) * 10) / 10;
-    dailyLog.totalMacros.fats = Math.round((dailyLog.totalMacros.fats + calculatedMacros.fats) * 10) / 10;
-
+    // Recompute totals from entries — no add/subtract drift.
+    recalculateTotals(dailyLog);
     dailyLog.updatedAt = new Date();
     await dailyLog.save();
 
@@ -199,69 +133,45 @@ export async function PATCH(request) {
     }
 
     const { gymStatus, date } = normalized;
+    const logDate = date || todayDateString();
 
     await dbConnect();
 
-    const logDate = date || format(new Date(), 'yyyy-MM-dd');
+    // Insert shape omits gymStatus/gymCompletedAt — they arrive via $set
+    // below (a $setOnInsert/$set collision would make the upsert fail).
+    const { gymStatus: _ignoredGymStatus, ...insertBase } = createEmptyDailyLog(
+      user.id,
+      logDate
+    );
 
-    let dailyLog = await DailyLog.findOne({
-      user: user.id,
-      date: logDate,
-    });
-
-    if (!dailyLog) {
-      dailyLog = await DailyLog.create({
-        user: user.id,
-        date: logDate,
-        meals: [],
-        totalMacros: {
-          calories: 0,
-          protein: 0,
-          carbs: 0,
-          fats: 0,
+    const dailyLog = await DailyLog.findOneAndUpdate(
+      { user: user.id, date: logDate },
+      {
+        $set: {
+          gymStatus,
+          gymCompletedAt: gymStatus !== 'not-completed' ? new Date() : null,
+          updatedAt: new Date(),
         },
-        gymStatus,
-        gymCompletedAt: gymStatus !== 'not-completed' ? new Date() : null,
-      });
-    } else {
-      // Migrate old field if it exists and update status
-      const updateFields = {
-        gymStatus,
-        gymCompletedAt: gymStatus !== 'not-completed' ? new Date() : null,
-        updatedAt: new Date()
-      };
-      
-      if (dailyLog.gymCompleted !== undefined) {
-        await DailyLog.updateOne(
-          { _id: dailyLog._id },
-          { 
-            $set: updateFields,
-            $unset: { gymCompleted: "" }
-          }
-        );
-      } else {
-        dailyLog.gymStatus = gymStatus;
-        dailyLog.gymCompletedAt = gymStatus !== 'not-completed' ? new Date() : null;
-        dailyLog.updatedAt = new Date();
-        await dailyLog.save();
-      }
-      
-      // Refresh the document
-      dailyLog = await DailyLog.findById(dailyLog._id);
-    }
+        $setOnInsert: insertBase,
+      },
+      { new: true, upsert: true }
+    );
 
-    // Fetch all gym logs for calendar display (last 365 days)
-    const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-    const allLogs = await DailyLog.find({
+    // Gym history for the calendar (last 365 days) — lean projection.
+    const gymHistory = await DailyLog.find({
       user: user.id,
-      date: { $gte: format(oneYearAgo, 'yyyy-MM-dd') },
-    }).sort({ date: 1 }).select('date gymStatus gymCompletedAt');
+      date: { $gte: oneYearAgoDateString() },
+    })
+      .sort({ date: 1 })
+      .select('date gymStatus gymCompletedAt');
 
-    return NextResponse.json({ 
-      dailyLog,
-      gymHistory: allLogs,
-    }, { status: 200 });
+    return NextResponse.json(
+      {
+        dailyLog,
+        gymHistory,
+      },
+      { status: 200 }
+    );
   } catch (error) {
     if (error.message === 'Authentication required') {
       return NextResponse.json({ error: error.message }, { status: 401 });

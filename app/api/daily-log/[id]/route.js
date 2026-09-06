@@ -3,6 +3,7 @@ import dbConnect from '@/lib/mongodb';
 import DailyLog from '@/models/DailyLog';
 import Meal from '@/models/Meal';
 import { requireAuth } from '@/lib/auth';
+import { calculateEntryMacros, recalculateTotals } from '@/lib/daily-log';
 import { isValidObjectId, isValidDateString } from '@/lib/validation';
 
 // PUT update meal entry quantity
@@ -51,36 +52,17 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: 'Meal entry not found' }, { status: 404 });
     }
 
-    // Get the meal to recalculate macros
+    // Get the meal to recalculate this entry's macros
     const meal = await Meal.findById(mealEntry.meal);
     if (!meal) {
       return NextResponse.json({ error: 'Meal not found' }, { status: 404 });
     }
 
-    // Subtract old macros from total
-    dailyLog.totalMacros.calories -= mealEntry.macros.calories;
-    dailyLog.totalMacros.protein -= mealEntry.macros.protein;
-    dailyLog.totalMacros.carbs -= mealEntry.macros.carbs;
-    dailyLog.totalMacros.fats -= mealEntry.macros.fats;
-
-    // Calculate new macros
-    const newMacros = {
-      calories: Math.round(meal.macros.calories * qty),
-      protein: Math.round(meal.macros.protein * qty * 10) / 10,
-      carbs: Math.round(meal.macros.carbs * qty * 10) / 10,
-      fats: Math.round(meal.macros.fats * qty * 10) / 10,
-    };
-
-    // Update entry
+    // Update entry, then recompute totals from all entries
     mealEntry.quantity = qty;
-    mealEntry.macros = newMacros;
+    mealEntry.macros = calculateEntryMacros(meal, qty);
 
-    // Add new macros to total
-    dailyLog.totalMacros.calories += newMacros.calories;
-    dailyLog.totalMacros.protein = Math.round((dailyLog.totalMacros.protein + newMacros.protein) * 10) / 10;
-    dailyLog.totalMacros.carbs = Math.round((dailyLog.totalMacros.carbs + newMacros.carbs) * 10) / 10;
-    dailyLog.totalMacros.fats = Math.round((dailyLog.totalMacros.fats + newMacros.fats) * 10) / 10;
-
+    recalculateTotals(dailyLog);
     dailyLog.updatedAt = new Date();
     await dailyLog.save();
 
@@ -134,15 +116,10 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ error: 'Meal entry not found' }, { status: 404 });
     }
 
-    // Subtract macros from total
-    dailyLog.totalMacros.calories -= mealEntry.macros.calories;
-    dailyLog.totalMacros.protein = Math.round((dailyLog.totalMacros.protein - mealEntry.macros.protein) * 10) / 10;
-    dailyLog.totalMacros.carbs = Math.round((dailyLog.totalMacros.carbs - mealEntry.macros.carbs) * 10) / 10;
-    dailyLog.totalMacros.fats = Math.round((dailyLog.totalMacros.fats - mealEntry.macros.fats) * 10) / 10;
-
-    // Remove entry
+    // Remove entry, then recompute totals from all entries
     mealEntry.deleteOne();
 
+    recalculateTotals(dailyLog);
     dailyLog.updatedAt = new Date();
     await dailyLog.save();
 
