@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
+import AppShell from "@/components/AppShell";
 import { useRouter } from "next/navigation";
 import Loader from "@/components/Loader";
 
@@ -12,7 +13,7 @@ const toTitleCase = (str) => {
 };
 
 export default function AdminPage() {
-  const { user, loading: authLoading, logout, checkAuth } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
   const mealFormRef = useRef(null);
   const exerciseFormRef = useRef(null);
@@ -236,12 +237,6 @@ export default function AdminPage() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showMuscleGroupDropdown]);
-
-  useEffect(() => {
-    if (!authLoading && (!user || !user.isAdmin)) {
-      router.push("/login");
-    }
-  }, [user, authLoading, router]);
 
   useEffect(() => {
     if (user && user.isAdmin) {
@@ -579,81 +574,12 @@ export default function AdminPage() {
     "Tricep",
   ];
 
-  if (authLoading || loading) {
+  if (loading) {
     return <Loader />;
   }
 
-  if (!user || !user.isAdmin) {
-    return null;
-  }
-
   return (
-    <div className="min-h-screen bg-neutral-950 text-white font-sans selection:bg-lime-500 selection:text-black">
-      <nav className="sticky top-0 z-50 bg-neutral-950/80 backdrop-blur-md border-b border-neutral-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            {/* Logo */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-lime-500 rounded-lg flex items-center justify-center shadow-[0_0_10px_rgba(132,204,22,0.3)]">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2.5}
-                  stroke="black"
-                  className="w-6 h-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"
-                  />
-                </svg>
-              </div>
-              <div>
-                <h1 className="text-2xl font-black tracking-tighter uppercase hidden sm:block">
-                  Nutri<span className="ml-0.5 text-lime-500">Gain</span>
-                </h1>
-                <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-[0.2em] leading-none">
-                  Master Control Terminal
-                </p>
-              </div>
-            </div>
-
-            {/* Desktop Actions */}
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-4 pl-2">
-                <div className="text-right hidden sm:block">
-                  <p className="text-xs text-neutral-400 uppercase tracking-widest font-bold">
-                    Admin
-                  </p>
-                  <p className="text-sm font-bold text-white">{user.name}</p>
-                </div>
-                <button
-                  onClick={logout}
-                  className="text-neutral-500 hover:text-red-500 transition-colors cursor-pointer"
-                  title="Logout"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2}
-                    stroke="currentColor"
-                    className="w-6 h-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
+    <AppShell variant="admin">
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Tabs */}
@@ -1959,6 +1885,6 @@ export default function AdminPage() {
           </div>
         </div>
       )}
-    </div>
+    </AppShell>
   );
 }

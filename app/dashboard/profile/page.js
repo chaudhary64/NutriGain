@@ -3,16 +3,13 @@
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useUserSettings } from "@/context/UserSettingsContext";
-import { useRouter } from "next/navigation";
-import Loader from "@/components/Loader";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
+import AppShell from "@/components/AppShell";
 
 export default function ProfilePage() {
-  const { user, loading: authLoading, logout, checkAuth } = useAuth();
+  const { user, logout, checkAuth } = useAuth();
   const { smoothScroll, toggleSmoothScroll } = useUserSettings();
-  const router = useRouter();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [saved, setSaved] = useState(false);
   const [goalForm, setGoalForm] = useState(null);
   const [savingGoals, setSavingGoals] = useState(false);
@@ -20,7 +17,7 @@ export default function ProfilePage() {
   const containerRef = useRef(null);
 
   useGSAP(() => {
-    if (!authLoading && user) {
+    if (user) {
       gsap.fromTo(
         ".stagger-item",
         { y: 30, opacity: 0 },
@@ -39,25 +36,9 @@ export default function ProfilePage() {
         { opacity: 1, duration: 1.5, ease: "power2.inOut", delay: 0.5 }
       );
     }
-  }, { scope: containerRef, dependencies: [user, authLoading] });
+  }, { scope: containerRef, dependencies: [user] });
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push("/login");
-    }
-  }, [user, authLoading, router]);
-
-  useEffect(() => {
-    if (user && user.isAdmin) {
-      router.push("/admin");
-    }
-  }, [user, router]);
-
-  if (authLoading) {
-    return <Loader />;
-  }
-
-  if (!user || user.isAdmin) {
+  if (!user) {
     return null;
   }
 
@@ -110,176 +91,13 @@ export default function ProfilePage() {
     : "NG";
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-neutral-950 text-white font-sans selection:bg-lime-500 selection:text-black relative overflow-hidden">
+    <AppShell>
       {/* Background Effects */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
         <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-lime-500/5 blur-[120px] glow-effect"></div>
         <div className="absolute top-[40%] -right-[10%] w-[40%] h-[40%] rounded-full bg-lime-500/5 blur-[100px] glow-effect"></div>
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay"></div>
       </div>
-
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-neutral-950/80 backdrop-blur-xl border-b border-neutral-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            {/* Logo */}
-            <div
-              className="flex items-center gap-3 cursor-pointer group"
-              onClick={() => router.push("/dashboard")}
-            >
-              <div className="w-10 h-10 bg-lime-500 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(132,204,22,0.4)] group-hover:scale-105 transition-transform duration-300">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2.5}
-                  stroke="black"
-                  className="w-6 h-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"
-                  />
-                </svg>
-              </div>
-              <h1 className="text-2xl font-black tracking-tighter uppercase hidden sm:block">
-                Nutri<span className="text-lime-500">Gain</span>
-              </h1>
-            </div>
-
-            {/* Desktop Actions */}
-            <div className="hidden md:flex items-center gap-6">
-              <div className="flex gap-1 bg-neutral-900 p-1.5 rounded-xl border border-neutral-800/80 shadow-inner">
-                <button
-                  onClick={() => router.push("/dashboard/meal")}
-                  className="px-5 py-2.5 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg font-bold text-sm flex items-center gap-2 transition-all cursor-pointer uppercase tracking-wide"
-                >
-                  Meal
-                </button>
-                <button
-                  onClick={() => router.push("/dashboard/gym")}
-                  className="px-5 py-2.5 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg font-bold text-sm flex items-center gap-2 transition-all cursor-pointer uppercase tracking-wide"
-                >
-                  Gym
-                </button>
-                <button
-                  onClick={() => router.push("/dashboard/profile")}
-                  className="px-5 py-2.5 bg-lime-500 text-black rounded-lg shadow-[0_4px_14px_0_rgba(132,204,22,0.39)] hover:shadow-[0_6px_20px_rgba(132,204,22,0.23)] hover:bg-lime-400 font-bold text-sm flex items-center gap-2 transition-all uppercase tracking-wide"
-                >
-                  Profile
-                </button>
-              </div>
-
-              <div className="flex items-center gap-4 pl-2">
-                <div className="text-right hidden lg:block">
-                  <p className="text-xs text-neutral-400 uppercase tracking-widest font-bold">
-                    Logged in as
-                  </p>
-                  <p className="text-sm font-bold text-white">{user.name}</p>
-                </div>
-                <button
-                  onClick={logout}
-                  className="text-neutral-500 hover:text-red-500 hover:bg-red-500/10 p-2 rounded-lg transition-colors"
-                  title="Logout"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2}
-                    stroke="currentColor"
-                    className="w-6 h-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            {/* Mobile Toggle */}
-            <div className="flex md:hidden items-center gap-3">
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 text-white hover:bg-neutral-800 rounded-lg transition"
-              >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  {mobileMenuOpen ? (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  ) : (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6h16M4 12h16M4 18h16"
-                    />
-                  )}
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-b border-neutral-800 bg-neutral-900/95 backdrop-blur-md">
-            <div className="p-4 space-y-4">
-              <div className="flex items-center gap-3 px-2 mb-4">
-                <div>
-                  <p className="text-xs text-neutral-400 uppercase tracking-widest font-bold">
-                    User
-                  </p>
-                  <p className="text-lg font-bold text-white">{user.name}</p>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <button
-                  onClick={() => { router.push("/dashboard/meal"); setMobileMenuOpen(false); }}
-                  className="w-full flex items-center justify-between px-4 py-3 text-neutral-400 hover:bg-neutral-800 rounded-xl font-bold uppercase tracking-wider transition-colors"
-                >
-                  Meal Tracker
-                </button>
-                <button
-                  onClick={() => { router.push("/dashboard/gym"); setMobileMenuOpen(false); }}
-                  className="w-full flex items-center justify-between px-4 py-3 text-neutral-400 hover:bg-neutral-800 rounded-xl font-bold uppercase tracking-wider transition-colors"
-                >
-                  Gym Tracker
-                </button>
-                <button
-                  onClick={() => { router.push("/dashboard/profile"); setMobileMenuOpen(false); }}
-                  className="w-full flex items-center justify-between px-4 py-3 bg-neutral-800 text-white rounded-xl font-bold uppercase tracking-wider"
-                >
-                  Profile <span className="text-lime-500 shadow-[0_0_10px_rgba(132,204,22,0.8)] rounded-full">●</span>
-                </button>
-              </div>
-
-              <div className="pt-3 mt-3 border-t border-neutral-800">
-                <button
-                  onClick={() => { logout(); setMobileMenuOpen(false); }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-900/20 rounded-xl font-bold uppercase tracking-wider transition-colors"
-                >
-                  Logout
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </nav>
 
       {/* Page Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
@@ -646,6 +464,6 @@ export default function ProfilePage() {
           </div>
         </div>
       </main>
-    </div>
+    </AppShell>
   );
 }

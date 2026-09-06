@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
 import { format } from "date-fns";
+import AppShell from "@/components/AppShell";
 import Loader from "@/components/Loader";
 
 // Helper function to convert text to title case
@@ -13,8 +13,7 @@ const toTitleCase = (str) => {
 };
 
 export default function MealTrackingPage() {
-  const { user, loading: authLoading, logout, checkAuth } = useAuth();
-  const router = useRouter();
+  const { user, checkAuth } = useAuth();
   const [dailyLog, setDailyLog] = useState(null);
   const [meals, setMeals] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +21,6 @@ export default function MealTrackingPage() {
   const [selectedMeal, setSelectedMeal] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [showMealStats, setShowMealStats] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mealSearch, setMealSearch] = useState("");
   const [showMealDropdown, setShowMealDropdown] = useState(false);
   const [currentDate, setCurrentDate] = useState(
@@ -78,18 +76,6 @@ export default function MealTrackingPage() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showMealDropdown]);
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push("/login");
-    }
-  }, [user, authLoading, router]);
-
-  useEffect(() => {
-    if (user && user.isAdmin) {
-      router.push("/admin");
-    }
-  }, [user, router]);
 
   useEffect(() => {
     if (user && !user.isAdmin) {
@@ -294,12 +280,8 @@ export default function MealTrackingPage() {
     );
   };
 
-  if (authLoading || loading) {
+  if (loading) {
     return <Loader />;
-  }
-
-  if (!user || user.isAdmin) {
-    return null;
   }
 
   const totalMacros = dailyLog?.totalMacros || {
@@ -339,236 +321,71 @@ export default function MealTrackingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white font-sans selection:bg-lime-500 selection:text-black">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-neutral-950/80 backdrop-blur-md border-b border-neutral-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            {/* Logo */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-lime-500 rounded-lg flex items-center justify-center shadow-[0_0_10px_rgba(132,204,22,0.3)]">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2.5}
-                  stroke="black"
-                  className="w-6 h-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"
-                  />
-                </svg>
-              </div>
-              <h1 className="text-2xl font-black tracking-tighter uppercase hidden sm:block">
-                Nutri<span className="text-lime-500">Gain</span>
-              </h1>
-            </div>
-
-            {/* Desktop Actions */}
-            <div className="hidden md:flex items-center gap-6">
-              {/* Date Picker */}
-              <div className="relative group">
-                <input
-                  type="date"
-                  value={currentDate}
-                  onChange={(e) => setCurrentDate(e.target.value)}
-                  className="pl-10 pr-4 py-2.5 bg-neutral-900/50 backdrop-blur-md border border-neutral-800 rounded-xl focus:outline-none focus:border-lime-500 focus:ring-2 focus:ring-lime-500/20 text-sm font-bold text-neutral-300 group-hover:text-white cursor-pointer hover:bg-neutral-800 hover:border-neutral-700 transition-all shadow-lg [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer relative z-10 uppercase tracking-widest"
-                />
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 group-hover:text-lime-500 transition-colors z-20 pointer-events-none">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2}
-                    stroke="currentColor"
-                    className="w-4 h-4"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
-                    />
-                  </svg>
-                </div>
-              </div>
-
-              <div className="h-6 w-px bg-neutral-800"></div>
-
-              <div className="flex gap-1 bg-neutral-900 p-1 rounded-xl border border-neutral-800">
-                <button
-                  onClick={() => router.push("/dashboard/meal")}
-                  className="px-4 py-2 bg-lime-500 text-black rounded-lg shadow-lg shadow-lime-500/20 font-bold text-sm flex items-center gap-2 transition-all uppercase tracking-wide"
-                >
-                  Meal
-                </button>
-                <button
-                  onClick={() => router.push("/dashboard/gym")}
-                  className="px-4 py-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg font-bold text-sm flex items-center gap-2 transition-all cursor-pointer uppercase tracking-wide"
-                >
-                  Gym
-                </button>
-                <button
-                  onClick={() => router.push("/dashboard/profile")}
-                  className="px-4 py-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg font-bold text-sm flex items-center gap-2 transition-all cursor-pointer uppercase tracking-wide"
-                >
-                  Profile
-                </button>
-              </div>
-
-              <div className="flex items-center gap-4 pl-2">
-                <div className="text-right hidden lg:block">
-                  <p className="text-xs text-neutral-400 uppercase tracking-widest font-bold">
-                    Logged in as
-                  </p>
-                  <p className="text-sm font-bold text-white">{user.name}</p>
-                </div>
-                <button
-                  onClick={logout}
-                  className="text-neutral-500 hover:text-red-500 transition-colors"
-                  title="Logout"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2}
-                    stroke="currentColor"
-                    className="w-6 h-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            {/* Mobile Toggle */}
-            <div className="flex md:hidden items-center gap-3">
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 text-white hover:bg-neutral-800 rounded-lg transition"
+    <AppShell
+      navSlot={
+        <>
+        {/* Date Picker */}
+        <div className="relative group">
+          <input
+            type="date"
+            value={currentDate}
+            onChange={(e) => setCurrentDate(e.target.value)}
+            className="pl-10 pr-4 py-2.5 bg-neutral-900/50 backdrop-blur-md border border-neutral-800 rounded-xl focus:outline-none focus:border-lime-500 focus:ring-2 focus:ring-lime-500/20 text-sm font-bold text-neutral-300 group-hover:text-white cursor-pointer hover:bg-neutral-800 hover:border-neutral-700 transition-all shadow-lg [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer relative z-10 uppercase tracking-widest"
+          />
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 group-hover:text-lime-500 transition-colors z-20 pointer-events-none">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+              className="w-4 h-4"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
+              />
+            </svg>
+          </div>
+        </div>
+        </>
+      }
+      mobileSlot={
+        <>
+        {/* Select Date */}
+        <div className="pb-4 relative group">
+          <p className="text-xs text-neutral-400 uppercase tracking-widest font-bold mb-2">
+            Select Date
+          </p>
+          <div className="relative">
+            <input
+              type="date"
+              value={currentDate}
+              onChange={(e) => setCurrentDate(e.target.value)}
+              className="w-full py-3 pl-11 pr-4 bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-lime-500 focus:ring-2 focus:ring-lime-500/20 text-white font-bold cursor-pointer hover:border-neutral-700 transition-all [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer relative z-10 uppercase tracking-widest"
+            />
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 group-hover:text-lime-500 transition-colors z-20 pointer-events-none">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="w-5 h-5"
               >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  {mobileMenuOpen ? (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  ) : (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6h16M4 12h16M4 18h16"
-                    />
-                  )}
-                </svg>
-              </button>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
+                />
+              </svg>
             </div>
           </div>
         </div>
-
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-b border-neutral-800 bg-neutral-900">
-            <div className="p-4 space-y-4">
-              <div className="flex items-center gap-3 px-2 mb-4">
-                <div>
-                  <p className="text-xs text-neutral-400 uppercase tracking-widest font-bold">
-                    User
-                  </p>
-                  <p className="text-lg font-bold text-white">{user.name}</p>
-                </div>
-              </div>
-
-              <div className="pb-4 relative group">
-                <p className="text-xs text-neutral-400 uppercase tracking-widest font-bold mb-2">
-                  Select Date
-                </p>
-                <div className="relative">
-                  <input
-                    type="date"
-                    value={currentDate}
-                    onChange={(e) => setCurrentDate(e.target.value)}
-                    className="w-full py-3 pl-11 pr-4 bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-lime-500 focus:ring-2 focus:ring-lime-500/20 text-white font-bold cursor-pointer hover:border-neutral-700 transition-all [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer relative z-10 uppercase tracking-widest"
-                  />
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 group-hover:text-lime-500 transition-colors z-20 pointer-events-none">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={2}
-                      stroke="currentColor"
-                      className="w-5 h-5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
-                      />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <button
-                  onClick={() => {
-                    router.push("/dashboard/meal");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full flex items-center justify-between px-4 py-3 bg-neutral-800 text-white rounded-xl font-bold uppercase tracking-wider"
-                >
-                  Meal Tracker <span className="text-lime-500">●</span>
-                </button>
-                <button
-                  onClick={() => {
-                    router.push("/dashboard/gym");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full flex items-center justify-between px-4 py-3 text-neutral-400 hover:bg-neutral-800 rounded-xl font-bold uppercase tracking-wider"
-                >
-                  Gym Tracker
-                </button>
-                <button
-                  onClick={() => {
-                    router.push("/dashboard/profile");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full flex items-center justify-between px-4 py-3 text-neutral-400 hover:bg-neutral-800 rounded-xl font-bold uppercase tracking-wider"
-                >
-                  Profile
-                </button>
-              </div>
-
-              <div className="pt-3 mt-3 border-t border-neutral-800">
-                <button
-                  onClick={() => {
-                    logout();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-900/20 rounded-xl font-bold uppercase tracking-wider"
-                >
-                  Logout
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </nav>
+        </>
+      }
+    >
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -1053,7 +870,7 @@ export default function MealTrackingPage() {
           </div>
         </div>
       </div>
-    </div>
+    </AppShell>
   );
 }
 

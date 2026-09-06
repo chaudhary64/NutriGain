@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
+import AppShell from "@/components/AppShell";
 import { useRouter, useParams } from "next/navigation";
 import Loader from "@/components/Loader";
 import {
@@ -18,7 +19,7 @@ import {
 } from "recharts";
 
 export default function UserDetailPage() {
-  const { user: authUser, loading: authLoading, logout } = useAuth();
+  const { user: authUser } = useAuth();
   const router = useRouter();
   const params = useParams();
   const userId = params.id;
@@ -28,12 +29,6 @@ export default function UserDetailPage() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedLog, setSelectedLog] = useState(null);
-
-  useEffect(() => {
-    if (!authLoading && (!authUser || !authUser.isAdmin)) {
-      router.push("/login");
-    }
-  }, [authUser, authLoading, router]);
 
   const fetchUserData = useCallback(async () => {
     try {
@@ -79,46 +74,26 @@ export default function UserDetailPage() {
       }));
   };
 
-  if (authLoading || loading) {
+  if (loading) {
     return <Loader />;
   }
 
-  if (!authUser || !authUser.isAdmin || !userData) {
+  if (!userData) {
     return null;
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white">
-      {/* Navigation */}
-      <nav className="bg-neutral-900 shadow-lg border-b border-neutral-800 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-3">
-              <div className="text-2xl bg-neutral-800 w-10 h-10 rounded-lg flex items-center justify-center border border-neutral-700 shadow-lg">
-                👤
-              </div>
-              <h1 className="text-xl font-black italic uppercase tracking-wider text-white">
-                <span className="text-lime-500">{userData.name}'s</span> Profile
-              </h1>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => router.push("/admin")}
-                className="px-4 py-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition font-bold text-xs uppercase tracking-wider flex items-center gap-2"
-              >
-                📊 Dashboard
-              </button>
-              <button
-                onClick={logout}
-                className="bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-2 rounded-lg hover:bg-red-500 hover:text-white transition font-bold text-xs uppercase tracking-wider"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+    <AppShell
+      variant="admin"
+      navSlot={
+        <button
+          onClick={() => router.push("/admin")}
+          className="px-4 py-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition font-bold text-xs uppercase tracking-wider flex items-center gap-2"
+        >
+          📊 Dashboard
+        </button>
+      }
+    >
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* User Info Card */}
@@ -448,6 +423,6 @@ export default function UserDetailPage() {
           )}
         </div>
       </div>
-    </div>
+    </AppShell>
   );
 }
