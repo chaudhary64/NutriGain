@@ -46,9 +46,6 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: 'Daily log not found' }, { status: 404 });
     }
 
-    console.log('PUT - Looking for entry:', entryId);
-    console.log('PUT - Available meals:', dailyLog.meals.map(m => ({ id: m._id.toString(), name: m.mealName })));
-
     const mealEntry = dailyLog.meals.id(entryId);
     if (!mealEntry) {
       return NextResponse.json({ error: 'Meal entry not found' }, { status: 404 });
@@ -131,9 +128,6 @@ export async function DELETE(request, { params }) {
     if (!dailyLog) {
       return NextResponse.json({ error: 'Daily log not found' }, { status: 404 });
     }
-
-    console.log('DELETE - Looking for entry:', entryId);
-    console.log('DELETE - Available meals:', dailyLog.meals.map(m => ({ id: m._id.toString(), name: m.mealName })));
 
     const mealEntry = dailyLog.meals.id(entryId);
     if (!mealEntry) {

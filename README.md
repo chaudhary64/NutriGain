@@ -42,13 +42,13 @@ Instead of scattered spreadsheets and basic calorie counters, NutriGain gives yo
 | Feature | Description |
 |---|---|
 | 🎯 **Macro Tracking** | Real-time calorie, protein, carb, and fat monitoring with visual progress meters |
-| 🍽️ **Meal Database** | Searchable database of meals with accurate macro breakdowns per 100g |
+| 🍽️ **Meal Database** | Searchable database of meals with macro breakdowns per serving |
 | 🏋️ **Gym Log & PR Tracking** | Log personal records and working weights categorized by muscle group |
 | 📆 **Weekly Workout Schedules** | Define which muscle groups to train on which days of the week |
 | 🔥 **Activity Heatmap** | GitHub-style heatmap to visualize gym consistency across the calendar year |
 | 📊 **Weight Progression Charts** | Interactive Recharts graphs to track body weight trends over time |
 | 📅 **Daily Log** | Unified per-day log linking meals (breakfast, lunch, dinner) with gym status |
-| 🔒 **Secure Auth** | Passwords hashed with `bcryptjs`, sessions managed via JWT in `httpOnly` cookies |
+| 🔒 **Secure Auth** | Passwords hashed with `bcryptjs`, JWT sessions in `httpOnly` cookies, route guards via a Next.js proxy, login rate limiting, and server-side input validation |
 | 📱 **Fully Responsive** | Fluid layout with a polished mobile experience |
 | 🛡️ **Admin Panel** | Manage the global meal and exercise database from a dedicated admin interface |
 
@@ -57,7 +57,7 @@ Instead of scattered spreadsheets and basic calorie counters, NutriGain gives yo
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **[Next.js 16](https://nextjs.org/)** — App Router, file-based routing, server-side rendering
+- **[Next.js 16](https://nextjs.org/)** — App Router, file-based routing, route guards via the proxy convention
 - **[React 19](https://react.dev/)** — UI library with hooks and context
 - **[Tailwind CSS 4](https://tailwindcss.com/)** — Utility-first styling with dark, premium aesthetics
 - **[GSAP 3](https://gsap.com/)** — High-performance animations (hero reveals, scroll triggers, cursor glow)
@@ -71,12 +71,12 @@ Instead of scattered spreadsheets and basic calorie counters, NutriGain gives yo
 - **[Next.js API Routes](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)** — Serverless REST API endpoints
 - **[MongoDB](https://www.mongodb.com/) + [Mongoose 8](https://mongoosejs.com/)** — NoSQL database with schema validation
 - **[bcryptjs](https://www.npmjs.com/package/bcryptjs)** — Password hashing
-- **[jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken)** — JWT-based session management
-- **[next-auth](https://next-auth.js.org/)** — Auth utilities and session handling helpers
+- **[jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken)** — JWT-based session management (verified at the edge with `jose`)
 
 ### Dev Tools
 - **ESLint** — Code linting with Next.js config
 - **PostCSS** — CSS processing pipeline
+- **pnpm** — Fast, disk-efficient package management
 
 ---
 
@@ -86,43 +86,42 @@ Instead of scattered spreadsheets and basic calorie counters, NutriGain gives yo
 NutriGain/
 ├── app/
 │   ├── api/
-│   │   ├── auth/               # POST login/register, GET me, POST logout
-│   │   ├── daily-log/          # GET/POST/PUT daily log with meals & gym status
-│   │   ├── exercises/          # GET/POST/PUT/DELETE exercise library
-│   │   ├── meals/              # GET/POST/PUT/DELETE meal database
-│   │   ├── settings/           # GET/PUT user macro settings & targets
-│   │   ├── users/              # GET all users (admin)
-│   │   ├── weight/             # GET/POST body weight entries
-│   │   ├── workout-schedule/   # GET/PUT weekly per-day muscle group schedule
-│   │   └── ...                 # (migration & debug utilities)
+│   │   ├── auth/               # POST login/register, GET me, PUT me, POST logout
+│   │   ├── daily-log/          # GET/POST/PATCH daily log, PUT/DELETE meal entries
+│   │   ├── exercises/          # GET exercise library, PUT/DELETE per-user PR data
+│   │   ├── meals/              # GET meal database (admin CRUD)
+│   │   ├── settings/           # GET/PUT global meal schedule (admin)
+│   │   ├── users/              # GET all users & details (admin)
+│   │   ├── weight/             # GET/POST/PUT/DELETE body weight entries
+│   │   └── workout-schedule/   # GET weekly schedule, PUT single day (admin)
 │   ├── admin/                  # Admin panel — manage meals, exercises, users
 │   ├── dashboard/
 │   │   ├── gym/                # Gym tracking: PRs, heatmap, workout log
 │   │   ├── meal/               # Meal logging: search, add, daily macros
-│   │   └── page.js             # Main dashboard overview
+│   │   └── profile/            # Profile: preferences & settings
 │   ├── login/                  # Login page
 │   ├── register/               # Sign-up page
 │   ├── globals.css             # Global design tokens & base styles
-│   ├── layout.js               # Root layout with fonts & auth provider
+│   ├── layout.js               # Root layout with fonts & providers
 │   └── page.js                 # Landing page with GSAP scroll animations
+├── components/
+│   ├── LenisProvider.js        # Global smooth-scroll provider
+│   └── Loader.js               # Full-screen loading state
 ├── context/
-│   └── AuthContext.js          # Global auth state via React context
+│   ├── AuthContext.js          # Global auth state via React context
+│   └── UserSettingsContext.js  # Smooth-scroll & UI preferences
 ├── lib/
-│   ├── auth.js                 # JWT utility (sign / verify)
-│   └── mongodb.js              # Mongoose connection singleton
-├── models/
-│   ├── DailyLog.js             # Per-day log: meals, macros, gym status
-│   ├── Exercise.js             # Exercise library (muscle group, compound/isolation)
-│   ├── Meal.js                 # Meal schema (name, macros per 100g)
-│   ├── Settings.js             # User macro targets & preferences
-│   ├── User.js                 # User schema (name, email, hashed password, role)
-│   ├── UserExerciseData.js     # Per-user PR & working weight history
-│   └── WorkoutSchedule.js      # Weekly day → muscle group mapping
-├── public/
-├── .env.local.example
-├── package.json
-├── next.config.mjs
-└── jsconfig.json
+│   ├── auth.js                 # JWT sign/verify, cookie options, auth helpers
+│   ├── mongodb.js              # Mongoose connection singleton
+│   ├── rate-limit.js           # Login rate limiting
+│   └── validation.js           # Server-side input validation helpers
+├── models/                     # Mongoose schemas (User, Meal, DailyLog, ...)
+├── proxy.js                    # Route guard for protected pages & APIs
+├── scripts/
+│   └── seed-admin.js           # Manual admin seeding (pnpm run seed)
+├── public/                     # Icons & web manifest
+├── .env.local.example          # Environment variable template
+└── package.json
 ```
 
 ---
@@ -136,8 +135,8 @@ NutriGain/
        └── "Login" → /login
 
 2. Auth (/login, /register)
-   ├── Register: POST /api/auth/register → creates User + Settings, sets JWT cookie
-   └── Login:    POST /api/auth/login    → validates credentials, sets JWT cookie
+   ├── Register: POST /api/auth/register → creates User, sets JWT cookie
+   └── Login:    POST /api/auth/login    → validates credentials (rate limited), sets JWT cookie
 
 3. Dashboard (/dashboard)
    ├── Overview of today's macros, gym status, and streaks
@@ -159,7 +158,8 @@ NutriGain/
 6. Admin Panel (/admin)
    ├── Manage the global meal database (add, edit, delete meals)
    ├── Manage the exercise library (add, edit, delete exercises)
-   └── View registered users
+   ├── Edit the weekly workout schedule and global meal schedule
+   └── View registered users and their stats
 
 7. Sign Out
    └── POST /api/auth/logout → clears JWT cookie → redirect to /
@@ -172,6 +172,7 @@ NutriGain/
 ### Prerequisites
 
 - **Node.js** v18 or higher
+- **pnpm** (`npm install -g pnpm` or see [pnpm.io/installation](https://pnpm.io/installation))
 - A **MongoDB** instance (local or [MongoDB Atlas](https://www.mongodb.com/cloud/atlas))
 
 ### 1. Clone the repository
@@ -184,7 +185,7 @@ cd nutrigain
 ### 2. Install dependencies
 
 ```bash
-npm install
+pnpm install
 ```
 
 ### 3. Configure environment variables
@@ -195,7 +196,8 @@ Create a `.env.local` file in the project root (see `.env.local.example` for ref
 # MongoDB connection string
 MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/nutrigain?retryWrites=true&w=majority
 
-# JWT secret — use a long, random string
+# JWT secret — required, at least 32 characters
+# Generate one with: openssl rand -base64 32
 JWT_SECRET=your-super-secret-jwt-key-here
 
 # Node environment
@@ -207,20 +209,34 @@ NODE_ENV=development
 ### 4. Run the development server
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### 5. (Optional) Seed the admin account
 
-After registering your first account, you can promote it to admin directly in MongoDB by setting the `role` field on the `User` document to `"admin"`, then access the admin panel at `/admin`.
+Create (or promote) an admin account with the seed script:
+
+```bash
+pnpm run seed
+```
+
+Defaults come from optional env overrides — set these before running to customize:
+
+```env
+SEED_ADMIN_EMAIL=you@example.com
+SEED_ADMIN_NAME=Your Name
+SEED_ADMIN_PASSWORD=choose-a-strong-password
+```
+
+Then access the admin panel at `/admin`.
 
 ### 6. Build for production
 
 ```bash
-npm run build
-npm run start
+pnpm run build
+pnpm run start
 ```
 
 ---
@@ -234,12 +250,6 @@ Contributions are welcome! Please open an issue first to discuss what you would 
 3. Commit your changes: `git commit -m 'feat: add some feature'`
 4. Push to the branch: `git push origin feature/my-new-feature`
 5. Open a Pull Request
-
----
-
-## 📜 License
-
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
 ---
 

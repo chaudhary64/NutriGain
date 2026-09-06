@@ -1,72 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-
-const LOADING_MESSAGES = [
-  "Charging your power level…",
-  "Entering training mode…",
-  "Awakening your potential…",
-  "Synchronizing your strength…",
-  "Initiating transformation…",
-  "Preparing your next battle…",
-  "Calibrating your stats…",
-  "Loading your training arc…",
-  "Your journey is about to begin…",
-  "Summoning your inner strength…",
-
-  "Calculating your power stats…",
-  "Tracking your strength progression…",
-  "Optimizing your training arc…",
-  "Analyzing your gains…",
-  "Updating your skill tree…",
-
-  "Syncing with your system…",
-  "Initializing fitness protocol…",
-  "Linking your performance data…",
-  "Activating core systems…",
-
-  "Logging your reps and sets…",
-  "Scanning your physique stats…",
-  "Measuring hypertrophy levels…",
-  "Updating your PR records…",
-  "Balancing your macros…",
-  "Fueling your recovery system…",
-
-  "Entering hypertrophy mode…",
-  "Engaging beast mode…",
-  "Unleashing full strength…",
-  "Breaking your limits…",
-  "Pushing beyond 100%…",
-
-  "Analyzing muscle output…",
-  "Stabilizing core strength…",
-  "Enhancing endurance stats…",
-  "Upgrading your physique…",
-  "Refining your form…",
-
-  "Preparing next set: maximum effort…",
-  "Rest timer initiated…",
-  "Cooldown phase engaged…",
-
-  "Skill unlocked: Strength +1",
-  "Skill unlocked: Endurance +1",
-  "New achievement incoming…",
-  "Updating training log…",
-  "Sync complete. Stand by…"
-];
-
-export default function Loader({ text }) {
-  const [message, setMessage] = useState("LOADING YOUR EXPERIENCE...");
-
-  useEffect(() => {
-    if (!text) {
-      const randomIndex = Math.floor(Math.random() * LOADING_MESSAGES.length);
-      setMessage(LOADING_MESSAGES[randomIndex]);
-    } else {
-      setMessage(text);
-    }
-  }, [text]);
-
+export default function Loader({ text = "LOADING YOUR EXPERIENCE..." }) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-neutral-950">
       <div className="relative flex items-center justify-center">
@@ -89,7 +23,7 @@ export default function Loader({ text }) {
         </svg>
       </div>
       <div className="mt-8 text-[10px] font-black tracking-[0.4em] text-lime-500/70 uppercase animate-pulse">
-        {message}
+        {text}
       </div>
     </div>
   );

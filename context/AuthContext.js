@@ -27,7 +27,6 @@ export function AuthProvider({ children }) {
       });
       if (res.ok) {
         const data = await res.json();
-        console.log('[AuthContext] User data fetched:', data.user.mealDays);
         setUser(data.user);
       } else {
         setUser(null);
@@ -42,27 +41,21 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     try {
-      console.log('Attempting login...', email);
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
 
-      console.log('Response status:', res.status);
       const data = await res.json();
-      console.log('Response data:', data);
 
       if (res.ok) {
-        console.log('Login successful, setting user:', data.user);
         setUser(data.user);
         // Use window.location for a hard redirect to ensure cookie is set
         const redirectUrl = data.user.isAdmin ? '/admin' : '/dashboard';
-        console.log('Redirecting to:', redirectUrl);
         window.location.href = redirectUrl;
         return { success: true };
       } else {
-        console.log('Login failed:', data.error);
         return { success: false, error: data.error || 'Login failed' };
       }
     } catch (error) {
