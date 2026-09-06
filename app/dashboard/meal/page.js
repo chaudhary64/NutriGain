@@ -330,12 +330,12 @@ export default function MealTrackingPage() {
   const previewMacros = getPreviewMacros();
   const hasPreview = selectedMeal && quantity > 0;
 
-  // Daily goals from environment variables
-  const goals = {
-    calories: parseInt(process.env.NEXT_PUBLIC_GOAL_CALORIES) || 1900,
-    protein: parseInt(process.env.NEXT_PUBLIC_GOAL_PROTEIN) || 120,
-    carbs: parseInt(process.env.NEXT_PUBLIC_GOAL_CARBS) || 170,
-    fats: parseInt(process.env.NEXT_PUBLIC_GOAL_FATS) || 60,
+  // Per-user daily goals (editable on the profile page)
+  const goals = user?.macroGoals || {
+    calories: 1900,
+    protein: 120,
+    carbs: 170,
+    fats: 60,
   };
 
   return (

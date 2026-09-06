@@ -2,20 +2,13 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 import DailyLog from '@/models/DailyLog';
-import { verifyAuth } from '@/lib/auth';
+import { withAuth } from '@/lib/auth';
 import { calculateStreaks } from '@/lib/daily-log';
 import { isValidObjectId } from '@/lib/validation';
 
-export async function GET(request, { params }) {
-  try {
-    const authResult = verifyAuth(request);
-    if (!authResult.authenticated || !authResult.user.isAdmin) {
-      return NextResponse.json(
-        { error: 'Unauthorized - Admin access required' },
-        { status: 401 }
-      );
-    }
-
+// Admin only — user details with computed stats
+export const GET = withAuth(
+  async (request, user, { params }) => {
     await dbConnect();
 
     const { id } = await params;
@@ -25,17 +18,14 @@ export async function GET(request, { params }) {
     }
 
     // Get user details
-    const user = await User.findById(id).select('-password');
+    const targetUser = await User.findById(id).select('-password');
 
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+    if (!targetUser) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // Get all daily logs for the user (entries already carry denormalized
-    // mealName/macros, so the old meals.meal populate is unnecessary).
+    // mealName/macros, so a meals.meal populate is unnecessary).
     const dailyLogs = await DailyLog.find({ user: id }).sort({ date: -1 });
 
     // Calculate statistics
@@ -68,10 +58,8 @@ export async function GET(request, { params }) {
       stats.averageCarbs = Math.round(stats.totalCarbs / dailyLogs.length);
       stats.averageFats = Math.round(stats.totalFats / dailyLogs.length);
 
-      // Streaks are computed over distinct logged dates: the current streak
-      // is the consecutive run ending today (or yesterday — an unfinished
-      // today doesn't hide an active streak), the longest is the best run
-      // ever. The old implementation conflated the two counters.
+      // Current streak = consecutive run ending today (or yesterday — an
+      // unfinished today doesn't hide an active streak); longest = best run.
       const { currentStreak, longestStreak } = calculateStreaks(
         dailyLogs.map((log) => log.date)
       );
@@ -80,15 +68,10 @@ export async function GET(request, { params }) {
     }
 
     return NextResponse.json({
-      user,
+      user: targetUser,
       dailyLogs,
       stats,
     });
-  } catch (error) {
-    console.error('Error fetching user details:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch user details' },
-      { status: 500 }
-    );
-  }
-}
+  },
+  { admin: true }
+);

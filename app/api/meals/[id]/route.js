@@ -1,42 +1,30 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Meal from '@/models/Meal';
-import { requireAdmin, verifyAuth } from '@/lib/auth';
+import { withAuth } from '@/lib/auth';
 import { isValidObjectId, validateMeal } from '@/lib/validation';
 
 // GET single meal (any authenticated user)
-export async function GET(request, { params }) {
-  try {
-    const auth = verifyAuth(request);
-    if (!auth.authenticated) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
+export const GET = withAuth(async (request, user, { params }) => {
+  await dbConnect();
+  const { id } = await params;
 
-    await dbConnect();
-    const { id } = await params;
-
-    if (!isValidObjectId(id)) {
-      return NextResponse.json({ error: 'Invalid meal id' }, { status: 400 });
-    }
-
-    const meal = await Meal.findById(id);
-
-    if (!meal) {
-      return NextResponse.json({ error: 'Meal not found' }, { status: 404 });
-    }
-
-    return NextResponse.json({ meal }, { status: 200 });
-  } catch (error) {
-    console.error('Error fetching meal:', error);
-    return NextResponse.json({ error: 'Failed to fetch meal' }, { status: 500 });
+  if (!isValidObjectId(id)) {
+    return NextResponse.json({ error: 'Invalid meal id' }, { status: 400 });
   }
-}
+
+  const meal = await Meal.findById(id);
+
+  if (!meal) {
+    return NextResponse.json({ error: 'Meal not found' }, { status: 404 });
+  }
+
+  return NextResponse.json({ meal }, { status: 200 });
+});
 
 // PUT update meal (admin only)
-export async function PUT(request, { params }) {
-  try {
-    requireAdmin(request);
-
+export const PUT = withAuth(
+  async (request, user, { params }) => {
     const body = await request.json().catch(() => ({}));
     const { id } = await params;
 
@@ -71,19 +59,13 @@ export async function PUT(request, { params }) {
     }
 
     return NextResponse.json({ meal }, { status: 200 });
-  } catch (error) {
-    if (error.message === 'Admin privileges required' || error.message === 'Authentication required') {
-      return NextResponse.json({ error: error.message }, { status: error.message === 'Authentication required' ? 401 : 403 });
-    }
-    console.error('Error updating meal:', error);
-    return NextResponse.json({ error: 'Failed to update meal' }, { status: 500 });
-  }
-}
+  },
+  { admin: true }
+);
 
 // DELETE meal (admin only)
-export async function DELETE(request, { params }) {
-  try {
-    requireAdmin(request);
+export const DELETE = withAuth(
+  async (request, user, { params }) => {
     const { id } = await params;
 
     if (!isValidObjectId(id)) {
@@ -99,11 +81,6 @@ export async function DELETE(request, { params }) {
     }
 
     return NextResponse.json({ message: 'Meal deleted successfully' }, { status: 200 });
-  } catch (error) {
-    if (error.message === 'Admin privileges required' || error.message === 'Authentication required') {
-      return NextResponse.json({ error: error.message }, { status: error.message === 'Authentication required' ? 401 : 403 });
-    }
-    console.error('Error deleting meal:', error);
-    return NextResponse.json({ error: 'Failed to delete meal' }, { status: 500 });
-  }
-}
+  },
+  { admin: true }
+);

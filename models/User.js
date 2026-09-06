@@ -48,6 +48,12 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  macroGoals: {
+    calories: { type: Number, default: 1900 },
+    protein: { type: Number, default: 120 },
+    carbs: { type: Number, default: 170 },
+    fats: { type: Number, default: 60 },
+  },
   createdAt: {
     type: Date,
     default: Date.now,

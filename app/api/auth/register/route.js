@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 import { signToken, tokenCookieOptions } from '@/lib/auth';
+import { getDefaultMacroGoals } from '@/lib/goals';
 import { validateRegister } from '@/lib/validation';
 
 export async function POST(request) {
@@ -29,6 +30,7 @@ export async function POST(request) {
       password: hashedPassword,
       name,
       isAdmin: false,
+      macroGoals: getDefaultMacroGoals(),
     });
 
     const token = signToken(user);

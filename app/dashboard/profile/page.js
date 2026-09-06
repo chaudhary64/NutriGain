@@ -9,11 +9,14 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
 export default function ProfilePage() {
-  const { user, loading: authLoading, logout } = useAuth();
+  const { user, loading: authLoading, logout, checkAuth } = useAuth();
   const { smoothScroll, toggleSmoothScroll } = useUserSettings();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [goalForm, setGoalForm] = useState(null);
+  const [savingGoals, setSavingGoals] = useState(false);
+  const [goalsMessage, setGoalsMessage] = useState("");
   const containerRef = useRef(null);
 
   useGSAP(() => {
@@ -57,6 +60,39 @@ export default function ProfilePage() {
   if (!user || user.isAdmin) {
     return null;
   }
+
+  const goals = user.macroGoals || { calories: 1900, protein: 120, carbs: 170, fats: 60 };
+
+  const handleGoalChange = (field, value) => {
+    setGoalForm((prev) => ({ ...(prev || goals), [field]: value }));
+  };
+
+  const handleSaveGoals = async () => {
+    setSavingGoals(true);
+    setGoalsMessage("");
+    try {
+      const current = goalForm || goals;
+      const res = await fetch("/api/auth/me", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ macroGoals: current }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        await checkAuth();
+        setGoalForm(null);
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2500);
+      } else {
+        setGoalsMessage(data.error || "Failed to save goals");
+      }
+    } catch (error) {
+      console.error("Error saving macro goals:", error);
+      setGoalsMessage("Network error. Please try again.");
+    } finally {
+      setSavingGoals(false);
+    }
+  };
 
   const handleToggleScroll = (val) => {
     toggleSmoothScroll(val);
@@ -414,6 +450,86 @@ export default function ProfilePage() {
                   />
                 </svg>
                 Saved
+              </div>
+            </div>
+
+            {/* Macro Goals */}
+            <div className="stagger-item bg-gradient-to-br from-neutral-900/90 to-neutral-950/90 backdrop-blur-md border border-neutral-800/80 hover:border-orange-500/20 transition-all duration-500 shadow-2xl hover:shadow-[0_0_30px_rgba(249,115,22,0.1)] rounded-[2rem] p-8 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/4 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+
+              <div className="flex items-center gap-4 mb-8 relative z-10">
+                <div className="bg-gradient-to-br from-orange-500/20 to-orange-500/5 p-3.5 rounded-2xl border border-orange-500/30 text-orange-500 shadow-[0_0_20px_rgba(249,115,22,0.15)] group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-6 h-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-black text-white uppercase tracking-tighter">
+                    Daily Goals
+                  </h3>
+                  <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest mt-1">
+                    Your personal macro targets
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 relative z-10">
+                {[
+                  { field: "calories", label: "Calories", unit: "kcal", color: "text-orange-500" },
+                  { field: "protein", label: "Protein", unit: "g", color: "text-blue-500" },
+                  { field: "carbs", label: "Carbs", unit: "g", color: "text-lime-500" },
+                  { field: "fats", label: "Fats", unit: "g", color: "text-purple-500" },
+                ].map((item) => (
+                  <div
+                    key={item.field}
+                    className="p-5 bg-neutral-950/80 rounded-2xl border border-neutral-800/80 focus-within:border-orange-500/50 transition-colors"
+                  >
+                    <label
+                      htmlFor={`goal-${item.field}`}
+                      className="text-[10px] font-black text-neutral-500 uppercase tracking-widest mb-2 block"
+                    >
+                      {item.label} ({item.unit})
+                    </label>
+                    <input
+                      id={`goal-${item.field}`}
+                      type="number"
+                      min="1"
+                      max="10000"
+                      step="1"
+                      value={(goalForm || goals)[item.field] ?? ""}
+                      onChange={(e) => handleGoalChange(item.field, e.target.value)}
+                      className={`w-full bg-transparent text-2xl font-black ${item.color} outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {goalsMessage && (
+                <p className="mt-4 text-sm font-bold text-red-500 relative z-10">{goalsMessage}</p>
+              )}
+
+              <div className="mt-6 flex items-center justify-between relative z-10">
+                <p className="text-xs text-neutral-500">
+                  {goalForm ? "Unsaved changes" : "These targets power the meters on your meal dashboard"}
+                </p>
+                <button
+                  onClick={handleSaveGoals}
+                  disabled={savingGoals}
+                  className="px-6 py-3 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/40 hover:border-orange-500/70 rounded-xl text-orange-500 font-black uppercase tracking-widest text-xs transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  {savingGoals ? "Saving..." : "Save Goals"}
+                </button>
               </div>
             </div>
 

@@ -1,50 +1,37 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Settings from '@/models/Settings';
-import { verifyAuth } from '@/lib/auth';
+import { withAuth } from '@/lib/auth';
 import { validateMealSchedule } from '@/lib/validation';
 
 // Disable caching
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export async function GET(request) {
-  try {
-    await dbConnect();
+export const GET = withAuth(async () => {
+  await dbConnect();
 
-    const mealSchedule = await Settings.findOne({ key: 'mealSchedule' });
+  const mealSchedule = await Settings.findOne({ key: 'mealSchedule' });
 
-    const defaultSchedule = ['Paneer', 'Chicken', 'Paneer', 'Chicken', 'Paneer', 'Chicken', 'Paneer'];
+  const defaultSchedule = ['Paneer', 'Chicken', 'Paneer', 'Chicken', 'Paneer', 'Chicken', 'Paneer'];
 
-    return NextResponse.json(
-      {
-        mealDays: mealSchedule?.value || defaultSchedule,
+  return NextResponse.json(
+    {
+      mealDays: mealSchedule?.value || defaultSchedule,
+    },
+    {
+      status: 200,
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+        Pragma: 'no-cache',
+        Expires: '0',
       },
-      {
-        status: 200,
-        headers: {
-          'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-          Pragma: 'no-cache',
-          Expires: '0',
-        },
-      }
-    );
-  } catch (error) {
-    console.error('[SETTINGS GET] Error:', error);
-    return NextResponse.json({ error: 'Failed to fetch settings' }, { status: 500 });
-  }
-}
-
-export async function PUT(request) {
-  try {
-    const authResult = verifyAuth(request);
-    if (!authResult.authenticated || !authResult.user.isAdmin) {
-      return NextResponse.json(
-        { error: 'Unauthorized - Admin access required' },
-        { status: 401 }
-      );
     }
+  );
+});
 
+export const PUT = withAuth(
+  async (request) => {
     const { mealDays } = await request.json().catch(() => ({}));
 
     const [validationErrors] = validateMealSchedule(mealDays);
@@ -68,8 +55,6 @@ export async function PUT(request) {
       success: true,
       mealDays: result.value,
     });
-  } catch (error) {
-    console.error('[SETTINGS UPDATE] Error:', error);
-    return NextResponse.json({ error: 'Update failed' }, { status: 500 });
-  }
-}
+  },
+  { admin: true }
+);

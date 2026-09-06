@@ -2,18 +2,11 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 import DailyLog from '@/models/DailyLog';
-import { verifyAuth } from '@/lib/auth';
+import { withAuth } from '@/lib/auth';
 
-export async function GET(request) {
-  try {
-    const authResult = verifyAuth(request);
-    if (!authResult.authenticated || !authResult.user.isAdmin) {
-      return NextResponse.json(
-        { error: 'Unauthorized - Admin access required' },
-        { status: 401 }
-      );
-    }
-
+// Admin only — list users with aggregated log stats
+export const GET = withAuth(
+  async () => {
     await dbConnect();
 
     // One aggregation computes per-user log stats; the old version fetched
@@ -74,11 +67,6 @@ export async function GET(request) {
     });
 
     return NextResponse.json(usersWithStats);
-  } catch (error) {
-    console.error('Error fetching users:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch users' },
-      { status: 500 }
-    );
-  }
-}
+  },
+  { admin: true }
+);
