@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
+import { validateTargetWeight, validateWeightEntry } from '@/lib/validation';
 
 // GET all weight entries for the authenticated user
 export async function GET(request) {
@@ -44,14 +45,11 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { weight, date } = body;
+    const body = await request.json().catch(() => ({}));
 
-    if (!weight || !date) {
-      return NextResponse.json(
-        { error: 'Weight and date are required' },
-        { status: 400 }
-      );
+    const [validationErrors, { weight, date }] = validateWeightEntry(body);
+    if (validationErrors.length > 0) {
+      return NextResponse.json({ error: validationErrors[0], errors: validationErrors }, { status: 400 });
     }
 
     await connectDB();
@@ -76,8 +74,8 @@ export async function POST(request) {
 
     // Add new weight entry
     userData.weightEntries.push({
-      weight: parseFloat(weight),
-      date: new Date(date),
+      weight,
+      date: new Date(`${date}T00:00:00Z`),
     });
 
     await userData.save();
@@ -105,21 +103,18 @@ export async function PUT(request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { targetWeight } = body;
+    const body = await request.json().catch(() => ({}));
 
-    if (!targetWeight) {
-      return NextResponse.json(
-        { error: 'Target weight is required' },
-        { status: 400 }
-      );
+    const [validationErrors, targetWeight] = validateTargetWeight(body);
+    if (validationErrors.length > 0) {
+      return NextResponse.json({ error: validationErrors[0], errors: validationErrors }, { status: 400 });
     }
 
     await connectDB();
 
     const userData = await User.findByIdAndUpdate(
       auth.user.id,
-      { targetWeight: parseFloat(targetWeight) },
+      { targetWeight },
       { new: true }
     );
 

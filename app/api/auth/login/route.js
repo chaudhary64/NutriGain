@@ -1,58 +1,43 @@
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
-import { NextResponse } from 'next/server';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+import { signToken, tokenCookieOptions } from '@/lib/auth';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { validateLogin } from '@/lib/validation';
 
 export async function POST(request) {
   try {
-    const { email, password } = await request.json();
+    const body = await request.json().catch(() => ({}));
 
-    console.log('[LOGIN] Attempt for email:', email);
-    console.log('[LOGIN] JWT_SECRET exists:', !!process.env.JWT_SECRET);
-    console.log('[LOGIN] MONGODB_URI exists:', !!process.env.MONGODB_URI);
+    const [validationErrors, { email, password }] = validateLogin(body);
+    if (validationErrors.length > 0) {
+      return NextResponse.json({ error: validationErrors[0], errors: validationErrors }, { status: 400 });
+    }
 
-    if (!email || !password) {
+    // Rate limit by IP + email before touching bcrypt or the DB.
+    const rateLimit = checkRateLimit(request, email);
+    if (!rateLimit.allowed) {
       return NextResponse.json(
-        { error: 'Email and password are required' },
-        { status: 400 }
+        { error: 'Too many login attempts. Please try again later.' },
+        {
+          status: 429,
+          headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) },
+        }
       );
     }
 
     await dbConnect();
 
     const user = await User.findOne({ email });
-    console.log('[LOGIN] User found:', !!user);
-    
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Invalid credentials' },
-        { status: 401 }
-      );
+
+    const isPasswordValid = user ? await bcrypt.compare(password, user.password) : false;
+
+    if (!user || !isPasswordValid) {
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    console.log('[LOGIN] Password valid:', isPasswordValid);
-    
-    if (!isPasswordValid) {
-      return NextResponse.json(
-        { error: 'Invalid credentials' },
-        { status: 401 }
-      );
-    }
-
-    const token = jwt.sign(
-      { 
-        userId: user._id, 
-        email: user.email, 
-        isAdmin: user.isAdmin,
-        name: user.name 
-      },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const token = signToken(user);
 
     const response = NextResponse.json(
       {
@@ -67,22 +52,11 @@ export async function POST(request) {
       { status: 200 }
     );
 
-    response.cookies.set('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60, // 7 days
-      path: '/',
-    });
-
-    console.log('[LOGIN] Login successful for:', email);
+    response.cookies.set('token', token, tokenCookieOptions());
 
     return response;
   } catch (error) {
     console.error('Login error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -1,30 +1,25 @@
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
-import { NextResponse } from 'next/server';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+import { signToken, tokenCookieOptions } from '@/lib/auth';
+import { validateRegister } from '@/lib/validation';
 
 export async function POST(request) {
   try {
-    const { email, password, name } = await request.json();
+    const body = await request.json().catch(() => ({}));
 
-    if (!email || !password || !name) {
-      return NextResponse.json(
-        { error: 'Email, password, and name are required' },
-        { status: 400 }
-      );
+    // Server-side validation — no longer trusts the client's checks.
+    const [validationErrors, { email, name, password }] = validateRegister(body);
+    if (validationErrors.length > 0) {
+      return NextResponse.json({ error: validationErrors[0], errors: validationErrors }, { status: 400 });
     }
 
     await dbConnect();
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return NextResponse.json(
-        { error: 'User already exists' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'User already exists' }, { status: 400 });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -36,16 +31,7 @@ export async function POST(request) {
       isAdmin: false,
     });
 
-    const token = jwt.sign(
-      { 
-        userId: user._id, 
-        email: user.email, 
-        isAdmin: user.isAdmin,
-        name: user.name 
-      },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const token = signToken(user);
 
     const response = NextResponse.json(
       {
@@ -60,20 +46,11 @@ export async function POST(request) {
       { status: 201 }
     );
 
-    response.cookies.set('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60, // 7 days
-      path: '/',
-    });
+    response.cookies.set('token', token, tokenCookieOptions());
 
     return response;
   } catch (error) {
     console.error('Registration error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

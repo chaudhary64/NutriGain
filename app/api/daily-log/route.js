@@ -4,6 +4,7 @@ import DailyLog from '@/models/DailyLog';
 import Meal from '@/models/Meal';
 import { requireAuth } from '@/lib/auth';
 import { format } from 'date-fns';
+import { isValidDateString, validateDailyLogMeal, validateGymStatus } from '@/lib/validation';
 
 // GET daily log
 export async function GET(request) {
@@ -104,15 +105,17 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const user = requireAuth(request);
-    const body = await request.json();
-    const { mealId, quantity, mealType, date } = body;
+    const body = await request.json().catch(() => ({}));
 
-    if (!mealId || !quantity || !mealType) {
+    const [validationErrors, normalized] = validateDailyLogMeal(body);
+    if (validationErrors.length > 0) {
       return NextResponse.json(
-        { error: 'Meal ID, quantity, and meal type are required' },
+        { error: validationErrors[0], errors: validationErrors },
         { status: 400 }
       );
     }
+
+    const { mealId, quantity, mealType, date } = normalized;
 
     await dbConnect();
 
@@ -185,15 +188,17 @@ export async function POST(request) {
 export async function PATCH(request) {
   try {
     const user = requireAuth(request);
-    const body = await request.json();
-    const { date, gymStatus } = body;
+    const body = await request.json().catch(() => ({}));
 
-    if (!gymStatus || !['not-completed', 'partially-completed', 'completed'].includes(gymStatus)) {
+    const [validationErrors, normalized] = validateGymStatus(body);
+    if (validationErrors.length > 0) {
       return NextResponse.json(
-        { error: 'Valid gymStatus is required (not-completed, partially-completed, or completed)' },
+        { error: validationErrors[0], errors: validationErrors },
         { status: 400 }
       );
     }
+
+    const { gymStatus, date } = normalized;
 
     await dbConnect();
 

@@ -3,18 +3,34 @@ import dbConnect from '@/lib/mongodb';
 import DailyLog from '@/models/DailyLog';
 import Meal from '@/models/Meal';
 import { requireAuth } from '@/lib/auth';
+import { isValidObjectId, isValidDateString } from '@/lib/validation';
 
 // PUT update meal entry quantity
 export async function PUT(request, { params }) {
   try {
     const user = requireAuth(request);
-    const body = await request.json();
+    const body = await request.json().catch(() => ({}));
     const { quantity, date } = body;
     const { id: entryId } = await params;
 
-    if (!quantity || quantity <= 0) {
+    if (!isValidObjectId(entryId)) {
       return NextResponse.json(
-        { error: 'Valid quantity is required' },
+        { error: 'Invalid meal entry id' },
+        { status: 400 }
+      );
+    }
+
+    if (!isValidDateString(date)) {
+      return NextResponse.json(
+        { error: 'date must be a valid yyyy-MM-dd string' },
+        { status: 400 }
+      );
+    }
+
+    const qty = Number(quantity);
+    if (!Number.isFinite(qty) || qty <= 0 || qty > 1000) {
+      return NextResponse.json(
+        { error: 'Valid quantity is required (positive number, max 1000)' },
         { status: 400 }
       );
     }
@@ -52,14 +68,14 @@ export async function PUT(request, { params }) {
 
     // Calculate new macros
     const newMacros = {
-      calories: Math.round(meal.macros.calories * quantity),
-      protein: Math.round(meal.macros.protein * quantity * 10) / 10,
-      carbs: Math.round(meal.macros.carbs * quantity * 10) / 10,
-      fats: Math.round(meal.macros.fats * quantity * 10) / 10,
+      calories: Math.round(meal.macros.calories * qty),
+      protein: Math.round(meal.macros.protein * qty * 10) / 10,
+      carbs: Math.round(meal.macros.carbs * qty * 10) / 10,
+      fats: Math.round(meal.macros.fats * qty * 10) / 10,
     };
 
     // Update entry
-    mealEntry.quantity = quantity;
+    mealEntry.quantity = qty;
     mealEntry.macros = newMacros;
 
     // Add new macros to total
@@ -90,6 +106,20 @@ export async function DELETE(request, { params }) {
     const { searchParams } = new URL(request.url);
     const date = searchParams.get('date');
     const { id: entryId } = await params;
+
+    if (!isValidDateString(date)) {
+      return NextResponse.json(
+        { error: 'date must be a valid yyyy-MM-dd string' },
+        { status: 400 }
+      );
+    }
+
+    if (!isValidObjectId(entryId)) {
+      return NextResponse.json(
+        { error: 'Invalid meal entry id' },
+        { status: 400 }
+      );
+    }
 
     await dbConnect();
 
