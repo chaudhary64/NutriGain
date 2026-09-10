@@ -2,6 +2,7 @@ import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { UserSettingsProvider } from "@/context/UserSettingsContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import LenisProvider from "@/components/LenisProvider";
 const inter = Inter({
   variable: "--font-inter",
@@ -38,10 +39,17 @@ export default function RootLayout({ children }) {
         className={`${inter.variable} ${playfair.variable} antialiased`}
         suppressHydrationWarning
       >
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "(function(){try{var t=localStorage.getItem('nutrigain_theme');if(t!=='light'&&t!=='dark'&&window.matchMedia('(prefers-color-scheme: dark)').matches){t='dark'}if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t)}}catch(e){}})();",
+          }}
+        />
         <AuthProvider>
-          <UserSettingsProvider>
-            <LenisProvider>{children}</LenisProvider>
-          </UserSettingsProvider>
+          <ThemeProvider>
+            <UserSettingsProvider>
+              <LenisProvider>{children}</LenisProvider>
+            </UserSettingsProvider>
+          </ThemeProvider>
         </AuthProvider>
       </body>
     </html>

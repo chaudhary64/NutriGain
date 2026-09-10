@@ -12,44 +12,46 @@ import Loader from "@/components/Loader";
 /* ------------------------------------------------------------------ */
 
 const MERIDIAN_CSS = `
-.mrd{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--t3:#6b6b76;--ac:#4f46e5;--ach:#4338ca;--red:#dc2626;color:var(--t1)}
-.mrd .m-card{background:#fff;border:1px solid var(--line);border-radius:12px}
+.mrd{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--t3:#6b6b76;--ac:#4f46e5;--ach:#4338ca;--red:#dc2626;--paper:#fafaf9;--card:#fff;--sunken:#f1f1ee;--track:#efefec;--name:#3a3a42;--on-ac:#fff;--ac-soft:#eef2ff;--ac-soft-b:#c7d2fe;--green:#059669;--green-soft:#ecfdf5;--red-soft:#fef2f2;--red-soft-b:#fecaca;--pro:#7c3aed;--pro-soft:#f5f3ff;--car:#d97706;--car-soft:#fffbeb;color:var(--t1)}
+html[data-theme="dark"] .mrd{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b96;--ac:#818cf8;--ach:#a5b4fc;--red:#f87171;--paper:#111113;--card:#1c1c1f;--sunken:#26262b;--track:#2e2e34;--name:#d4d4da;--on-ac:#111113;--ac-soft:#232347;--ac-soft-b:#3730a3;--green:#34d399;--green-soft:#0d2a22;--red-soft:#2b1b1b;--red-soft-b:#5c2b2b;--pro:#a78bfa;--pro-soft:#2b2140;--car:#fbbf24;--car-soft:#3a2d10}
+.mrd{background:var(--paper)}
+.mrd .m-card{background:var(--card);border:1px solid var(--line);border-radius:12px}
 .mrd .m-card-h{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
 .mrd .m-card-h h3{font-size:13px;font-weight:700;color:var(--t1)}
 .mrd .m-h1{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
 .mrd .m-sub{color:var(--t3);font-size:13px;margin-top:4px}
 .mrd .m-crumb{font-size:12px;color:var(--t3)}
 .mrd .m-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px}
-.mrd .m-chip-ac{background:#eef2ff;color:var(--ac)}
-.mrd .m-chip-p{background:#f5f3ff;color:#7c3aed}
-.mrd .m-chip-c{background:#fffbeb;color:#d97706}
-.mrd .m-chip-f{background:#ecfdf5;color:#059669}
+.mrd .m-chip-ac{background:var(--ac-soft);color:var(--ac)}
+.mrd .m-chip-p{background:var(--pro-soft);color:var(--pro)}
+.mrd .m-chip-c{background:var(--car-soft);color:var(--car)}
+.mrd .m-chip-f{background:var(--green-soft);color:var(--green)}
 .mrd .m-num{font-variant-numeric:tabular-nums}
 .mrd .m-iconbtn{color:var(--t3);padding:9px;border-radius:7px;cursor:pointer;transition:.15s}
-.mrd .m-iconbtn:hover{background:#f1f1ee;color:var(--red)}
+.mrd .m-iconbtn:hover{background:var(--sunken);color:var(--red)}
 /* meters */
 .mrd .m-meter{padding:14px 18px;border-bottom:1px solid var(--line)}
 .mrd .m-meter:last-child{border-bottom:0}
 .mrd .m-meter-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px}
-.mrd .m-meter-name{font-weight:600;display:flex;gap:8px;align-items:center;color:#3a3a42}
+.mrd .m-meter-name{font-weight:600;display:flex;gap:8px;align-items:center;color:var(--name)}
 .mrd .m-meter-val{font-weight:600}
 .mrd .m-meter-goal{color:var(--t3);font-weight:500}
-.mrd .m-bar{height:6px;border-radius:999px;overflow:hidden;position:relative;background:#efefec}
+.mrd .m-bar{height:6px;border-radius:999px;overflow:hidden;position:relative;background:var(--track)}
 .mrd .m-bar i{display:block;height:100%;width:100%;transform-origin:left center;border-radius:999px;transition:transform .7s cubic-bezier(.22,1,.36,1)}
-.mrd .i-cal{color:var(--ac)}.mrd .i-pro{color:#7c3aed}.mrd .i-car{color:#d97706}.mrd .i-fat{color:#059669}
+.mrd .i-cal{color:var(--ac)}.mrd .i-pro{color:var(--pro)}.mrd .i-car{color:var(--car)}.mrd .i-fat{color:var(--green)}
 /* The <i> element itself carries the bar class; over-limit bars turn red. */
-.mrd .b-cal{background:var(--ac)}.mrd .b-pro{background:#7c3aed}.mrd .b-car{background:#d97706}.mrd .b-fat{background:#059669}
+.mrd .b-cal{background:var(--ac)}.mrd .b-pro{background:var(--pro)}.mrd .b-car{background:var(--car)}.mrd .b-fat{background:var(--green)}
 .mrd .m-bar i.m-overbar{background:var(--red)!important}
 .mrd .m-over{color:var(--red)!important}
 .mrd .m-ghost{position:absolute;top:0;left:0;height:100%;width:100%;transform-origin:left center;border-radius:999px;background:#4f46e533;transition:transform .3s ease}
 /* banner */
-.mrd .m-banner{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 18px;font-size:13px;color:var(--t2)}
+.mrd .m-banner{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 18px;font-size:13px;color:var(--t2)}
 .mrd .m-banner b{font-weight:700;color:var(--t1)}
-.mrd .m-tag{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--ac);background:#eef2ff;border-radius:5px;padding:3px 8px;white-space:nowrap}
+.mrd .m-tag{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--ac);background:var(--ac-soft);border-radius:5px;padding:3px 8px;white-space:nowrap}
 /* entries */
 .mrd .m-entry{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--line);font-size:13px;flex-wrap:wrap}
 .mrd .m-entry:last-child{border-bottom:0}
-.mrd .m-entry:hover{background:#fafaf9}
+.mrd .m-entry:hover{background:var(--paper)}
 .mrd .m-entry .m-name{font-weight:600;flex:1;min-width:150px}
 .mrd .m-entry .m-serving{display:block;font-size:11px;color:var(--t3);font-weight:500;margin-top:2px}
 .mrd .m-chiprow{display:flex;gap:6px}
@@ -57,22 +59,22 @@ const MERIDIAN_CSS = `
 /* steppers */
 .mrd .m-step{display:flex;align-items:center;gap:2px;border:1px solid var(--line);border-radius:8px;padding:2px}
 .mrd .m-step button{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--t2);cursor:pointer;transition:.15s;background:none;border:0;font-size:14px}
-.mrd .m-step button:hover{background:#f1f1ee;color:var(--t1)}
+.mrd .m-step button:hover{background:var(--sunken);color:var(--t1)}
 .mrd .m-step input{width:36px;text-align:center;font-size:13px;font-weight:600;color:var(--t1);background:none;border:0;outline:none}
 /* fields */
-.mrd .m-field{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--t2);background:#fff;display:flex;align-items:center;gap:8px;transition:.15s}
+.mrd .m-field{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--t2);background:var(--card);display:flex;align-items:center;gap:8px;transition:.15s}
 .mrd .m-field:focus-within{border-color:var(--ac);box-shadow:0 0 0 3px #4f46e51f}
 .mrd select.m-field,.mrd input.m-field{width:100%;outline:none;color:var(--t1);font-weight:500;appearance:none}
 .mrd input.m-field::placeholder{color:var(--t3)}
 .mrd .m-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:600;font-size:13px;border-radius:8px;padding:10px 16px;cursor:pointer;border:1px solid transparent;transition:.15s}
-.mrd .m-btn-primary{background:var(--ac);color:#fff}
+.mrd .m-btn-primary{background:var(--ac);color:var(--on-ac)}
 .mrd .m-btn-primary:hover{background:var(--ach)}
 .mrd .m-btn-primary:disabled{opacity:.6;cursor:wait}
 /* dropdown */
-.mrd .m-dd{position:absolute;z-index:50;width:100%;margin-top:6px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 16px 40px -12px rgba(26,26,30,.18);max-height:240px;overflow:auto}
+.mrd .m-dd{position:absolute;z-index:50;width:100%;margin-top:6px;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:0 16px 40px -12px rgba(0,0,0,.45);max-height:240px;overflow:auto}
 .mrd .m-dd-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--line)}
 .mrd .m-dd-item:last-child{border-bottom:0}
-.mrd .m-dd-item:hover{background:#fafaf9}
+.mrd .m-dd-item:hover{background:var(--paper)}
 .mrd .m-dd-item .m-dd-name{font-weight:600;color:var(--t1)}
 .mrd .m-dd-empty{padding:26px;text-align:center;color:var(--t3);font-size:13px}
 /* remaining */
@@ -80,21 +82,21 @@ const MERIDIAN_CSS = `
 .mrd .m-rem-row span{color:var(--t2)}
 /* toasts */
 .mrd-toast{position:fixed;bottom:24px;right:24px;z-index:100;display:flex;flex-direction:column;gap:10px;width:calc(100% - 48px);max-width:380px}
-.mrd-toast-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:#fff;box-shadow:0 16px 40px -12px rgba(26,26,30,.22)}
-.mrd-toast-item.err{background:#fef2f2;border-color:#fecaca}
+.mrd-toast-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:var(--card);box-shadow:0 16px 40px -12px rgba(0,0,0,.5)}
+.mrd-toast-item.err{background:var(--red-soft);border-color:var(--red-soft-b)}
 .mrd-toast-item p{font-size:13px;color:var(--t1);flex:1;line-height:1.45}
 .mrd-toast-item.err p{color:#991b1b}
 .mrd-toast-dot{width:8px;height:8px;border-radius:50%;background:var(--ac);flex-shrink:0}
 .mrd-toast-item.err .mrd-toast-dot{background:var(--red)}
-.mrd-toast-act{flex-shrink:0;background:var(--ac);color:#fff;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border:0;border-radius:7px;padding:7px 12px;cursor:pointer}
+.mrd-toast-act{flex-shrink:0;background:var(--ac);color:var(--on-ac);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border:0;border-radius:7px;padding:7px 12px;cursor:pointer}
 .mrd-toast-act:hover{background:var(--ach)}
 .mrd-toast-x{flex-shrink:0;position:relative;color:var(--t3);background:none;border:0;cursor:pointer;padding:4px;border-radius:6px}
 .mrd-toast-x::after{content:"";position:absolute;inset:-6px}
-.mrd-toast-x:hover{color:var(--t1);background:#f1f1ee}
+.mrd-toast-x:hover{color:var(--t1);background:var(--sunken)}
 /* svg icon default */
 .mrd .m-ic{width:16px;height:16px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 /* date pill (nav slot) */
-.mrd .m-datepill{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:7px 11px;font-size:12px;font-weight:600;color:var(--t2);background:#fff}
+.mrd .m-datepill{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:7px 11px;font-size:12px;font-weight:600;color:var(--t2);background:var(--card)}
 .mrd .m-datepill .m-live{display:flex;align-items:center;gap:6px;color:var(--ac);text-transform:uppercase;letter-spacing:.05em;font-size:11px;font-weight:700}
 .mrd .m-datepill .m-live .m-dot{width:6px;height:6px;border-radius:50%;background:var(--ac)}
 .mrd .m-datepill .m-viewing{display:flex;align-items:center;gap:6px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;font-size:11px;font-weight:700}
@@ -103,7 +105,7 @@ const MERIDIAN_CSS = `
 .mrd .m-datewrap{position:relative}
 .mrd .m-datewrap input[type="date"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
 /* empty state */
-.mrd .m-empty{text-align:center;padding:34px 18px;border-radius:10px;background:#fafaf9;color:var(--t3);font-weight:600;font-size:13px}
+.mrd .m-empty{text-align:center;padding:34px 18px;border-radius:10px;background:var(--sunken);color:var(--t3);font-weight:600;font-size:13px}
 /* responsive */
 @media (max-width:1023px){.mrd .mrd-layout{grid-template-columns:1fr !important}.mrd .mrd-layout>div:first-child{position:static !important}}
 @media (max-width:860px){.mrd .m-addgrid{grid-template-columns:1fr 1fr !important}.mrd .m-addgrid>div:nth-child(2){grid-column:1 / -1;order:3}.mrd .m-addgrid>div:nth-child(4){grid-column:1 / -1;order:4}}
@@ -916,7 +918,7 @@ export default function MealTrackingPage() {
                                   className="m-dd-item"
                                 >
                                   <span className="m-dd-name">{toTitleCase(meal.name)}</span>
-                                  <span className="m-chip" style={{ background: "#f1f1ee", color: "var(--t2)" }}>{meal.servingSize}</span>
+                                  <span className="m-chip" style={{ background: "var(--sunken)", color: "var(--t2)" }}>{meal.servingSize}</span>
                                 </div>
                               ))}
                               {filteredMeals.length === 0 && (
@@ -974,16 +976,16 @@ export default function MealTrackingPage() {
 
                   {/* Live preview banner */}
                   {hasPreview && (
-                    <div className="m-banner" style={{ marginTop: 14, background: "#eef2ff", borderColor: "#c7d2fe", color: "var(--t2)" }}>
+                    <div className="m-banner" style={{ marginTop: 14, background: "var(--ac-soft)", borderColor: "var(--ac-soft-b)", color: "var(--t2)" }}>
                       <span className="m-tag">PREVIEW</span>
                       <span>
                         After adding at qty {quantity}: <b className="m-num">{previewMacros.calories} kcal</b>
                         <span className="m-crumb"> · </span>
-                        <b className="m-num" style={{ color: "#7c3aed" }}>{previewMacros.protein}g P</b>
+                        <b className="m-num" style={{ color: "var(--pro)" }}>{previewMacros.protein}g P</b>
                         <span className="m-crumb"> · </span>
-                        <b className="m-num" style={{ color: "#d97706" }}>{previewMacros.carbs}g C</b>
+                        <b className="m-num" style={{ color: "var(--car)" }}>{previewMacros.carbs}g C</b>
                         <span className="m-crumb"> · </span>
-                        <b className="m-num" style={{ color: "#059669" }}>{previewMacros.fats}g F</b>
+                        <b className="m-num" style={{ color: "var(--green)" }}>{previewMacros.fats}g F</b>
                       </span>
                     </div>
                   )}
@@ -1010,7 +1012,7 @@ export default function MealTrackingPage() {
                               { k: "Carbs", v: meal.macros.carbs, cls: "m-chip-c" },
                               { k: "Fats", v: meal.macros.fats, cls: "m-chip-f" },
                             ].map((s) => (
-                              <div key={s.k} style={{ background: "#fafaf9", borderRadius: 9, padding: "10px 12px", textAlign: "center" }}>
+                              <div key={s.k} style={{ background: "var(--sunken)", borderRadius: 9, padding: "10px 12px", textAlign: "center" }}>
                                 <span className="m-crumb" style={{ display: "block", fontSize: 10, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 3 }}>{s.k}</span>
                                 <b className="m-num" style={{ fontSize: 16 }}>{s.v}</b>
                               </div>

@@ -48,6 +48,11 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  theme: {
+    type: String,
+    enum: ["light", "dark", ""],
+    default: "", // empty = follow OS on first visit
+  },
   macroGoals: {
     calories: { type: Number, default: 1900 },
     protein: { type: Number, default: 120 },

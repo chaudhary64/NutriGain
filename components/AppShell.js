@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 
 /**
  * Shared application shell: top navigation + content container.
@@ -22,6 +23,7 @@ import { useAuth } from "@/context/AuthContext";
  */
 export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, children }) {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -56,10 +58,31 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
     </svg>
   );
 
+  // Theme toggle — Meridian stroke style, matches the logout icon weight.
+  const themeToggle = (
+    <button
+      onClick={toggleTheme}
+      className="p-2 rounded-lg transition-colors cursor-pointer text-[var(--shell-ink-2)] hover:text-[var(--shell-ink)] hover:bg-[var(--shell-sunken)]"
+      aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+      aria-pressed={theme === "dark"}
+      title={theme === "dark" ? "Light mode" : "Dark mode"}
+    >
+      {theme === "dark" ? (
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-5 h-5" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+        </svg>
+      ) : (
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-5 h-5" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+        </svg>
+      )}
+    </button>
+  );
+
   return (
-    <div className="app-shell min-h-screen bg-[#fafaf9] text-[#1a1a1e] font-sans selection:bg-[#4f46e5] selection:text-white">
+    <div className="app-shell min-h-screen bg-[var(--shell-bg)] text-[var(--shell-ink)] font-sans selection:bg-[var(--shell-accent)] selection:text-[var(--shell-on-accent)]">
       <nav
-        className={`${isAdmin ? "sticky" : "fixed top-0 w-full"} top-0 z-50 bg-white/90 backdrop-blur-md border-b border-[#e7e7e3]`}
+        className={`${isAdmin ? "sticky" : "fixed top-0 w-full"} top-0 z-50 bg-[var(--shell-chrome)] backdrop-blur-md border-b border-[var(--shell-line)]`}
       >
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -101,9 +124,9 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
 
               {!isAdmin && (
                 <>
-                  <div className="h-6 w-px bg-[#e7e7e3]"></div>
+                  <div className="h-6 w-px bg-[var(--shell-line)]"></div>
 
-                  <div className="flex gap-1 bg-[#f1f1ee] p-1 rounded-[10px]">
+                  <div className="flex gap-1 bg-[var(--shell-sunken)] p-1 rounded-[10px]">
                     {dashboardTabs.map((tab) => (
                       <button
                         key={tab.href}
@@ -111,8 +134,8 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
                         aria-current={pathname === tab.href ? "page" : undefined}
                         className={`px-3.5 py-1.5 rounded-lg font-semibold text-[13px] flex items-center gap-2 transition-all cursor-pointer ${
                           pathname === tab.href
-                            ? "bg-[#4f46e5] text-white"
-                            : "text-[#5f5f68] hover:text-[#1a1a1e] hover:bg-white"
+                            ? "bg-[var(--shell-accent)] text-[var(--shell-on-accent)]"
+                            : "text-[var(--shell-ink-2)] hover:text-[var(--shell-ink)] hover:bg-[var(--shell-raised)]"
                         }`}
                       >
                         {tab.label}
@@ -122,16 +145,17 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
                 </>
               )}
 
-              <div className="flex items-center gap-3">
-                <div className="text-right hidden sm:block">
-                  <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">
+              <div className="flex items-center gap-2">
+                {themeToggle}
+                <div className="text-right hidden sm:block pl-1">
+                  <p className="text-[10px] text-[var(--shell-muted)] uppercase tracking-widest font-bold">
                     {isAdmin ? "Admin" : "Signed in"}
                   </p>
-                  <p className="text-[13px] font-semibold text-[#1a1a1e] leading-tight">{user?.name}</p>
+                  <p className="text-[13px] font-semibold text-[var(--shell-ink)] leading-tight">{user?.name}</p>
                 </div>
                 <button
                   onClick={logout}
-                  className="text-neutral-500 hover:text-red-600 transition-colors cursor-pointer p-1.5 rounded-lg"
+                  className="text-[var(--shell-muted)] hover:text-[var(--shell-danger)] transition-colors cursor-pointer p-1.5 rounded-lg"
                   aria-label="Log out"
                   title="Log out"
                 >
@@ -142,9 +166,10 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
 
             {/* Mobile Toggle */}
             <div className="flex md:hidden items-center">
+              {themeToggle}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 text-[#1a1a1e] hover:bg-[#f1f1ee] rounded-lg transition cursor-pointer"
+                className="p-2 text-[var(--shell-ink)] hover:bg-[var(--shell-sunken)] rounded-lg transition cursor-pointer"
                 aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
                 aria-expanded={mobileMenuOpen}
                 aria-controls="mobile-menu"
@@ -173,14 +198,14 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div id="mobile-menu" className="md:hidden border-b border-[#e7e7e3] bg-white">
+          <div id="mobile-menu" className="md:hidden border-b border-[var(--shell-line)] bg-[var(--shell-menu)]">
             <div className="p-4 space-y-4">
               <div className="flex items-center gap-3 px-2 mb-4">
                 <div>
-                  <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">
+                  <p className="text-[10px] text-[var(--shell-muted)] uppercase tracking-widest font-bold">
                     Signed in
                   </p>
-                  <p className="text-lg font-bold text-[#1a1a1e]">{user?.name}</p>
+                  <p className="text-lg font-bold text-[var(--shell-ink)]">{user?.name}</p>
                 </div>
               </div>
 
@@ -194,8 +219,8 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
                       onClick={() => navigate(tab.href)}
                       className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-semibold ${
                         pathname === tab.href
-                          ? "bg-[#eef2ff] text-[#4f46e5]"
-                          : "text-[#5f5f68] hover:bg-[#f1f1ee]"
+                          ? "bg-[var(--shell-accent-soft)] text-[var(--shell-accent)]"
+                          : "text-[var(--shell-ink-2)] hover:bg-[var(--shell-sunken)]"
                       }`}
                     >
                       {tab.label === "Meal"
@@ -204,7 +229,7 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
                           ? "Gym Tracker"
                           : tab.label}
                       {pathname === tab.href && (
-                        <span className="text-[#4f46e5]">●</span>
+                        <span className="text-[var(--shell-accent)]">●</span>
                       )}
                     </button>
                   ))}
@@ -215,20 +240,20 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
                 <div className="space-y-2">
                   <button
                     onClick={() => navigate("/admin")}
-                    className="w-full flex items-center justify-between px-4 py-3 text-[#5f5f68] hover:bg-[#f1f1ee] rounded-xl font-semibold"
+                    className="w-full flex items-center justify-between px-4 py-3 text-[var(--shell-ink-2)] hover:bg-[var(--shell-sunken)] rounded-xl font-semibold"
                   >
                     Admin Panel
                   </button>
                 </div>
               )}
 
-              <div className="pt-3 mt-3 border-t border-[#e7e7e3]">
+              <div className="pt-3 mt-3 border-t border-[var(--shell-line)]">
                 <button
                   onClick={() => {
                     logout();
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-semibold"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-[var(--shell-danger)] hover:bg-[var(--shell-danger-soft)] rounded-xl font-semibold"
                 >
                   Logout
                 </button>

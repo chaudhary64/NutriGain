@@ -2,6 +2,7 @@
 
 import { useEffect, useState, cloneElement } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 import { ActivityCalendar } from "react-activity-calendar";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
@@ -25,24 +26,31 @@ import {
 /* ------------------------------------------------------------------ */
 
 const MERIDIAN_CSS = `
-.gym{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--t3:#6b6b76;--ac:#4f46e5;--ach:#4338ca;--red:#dc2626;--amber:#d97706;--green:#059669;color:var(--t1)}
-.gym .m-card{background:#fff;border:1px solid var(--line);border-radius:12px}
+.gym{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--t3:#6b6b76;--ac:#4f46e5;--ach:#4338ca;--red:#dc2626;--amber:#d97706;--green:#059669;--paper:#fafaf9;--card:#fff;--sunken:#f1f1ee;--track:#efefec;--on-ac:#fff;--ac-soft:#eef2ff;--ac-soft-b:#c7d2fe;--green-soft:#ecfdf5;--amber-soft:#fef3c7;--red-soft:#fef2f2;--red-soft-b:#fecaca;color:var(--t1)}
+html[data-theme="dark"] .gym{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b96;--ac:#818cf8;--ach:#a5b4fc;--red:#f87171;--amber:#fbbf24;--green:#34d399;--paper:#111113;--card:#1c1c1f;--sunken:#26262b;--track:#2e2e34;--on-ac:#111113;--ac-soft:#232347;--ac-soft-b:#3730a3;--green-soft:#0d2a22;--amber-soft:#3a2d10;--red-soft:#2b1b1b;--red-soft-b:#5c2b2b}
+.gym{background:var(--paper)}
+.gym .m-card{background:var(--card);border:1px solid var(--line);border-radius:12px}
+/* Theme-aware chart + heatmap chrome (overrides SVG presentation attrs) */
+.gym .recharts-cartesian-grid line{stroke:var(--track)!important}
+.gym .recharts-dot{fill:var(--card)!important}
+.gym .recharts-line-curve{stroke:var(--ac)}
+.gym .recharts-cartesian-axis-tick text{fill:var(--t3)}
 .gym .m-card-h{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
 .gym .m-card-h h3{font-size:13px;font-weight:700;color:var(--t1)}
 .gym .m-h1{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
 .gym .m-sub{color:var(--t3);font-size:13px;margin-top:4px}
 .gym .m-crumb{font-size:12px;color:var(--t3)}
 .gym .m-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px}
-.gym .m-chip-ac{background:#eef2ff;color:var(--ac)}
+.gym .m-chip-ac{background:var(--ac-soft);color:var(--ac)}
 .gym .m-num{font-variant-numeric:tabular-nums}
 .gym .m-ic{width:16px;height:16px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 .gym .m-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:600;font-size:13px;border-radius:8px;padding:10px 16px;cursor:pointer;border:1px solid transparent;transition:.15s}
-.gym .m-btn-primary{background:var(--ac);color:#fff}
+.gym .m-btn-primary{background:var(--ac);color:var(--on-ac)}
 .gym .m-btn-primary:hover{background:var(--ach)}
 .gym .m-btn-primary:disabled{opacity:.6;cursor:wait}
-.gym .m-btn-ghost{border:1px solid var(--line);color:var(--t1);background:#fff}
-.gym .m-btn-ghost:hover{background:#fafaf9}
-.gym .m-field{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--t1);background:#fff;transition:.15s}
+.gym .m-btn-ghost{border:1px solid var(--line);color:var(--t1);background:var(--card)}
+.gym .m-btn-ghost:hover{background:var(--sunken)}
+.gym .m-field{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--t1);background:var(--card);transition:.15s}
 .gym .m-field:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px #4f46e51f}
 .gym .m-lbl{display:block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:5px}
 .gym .m-stat{padding:14px 16px}
@@ -54,18 +62,18 @@ const MERIDIAN_CSS = `
 .gym .m-in:nth-child(2){animation-delay:.06s}
 .gym .m-in:nth-child(3){animation-delay:.12s}
 .gym-toast{position:fixed;bottom:24px;right:24px;z-index:100;display:flex;flex-direction:column;gap:10px;width:calc(100% - 48px);max-width:380px}
-.gym-toast-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:#fff;box-shadow:0 16px 40px -12px rgba(26,26,30,.22)}
-.gym-toast-item.err{background:#fef2f2;border-color:#fecaca}
+.gym-toast-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:var(--card);box-shadow:0 16px 40px -12px rgba(0,0,0,.5)}
+.gym-toast-item.err{background:var(--red-soft);border-color:var(--red-soft-b)}
 .gym-toast-item p{font-size:13px;color:var(--t1);flex:1;line-height:1.45}
 .gym-toast-item.err p{color:#991b1b}
 .gym-toast-dot{width:8px;height:8px;border-radius:50%;background:var(--ac);flex-shrink:0}
 .gym-toast-item.err .gym-toast-dot{background:var(--red)}
 .gym-toast-x{flex-shrink:0;position:relative;color:var(--t3);background:none;border:0;cursor:pointer;padding:4px;border-radius:6px}
 .gym-toast-x::after{content:"";position:absolute;inset:-6px}
-.gym-toast-x:hover{color:var(--t1);background:#f1f1ee}
+.gym-toast-x:hover{color:var(--t1);background:var(--sunken)}
 .gym .react-calendar-heatmap{color-scheme:light}
 .gym .rt-cell{display:flex;flex-direction:column;gap:2px;padding:8px 12px;border-radius:8px;font-size:13px;border:1px solid transparent}
-.gym .rt-cell:hover{background:#fafaf9}
+.gym .rt-cell:hover{background:var(--paper)}
 @media (max-width:1024px){.gym .gym-layout{grid-template-columns:minmax(0,1fr) !important}}
 /* Sticky rail: pinned on desktop, capped to the viewport so the whole card
    stays visible; internal scroll if it ever grows taller. Static on mobile —
@@ -73,7 +81,7 @@ const MERIDIAN_CSS = `
 .gym .gym-rail{display:grid;gap:20px;position:sticky;top:88px;align-self:start;max-height:calc(100vh - 104px);overflow-y:auto}
 .gym .gym-entries{max-height:200px;overflow-y:auto}
 .gym .gym-rail::-webkit-scrollbar,.gym .gym-entries::-webkit-scrollbar{width:5px}
-.gym .gym-rail::-webkit-scrollbar-thumb,.gym .gym-entries::-webkit-scrollbar-thumb{background:#dededa;border-radius:99px}
+.gym .gym-rail::-webkit-scrollbar-thumb,.gym .gym-entries::-webkit-scrollbar-thumb{background:var(--track);border-radius:99px}
 @media (max-width:1024px){.gym .gym-rail{position:static;max-height:none;overflow:visible}}
 .gym .gym-stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
 .gym .gym-layout > *{min-width:0}
@@ -121,8 +129,8 @@ function ToastHost({ toasts, onDismiss }) {
 }
 
 /* Recharts chrome in Meridian colors */
-const AXIS_TICK = { fill: "#6b6b76", fontSize: 11 };
-const RT_GRID = "#ececea";
+const AXIS_TICK = { fill: "var(--t3)", fontSize: 11 };
+const RT_GRID = "var(--track)";
 
 const toTitleCase = (str) => {
   if (!str) return "";
@@ -130,16 +138,18 @@ const toTitleCase = (str) => {
 };
 
 const STATUS_META = {
-  completed: { label: "Completed", chip: { background: "#eef2ff", color: "#4f46e5" } },
-  "partially-completed": { label: "Partial", chip: { background: "#fef3c7", color: "#92400e" } },
-  "not-completed": { label: "Pending", chip: { background: "#f4f4f2", color: "#5f5f68" } },
+  completed: { label: "Completed", chip: { background: "var(--ac-soft)", color: "var(--ac)" } },
+  "partially-completed": { label: "Partial", chip: { background: "var(--amber-soft)", color: "var(--amber)" } },
+  "not-completed": { label: "Pending", chip: { background: "var(--sunken)", color: "var(--t2)" } },
 };
 
-/* Heatmap ramp — Meridian indigo, matching ActivityCalendar theme */
+/* Heatmap ramps — Meridian indigo, light + dark tracks matching the theme */
 const LIGHT_RAMP = ["#ececea", "#c7d2fe", "#a5b4fc", "#818cf8", "#4f46e5"];
+const DARK_RAMP = ["#2e2e34", "#3730a3", "#4f46e5", "#818cf8", "#a5b4fc"];
 
 export default function GymTrackingPage() {
   const { user, checkAuth } = useAuth();
+  const { theme } = useTheme();
 
   // Data State
   const [exercises, setExercises] = useState([]);
@@ -624,12 +634,12 @@ export default function GymTrackingPage() {
         <ActivityCalendar
           data={data}
           theme={{
-            light: ["#ececea", "#c7d2fe", "#a5b4fc", "#818cf8", "#4f46e5"],
-            dark: ["#ececea", "#c7d2fe", "#a5b4fc", "#818cf8", "#4f46e5"],
+            light: LIGHT_RAMP,
+            dark: DARK_RAMP,
           }}
           blockSize={10}
           blockMargin={4}
-          colorScheme="light"
+          colorScheme={theme === "dark" ? "dark" : "light"}
           showTotalCount={false}
           showColorLegend={false}
           showWeekdayLabels={["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]}
@@ -713,7 +723,7 @@ export default function GymTrackingPage() {
                         style={{
                           width: "100%",
                           textAlign: "left",
-                          background: todayGymStatus === val ? "#fafaf9" : "transparent",
+                          background: todayGymStatus === val ? "var(--sunken)" : "transparent",
                           fontWeight: todayGymStatus === val ? 700 : 500,
                           color: "var(--t1)",
                           cursor: "pointer",
@@ -745,7 +755,7 @@ export default function GymTrackingPage() {
                     cursor: "pointer",
                     ...(todayGymStatus === val
                       ? STATUS_META[val].chip
-                      : { background: "#fff", color: "var(--t2)", border: "1px solid var(--line)" }),
+                      : { background: "var(--card)", color: "var(--t2)", border: "1px solid var(--line)" }),
                   }}
                 >
                   {meta.label}
@@ -777,11 +787,11 @@ export default function GymTrackingPage() {
             </div>
             <div style={{ padding: 18 }}>
               <div className="gym-stats-row">
-                <div className="m-stat" style={{ background: "#fafaf9", borderRadius: 8 }}>
+                <div className="m-stat" style={{ background: "var(--sunken)", borderRadius: 8 }}>
                   <b className="m-num">{currentStreak}</b>
                   <span>Current streak</span>
                 </div>
-                <div className="m-stat" style={{ background: "#fafaf9", borderRadius: 8 }}>
+                <div className="m-stat" style={{ background: "var(--sunken)", borderRadius: 8 }}>
                   <b className="m-num">{longestStreak}</b>
                   <span>Longest streak</span>
                 </div>
@@ -800,11 +810,11 @@ export default function GymTrackingPage() {
                   if (trainedDays === 0) return null;
                   return (
                     <>
-                      <div className="m-stat" style={{ background: "#fafaf9", borderRadius: 8 }}>
+                      <div className="m-stat" style={{ background: "var(--sunken)", borderRadius: 8 }}>
                         <b className="m-num">{trainedDays}</b>
                         <span>Trained days</span>
                       </div>
-                      <div className="m-stat" style={{ background: "#fafaf9", borderRadius: 8 }}>
+                      <div className="m-stat" style={{ background: "var(--sunken)", borderRadius: 8 }}>
                         <b className="m-num">{Math.round(yearVolume).toLocaleString()}</b>
                         <span>Kg lifted</span>
                       </div>
@@ -818,7 +828,7 @@ export default function GymTrackingPage() {
                 <p className="m-crumb">Every logged set feeds this map.</p>
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }} aria-hidden="true">
                   <span className="m-crumb">Less</span>
-                  {LIGHT_RAMP.map((c) => (
+                  {(theme === "dark" ? DARK_RAMP : LIGHT_RAMP).map((c) => (
                     <span key={c} style={{ width: 9, height: 9, borderRadius: 2, background: c }}></span>
                   ))}
                   <span className="m-crumb">More</span>
@@ -864,7 +874,7 @@ export default function GymTrackingPage() {
                         />
                         <Tooltip
                           contentStyle={{
-                            backgroundColor: "#fff",
+                            backgroundColor: "var(--card)",
                             border: "1px solid var(--line)",
                             borderRadius: "8px",
                             boxShadow: "0 8px 24px -8px rgba(26,26,30,.18)",
@@ -878,7 +888,7 @@ export default function GymTrackingPage() {
                         />
                         <ReferenceLine
                           y={targetWeight}
-                          stroke="#c7d2fe"
+                          stroke={theme === "dark" ? "#2e2e34" : "#c7d2fe"}
                           strokeDasharray="4 4"
                         />
                         <Line
@@ -886,7 +896,7 @@ export default function GymTrackingPage() {
                           dataKey="weight"
                           stroke="#4f46e5"
                           strokeWidth={2}
-                          dot={{ fill: "#fff", stroke: "#4f46e5", strokeWidth: 2, r: 3 }}
+                          dot={{ fill: "var(--card)", stroke: "#4f46e5", strokeWidth: 2, r: 3 }}
                           activeDot={{ r: 4 }}
                         />
                       </LineChart>
@@ -989,7 +999,7 @@ export default function GymTrackingPage() {
                     <div className="m-card m-in" style={{ padding: "40px 24px", textAlign: "center" }}>
                       <div
                         style={{
-                          width: 48, height: 48, borderRadius: "50%", background: "#eef2ff", color: "var(--ac)",
+                          width: 48, height: 48, borderRadius: "50%", background: "var(--ac-soft)", color: "var(--ac)",
                           display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 16,
                         }}
                         aria-hidden="true"
@@ -1031,13 +1041,13 @@ export default function GymTrackingPage() {
                                 <h3 style={{ fontSize: 14, display: "flex", alignItems: "center", gap: 8 }}>
                                   {toTitleCase(ex.name)}
                                   {savedExercises[ex._id] && (
-                                    <span className="m-chip" style={{ background: "#ecfdf5", color: "var(--green)" }}>
+                                    <span className="m-chip" style={{ background: "var(--green-soft)", color: "var(--green)" }}>
                                       <Icon d={ICONS.check} className="w-3 h-3" />
                                       Saved
                                     </span>
                                   )}
                                   {newPRs[ex._id] && (
-                                    <span className="m-chip" style={{ background: "#fef3c7", color: "#92400e" }}>
+                                    <span className="m-chip" style={{ background: "var(--amber-soft)", color: "var(--amber)" }}>
                                       <Icon d={ICONS.trophy} className="w-3 h-3" />
                                       New PR {newPRs[ex._id].newPR} kg{newPRs[ex._id].previousPR != null ? ` · was ${newPRs[ex._id].previousPR}` : ""}
                                     </span>
@@ -1068,13 +1078,13 @@ export default function GymTrackingPage() {
                             <div style={{ padding: 16 }}>
                               {/* Template + PR summary row */}
                               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 12 }}>
-                                <div style={{ background: "#fafaf9", borderRadius: 8, padding: "10px 12px" }}>
+                                <div style={{ background: "var(--sunken)", borderRadius: 8, padding: "10px 12px" }}>
                                   <span className="m-lbl" style={{ marginBottom: 3 }}>Warm up</span>
                                   <p style={{ fontSize: 13, fontWeight: 600, color: "var(--t1)" }}>
                                     {ex.warmUpSets?.length > 0 ? formatSetsDisplay(ex.warmUpSets) : ex.warmUp || "Not set"}
                                   </p>
                                 </div>
-                                <div style={{ background: "#fafaf9", borderRadius: 8, padding: "10px 12px" }}>
+                                <div style={{ background: "var(--sunken)", borderRadius: 8, padding: "10px 12px" }}>
                                   <span className="m-lbl" style={{ marginBottom: 3, color: "var(--amber)" }}>Personal best</span>
                                   <p className="m-num" style={{ fontSize: 13, fontWeight: 700, color: "var(--t1)" }}>
                                     {ex.prWeight != null ? `${ex.prWeight} kg` : ex.lastPR ? ex.lastPR : "None"}
@@ -1140,7 +1150,7 @@ export default function GymTrackingPage() {
 
                               {/* PR progression chart */}
                               {prExercise === ex._id && (
-                                <div style={{ marginTop: 14, background: "#fafaf9", borderRadius: 8, padding: 14 }}>
+                                <div style={{ marginTop: 14, background: "var(--sunken)", borderRadius: 8, padding: 14 }}>
                                   <p className="m-lbl" style={{ marginBottom: 10 }}>Top set weight — last 6 months</p>
                                   {prSeries.length === 0 ? (
                                     <p className="m-sub" style={{ margin: 0 }}>
@@ -1166,7 +1176,7 @@ export default function GymTrackingPage() {
                                         />
                                         <Tooltip
                                           contentStyle={{
-                                            backgroundColor: "#fff",
+                                            backgroundColor: "var(--card)",
                                             border: "1px solid var(--line)",
                                             borderRadius: "8px",
                                             boxShadow: "0 8px 24px -8px rgba(26,26,30,.18)",

@@ -36,6 +36,7 @@ export const GET = withAuth(async (request, user) => {
         isAdmin: userData.isAdmin,
         mealDays: userData.mealDays || DEFAULT_MEAL_DAYS,
         smoothScroll: userData.smoothScroll !== undefined ? userData.smoothScroll : true,
+        theme: userData.theme || null,
         macroGoals: userData.macroGoals,
       },
     },
@@ -53,7 +54,7 @@ export const GET = withAuth(async (request, user) => {
 
 export const PUT = withAuth(async (request, user) => {
   const body = await request.json().catch(() => ({}));
-  const { mealDays, smoothScroll, macroGoals } = body;
+  const { mealDays, smoothScroll, macroGoals, theme } = body;
 
   const updateFields = {};
 
@@ -63,10 +64,15 @@ export const PUT = withAuth(async (request, user) => {
       return NextResponse.json({ error: validationErrors[0], errors: validationErrors }, { status: 400 });
     }
     updateFields.mealDays = mealDays;
+  }  if (smoothScroll !== undefined) {
+      updateFields.smoothScroll = Boolean(smoothScroll);
   }
 
-  if (smoothScroll !== undefined) {
-    updateFields.smoothScroll = Boolean(smoothScroll);
+  if (theme !== undefined) {
+    if (theme !== "light" && theme !== "dark" && theme !== "") {
+      return NextResponse.json({ error: "theme must be light, dark, or empty" }, { status: 400 });
+    }
+    updateFields.theme = theme;
   }
 
   if (macroGoals !== undefined) {
@@ -99,6 +105,7 @@ export const PUT = withAuth(async (request, user) => {
       isAdmin: userData.isAdmin,
       mealDays: userData.mealDays,
       smoothScroll: userData.smoothScroll !== undefined ? userData.smoothScroll : true,
+      theme: userData.theme || null,
       macroGoals: userData.macroGoals,
     },
   });

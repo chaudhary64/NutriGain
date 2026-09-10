@@ -10,42 +10,44 @@ import AppShell from "@/components/AppShell";
 /* ------------------------------------------------------------------ */
 
 const MERIDIAN_CSS = `
-.mrd{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--t3:#6b6b76;--ac:#4f46e5;--ach:#4338ca;--red:#dc2626;color:var(--t1)}
-.mrd .m-card{background:#fff;border:1px solid var(--line);border-radius:12px}
+.mrd{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--t3:#6b6b76;--ac:#4f46e5;--ach:#4338ca;--red:#dc2626;--paper:#fafaf9;--card:#fff;--sunken:#f1f1ee;--track:#efefec;--on-ac:#fff;--ac-soft:#eef2ff;--ac-soft-b:#c7d2fe;--red-soft:#fef2f2;--red-soft-b:#fecaca;color:var(--t1)}
+html[data-theme="dark"] .mrd{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b96;--ac:#818cf8;--ach:#a5b4fc;--red:#f87171;--paper:#111113;--card:#1c1c1f;--sunken:#26262b;--track:#2e2e34;--on-ac:#111113;--ac-soft:#232347;--ac-soft-b:#3730a3;--red-soft:#2b1b1b;--red-soft-b:#5c2b2b}
+.mrd{background:var(--paper)}
+.mrd .m-card{background:var(--card);border:1px solid var(--line);border-radius:12px}
 .mrd .m-card-h{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
 .mrd .m-card-h h3{font-size:13px;font-weight:700;color:var(--t1)}
 .mrd .m-h1{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
 .mrd .m-sub{color:var(--t3);font-size:13px;margin-top:4px}
 .mrd .m-crumb{font-size:12px;color:var(--t3)}
 .mrd .m-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px}
-.mrd .m-chip-ac{background:#eef2ff;color:var(--ac)}
+.mrd .m-chip-ac{background:var(--ac-soft);color:var(--ac)}
 .mrd .m-num{font-variant-numeric:tabular-nums}
 .mrd .m-ic{width:16px;height:16px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 .mrd .m-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:600;font-size:13px;border-radius:8px;padding:10px 16px;cursor:pointer;border:1px solid transparent;transition:.15s}
-.mrd .m-btn-primary{background:var(--ac);color:#fff}
+.mrd .m-btn-primary{background:var(--ac);color:var(--on-ac)}
 .mrd .m-btn-primary:hover{background:var(--ach)}
 .mrd .m-btn-primary:disabled{opacity:.6;cursor:wait}
-.mrd .m-field{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--t1);background:#fff;transition:.15s}
+.mrd .m-field{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--t1);background:var(--card);transition:.15s}
 .mrd .m-field:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px #4f46e51f}
 .mrd .m-row{display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid var(--line);font-size:13px}
 .mrd .m-row:last-child{border-bottom:0}
-.mrd .m-row:hover{background:#fafaf9}
-.mrd .m-rowicon{width:34px;height:34px;border-radius:9px;background:#fafaf9;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--t2);flex-shrink:0}
+.mrd .m-row:hover{background:var(--paper)}
+.mrd .m-rowicon{width:34px;height:34px;border-radius:9px;background:var(--sunken);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--t2);flex-shrink:0}
 .mrd .m-lbl{display:block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:5px}
 @keyframes mrd-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .mrd .m-in{animation:mrd-in .45s cubic-bezier(.22,1,.36,1) both}
 .mrd .m-in:nth-child(2){animation-delay:.06s}
 .mrd .m-in:nth-child(3){animation-delay:.12s}
 .mrd-toast{position:fixed;bottom:24px;right:24px;z-index:100;display:flex;flex-direction:column;gap:10px;width:calc(100% - 48px);max-width:380px}
-.mrd-toast-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:#fff;box-shadow:0 16px 40px -12px rgba(26,26,30,.22)}
-.mrd-toast-item.err{background:#fef2f2;border-color:#fecaca}
+.mrd-toast-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:var(--card);box-shadow:0 16px 40px -12px rgba(0,0,0,.5)}
+.mrd-toast-item.err{background:var(--red-soft);border-color:var(--red-soft-b)}
 .mrd-toast-item p{font-size:13px;color:var(--t1);flex:1;line-height:1.45}
 .mrd-toast-item.err p{color:#991b1b}
 .mrd-toast-dot{width:8px;height:8px;border-radius:50%;background:var(--ac);flex-shrink:0}
 .mrd-toast-item.err .mrd-toast-dot{background:var(--red)}
 .mrd-toast-x{flex-shrink:0;position:relative;color:var(--t3);background:none;border:0;cursor:pointer;padding:4px;border-radius:6px}
 .mrd-toast-x::after{content:"";position:absolute;inset:-6px}
-.mrd-toast-x:hover{color:var(--t1);background:#f1f1ee}
+.mrd-toast-x:hover{color:var(--t1);background:var(--sunken)}
 @media (max-width:900px){.mrd .prf-layout{grid-template-columns:1fr !important}}
 `;
 
@@ -197,10 +199,10 @@ export default function ProfilePage() {
               <div style={{ padding: "28px 22px", display: "flex", flexDirection: "column", alignItems: "center", gap: 14, borderBottom: "1px solid var(--line)" }}>
                 <div
                   style={{
-                    width: 96, height: 96, borderRadius: "50%", background: "#eef2ff", color: "var(--ac)",
+                    width: 96, height: 96, borderRadius: "50%", background: "var(--ac-soft)", color: "var(--ac)",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontSize: 30, fontWeight: 700, letterSpacing: "-.02em",
-                    border: "1px solid #c7d2fe",
+                    border: "1px solid var(--ac-soft-b)",
                   }}
                   aria-hidden="true"
                 >
@@ -240,9 +242,9 @@ export default function ProfilePage() {
                     <button
                       onClick={startEditGoals}
                       className="m-btn"
-                      style={{ padding: "6px 12px", fontSize: 12, border: "1px solid var(--line)", color: "var(--t1)", background: "#fff", gap: 6 }}
-                      onMouseEnter={(e) => (e.currentTarget.style.background = "#fafaf9")}
-                      onMouseLeave={(e) => (e.currentTarget.style.background = "#fff")}
+                      style={{ padding: "6px 12px", fontSize: 12, border: "1px solid var(--line)", color: "var(--t1)", background: "var(--card)", gap: 6 }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--sunken)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "var(--card)")}
                     >
                       <Icon d={ICONS.pencil} className="w-3.5 h-3.5" />
                       Edit
@@ -252,7 +254,7 @@ export default function ProfilePage() {
                 <div style={{ padding: 18 }}>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                     {goalFields.map((item) => (
-                      <div key={item.field} className="m-field" style={{ display: "block", padding: "12px 14px", background: editingGoals ? "#fff" : "#fafaf9" }}>
+                      <div key={item.field} className="m-field" style={{ display: "block", padding: "12px 14px", background: editingGoals ? "var(--card)" : "var(--sunken)" }}>
                         <label htmlFor={`goal-${item.field}`} className="m-lbl" style={{ display: "flex", alignItems: "center", gap: 7 }}>
                           <Icon d={ICONS[item.icon]} className="m-ic" style={{ color: item.dot }} />
                           {item.label} ({item.unit})
@@ -292,7 +294,7 @@ export default function ProfilePage() {
                           onClick={cancelEditGoals}
                           disabled={savingGoals}
                           className="m-btn"
-                          style={{ border: "1px solid var(--line)", color: "var(--t2)", background: "#fff" }}
+                          style={{ border: "1px solid var(--line)", color: "var(--t2)", background: "var(--card)" }}
                         >
                           Cancel
                         </button>
@@ -335,13 +337,13 @@ export default function ProfilePage() {
                     className="m-num"
                     style={{
                       position: "relative", width: 46, height: 26, borderRadius: 999, border: "1px solid var(--line)",
-                      background: smoothScroll ? "var(--ac)" : "#e7e7e3", cursor: "pointer", transition: "background .2s ease", flexShrink: 0,
+                      background: smoothScroll ? "var(--ac)" : "var(--track)", cursor: "pointer", transition: "background .2s ease", flexShrink: 0,
                     }}
                   >
                     <span
                       style={{
                         position: "absolute", top: 3, left: smoothScroll ? 23 : 3, width: 18, height: 18, borderRadius: "50%",
-                        background: "#fff", boxShadow: "0 1px 3px rgba(26,26,30,.25)", transition: "left .2s cubic-bezier(.22,1,.36,1)",
+                        background: "var(--card)", boxShadow: "0 1px 3px rgba(26,26,30,.25)", transition: "left .2s cubic-bezier(.22,1,.36,1)",
                       }}
                     />
                   </button>
@@ -383,9 +385,9 @@ export default function ProfilePage() {
                     id="profile-logout-btn"
                     onClick={logout}
                     className="m-btn"
-                    style={{ width: "100%", border: "1px solid #fecaca", color: "var(--red)", background: "#fff" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "#fef2f2")}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = "#fff")}
+                    style={{ width: "100%", border: "1px solid var(--red-soft-b)", color: "var(--red)", background: "var(--card)" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(239,68,68,.08)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "var(--card)")}
                   >
                     <Icon d={ICONS.logout} />
                     Sign out
