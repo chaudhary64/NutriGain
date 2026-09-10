@@ -49,8 +49,8 @@ const MERIDIAN_CSS = `
 @media (max-width:900px){.mrd .prf-layout{grid-template-columns:1fr !important}}
 `;
 
-const Icon = ({ d, className = "m-ic" }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+const Icon = ({ d, className = "m-ic", style }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     {d}
   </svg>
 );
@@ -65,6 +65,11 @@ const ICONS = {
   check: <path d="M5 13l4 4L19 7" />,
   pencil: <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />,
   x: <path d="M18 6 6 18M6 6l12 12" />,
+  /* Food-source macro glyphs (shared with the meal page meters) */
+  flame: <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />,
+  drumstick: <><circle cx="9.5" cy="9.5" r="5.5" /><path d="M13.6 13.6 17.2 17.2" /><circle cx="19.4" cy="16.5" r="1.7" /><circle cx="16.5" cy="19.4" r="1.7" /></>,
+  wheat: <><path d="M12 22v-7" /><path d="M8 15l4-3 4 3" /><path d="M8 11l4-3 4 3" /><path d="M8 7l4-3 4 3" /></>,
+  avocado: <><path d="M12 3c3.2 3.2 6.5 7 6.5 11.2a6.5 6.5 0 0 1-13 0C5.5 10 8.8 6.2 12 3z" /><circle cx="12" cy="14.2" r="2.8" /></>,
 };
 
 let toastSeq = 0;
@@ -168,10 +173,10 @@ export default function ProfilePage() {
     : "NG";
 
   const goalFields = [
-    { field: "calories", label: "Calories", unit: "kcal", cls: "i-cal", dot: "#4f46e5" },
-    { field: "protein", label: "Protein", unit: "g", cls: "i-pro", dot: "#059669" },
-    { field: "carbs", label: "Carbs", unit: "g", cls: "i-car", dot: "#d97706" },
-    { field: "fats", label: "Fats", unit: "g", cls: "i-fat", dot: "#e11d48" },
+    { field: "calories", label: "Calories", unit: "kcal", icon: "flame", dot: "#4f46e5" },
+    { field: "protein", label: "Protein", unit: "g", icon: "drumstick", dot: "#7c3aed" },
+    { field: "carbs", label: "Carbs", unit: "g", icon: "wheat", dot: "#d97706" },
+    { field: "fats", label: "Fats", unit: "g", icon: "avocado", dot: "#059669" },
   ];
 
   return (
@@ -179,7 +184,7 @@ export default function ProfilePage() {
       <style>{MERIDIAN_CSS}</style>
       <ToastHost toasts={toasts} onDismiss={dismissToast} />
       <AppShell>
-        <div className="mrd" style={{ maxWidth: 1080, margin: "0 auto", padding: "32px 28px 56px" }}>
+        <div className="mrd" style={{ maxWidth: 1440, margin: "0 auto", padding: "32px 28px 56px" }}>
           {/* Page header */}
           <div style={{ marginBottom: 24 }}>
             <div className="m-h1">Profile</div>
@@ -249,7 +254,7 @@ export default function ProfilePage() {
                     {goalFields.map((item) => (
                       <div key={item.field} className="m-field" style={{ display: "block", padding: "12px 14px", background: editingGoals ? "#fff" : "#fafaf9" }}>
                         <label htmlFor={`goal-${item.field}`} className="m-lbl" style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                          <span style={{ width: 8, height: 8, borderRadius: 3, background: item.dot, display: "inline-block" }}></span>
+                          <Icon d={ICONS[item.icon]} className="m-ic" style={{ color: item.dot }} />
                           {item.label} ({item.unit})
                         </label>
                         {editingGoals ? (

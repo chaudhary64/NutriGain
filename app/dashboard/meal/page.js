@@ -21,9 +21,9 @@ const MERIDIAN_CSS = `
 .mrd .m-crumb{font-size:12px;color:var(--t3)}
 .mrd .m-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px}
 .mrd .m-chip-ac{background:#eef2ff;color:var(--ac)}
-.mrd .m-chip-p{background:#ecfdf5;color:#059669}
+.mrd .m-chip-p{background:#f5f3ff;color:#7c3aed}
 .mrd .m-chip-c{background:#fffbeb;color:#d97706}
-.mrd .m-chip-f{background:#fff1f2;color:#e11d48}
+.mrd .m-chip-f{background:#ecfdf5;color:#059669}
 .mrd .m-num{font-variant-numeric:tabular-nums}
 .mrd .m-iconbtn{color:var(--t3);padding:9px;border-radius:7px;cursor:pointer;transition:.15s}
 .mrd .m-iconbtn:hover{background:#f1f1ee;color:var(--red)}
@@ -36,8 +36,10 @@ const MERIDIAN_CSS = `
 .mrd .m-meter-goal{color:var(--t3);font-weight:500}
 .mrd .m-bar{height:6px;border-radius:999px;overflow:hidden;position:relative;background:#efefec}
 .mrd .m-bar i{display:block;height:100%;width:100%;transform-origin:left center;border-radius:999px;transition:transform .7s cubic-bezier(.22,1,.36,1)}
-.mrd .i-cal{color:var(--ac)}.mrd .i-pro{color:#059669}.mrd .i-car{color:#d97706}.mrd .i-fat{color:#e11d48}
-.mrd .b-cal i{background:var(--ac)}.mrd .b-pro i{background:#059669}.mrd .b-car i{background:#d97706}.mrd .b-fat i{background:#e11d48}
+.mrd .i-cal{color:var(--ac)}.mrd .i-pro{color:#7c3aed}.mrd .i-car{color:#d97706}.mrd .i-fat{color:#059669}
+/* The <i> element itself carries the bar class; over-limit bars turn red. */
+.mrd .b-cal{background:var(--ac)}.mrd .b-pro{background:#7c3aed}.mrd .b-car{background:#d97706}.mrd .b-fat{background:#059669}
+.mrd .m-bar i.m-overbar{background:var(--red)!important}
 .mrd .m-over{color:var(--red)!important}
 .mrd .m-ghost{position:absolute;top:0;left:0;height:100%;width:100%;transform-origin:left center;border-radius:999px;background:#4f46e533;transition:transform .3s ease}
 /* banner */
@@ -120,6 +122,10 @@ const ICONS = {
   layers: <path d="M12 2 3 7l9 5 9-5-9-5zM3 12l9 5 9-5M3 17l9 5 9-5" />,
   gauge: <><circle cx="12" cy="12" r="9" /><path d="M12 3a9 9 0 0 1 9 9h-9z" /></>,
   heart: <path d="M12 21C7 17 3 13 3 8.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 9 2.5c0 4.5-4 8.5-9 12.5z" />,
+  /* Food-source macro glyphs, drawn to match the system stroke style */
+  drumstick: <><circle cx="9.5" cy="9.5" r="5.5" /><path d="M13.6 13.6 17.2 17.2" /><circle cx="19.4" cy="16.5" r="1.7" /><circle cx="16.5" cy="19.4" r="1.7" /></>,
+  wheat: <><path d="M12 22v-7" /><path d="M8 15l4-3 4 3" /><path d="M8 11l4-3 4 3" /><path d="M8 7l4-3 4 3" /></>,
+  avocado: <><path d="M12 3c3.2 3.2 6.5 7 6.5 11.2a6.5 6.5 0 0 1-13 0C5.5 10 8.8 6.2 12 3z" /><circle cx="12" cy="14.2" r="2.8" /></>,
   search: <><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></>,
   plus: <path d="M12 5v14M5 12h14" />,
   trash: <path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14" />,
@@ -134,9 +140,9 @@ const ICONS = {
 /* Semantic macro metadata — accent icon class + bar class per macro. */
 const MACRO_META = {
   calories: { icon: ICONS.flame, iconCls: "i-cal", barCls: "b-cal" },
-  protein: { icon: ICONS.layers, iconCls: "i-pro", barCls: "b-pro" },
-  carbs: { icon: ICONS.gauge, iconCls: "i-car", barCls: "b-car" },
-  fats: { icon: ICONS.heart, iconCls: "i-fat", barCls: "b-fat" },
+  protein: { icon: ICONS.drumstick, iconCls: "i-pro", barCls: "b-pro" },
+  carbs: { icon: ICONS.wheat, iconCls: "i-car", barCls: "b-car" },
+  fats: { icon: ICONS.avocado, iconCls: "i-fat", barCls: "b-fat" },
 };
 
 const MACRO_CHIP = {
@@ -217,7 +223,7 @@ function MacroMeter({ label, value, max, macroKey, preview, previewValue }) {
       </div>
       <div className="m-bar">
         {hasPreview && <div className="m-ghost" style={{ transform: `scaleX(${previewPct / 100})` }}></div>}
-        <i className={meta.barCls} style={{ transform: `scaleX(${percentage / 100})` }}></i>
+        <i className={`${meta.barCls}${isOverLimit ? " m-overbar" : ""}`} style={{ transform: `scaleX(${percentage / 100})` }}></i>
       </div>
     </div>
   );
@@ -741,7 +747,7 @@ export default function MealTrackingPage() {
           </div>
         }
       >
-        <div className="mrd" style={{ maxWidth: 1160, margin: "0 auto", padding: "32px 28px 56px" }}>
+        <div className="mrd" style={{ maxWidth: 1440, margin: "0 auto", padding: "32px 28px 56px" }}>
           {/* Page header */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
             <div>
@@ -973,11 +979,11 @@ export default function MealTrackingPage() {
                       <span>
                         After adding at qty {quantity}: <b className="m-num">{previewMacros.calories} kcal</b>
                         <span className="m-crumb"> · </span>
-                        <b className="m-num" style={{ color: "#059669" }}>{previewMacros.protein}g P</b>
+                        <b className="m-num" style={{ color: "#7c3aed" }}>{previewMacros.protein}g P</b>
                         <span className="m-crumb"> · </span>
                         <b className="m-num" style={{ color: "#d97706" }}>{previewMacros.carbs}g C</b>
                         <span className="m-crumb"> · </span>
-                        <b className="m-num" style={{ color: "#e11d48" }}>{previewMacros.fats}g F</b>
+                        <b className="m-num" style={{ color: "#059669" }}>{previewMacros.fats}g F</b>
                       </span>
                     </div>
                   )}

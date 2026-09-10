@@ -61,7 +61,7 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
       <nav
         className={`${isAdmin ? "sticky" : "fixed top-0 w-full"} top-0 z-50 bg-white/90 backdrop-blur-md border-b border-[#e7e7e3]`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center gap-3">

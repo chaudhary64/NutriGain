@@ -755,7 +755,7 @@ export default function GymTrackingPage() {
           </>
         }
       >
-        <div className="gym" style={{ maxWidth: 1280, margin: "0 auto", padding: "32px 28px 56px" }}>
+        <div className="gym" style={{ maxWidth: 1440, margin: "0 auto", padding: "32px 28px 56px" }}>
           {/* Page header */}
           <div style={{ marginBottom: 24 }}>
             <div className="m-h1">Gym</div>
