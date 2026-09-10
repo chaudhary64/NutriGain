@@ -12,7 +12,7 @@ import Loader from "@/components/Loader";
 /* ------------------------------------------------------------------ */
 
 const MERIDIAN_CSS = `
-.mrd{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--t3:#6b6b76;--ac:#4f46e5;--ach:#4338ca;--red:#dc2626;--paper:#fafaf9;--card:#fff;--sunken:#f1f1ee;--track:#efefec;--name:#3a3a42;--on-ac:#fff;--ac-soft:#eef2ff;--ac-soft-b:#c7d2fe;--green:#059669;--green-soft:#ecfdf5;--red-soft:#fef2f2;--red-soft-b:#fecaca;--pro:#7c3aed;--pro-soft:#f5f3ff;--car:#d97706;--car-soft:#fffbeb;color:var(--t1)}
+.mrd{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--t3:#6b6b76;--ac:#4f46e5;--ach:#4338ca;--red:#dc2626;--paper:#fafaf9;--card:#fff;--sunken:#f1f1ee;--track:#efefec;--name:#3a3a42;--on-ac:#fff;--ac-soft:#eef2ff;--ac-soft-b:#c7d2fe;--green:#047857;--green-soft:#ecfdf5;--red-soft:#fef2f2;--red-soft-b:#fecaca;--pro:#7c3aed;--pro-soft:#f5f3ff;--car:#b45309;--car-soft:#fffbeb;color:var(--t1)}
 html[data-theme="dark"] .mrd{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b96;--ac:#818cf8;--ach:#a5b4fc;--red:#f87171;--paper:#111113;--card:#1c1c1f;--sunken:#26262b;--track:#2e2e34;--name:#d4d4da;--on-ac:#111113;--ac-soft:#232347;--ac-soft-b:#3730a3;--green:#34d399;--green-soft:#0d2a22;--red-soft:#2b1b1b;--red-soft-b:#5c2b2b;--pro:#a78bfa;--pro-soft:#2b2140;--car:#fbbf24;--car-soft:#3a2d10}
 .mrd{background:var(--paper)}
 .mrd .m-card{background:var(--card);border:1px solid var(--line);border-radius:12px}

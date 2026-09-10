@@ -10,8 +10,8 @@ import AppShell from "@/components/AppShell";
 /* ------------------------------------------------------------------ */
 
 const MERIDIAN_CSS = `
-.mrd{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--t3:#6b6b76;--ac:#4f46e5;--ach:#4338ca;--red:#dc2626;--paper:#fafaf9;--card:#fff;--sunken:#f1f1ee;--track:#efefec;--on-ac:#fff;--ac-soft:#eef2ff;--ac-soft-b:#c7d2fe;--red-soft:#fef2f2;--red-soft-b:#fecaca;color:var(--t1)}
-html[data-theme="dark"] .mrd{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b96;--ac:#818cf8;--ach:#a5b4fc;--red:#f87171;--paper:#111113;--card:#1c1c1f;--sunken:#26262b;--track:#2e2e34;--on-ac:#111113;--ac-soft:#232347;--ac-soft-b:#3730a3;--red-soft:#2b1b1b;--red-soft-b:#5c2b2b}
+.mrd{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--t3:#6b6b76;--ac:#4f46e5;--ach:#4338ca;--red:#dc2626;--paper:#fafaf9;--card:#fff;--sunken:#f1f1ee;--track:#efefec;--on-ac:#fff;--ac-soft:#eef2ff;--ac-soft-b:#c7d2fe;--red-soft:#fef2f2;--red-soft-b:#fecaca;--pro:#7c3aed;--car:#b45309;--green:#047857;color:var(--t1)}
+html[data-theme="dark"] .mrd{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b96;--ac:#818cf8;--ach:#a5b4fc;--red:#f87171;--paper:#111113;--card:#1c1c1f;--sunken:#26262b;--track:#2e2e34;--on-ac:#111113;--ac-soft:#232347;--ac-soft-b:#3730a3;--red-soft:#2b1b1b;--red-soft-b:#5c2b2b;--pro:#a78bfa;--car:#fbbf24;--green:#34d399}
 .mrd{background:var(--paper)}
 .mrd .m-card{background:var(--card);border:1px solid var(--line);border-radius:12px}
 .mrd .m-card-h{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
@@ -175,10 +175,10 @@ export default function ProfilePage() {
     : "NG";
 
   const goalFields = [
-    { field: "calories", label: "Calories", unit: "kcal", icon: "flame", dot: "#4f46e5" },
-    { field: "protein", label: "Protein", unit: "g", icon: "drumstick", dot: "#7c3aed" },
-    { field: "carbs", label: "Carbs", unit: "g", icon: "wheat", dot: "#d97706" },
-    { field: "fats", label: "Fats", unit: "g", icon: "avocado", dot: "#059669" },
+    { field: "calories", label: "Calories", unit: "kcal", icon: "flame", dot: "var(--ac)" },
+    { field: "protein", label: "Protein", unit: "g", icon: "drumstick", dot: "var(--pro)" },
+    { field: "carbs", label: "Carbs", unit: "g", icon: "wheat", dot: "var(--car)" },
+    { field: "fats", label: "Fats", unit: "g", icon: "avocado", dot: "var(--green)" },
   ];
 
   return (

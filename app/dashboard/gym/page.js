@@ -26,7 +26,7 @@ import {
 /* ------------------------------------------------------------------ */
 
 const MERIDIAN_CSS = `
-.gym{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--t3:#6b6b76;--ac:#4f46e5;--ach:#4338ca;--red:#dc2626;--amber:#d97706;--green:#059669;--paper:#fafaf9;--card:#fff;--sunken:#f1f1ee;--track:#efefec;--on-ac:#fff;--ac-soft:#eef2ff;--ac-soft-b:#c7d2fe;--green-soft:#ecfdf5;--amber-soft:#fef3c7;--red-soft:#fef2f2;--red-soft-b:#fecaca;color:var(--t1)}
+.gym{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--t3:#6b6b76;--ac:#4f46e5;--ach:#4338ca;--red:#dc2626;--amber:#b45309;--green:#047857;--paper:#fafaf9;--card:#fff;--sunken:#f1f1ee;--track:#efefec;--on-ac:#fff;--ac-soft:#eef2ff;--ac-soft-b:#c7d2fe;--green-soft:#ecfdf5;--amber-soft:#fef3c7;--red-soft:#fef2f2;--red-soft-b:#fecaca;color:var(--t1)}
 html[data-theme="dark"] .gym{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b96;--ac:#818cf8;--ach:#a5b4fc;--red:#f87171;--amber:#fbbf24;--green:#34d399;--paper:#111113;--card:#1c1c1f;--sunken:#26262b;--track:#2e2e34;--on-ac:#111113;--ac-soft:#232347;--ac-soft-b:#3730a3;--green-soft:#0d2a22;--amber-soft:#3a2d10;--red-soft:#2b1b1b;--red-soft-b:#5c2b2b}
 .gym{background:var(--paper)}
 .gym .m-card{background:var(--card);border:1px solid var(--line);border-radius:12px}

@@ -63,8 +63,9 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
     <button
       onClick={toggleTheme}
       className="p-2 rounded-lg transition-colors cursor-pointer text-[var(--shell-ink-2)] hover:text-[var(--shell-ink)] hover:bg-[var(--shell-sunken)]"
+      role="switch"
       aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-      aria-pressed={theme === "dark"}
+      aria-checked={theme === "dark"}
       title={theme === "dark" ? "Light mode" : "Dark mode"}
     >
       {theme === "dark" ? (
@@ -111,7 +112,7 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
                   Nutri<span className="text-[#4f46e5]">Gain</span>
                 </h1>
                 {isAdmin && (
-                  <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-[0.2em] leading-none">
+                  <p className="text-[10px] text-[var(--shell-muted)] font-bold uppercase tracking-[0.2em] leading-none">
                     Master Control Terminal
                   </p>
                 )}
