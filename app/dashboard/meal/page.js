@@ -1,16 +1,340 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { format } from "date-fns";
+import { format, isToday } from "date-fns";
 import AppShell from "@/components/AppShell";
 import Loader from "@/components/Loader";
 
-// Helper function to convert text to title case
+/* ------------------------------------------------------------------ */
+/* Meridian design system — restrained SaaS.                          */
+/* Paper #fafaf9 · cards #fff · hairline #e7e7e3 · accent #4f46e5     */
+/* ------------------------------------------------------------------ */
+
+const MERIDIAN_CSS = `
+.mrd{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--t3:#6b6b76;--ac:#4f46e5;--ach:#4338ca;--red:#dc2626;color:var(--t1)}
+.mrd .m-card{background:#fff;border:1px solid var(--line);border-radius:12px}
+.mrd .m-card-h{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
+.mrd .m-card-h h3{font-size:13px;font-weight:700;color:var(--t1)}
+.mrd .m-h1{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.mrd .m-sub{color:var(--t3);font-size:13px;margin-top:4px}
+.mrd .m-crumb{font-size:12px;color:var(--t3)}
+.mrd .m-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px}
+.mrd .m-chip-ac{background:#eef2ff;color:var(--ac)}
+.mrd .m-chip-p{background:#ecfdf5;color:#059669}
+.mrd .m-chip-c{background:#fffbeb;color:#d97706}
+.mrd .m-chip-f{background:#fff1f2;color:#e11d48}
+.mrd .m-num{font-variant-numeric:tabular-nums}
+.mrd .m-iconbtn{color:var(--t3);padding:9px;border-radius:7px;cursor:pointer;transition:.15s}
+.mrd .m-iconbtn:hover{background:#f1f1ee;color:var(--red)}
+/* meters */
+.mrd .m-meter{padding:14px 18px;border-bottom:1px solid var(--line)}
+.mrd .m-meter:last-child{border-bottom:0}
+.mrd .m-meter-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px}
+.mrd .m-meter-name{font-weight:600;display:flex;gap:8px;align-items:center;color:#3a3a42}
+.mrd .m-meter-val{font-weight:600}
+.mrd .m-meter-goal{color:var(--t3);font-weight:500}
+.mrd .m-bar{height:6px;border-radius:999px;overflow:hidden;position:relative;background:#efefec}
+.mrd .m-bar i{display:block;height:100%;width:100%;transform-origin:left center;border-radius:999px;transition:transform .7s cubic-bezier(.22,1,.36,1)}
+.mrd .i-cal{color:var(--ac)}.mrd .i-pro{color:#059669}.mrd .i-car{color:#d97706}.mrd .i-fat{color:#e11d48}
+.mrd .b-cal i{background:var(--ac)}.mrd .b-pro i{background:#059669}.mrd .b-car i{background:#d97706}.mrd .b-fat i{background:#e11d48}
+.mrd .m-over{color:var(--red)!important}
+.mrd .m-ghost{position:absolute;top:0;left:0;height:100%;width:100%;transform-origin:left center;border-radius:999px;background:#4f46e533;transition:transform .3s ease}
+/* banner */
+.mrd .m-banner{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 18px;font-size:13px;color:var(--t2)}
+.mrd .m-banner b{font-weight:700;color:var(--t1)}
+.mrd .m-tag{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--ac);background:#eef2ff;border-radius:5px;padding:3px 8px;white-space:nowrap}
+/* entries */
+.mrd .m-entry{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--line);font-size:13px;flex-wrap:wrap}
+.mrd .m-entry:last-child{border-bottom:0}
+.mrd .m-entry:hover{background:#fafaf9}
+.mrd .m-entry .m-name{font-weight:600;flex:1;min-width:150px}
+.mrd .m-entry .m-serving{display:block;font-size:11px;color:var(--t3);font-weight:500;margin-top:2px}
+.mrd .m-chiprow{display:flex;gap:6px}
+.mrd .m-kc{min-width:64px;text-align:right;font-weight:600}
+/* steppers */
+.mrd .m-step{display:flex;align-items:center;gap:2px;border:1px solid var(--line);border-radius:8px;padding:2px}
+.mrd .m-step button{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--t2);cursor:pointer;transition:.15s;background:none;border:0;font-size:14px}
+.mrd .m-step button:hover{background:#f1f1ee;color:var(--t1)}
+.mrd .m-step input{width:36px;text-align:center;font-size:13px;font-weight:600;color:var(--t1);background:none;border:0;outline:none}
+/* fields */
+.mrd .m-field{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--t2);background:#fff;display:flex;align-items:center;gap:8px;transition:.15s}
+.mrd .m-field:focus-within{border-color:var(--ac);box-shadow:0 0 0 3px #4f46e51f}
+.mrd select.m-field,.mrd input.m-field{width:100%;outline:none;color:var(--t1);font-weight:500;appearance:none}
+.mrd input.m-field::placeholder{color:var(--t3)}
+.mrd .m-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:600;font-size:13px;border-radius:8px;padding:10px 16px;cursor:pointer;border:1px solid transparent;transition:.15s}
+.mrd .m-btn-primary{background:var(--ac);color:#fff}
+.mrd .m-btn-primary:hover{background:var(--ach)}
+.mrd .m-btn-primary:disabled{opacity:.6;cursor:wait}
+/* dropdown */
+.mrd .m-dd{position:absolute;z-index:50;width:100%;margin-top:6px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 16px 40px -12px rgba(26,26,30,.18);max-height:240px;overflow:auto}
+.mrd .m-dd-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--line)}
+.mrd .m-dd-item:last-child{border-bottom:0}
+.mrd .m-dd-item:hover{background:#fafaf9}
+.mrd .m-dd-item .m-dd-name{font-weight:600;color:var(--t1)}
+.mrd .m-dd-empty{padding:26px;text-align:center;color:var(--t3);font-size:13px}
+/* remaining */
+.mrd .m-rem-row{display:flex;justify-content:space-between;font-size:13px;padding:5px 0}
+.mrd .m-rem-row span{color:var(--t2)}
+/* toasts */
+.mrd-toast{position:fixed;bottom:24px;right:24px;z-index:100;display:flex;flex-direction:column;gap:10px;width:calc(100% - 48px);max-width:380px}
+.mrd-toast-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:#fff;box-shadow:0 16px 40px -12px rgba(26,26,30,.22)}
+.mrd-toast-item.err{background:#fef2f2;border-color:#fecaca}
+.mrd-toast-item p{font-size:13px;color:var(--t1);flex:1;line-height:1.45}
+.mrd-toast-item.err p{color:#991b1b}
+.mrd-toast-dot{width:8px;height:8px;border-radius:50%;background:var(--ac);flex-shrink:0}
+.mrd-toast-item.err .mrd-toast-dot{background:var(--red)}
+.mrd-toast-act{flex-shrink:0;background:var(--ac);color:#fff;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border:0;border-radius:7px;padding:7px 12px;cursor:pointer}
+.mrd-toast-act:hover{background:var(--ach)}
+.mrd-toast-x{flex-shrink:0;position:relative;color:var(--t3);background:none;border:0;cursor:pointer;padding:4px;border-radius:6px}
+.mrd-toast-x::after{content:"";position:absolute;inset:-6px}
+.mrd-toast-x:hover{color:var(--t1);background:#f1f1ee}
+/* svg icon default */
+.mrd .m-ic{width:16px;height:16px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+/* date pill (nav slot) */
+.mrd .m-datepill{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:7px 11px;font-size:12px;font-weight:600;color:var(--t2);background:#fff}
+.mrd .m-datepill .m-live{display:flex;align-items:center;gap:6px;color:var(--ac);text-transform:uppercase;letter-spacing:.05em;font-size:11px;font-weight:700}
+.mrd .m-datepill .m-live .m-dot{width:6px;height:6px;border-radius:50%;background:var(--ac)}
+.mrd .m-datepill .m-viewing{display:flex;align-items:center;gap:6px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;font-size:11px;font-weight:700}
+.mrd .m-datepill .m-viewing .m-dot{width:6px;height:6px;border-radius:50%;background:var(--t3)}
+.mrd .m-datepill .m-datestr{color:var(--t3);font-weight:500;text-transform:none;letter-spacing:0}
+.mrd .m-datewrap{position:relative}
+.mrd .m-datewrap input[type="date"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+/* empty state */
+.mrd .m-empty{text-align:center;padding:34px 18px;border-radius:10px;background:#fafaf9;color:var(--t3);font-weight:600;font-size:13px}
+/* responsive */
+@media (max-width:1023px){.mrd .mrd-layout{grid-template-columns:1fr !important}.mrd .mrd-layout>div:first-child{position:static !important}}
+@media (max-width:860px){.mrd .m-addgrid{grid-template-columns:1fr 1fr !important}.mrd .m-addgrid>div:nth-child(2){grid-column:1 / -1;order:3}.mrd .m-addgrid>div:nth-child(4){grid-column:1 / -1;order:4}}
+@media (max-width:560px){.mrd .m-addgrid{grid-template-columns:1fr !important}.mrd .m-entry{gap:10px}.mrd .m-chiprow{order:5;width:100%}}
+`;
+
+/* Shared drawn icons — one stroke weight, no emoji. */
+const Icon = ({ d, className = "m-ic", viewBox = "0 0 24 24" }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox={viewBox} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    {d}
+  </svg>
+);
+
+const ICONS = {
+  flame: <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />,
+  layers: <path d="M12 2 3 7l9 5 9-5-9-5zM3 12l9 5 9-5M3 17l9 5 9-5" />,
+  gauge: <><circle cx="12" cy="12" r="9" /><path d="M12 3a9 9 0 0 1 9 9h-9z" /></>,
+  heart: <path d="M12 21C7 17 3 13 3 8.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 9 2.5c0 4.5-4 8.5-9 12.5z" />,
+  search: <><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></>,
+  plus: <path d="M12 5v14M5 12h14" />,
+  trash: <path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14" />,
+  minus: <path d="M5 12h14" />,
+  calendar: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 10h18" /></>,
+  clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" /></>,
+  info: <><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v4h1" /></>,
+  x: <path d="M18 6 6 18M6 6l12 12" />,
+  trend: <><path d="M3 3v18h18" /><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" /></>,
+};
+
+/* Semantic macro metadata — accent icon class + bar class per macro. */
+const MACRO_META = {
+  calories: { icon: ICONS.flame, iconCls: "i-cal", barCls: "b-cal" },
+  protein: { icon: ICONS.layers, iconCls: "i-pro", barCls: "b-pro" },
+  carbs: { icon: ICONS.gauge, iconCls: "i-car", barCls: "b-car" },
+  fats: { icon: ICONS.heart, iconCls: "i-fat", barCls: "b-fat" },
+};
+
+const MACRO_CHIP = {
+  protein: "m-chip-p",
+  carbs: "m-chip-c",
+  fats: "m-chip-f",
+};
+
+/* ------------------------------------------------------------------ */
+/* Helpers                                                            */
+/* ------------------------------------------------------------------ */
+
 const toTitleCase = (str) => {
   if (!str) return "";
   return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
 };
+
+/* ------------------------------------------------------------------ */
+/* ToastHost — designed feedback replacing native alert()/confirm().  */
+/* ------------------------------------------------------------------ */
+
+let toastSeq = 0;
+
+function ToastHost({ toasts, onDismiss }) {
+  return (
+    <div className="mrd-toast" aria-live="polite" role="status">
+      {toasts.map((t) => (
+        <div key={t.id} className={`mrd-toast-item ${t.tone === "error" ? "err" : ""}`}>
+          <span className="mrd-toast-dot"></span>
+          <p>{t.message}</p>
+          {t.actionLabel && (
+            <button
+              onClick={() => {
+                t.onAction?.();
+                onDismiss(t.id);
+              }}
+              className="mrd-toast-act"
+            >
+              {t.actionLabel}
+            </button>
+          )}
+          <button onClick={() => onDismiss(t.id)} aria-label="Dismiss notification" className="mrd-toast-x">
+            <Icon d={ICONS.x} className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* MacroMeter — Meridian row + bar, with live preview ghost fill.     */
+/* ------------------------------------------------------------------ */
+
+function MacroMeter({ label, value, max, macroKey, preview, previewValue }) {
+  const meta = MACRO_META[macroKey];
+  const percentage = Math.min((value / max) * 100, 100);
+  const isOverLimit = value > max;
+  const hasPreview = preview !== undefined && previewValue !== value;
+  const previewDelta = hasPreview ? Math.round((previewValue - value) * 10) / 10 : 0;
+  const previewPct = hasPreview ? Math.min((previewValue / max) * 100, 100) : percentage;
+
+  return (
+    <div className="m-meter">
+      <div className="m-meter-row">
+        <span className="m-meter-name">
+          <Icon d={meta.icon} className={`m-ic ${meta.iconCls}`} />
+          {label}
+        </span>
+        <span className={`m-meter-val m-num ${isOverLimit ? "m-over" : ""}`}>
+          {value} <span className="m-meter-goal m-num">/ {max}{macroKey === "calories" ? "" : " g"}</span>
+          {hasPreview && (
+            <span className="ml-2 text-[11px] font-bold" style={{ color: "var(--ac)" }}>
+              +{label === "Calories" ? Math.round(previewDelta) : previewDelta}
+            </span>
+          )}
+        </span>
+      </div>
+      <div className="m-bar">
+        {hasPreview && <div className="m-ghost" style={{ transform: `scaleX(${previewPct / 100})` }}></div>}
+        <i className={meta.barCls} style={{ transform: `scaleX(${percentage / 100})` }}></i>
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* DayBanner — Chicken / Paneer protein-plan banner.                  */
+/* ------------------------------------------------------------------ */
+
+function DayBanner({ dayType, weekday }) {
+  const isChickenDay = dayType === "Chicken";
+  return (
+    <div className="m-banner">
+      <span className="m-tag">PROTEIN PLAN</span>
+      <span>
+        <b>{isChickenDay ? "Chicken Day" : "Paneer Day"}</b> —{" "}
+        {isChickenDay
+          ? "prioritize lean protein across lunch and dinner to hit 120 g."
+          : "vegetarian protein and healthy fats are prioritized today."}
+      </span>
+      <span className="m-crumb" style={{ marginLeft: "auto", whiteSpace: "nowrap" }}>{weekday}</span>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* MealSection — breakfast / lunch / dinner card.                     */
+/* ------------------------------------------------------------------ */
+
+function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
+  const mealIcon = title.toLowerCase() === "breakfast" ? <><circle cx="12" cy="12" r="4" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1" /></>
+    : title.toLowerCase() === "lunch" ? <><circle cx="12" cy="12" r="4" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></>
+    : <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z" />;
+
+  const subtotal = meals.reduce(
+    (sum, e) => sum + (e.meal?.macros?.calories || 0) * (parseFloat(e.quantity) || 0),
+    0,
+  );
+
+  return (
+    <div className="m-card" style={{ marginTop: 20 }}>
+      <div className="m-card-h">
+        <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ color: "var(--t3)" }}><Icon d={mealIcon} /></span>
+          {title}
+          <span className="m-crumb" style={{ fontWeight: 500 }}>· {meals.length} {meals.length === 1 ? "item" : "items"}</span>
+        </h3>
+        {meals.length > 0 ? (
+          <b className="m-num" style={{ fontSize: 14 }}>{Math.round(subtotal).toLocaleString()} kcal</b>
+        ) : (
+          <span className="m-crumb">Nothing logged yet</span>
+        )}
+      </div>
+
+      {meals.length === 0 ? (
+        <div style={{ padding: "16px 18px" }}>
+          <div className="m-empty">No meals logged — use the form above to add one.</div>
+        </div>
+      ) : (
+        <div>
+          {meals.map((entry) => (
+            <div key={entry._id} className="m-entry">
+              <span className="m-name">
+                {toTitleCase(entry.mealName)}
+                <span className="m-serving">
+                  {entry.meal?.servingSize || "1 unit"} · {entry.meal?.macros?.calories || 0} kcal per serving
+                </span>
+              </span>
+              <span className="m-chiprow">
+                <span className={`m-chip ${MACRO_CHIP.protein}`}>{entry.meal?.macros?.protein || 0}g P</span>
+                <span className={`m-chip ${MACRO_CHIP.carbs}`}>{entry.meal?.macros?.carbs || 0}g C</span>
+                <span className={`m-chip ${MACRO_CHIP.fats}`}>{entry.meal?.macros?.fats || 0}g F</span>
+              </span>
+              <div className="m-step">
+                <button
+                  onClick={() => onUpdateQuantity(entry._id, Math.max(0.5, parseFloat(entry.quantity) - 0.5))}
+                  aria-label={`Decrease quantity of ${toTitleCase(entry.mealName)}`}
+                >
+                  −
+                </button>
+                <input
+                  type="number"
+                  step="0.5"
+                  min="0.5"
+                  value={entry.quantity}
+                  onChange={(e) => onUpdateQuantity(entry._id, parseFloat(e.target.value))}
+                  aria-label={`Quantity of ${toTitleCase(entry.mealName)}`}
+                />
+                <button
+                  onClick={() => onUpdateQuantity(entry._id, parseFloat(entry.quantity) + 0.5)}
+                  aria-label={`Increase quantity of ${toTitleCase(entry.mealName)}`}
+                >
+                  +
+                </button>
+              </div>
+              <span className="m-kc m-num">
+                {Math.round((entry.meal?.macros?.calories || 0) * (parseFloat(entry.quantity) || 0))}
+              </span>
+              <button
+                onClick={() => onDelete(entry._id)}
+                aria-label={`Delete ${toTitleCase(entry.mealName)}`}
+                className="m-iconbtn"
+                title="Delete entry"
+              >
+                <Icon d={ICONS.trash} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Page                                                               */
+/* ------------------------------------------------------------------ */
 
 export default function MealTrackingPage() {
   const { user, checkAuth } = useAuth();
@@ -23,6 +347,12 @@ export default function MealTrackingPage() {
   const [showMealStats, setShowMealStats] = useState(false);
   const [mealSearch, setMealSearch] = useState("");
   const [showMealDropdown, setShowMealDropdown] = useState(false);
+  const [toasts, setToasts] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
+  const searchInputRef = useRef(null);
+  const typeSelectRef = useRef(null);
+  const qtyInputRef = useRef(null);
+  const submitRef = useRef(null);
   const [currentDate, setCurrentDate] = useState(
     format(new Date(), "yyyy-MM-dd"),
   );
@@ -35,6 +365,19 @@ export default function MealTrackingPage() {
     "Chicken",
     "Paneer",
   ]);
+
+  // Designed feedback — replaces native alert()/confirm() everywhere.
+  const pushToast = (message, tone = "success", action = null, ttl = 5000) => {
+    const id = ++toastSeq;
+    setToasts((prev) => [...prev, { id, message, tone, ...action }]);
+    if (ttl > 0) {
+      setTimeout(() => {
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+      }, ttl);
+    }
+  };
+  const dismissToast = (id) =>
+    setToasts((prev) => prev.filter((t) => t.id !== id));
 
   // Fetch global meal schedule
   const fetchGlobalSchedule = async () => {
@@ -69,12 +412,47 @@ export default function MealTrackingPage() {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (showMealDropdown && !event.target.closest(".meal-dropdown")) {
+      if (showMealDropdown && !event.target.closest(".m-dd-anchor")) {
         setShowMealDropdown(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
+  }, [showMealDropdown]);
+
+  // Keyboard accelerators: "/" or Ctrl/Cmd+K focuses search, Esc steps back out.
+  useEffect(() => {
+    const handleShortcuts = (event) => {
+      const target = event.target;
+      const typing =
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLSelectElement ||
+        target instanceof HTMLTextAreaElement;
+
+      if ((event.key === "k" || event.key === "K") && (event.metaKey || event.ctrlKey)) {
+        event.preventDefault();
+        searchInputRef.current?.focus();
+        return;
+      }
+      if (event.key === "/" && !typing) {
+        event.preventDefault();
+        searchInputRef.current?.focus();
+        return;
+      }
+      if (event.key === "Escape") {
+        if (showMealDropdown) {
+          setShowMealDropdown(false);
+          searchInputRef.current?.focus();
+        } else if (document.activeElement === qtyInputRef.current) {
+          searchInputRef.current?.focus();
+        } else if (document.activeElement === searchInputRef.current) {
+          searchInputRef.current?.blur();
+        }
+      }
+    };
+    window.addEventListener("keydown", handleShortcuts);
+    return () => window.removeEventListener("keydown", handleShortcuts);
   }, [showMealDropdown]);
 
   useEffect(() => {
@@ -113,10 +491,12 @@ export default function MealTrackingPage() {
   const handleAddMeal = async (e) => {
     e.preventDefault();
 
-    if (!selectedMeal || quantity <= 0) {
-      alert("Please select a meal and enter a valid quantity");
+    if (!selectedMeal || !(parseFloat(quantity) > 0)) {
+      pushToast("Pick a meal from the search list and set a quantity above 0.", "error");
       return;
     }
+    if (submitting) return;
+    setSubmitting(true);
 
     try {
       const res = await fetch("/api/daily-log", {
@@ -133,17 +513,25 @@ export default function MealTrackingPage() {
       if (res.ok) {
         const data = await res.json();
         setDailyLog(data.dailyLog);
+        const addedName = meals.find((m) => m._id === selectedMeal)?.name;
         setSelectedMeal("");
         setQuantity(1);
         setMealSearch("");
         setShowMealDropdown(false);
+        pushToast(
+          `${toTitleCase(addedName || "Meal")} added to ${selectedMealType}.`,
+          "success",
+        );
+        searchInputRef.current?.focus();
       } else {
         const data = await res.json();
-        alert(data.error || "Failed to add meal");
+        pushToast(data.error || "Couldn't add that meal. Try again.", "error");
       }
     } catch (error) {
       console.error("Error adding meal:", error);
-      alert("Failed to add meal");
+      pushToast("Couldn't reach the server. Check your connection and retry.", "error");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -151,7 +539,7 @@ export default function MealTrackingPage() {
     const qty = parseFloat(newQuantity);
 
     if (isNaN(qty) || qty <= 0) {
-      alert("Quantity must be greater than 0");
+      pushToast("Quantity has to be at least 0.5. Adjusted back for you.", "error");
       return;
     }
 
@@ -171,16 +559,24 @@ export default function MealTrackingPage() {
       } else {
         const data = await res.json();
         console.error("Update failed:", data);
-        alert(data.error || "Failed to update quantity");
+        pushToast(data.error || "Couldn't update that entry. Try again.", "error");
       }
     } catch (error) {
       console.error("Error updating quantity:", error);
-      alert("Failed to update quantity");
+      pushToast("Couldn't reach the server. Check your connection and retry.", "error");
     }
   };
 
   const handleDeleteEntry = async (entryId) => {
-    if (!confirm("Are you sure you want to remove this meal?")) return;
+    const snapshot = dailyLog;
+    const entry = dailyLog?.meals?.find((m) => m._id === entryId);
+    if (!entry) return;
+
+    // Optimistic remove — the Undo toast is the safety net, not a dialog.
+    setDailyLog({
+      ...dailyLog,
+      meals: dailyLog.meals.filter((m) => m._id !== entryId),
+    });
 
     try {
       const res = await fetch(`/api/daily-log/${entryId}?date=${currentDate}`, {
@@ -190,94 +586,57 @@ export default function MealTrackingPage() {
       if (res.ok) {
         const data = await res.json();
         setDailyLog(data.dailyLog);
+        pushToast(
+          `${toTitleCase(entry.mealName)} removed.`,
+          "success",
+          {
+            actionLabel: "Undo",
+            onAction: () => {
+              const restore = async () => {
+                try {
+                  const res = await fetch("/api/daily-log", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      mealId: entry.meal?._id || entry.meal,
+                      quantity: entry.quantity,
+                      mealType: entry.mealType,
+                      date: currentDate,
+                    }),
+                  });
+                  if (res.ok) {
+                    const data = await res.json();
+                    setDailyLog(data.dailyLog);
+                  } else {
+                    setDailyLog(snapshot);
+                    pushToast("Couldn't restore it. Your log is back as it was.", "error");
+                  }
+                } catch (error) {
+                  console.error("Error restoring entry:", error);
+                  setDailyLog(snapshot);
+                  pushToast("Couldn't reach the server. Your log is back as it was.", "error");
+                }
+              };
+              restore();
+            },
+          },
+        );
       } else {
         const data = await res.json();
         console.error("Delete failed:", data);
-        alert(data.error || "Failed to delete entry");
+        setDailyLog(snapshot);
+        pushToast(data.error || "Couldn't remove that entry. Try again.", "error");
       }
     } catch (error) {
       console.error("Error deleting entry:", error);
-      alert("Failed to delete entry");
+      setDailyLog(snapshot);
+      pushToast("Couldn't reach the server. Nothing was deleted.", "error");
     }
   };
 
   const getMealsByType = (type) => {
     if (!dailyLog) return [];
     return dailyLog.meals.filter((entry) => entry.mealType === type);
-  };
-
-  const MacroMeter = ({ label, value, max, color, icon, bgClass }) => {
-    const percentage = Math.min((value / max) * 100, 100);
-    const isOverLimit = value > max;
-
-    return (
-      <div className="mb-6 last:mb-0 group">
-        <div className="flex justify-between items-center mb-2">
-          <div className="flex items-center gap-3">
-            <span className="flex items-center justify-center w-8 h-8 bg-neutral-800 rounded-lg text-lg border border-neutral-700">
-              {icon}
-            </span>
-            <span className="text-sm font-bold text-neutral-300 uppercase tracking-wide">
-              {label}
-            </span>
-          </div>
-          <div className="text-right flex items-baseline gap-1">
-            <span
-              className={`text-sm font-bold ${isOverLimit ? "text-red-500" : "text-white"
-                }`}
-            >
-              {value}
-            </span>
-            <span className="text-xs text-neutral-600 font-medium">/</span>
-            <span className="text-xs text-neutral-500">{max}</span>
-            {hasPreview &&
-              value !==
-              previewMacros[
-              label.toLowerCase().split(" ")[0].replace("(g)", "")
-              ] && (
-                <span className="ml-1 text-lime-500 font-bold animate-pulse text-xs">
-                  +
-                  {label.includes("Calories")
-                    ? previewMacros.calories - value
-                    : label.includes("Protein")
-                      ? Math.round((previewMacros.protein - value) * 10) / 10
-                      : label.includes("Carbs")
-                        ? Math.round((previewMacros.carbs - value) * 10) / 10
-                        : Math.round((previewMacros.fats - value) * 10) / 10}
-                </span>
-              )}
-          </div>
-        </div>
-        <div
-          className={`w-full bg-neutral-950 rounded-full h-2 relative overflow-hidden border border-neutral-800`}
-        >
-          <div
-            className={`h-full rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(0,0,0,0.5)] ${color} ${isOverLimit ? "animate-pulse" : ""
-              }`}
-            style={{ width: `${percentage}%` }}
-          ></div>
-          {hasPreview && (
-            <div
-              className={`h-full rounded-full absolute top-0 left-0 transition-all duration-300 opacity-30 bg-lime-500`}
-              style={{
-                width: `${Math.min(
-                  ((label.includes("Calories")
-                    ? previewMacros.calories
-                    : label.includes("Protein")
-                      ? previewMacros.protein
-                      : label.includes("Carbs")
-                        ? previewMacros.carbs
-                        : previewMacros.fats) /
-                    max) *
-                  100,
-                  100,
-                )}%`,
-              }}
-            ></div>
-          )}
-        </div>
-      </div>
-    );
   };
 
   if (loading) {
@@ -310,7 +669,7 @@ export default function MealTrackingPage() {
   };
 
   const previewMacros = getPreviewMacros();
-  const hasPreview = selectedMeal && quantity > 0;
+  const hasPreview = Boolean(selectedMeal && quantity > 0);
 
   // Per-user daily goals (editable on the profile page)
   const goals = user?.macroGoals || {
@@ -320,699 +679,352 @@ export default function MealTrackingPage() {
     fats: 60,
   };
 
+  // Day banner info from the global schedule
+  const [selY, selM, selD] = currentDate.split("-").map(Number);
+  const selDate = new Date(selY, selM - 1, selD);
+  const dayType = globalSchedule[selDate.getDay()] || "Paneer";
+  const weekday = selDate.toLocaleDateString("en-US", { weekday: "long" });
+  const selectedIsToday = isToday(selDate);
+
+  const daySummary = `${dayType} Day · ${dailyLog?.meals?.length || 0} ${
+    (dailyLog?.meals?.length || 0) === 1 ? "meal" : "meals"
+  } logged`;
+
+  const filteredMeals = meals.filter((meal) =>
+    meal.name.toLowerCase().includes(mealSearch.toLowerCase()),
+  );
+
   return (
-    <AppShell
-      navSlot={
-        <>
-        {/* Date Picker */}
-        <div className="relative group">
-          <input
-            type="date"
-            value={currentDate}
-            onChange={(e) => setCurrentDate(e.target.value)}
-            className="pl-10 pr-4 py-2.5 bg-neutral-900/50 backdrop-blur-md border border-neutral-800 rounded-xl focus:outline-none focus:border-lime-500 focus:ring-2 focus:ring-lime-500/20 text-sm font-bold text-neutral-300 group-hover:text-white cursor-pointer hover:bg-neutral-800 hover:border-neutral-700 transition-all shadow-lg [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer relative z-10 uppercase tracking-widest"
-          />
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 group-hover:text-lime-500 transition-colors z-20 pointer-events-none">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
-              className="w-4 h-4"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
-              />
-            </svg>
-          </div>
-        </div>
-        </>
-      }
-      mobileSlot={
-        <>
-        {/* Select Date */}
-        <div className="pb-4 relative group">
-          <p className="text-xs text-neutral-400 uppercase tracking-widest font-bold mb-2">
-            Select Date
-          </p>
-          <div className="relative">
-            <input
-              type="date"
-              value={currentDate}
-              onChange={(e) => setCurrentDate(e.target.value)}
-              className="w-full py-3 pl-11 pr-4 bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-lime-500 focus:ring-2 focus:ring-lime-500/20 text-white font-bold cursor-pointer hover:border-neutral-700 transition-all [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer relative z-10 uppercase tracking-widest"
-            />
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 group-hover:text-lime-500 transition-colors z-20 pointer-events-none">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="w-5 h-5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
+    <>
+      <style>{MERIDIAN_CSS}</style>
+      <ToastHost toasts={toasts} onDismiss={dismissToast} />
+      <AppShell
+        navSlot={
+          <div className="mrd">
+            <div className="m-datepill">
+              {selectedIsToday ? (
+                <span className="m-live"><span className="m-dot"></span>Today</span>
+              ) : (
+                <span className="m-viewing"><span className="m-dot"></span>Viewing</span>
+              )}
+              <span className="m-datestr">{format(selDate, "EEE, MMM d")}</span>
+              <div className="m-datewrap">
+                <Icon d={ICONS.calendar} className="m-ic" />
+                <input
+                  type="date"
+                  value={currentDate}
+                  onChange={(e) => setCurrentDate(e.target.value)}
+                  aria-label="Select date"
                 />
-              </svg>
+              </div>
             </div>
           </div>
-        </div>
-        </>
-      }
-    >
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Macro Meters */}
-          <div className="lg:col-span-1 order-2 lg:order-1">
-            <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl shadow-xl">
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-3">
-                  <div className="bg-lime-500/10 p-2 rounded-lg text-lime-500 border border-lime-500/20">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-6 h-6"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M3 3v18h18" />
-                      <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-black text-white uppercase tracking-tighter">
-                      Macros
-                    </h2>
-                    <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest">
-                      Daily Targets
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <MacroMeter
-                  label="Calories"
-                  value={totalMacros.calories}
-                  max={goals.calories}
-                  color="bg-blue-500"
-                  icon="🔥"
-                />
-
-                <MacroMeter
-                  label="Protein"
-                  value={totalMacros.protein}
-                  max={goals.protein}
-                  color="bg-lime-500"
-                  icon="🍖"
-                />
-
-                <MacroMeter
-                  label="Carbs"
-                  value={totalMacros.carbs}
-                  max={goals.carbs}
-                  color="bg-amber-500"
-                  icon="🥔"
-                />
-
-                <MacroMeter
-                  label="Fats"
-                  value={totalMacros.fats}
-                  max={goals.fats}
-                  color="bg-purple-500"
-                  icon="🥑"
+        }
+        mobileSlot={
+          <div className="mrd" style={{ paddingBottom: 8 }}>
+            <p className="m-crumb" style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 6 }}>
+              Select date {selectedIsToday ? "· Today" : ""}
+            </p>
+            <div className="m-datepill" style={{ width: "100%", justifyContent: "space-between" }}>
+              <span className="m-live"><span className="m-dot"></span>{format(selDate, "EEE, MMM d")}</span>
+              <div className="m-datewrap" style={{ position: "static", display: "contents" }}>
+                <Icon d={ICONS.calendar} className="m-ic" />
+                <input
+                  type="date"
+                  value={currentDate}
+                  onChange={(e) => setCurrentDate(e.target.value)}
+                  aria-label="Select date"
+                  style={{ position: "static", opacity: 0, width: 24, height: 24, marginLeft: -24 }}
                 />
               </div>
+            </div>
+          </div>
+        }
+      >
+        <div className="mrd" style={{ maxWidth: 1160, margin: "0 auto", padding: "32px 28px 56px" }}>
+          {/* Page header */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
+            <div>
+              <div className="m-h1">{selectedIsToday ? "Today" : format(selDate, "EEEE, MMMM d")}</div>
+              <div className="m-sub">{daySummary}</div>
+            </div>
+            <div className="m-datepill">
+              <Icon d={ICONS.calendar} className="m-ic" />
+              <span className="m-num">{format(selDate, "MMM d, yyyy")}</span>
+            </div>
+          </div>
 
-              {/* Summary with 2x2 Grid */}
-              <div className="mt-8 pt-6 border-t border-neutral-800">
-                <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-4">
-                  Remaining
+          {/* Protein plan banner */}
+          <div style={{ marginTop: 16 }}>
+            <DayBanner dayType={dayType} weekday={weekday} />
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "min(340px,100%) 1fr", gap: 24, marginTop: 24 }} className="mrd-layout">
+            {/* Targets rail */}
+            <div className="m-card" style={{ alignSelf: "start", position: "sticky", top: 96 }}>
+              <div className="m-card-h">
+                <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ color: "var(--ac)" }}><Icon d={ICONS.trend} /></span>
+                  Daily targets
                 </h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    {
-                      label: "Calories",
-                      val: goals.calories - totalMacros.calories,
-                      unit: "kcal",
-                      color: "text-blue-500",
-                      borderColor: "group-hover:border-blue-500/50",
-                    },
-                    {
-                      label: "Protein",
-                      val: (goals.protein - totalMacros.protein).toFixed(1),
-                      unit: "g",
-                      color: "text-lime-500",
-                      borderColor: "group-hover:border-lime-500/50",
-                    },
-                    {
-                      label: "Carbs",
-                      val: (goals.carbs - totalMacros.carbs).toFixed(1),
-                      unit: "g",
-                      color: "text-amber-500",
-                      borderColor: "group-hover:border-amber-500/50",
-                    },
-                    {
-                      label: "Fats",
-                      val: (goals.fats - totalMacros.fats).toFixed(1),
-                      unit: "g",
-                      color: "text-purple-500",
-                      borderColor: "group-hover:border-purple-500/50",
-                    },
-                  ].map((item, idx) => {
-                    const valNum = parseFloat(item.val);
-                    const isExceeded = valNum < 0;
-                    return (
-                      <div
-                        key={idx}
-                        className={`p-4 rounded-xl border border-neutral-800 bg-neutral-950/50 transition-colors group ${item.borderColor}`}
-                      >
-                        <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-1">
-                          {item.label}
-                        </p>
-                        <p
-                          className={`text-xl font-black ${isExceeded ? "text-red-500" : "text-white"
-                            }`}
-                        >
-                          {isExceeded
-                            ? `+${Math.abs(valNum).toFixed(
-                              item.label === "Calories" ? 0 : 1,
-                            )}`
-                            : valNum}
-                          <span className="text-xs font-bold ml-1 opacity-50 text-neutral-400">
-                            {item.unit}
-                          </span>
-                        </p>
-                      </div>
-                    );
-                  })}
+                <span className="m-chip m-chip-ac m-num">
+                  {Math.min(Math.round((totalMacros.calories / goals.calories) * 100), 999)}%
+                </span>
+              </div>
+
+              <MacroMeter label="Calories" macroKey="calories" value={totalMacros.calories} max={goals.calories}
+                preview={hasPreview ? previewMacros.calories : undefined} previewValue={previewMacros.calories} />
+              <MacroMeter label="Protein" macroKey="protein" value={totalMacros.protein} max={goals.protein}
+                preview={hasPreview ? previewMacros.protein : undefined} previewValue={previewMacros.protein} />
+              <MacroMeter label="Carbs" macroKey="carbs" value={totalMacros.carbs} max={goals.carbs}
+                preview={hasPreview ? previewMacros.carbs : undefined} previewValue={previewMacros.carbs} />
+              <MacroMeter label="Fats" macroKey="fats" value={totalMacros.fats} max={goals.fats}
+                preview={hasPreview ? previewMacros.fats : undefined} previewValue={previewMacros.fats} />
+
+              {/* Remaining */}
+              <div style={{ padding: "16px 18px", borderTop: "1px solid var(--line)" }}>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".08em", color: "var(--t3)", marginBottom: 8 }}>
+                  REMAINING
                 </div>
+                {[
+                  { label: "Protein", val: (goals.protein - totalMacros.protein).toFixed(1), unit: "g" },
+                  { label: "Carbs", val: (goals.carbs - totalMacros.carbs).toFixed(1), unit: "g" },
+                  { label: "Fats", val: (goals.fats - totalMacros.fats).toFixed(1), unit: "g" },
+                ].map((item) => {
+                  const valNum = parseFloat(item.val);
+                  const isExceeded = valNum < 0;
+                  return (
+                    <div key={item.label} className="m-rem-row">
+                      <span>{item.label}</span>
+                      <b className={`m-num ${isExceeded ? "m-over" : ""}`}>
+                        {isExceeded ? `+${Math.abs(valNum).toFixed(1)} ${item.unit} over` : `${item.val} ${item.unit}`}
+                      </b>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-          </div>
 
-          {/* Meal Sections */}
-          <div className="lg:col-span-2 space-y-6 order-1 lg:order-2">
-            {/* Day Type Banner */}
-            {user &&
-              (() => {
-                const [y, m, d] = currentDate.split("-").map(Number);
-                const dayIndex = new Date(y, m - 1, d).getDay();
-                const dayType = globalSchedule[dayIndex] || "Paneer";
-                const isChickenDay = dayType === "Chicken";
-
-                return (
-                  <div className="relative p-8 rounded-2xl overflow-hidden group border border-neutral-800 transition-all duration-300 hover:border-lime-500/50">
-                    {/* Background */}
-                    <div
-                      className={`absolute inset-0 bg-neutral-900 ${isChickenDay ? "bg-linear-to-br from-orange-950/40 to-neutral-900" : "bg-linear-to-br from-lime-950/40 to-neutral-900"} z-0`}
-                    ></div>
-                    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 z-0"></div>
-
-                    <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between text-white gap-6">
-                      <div className="text-center sm:text-left">
-                        <div className="flex items-center justify-center sm:justify-start gap-3 mb-3">
-                          <span className="bg-lime-500 text-black px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest">
-                            Protein Plan
-                          </span>
-                          <span className="text-neutral-400 text-sm font-bold uppercase tracking-wider">
-                            {new Date(y, m - 1, d).toLocaleDateString("en-US", {
-                              weekday: "long",
-                            })}
-                          </span>
-                        </div>
-                        <h2 className="text-4xl sm:text-5xl font-black tracking-tighter text-white mb-2 uppercase italic">
-                          {isChickenDay ? "Chicken" : "Paneer"}{" "}
-                          <span className="text-transparent bg-clip-text pr-2 bg-linear-to-r from-lime-500 to-lime-200">
-                            Day
-                          </span>
-                        </h2>
-                        <p className="text-neutral-400 font-medium text-sm max-w-md">
-                          {isChickenDay
-                            ? "Focus on lean protein consumption today to maximize muscle recovery."
-                            : "Healthy fats and vegetarian protein sources are prioritized today."}
-                        </p>
-                      </div>
-                      <div className="text-7xl sm:text-8xl filter drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">
-                        {isChickenDay ? "🍗" : "🧀"}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
-
-            {/* Add Meal Form */}
-            <div className="bg-neutral-900 p-6 sm:p-8 rounded-2xl border border-neutral-800 relative z-20">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="h-10 w-1 bg-lime-500 rounded-full"></div>
-                <div>
-                  <h2 className="text-2xl font-black text-white uppercase tracking-tighter">
-                    Add Meal
-                  </h2>
-                  <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest">
-                    Log your intake
-                  </p>
+            {/* Feed column */}
+            <div>
+              {/* Add meal card */}
+              <div className="m-card">
+                <div className="m-card-h">
+                  <h3>Add a meal</h3>
+                  <span className="m-crumb">per-serving macros auto-calculated</span>
                 </div>
-              </div>
-
-              <form
-                onSubmit={handleAddMeal}
-                className="grid grid-cols-1 md:grid-cols-12 gap-6"
-              >
-                <div className="md:col-span-3">
-                  <label className="block text-neutral-500 font-bold mb-2 text-[10px] uppercase tracking-widest">
-                    Type
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={selectedMealType}
-                      onChange={(e) => setSelectedMealType(e.target.value)}
-                      className="w-full h-14 px-4 bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-lime-500 focus:ring-1 focus:ring-lime-500 transition-all text-white font-bold cursor-pointer appearance-none uppercase text-sm tracking-wider"
-                    >
-                      <option value="breakfast">Breakfast</option>
-                      <option value="lunch">Lunch</option>
-                      <option value="dinner">Dinner</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-lime-500">
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M19 9l-7 7-7-7"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="meal-dropdown md:col-span-7 relative z-30">
-                  <label className="block text-neutral-500 font-bold mb-2 text-[10px] uppercase tracking-widest">
-                    Item
-                  </label>
-                  <div className="flex gap-2">
-                    <div className="flex-1 min-w-0 relative">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <svg
-                          className="h-5 w-5 text-neutral-500"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
+                <form onSubmit={handleAddMeal} style={{ padding: 18 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "130px 1fr 84px auto", gap: 10 }} className="m-addgrid">
+                    <div>
+                      <label htmlFor="m-type" className="m-crumb" style={{ display: "block", fontSize: 10, fontWeight: 700, letterSpacing: ".08em", marginBottom: 5, textTransform: "uppercase" }}>Type</label>
+                      <div style={{ position: "relative" }}>
+                        <select
+                          id="m-type"
+                          ref={typeSelectRef}
+                          value={selectedMealType}
+                          onChange={(e) => setSelectedMealType(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              searchInputRef.current?.focus();
+                            }
+                          }}
+                          className="m-field"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                          />
+                          <option value="breakfast">Breakfast</option>
+                          <option value="lunch">Lunch</option>
+                          <option value="dinner">Dinner</option>
+                        </select>
+                        <svg className="m-ic" viewBox="0 0 24 24" style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: "var(--t3)" }}>
+                          <path d="m6 9 6 6 6-6" />
                         </svg>
                       </div>
+                    </div>
+
+                    <div className="m-dd-anchor" style={{ position: "relative" }}>
+                      <label htmlFor="m-search" className="m-crumb" style={{ display: "block", fontSize: 10, fontWeight: 700, letterSpacing: ".08em", marginBottom: 5, textTransform: "uppercase" }}>
+                        Item <span style={{ textTransform: "none", letterSpacing: 0, fontWeight: 500 }}>· press ⏎</span>
+                      </label>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
+                          <span style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "var(--t3)", pointerEvents: "none" }}>
+                            <Icon d={ICONS.search} />
+                          </span>
+                          <input
+                            id="m-search"
+                            type="text"
+                            ref={searchInputRef}
+                            autoComplete="off"
+                            value={
+                              mealSearch ||
+                              (selectedMeal
+                                ? meals.find((m) => m._id === selectedMeal)?.name
+                                  ? toTitleCase(meals.find((m) => m._id === selectedMeal).name)
+                                  : ""
+                                : "")
+                            }
+                            onChange={(e) => {
+                              setMealSearch(e.target.value);
+                              setShowMealDropdown(true);
+                            }}
+                            onFocus={() => setShowMealDropdown(true)}
+                            onKeyDown={(e) => {
+                              if (e.key === "ArrowDown" && !showMealDropdown) {
+                                setShowMealDropdown(true);
+                                return;
+                              }
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                const list = meals.filter((meal) =>
+                                  meal.name.toLowerCase().includes(mealSearch.toLowerCase()),
+                                );
+                                if (list.length === 1) {
+                                  setSelectedMeal(list[0]._id);
+                                  setMealSearch("");
+                                  setShowMealDropdown(false);
+                                  qtyInputRef.current?.focus();
+                                } else if (list.length > 1) {
+                                  setShowMealDropdown(true);
+                                }
+                              }
+                            }}
+                            className="m-field"
+                            style={{ paddingLeft: 34 }}
+                            placeholder="Search the database…"
+                            required={!selectedMeal}
+                          />
+                          {showMealDropdown && (
+                            <div className="m-dd" data-lenis-prevent="true" role="listbox">
+                              {filteredMeals.map((meal) => (
+                                <div
+                                  key={meal._id}
+                                  role="option"
+                                  aria-selected={selectedMeal === meal._id}
+                                  tabIndex={-1}
+                                  onClick={() => {
+                                    setSelectedMeal(meal._id);
+                                    setMealSearch("");
+                                    setShowMealDropdown(false);
+                                    qtyInputRef.current?.focus();
+                                  }}
+                                  className="m-dd-item"
+                                >
+                                  <span className="m-dd-name">{toTitleCase(meal.name)}</span>
+                                  <span className="m-chip" style={{ background: "#f1f1ee", color: "var(--t2)" }}>{meal.servingSize}</span>
+                                </div>
+                              ))}
+                              {filteredMeals.length === 0 && (
+                                <div className="m-dd-empty">No matching meals found</div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setShowMealStats(!showMealStats)}
+                          disabled={!selectedMeal}
+                          title="Show per-serving info"
+                          aria-label="Show per-serving info"
+                          className="m-iconbtn"
+                          style={{ border: "1px solid var(--line)", height: 41, width: 41, display: "flex", alignItems: "center", justifyContent: "center", opacity: selectedMeal ? 1 : 0.35 }}
+                        >
+                          <Icon d={ICONS.info} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label htmlFor="m-qty" className="m-crumb" style={{ display: "block", fontSize: 10, fontWeight: 700, letterSpacing: ".08em", marginBottom: 5, textTransform: "uppercase" }}>
+                        Qty <span style={{ textTransform: "none", letterSpacing: 0, fontWeight: 500 }}>· ⏎ adds</span>
+                      </label>
                       <input
-                        type="text"
-                        value={
-                          mealSearch ||
-                          (selectedMeal
-                            ? meals.find((m) => m._id === selectedMeal)?.name
-                              ? toTitleCase(
-                                meals.find((m) => m._id === selectedMeal)
-                                  .name,
-                              )
-                              : ""
-                            : "")
-                        }
-                        onChange={(e) => {
-                          setMealSearch(e.target.value);
-                          setShowMealDropdown(true);
-                        }}
-                        onFocus={() => setShowMealDropdown(true)}
+                        id="m-qty"
+                        type="number"
+                        ref={qtyInputRef}
+                        step="0.5"
+                        min="0.5"
+                        value={quantity}
+                        onChange={(e) => setQuantity(e.target.value)}
                         onKeyDown={(e) => {
                           if (e.key === "Enter") {
                             e.preventDefault();
-                            const filteredMeals = meals.filter((meal) =>
-                              meal.name
-                                .toLowerCase()
-                                .includes(mealSearch.toLowerCase()),
-                            );
-                            if (filteredMeals.length === 1) {
-                              setSelectedMeal(filteredMeals[0]._id);
-                              setMealSearch("");
-                              setShowMealDropdown(false);
-                            } else if (filteredMeals.length > 1) {
-                              setSelectedMeal(filteredMeals[0]._id);
-                              setMealSearch("");
-                              setShowMealDropdown(false);
-                            }
+                            submitRef.current?.click();
                           }
                         }}
-                        className="w-full h-14 pl-11 pr-4 bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-lime-500 focus:ring-1 focus:ring-lime-500 transition-all text-white placeholder-neutral-600 font-medium text-sm"
-                        placeholder="Search database..."
-                        required={!selectedMeal}
+                        aria-label="Quantity"
+                        className="m-field m-num"
+                        style={{ textAlign: "center" }}
+                        required
                       />
-                      {showMealDropdown && (
-                        <div className="absolute z-50 w-full mt-2 bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl max-h-60 overflow-auto animate-in fade-in zoom-in-95 duration-200 custom-scrollbar" data-lenis-prevent="true">
-                          {meals
-                            .filter((meal) =>
-                              meal.name
-                                .toLowerCase()
-                                .includes(mealSearch.toLowerCase()),
-                            )
-                            .map((meal) => (
-                              <div
-                                key={meal._id}
-                                onClick={() => {
-                                  setSelectedMeal(meal._id);
-                                  setMealSearch("");
-                                  setShowMealDropdown(false);
-                                }}
-                                className="px-4 py-3 hover:bg-neutral-800 cursor-pointer text-gray-300 text-sm flex justify-between items-center group transition-colors border-b border-neutral-800 last:border-0"
-                              >
-                                <span className="font-bold text-white group-hover:text-lime-500 transition-colors">
-                                  {toTitleCase(meal.name)}
-                                </span>
-                                <span className="text-[10px] text-neutral-500 font-bold uppercase bg-neutral-950 px-2 py-1 rounded">
-                                  {meal.servingSize}
-                                </span>
+                    </div>
+
+                    <div style={{ display: "flex", alignItems: "flex-end" }}>
+                      <button ref={submitRef} type="submit" disabled={submitting} className="m-btn m-btn-primary" style={{ width: "100%" }}>
+                        <Icon d={ICONS.plus} />
+                        {submitting ? "Adding…" : "Add entry"}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Live preview banner */}
+                  {hasPreview && (
+                    <div className="m-banner" style={{ marginTop: 14, background: "#eef2ff", borderColor: "#c7d2fe", color: "var(--t2)" }}>
+                      <span className="m-tag">PREVIEW</span>
+                      <span>
+                        After adding at qty {quantity}: <b className="m-num">{previewMacros.calories} kcal</b>
+                        <span className="m-crumb"> · </span>
+                        <b className="m-num" style={{ color: "#059669" }}>{previewMacros.protein}g P</b>
+                        <span className="m-crumb"> · </span>
+                        <b className="m-num" style={{ color: "#d97706" }}>{previewMacros.carbs}g C</b>
+                        <span className="m-crumb"> · </span>
+                        <b className="m-num" style={{ color: "#e11d48" }}>{previewMacros.fats}g F</b>
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Per-serving stats panel */}
+                  {showMealStats && selectedMeal && (
+                    <div className="m-card" style={{ marginTop: 14, padding: "14px 16px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                        <h3 style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase", color: "var(--t2)" }}>
+                          Nutritional data · per serving
+                        </h3>
+                        <button onClick={() => setShowMealStats(false)} className="m-iconbtn" aria-label="Close nutrition info">
+                          <Icon d={ICONS.x} className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      {(() => {
+                        const meal = meals.find((m) => m._id === selectedMeal);
+                        if (!meal) return null;
+                        return (
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10 }}>
+                            {[
+                              { k: "Cal", v: meal.macros.calories, cls: "" },
+                              { k: "Protein", v: meal.macros.protein, cls: "m-chip-p" },
+                              { k: "Carbs", v: meal.macros.carbs, cls: "m-chip-c" },
+                              { k: "Fats", v: meal.macros.fats, cls: "m-chip-f" },
+                            ].map((s) => (
+                              <div key={s.k} style={{ background: "#fafaf9", borderRadius: 9, padding: "10px 12px", textAlign: "center" }}>
+                                <span className="m-crumb" style={{ display: "block", fontSize: 10, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 3 }}>{s.k}</span>
+                                <b className="m-num" style={{ fontSize: 16 }}>{s.v}</b>
                               </div>
                             ))}
-                          {meals.filter((meal) =>
-                            meal.name
-                              .toLowerCase()
-                              .includes(mealSearch.toLowerCase()),
-                          ).length === 0 && (
-                              <div className="px-4 py-8 text-center text-neutral-500 text-sm flex flex-col items-center gap-2">
-                                <span className="text-2xl opacity-20">🔍</span>
-                                No matching meals found
-                              </div>
-                            )}
-                        </div>
-                      )}
+                          </div>
+                        );
+                      })()}
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setShowMealStats(!showMealStats)}
-                      disabled={!selectedMeal}
-                      className="shrink-0 w-14 bg-neutral-800 border border-neutral-700 text-neutral-400 rounded-xl hover:bg-neutral-700 hover:text-white transition-all disabled:opacity-20 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center"
-                      title="Show info"
-                    >
-                      <span className="text-lg">ℹ️</span>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-neutral-500 font-bold mb-2 text-[10px] uppercase tracking-widest">
-                    Qty
-                  </label>
-                  <input
-                    type="number"
-                    step="0.5"
-                    min="0.5"
-                    value={quantity}
-                    onChange={(e) => setQuantity(e.target.value)}
-                    className="w-full h-14 px-3 bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-lime-500 focus:ring-1 focus:ring-lime-500 transition-all text-white font-bold text-center text-sm"
-                    required
-                  />
-                </div>
-
-                <div className="md:col-span-12">
-                  <button
-                    type="submit"
-                    className="w-full bg-lime-500 text-black py-4 rounded-xl hover:bg-lime-400 transition-all shadow-[0_0_20px_rgba(132,204,22,0.2)] hover:shadow-[0_0_30px_rgba(132,204,22,0.4)] font-black uppercase tracking-wider transform active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-5 h-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={3}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                      />
-                    </svg>
-                    ADD ENTRY
-                  </button>
-                </div>
-              </form>
-
-              {/* Meal Stats Display */}
-              {showMealStats && selectedMeal && (
-                <div className="mt-6 p-4 bg-neutral-950 rounded-xl border border-neutral-800 animation-in slide-in-from-top-2 duration-300">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="font-bold text-white flex items-center gap-2 text-xs uppercase tracking-wider">
-                      Nutritional Data (Per Unit)
-                    </h3>
-                    <button
-                      onClick={() => setShowMealStats(false)}
-                      className="text-neutral-500 hover:text-white"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="w-4 h-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                  {(() => {
-                    const meal = meals.find((m) => m._id === selectedMeal);
-                    if (!meal) return null;
-                    return (
-                      <div className="grid grid-cols-4 gap-3">
-                        <div className="bg-neutral-900 p-3 rounded-lg border border-neutral-800 text-center">
-                          <span className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold block mb-1">
-                            Cal
-                          </span>
-                          <span className="font-bold text-white text-lg">
-                            {meal.macros.calories}
-                          </span>
-                        </div>
-                        <div className="bg-neutral-900 p-3 rounded-lg border border-neutral-800 text-center">
-                          <span className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold block mb-1">
-                            Pro
-                          </span>
-                          <span className="font-bold text-lime-500 text-lg">
-                            {meal.macros.protein}
-                          </span>
-                        </div>
-                        <div className="bg-neutral-900 p-3 rounded-lg border border-neutral-800 text-center">
-                          <span className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold block mb-1">
-                            Carb
-                          </span>
-                          <span className="font-bold text-amber-500 text-lg">
-                            {meal.macros.carbs}
-                          </span>
-                        </div>
-                        <div className="bg-neutral-900 p-3 rounded-lg border border-neutral-800 text-center">
-                          <span className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold block mb-1">
-                            Fat
-                          </span>
-                          <span className="font-bold text-purple-500 text-lg">
-                            {meal.macros.fats}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })()}
-                </div>
-              )}
-            </div>
-
-            {/* Breakfast */}
-            <MealSection
-              title="Breakfast"
-              meals={getMealsByType("breakfast")}
-              onUpdateQuantity={handleUpdateQuantity}
-              onDelete={handleDeleteEntry}
-            />
-
-            {/* Lunch */}
-            <MealSection
-              title="Lunch"
-              meals={getMealsByType("lunch")}
-              onUpdateQuantity={handleUpdateQuantity}
-              onDelete={handleDeleteEntry}
-            />
-
-            {/* Dinner */}
-            <MealSection
-              title="Dinner"
-              meals={getMealsByType("dinner")}
-              onUpdateQuantity={handleUpdateQuantity}
-              onDelete={handleDeleteEntry}
-            />
-          </div>
-        </div>
-      </div>
-    </AppShell>
-  );
-}
-
-function MealSection({ title, meals, onUpdateQuantity, onDelete }) {
-  const getMealIcon = (title) => {
-    switch (title.toLowerCase()) {
-      case "breakfast":
-        return "🌅";
-      case "lunch":
-        return "☀️";
-      case "dinner":
-        return "🌙";
-      default:
-        return "🍽️";
-    }
-  };
-
-  return (
-    <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 hover:border-neutral-700 transition-colors duration-300">
-      <div className="flex items-center justify-between mb-6 pb-4 border-b border-neutral-800">
-        <div className="flex items-center gap-4">
-          <span className="flex items-center justify-center w-12 h-12 bg-neutral-800 rounded-xl text-2xl border border-neutral-700 shadow-inner">
-            {getMealIcon(title)}
-          </span>
-          <div>
-            <h2 className="text-xl font-black text-white uppercase tracking-tighter">
-              {title}
-            </h2>
-            <p className="text-xs text-neutral-500 font-bold uppercase tracking-widest">
-              {meals.length} {meals.length === 1 ? "Item" : "Items"} Logged
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {meals.length === 0 ? (
-        <div className="text-center py-10 rounded-xl bg-neutral-950/50 border border-dashed border-neutral-800">
-          <p className="text-neutral-600 font-bold text-sm uppercase tracking-wider">
-            No meals logged
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {meals.map((entry) => {
-            return (
-              <div
-                key={entry._id}
-                className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-neutral-950 rounded-xl border border-neutral-800 hover:border-lime-500/30 transition-all duration-300 gap-4 group"
-              >
-                <div className="flex-1 w-full sm:w-auto">
-                  <div className="flex justify-between sm:justify-start items-start w-full">
-                    <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-bold text-white text-lg">
-                          {toTitleCase(entry.mealName)}
-                        </h3>
-                        <span className="px-2 py-0.5 bg-neutral-900 rounded-md text-[10px] text-neutral-400 font-bold border border-neutral-800 uppercase tracking-wider">
-                          {entry.meal?.servingSize || "1 unit"}
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap gap-3 text-xs">
-                        <span className="font-bold text-neutral-300">
-                          {entry.meal?.macros?.calories || 0}{" "}
-                          <span className="text-neutral-600">kcal</span>
-                        </span>
-                        <span className="w-px h-3 bg-neutral-800 my-auto"></span>
-                        <span className="font-bold text-lime-500">
-                          {entry.meal?.macros?.protein || 0}g P
-                        </span>
-                        <span className="font-bold text-amber-500">
-                          {entry.meal?.macros?.carbs || 0}g C
-                        </span>
-                        <span className="font-bold text-purple-500">
-                          {entry.meal?.macros?.fats || 0}g F
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-3 sm:pt-0 border-neutral-800 mt-2 sm:mt-0">
-                  <div className="flex items-center gap-1 bg-neutral-900 rounded-lg border border-neutral-800 p-1">
-                    <button
-                      onClick={() =>
-                        onUpdateQuantity(
-                          entry._id,
-                          Math.max(0.5, parseFloat(entry.quantity) - 0.5),
-                        )
-                      }
-                      className="w-8 h-8 rounded hover:bg-neutral-800 transition flex items-center justify-center font-bold text-neutral-400 cursor-pointer hover:text-white"
-                    >
-                      -
-                    </button>
-                    <input
-                      type="number"
-                      step="0.5"
-                      min="0.5"
-                      value={entry.quantity}
-                      onChange={(e) =>
-                        onUpdateQuantity(entry._id, parseFloat(e.target.value))
-                      }
-                      className="w-10 text-center text-sm font-bold text-white bg-transparent focus:outline-none"
-                    />
-                    <button
-                      onClick={() =>
-                        onUpdateQuantity(
-                          entry._id,
-                          parseFloat(entry.quantity) + 0.5,
-                        )
-                      }
-                      className="w-8 h-8 rounded hover:bg-neutral-800 transition flex items-center justify-center font-bold text-neutral-400 cursor-pointer hover:text-white"
-                    >
-                      +
-                    </button>
-                  </div>
-
-                  <button
-                    onClick={() => onDelete(entry._id)}
-                    className="p-2 text-neutral-600 hover:text-red-500 hover:bg-red-950/30 rounded-lg transition-all cursor-pointer"
-                    title="Delete entry"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-5 h-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      />
-                    </svg>
-                  </button>
-                </div>
+                  )}
+                </form>
               </div>
-            );
-          })}
+
+              {/* Meal sections */}
+              <MealSection title="Breakfast" meals={getMealsByType("breakfast")} onUpdateQuantity={handleUpdateQuantity} onDelete={handleDeleteEntry} />
+              <MealSection title="Lunch" meals={getMealsByType("lunch")} onUpdateQuantity={handleUpdateQuantity} onDelete={handleDeleteEntry} />
+              <MealSection title="Dinner" meals={getMealsByType("dinner")} onUpdateQuantity={handleUpdateQuantity} onDelete={handleDeleteEntry} />
+            </div>
+          </div>
         </div>
-      )}
-    </div>
+      </AppShell>
+    </>
   );
 }

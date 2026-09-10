@@ -1,42 +1,107 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useUserSettings } from "@/context/UserSettingsContext";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import AppShell from "@/components/AppShell";
+
+/* ------------------------------------------------------------------ */
+/* Meridian design system — same tokens as app/dashboard/meal.        */
+/* ------------------------------------------------------------------ */
+
+const MERIDIAN_CSS = `
+.mrd{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--t3:#6b6b76;--ac:#4f46e5;--ach:#4338ca;--red:#dc2626;color:var(--t1)}
+.mrd .m-card{background:#fff;border:1px solid var(--line);border-radius:12px}
+.mrd .m-card-h{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
+.mrd .m-card-h h3{font-size:13px;font-weight:700;color:var(--t1)}
+.mrd .m-h1{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.mrd .m-sub{color:var(--t3);font-size:13px;margin-top:4px}
+.mrd .m-crumb{font-size:12px;color:var(--t3)}
+.mrd .m-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px}
+.mrd .m-chip-ac{background:#eef2ff;color:var(--ac)}
+.mrd .m-num{font-variant-numeric:tabular-nums}
+.mrd .m-ic{width:16px;height:16px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.mrd .m-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:600;font-size:13px;border-radius:8px;padding:10px 16px;cursor:pointer;border:1px solid transparent;transition:.15s}
+.mrd .m-btn-primary{background:var(--ac);color:#fff}
+.mrd .m-btn-primary:hover{background:var(--ach)}
+.mrd .m-btn-primary:disabled{opacity:.6;cursor:wait}
+.mrd .m-field{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--t1);background:#fff;transition:.15s}
+.mrd .m-field:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px #4f46e51f}
+.mrd .m-row{display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid var(--line);font-size:13px}
+.mrd .m-row:last-child{border-bottom:0}
+.mrd .m-row:hover{background:#fafaf9}
+.mrd .m-rowicon{width:34px;height:34px;border-radius:9px;background:#fafaf9;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--t2);flex-shrink:0}
+.mrd .m-lbl{display:block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:5px}
+@keyframes mrd-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.mrd .m-in{animation:mrd-in .45s cubic-bezier(.22,1,.36,1) both}
+.mrd .m-in:nth-child(2){animation-delay:.06s}
+.mrd .m-in:nth-child(3){animation-delay:.12s}
+.mrd-toast{position:fixed;bottom:24px;right:24px;z-index:100;display:flex;flex-direction:column;gap:10px;width:calc(100% - 48px);max-width:380px}
+.mrd-toast-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:#fff;box-shadow:0 16px 40px -12px rgba(26,26,30,.22)}
+.mrd-toast-item.err{background:#fef2f2;border-color:#fecaca}
+.mrd-toast-item p{font-size:13px;color:var(--t1);flex:1;line-height:1.45}
+.mrd-toast-item.err p{color:#991b1b}
+.mrd-toast-dot{width:8px;height:8px;border-radius:50%;background:var(--ac);flex-shrink:0}
+.mrd-toast-item.err .mrd-toast-dot{background:var(--red)}
+.mrd-toast-x{flex-shrink:0;position:relative;color:var(--t3);background:none;border:0;cursor:pointer;padding:4px;border-radius:6px}
+.mrd-toast-x::after{content:"";position:absolute;inset:-6px}
+.mrd-toast-x:hover{color:var(--t1);background:#f1f1ee}
+@media (max-width:900px){.mrd .prf-layout{grid-template-columns:1fr !important}}
+`;
+
+const Icon = ({ d, className = "m-ic" }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    {d}
+  </svg>
+);
+
+const ICONS = {
+  gear: <><path d="M10.3 3.9l.15-.89a1 1 0 0 1 1.1-.84h.9a1 1 0 0 1 1.1.85l.15.89c.07.42.38.76.78.93.4.16.86.14 1.2-.11l.74-.53a1 1 0 0 1 1.45.12l.77.77c.39.39.44 1 .12 1.45l-.53.74c-.25.35-.27.8-.1 1.2.16.4.5.71.93.78l.89.15a1 1 0 0 1 .94 1.11v1.09a1 1 0 0 1-.94 1.11l-.89.15a1.13 1.13 0 0 0-.93.78c-.17.4-.14.85.1 1.2l.53.74a1 1 0 0 1-.12 1.45l-.77.77a1 1 0 0 1-1.45.12l-.74-.53a1.13 1.13 0 0 0-1.2-.1c-.4.16-.71.5-.78.93l-.15.89a1 1 0 0 1-1.1.94h-1.1a1 1 0 0 1-1.1-.94l-.15-.89a1.13 1.13 0 0 0-.78-.93 1.13 1.13 0 0 0-1.2.1l-.74.53a1 1 0 0 1-1.45-.12l-.77-.77a1 1 0 0 1-.12-1.45l.53-.74c.24-.35.27-.8.1-1.2a1.13 1.13 0 0 0-.93-.78l-.89-.15A1 1 0 0 1 3 12.45v-1.1a1 1 0 0 1 .94-1.1l.89-.15c.42-.07.77-.38.93-.78.17-.4.15-.85-.1-1.2l-.53-.74a1 1 0 0 1 .12-1.45l.77-.77a1 1 0 0 1 1.45-.12l.74.53c.34.25.8.27 1.2.1.4-.16.71-.5.78-.92z" /><circle cx="12" cy="12" r="3" /></>,
+  scroll: <path d="M8 9l4-4 4 4M8 15l4 4 4-4" />,
+  target: <><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1" /></>,
+  user: <><circle cx="12" cy="8" r="3.75" /><path d="M4.5 20.1a7.5 7.5 0 0 1 15 0" /></>,
+  mail: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></>,
+  logout: <path d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />,
+  check: <path d="M5 13l4 4L19 7" />,
+  pencil: <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />,
+  x: <path d="M18 6 6 18M6 6l12 12" />,
+};
+
+let toastSeq = 0;
+
+function ToastHost({ toasts, onDismiss }) {
+  return (
+    <div className="mrd-toast" aria-live="polite" role="status">
+      {toasts.map((t) => (
+        <div key={t.id} className={`mrd-toast-item ${t.tone === "error" ? "err" : ""}`}>
+          <span className="mrd-toast-dot"></span>
+          <p>{t.message}</p>
+          <button onClick={() => onDismiss(t.id)} aria-label="Dismiss notification" className="mrd-toast-x">
+            <Icon d={ICONS.x} className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function ProfilePage() {
   const { user, logout, checkAuth } = useAuth();
   const { smoothScroll, toggleSmoothScroll } = useUserSettings();
-  const [saved, setSaved] = useState(false);
   const [goalForm, setGoalForm] = useState(null);
+  const [editingGoals, setEditingGoals] = useState(false);
   const [savingGoals, setSavingGoals] = useState(false);
   const [goalsMessage, setGoalsMessage] = useState("");
-  const containerRef = useRef(null);
+  const [toasts, setToasts] = useState([]);
 
-  useGSAP(() => {
-    if (user) {
-      gsap.fromTo(
-        ".stagger-item",
-        { y: 30, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: "power3.out" }
-      );
-      
-      gsap.fromTo(
-        ".avatar-circle",
-        { scale: 0.5, opacity: 0, rotation: -15 },
-        { scale: 1, opacity: 1, rotation: 0, duration: 1.2, ease: "elastic.out(1, 0.5)", delay: 0.2 }
-      );
-      
-      gsap.fromTo(
-        ".glow-effect",
-        { opacity: 0 },
-        { opacity: 1, duration: 1.5, ease: "power2.inOut", delay: 0.5 }
-      );
+  const pushToast = (message, tone = "success", ttl = 4000) => {
+    const id = ++toastSeq;
+    setToasts((prev) => [...prev, { id, message, tone }]);
+    if (ttl > 0) {
+      setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), ttl);
     }
-  }, { scope: containerRef, dependencies: [user] });
+  };
+  const dismissToast = (id) => setToasts((prev) => prev.filter((t) => t.id !== id));
 
   if (!user) {
     return null;
@@ -62,8 +127,8 @@ export default function ProfilePage() {
       if (res.ok) {
         await checkAuth();
         setGoalForm(null);
-        setSaved(true);
-        setTimeout(() => setSaved(false), 2500);
+        setEditingGoals(false);
+        pushToast("Daily goals saved — your meal dashboard meters are updated.");
       } else {
         setGoalsMessage(data.error || "Failed to save goals");
       }
@@ -75,10 +140,22 @@ export default function ProfilePage() {
     }
   };
 
+  const startEditGoals = () => {
+    setGoalForm(goals);
+    setGoalsMessage("");
+    setEditingGoals(true);
+    requestAnimationFrame(() => document.getElementById("goal-calories")?.focus());
+  };
+
+  const cancelEditGoals = () => {
+    setGoalForm(null);
+    setGoalsMessage("");
+    setEditingGoals(false);
+  };
+
   const handleToggleScroll = (val) => {
     toggleSmoothScroll(val);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    pushToast(val ? "Smooth scrolling on." : "Native scrolling on.");
   };
 
   const initials = user.name
@@ -90,380 +167,230 @@ export default function ProfilePage() {
         .slice(0, 2)
     : "NG";
 
+  const goalFields = [
+    { field: "calories", label: "Calories", unit: "kcal", cls: "i-cal", dot: "#4f46e5" },
+    { field: "protein", label: "Protein", unit: "g", cls: "i-pro", dot: "#059669" },
+    { field: "carbs", label: "Carbs", unit: "g", cls: "i-car", dot: "#d97706" },
+    { field: "fats", label: "Fats", unit: "g", cls: "i-fat", dot: "#e11d48" },
+  ];
+
   return (
-    <AppShell>
-      {/* Background Effects */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-lime-500/5 blur-[120px] glow-effect"></div>
-        <div className="absolute top-[40%] -right-[10%] w-[40%] h-[40%] rounded-full bg-lime-500/5 blur-[100px] glow-effect"></div>
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay"></div>
-      </div>
+    <>
+      <style>{MERIDIAN_CSS}</style>
+      <ToastHost toasts={toasts} onDismiss={dismissToast} />
+      <AppShell>
+        <div className="mrd" style={{ maxWidth: 1080, margin: "0 auto", padding: "32px 28px 56px" }}>
+          {/* Page header */}
+          <div style={{ marginBottom: 24 }}>
+            <div className="m-h1">Profile</div>
+            <div className="m-sub">Account details, daily targets, and session.</div>
+          </div>
 
-      {/* Page Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
-        {/* Header */}
-        <div className="mb-12 stagger-item">
-          <p className="text-xs font-bold text-lime-500 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
-            <span className="w-8 h-px bg-lime-500/50"></span>
-            Account Management
-          </p>
-          <h2 className="text-5xl md:text-6xl font-black tracking-tighter text-white uppercase italic">
-            Your{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-lime-600 pr-1">
-              Profile
-            </span>
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Avatar Card */}
-          <div className="md:col-span-1 stagger-item">
-            <div className="bg-gradient-to-br from-neutral-900/90 to-neutral-950/90 backdrop-blur-md border border-neutral-800/80 hover:border-lime-500/40 transition-all duration-500 shadow-2xl hover:shadow-[0_0_40px_rgba(132,204,22,0.15)] rounded-[2rem] p-8 flex flex-col items-center gap-6 h-full group relative overflow-hidden">
-              {/* Subtle background element */}
-              <div className="absolute inset-0 bg-gradient-to-t from-lime-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
-              
-              {/* Avatar Circle */}
-              <div className="relative avatar-circle mt-4">
-                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-lime-400 via-lime-500 to-lime-600 flex items-center justify-center shadow-[0_0_40px_rgba(132,204,22,0.4)] ring-4 ring-lime-500/20 group-hover:ring-lime-500/50 transition-all duration-500 transform group-hover:scale-105 group-hover:-translate-y-2">
-                  <span className="text-5xl font-black text-neutral-950 tracking-tighter">
-                    {initials}
-                  </span>
+          <div className="prf-layout" style={{ display: "grid", gridTemplateColumns: "min(320px,100%) 1fr", gap: 24, alignItems: "start" }}>
+            {/* Identity card */}
+            <div className="m-card m-in" style={{ position: "sticky", top: 88 }}>
+              <div style={{ padding: "28px 22px", display: "flex", flexDirection: "column", alignItems: "center", gap: 14, borderBottom: "1px solid var(--line)" }}>
+                <div
+                  style={{
+                    width: 96, height: 96, borderRadius: "50%", background: "#eef2ff", color: "var(--ac)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 30, fontWeight: 700, letterSpacing: "-.02em",
+                    border: "1px solid #c7d2fe",
+                  }}
+                  aria-hidden="true"
+                >
+                  {initials}
                 </div>
-                <div className="absolute bottom-1 right-1 w-8 h-8 bg-lime-500 rounded-full border-4 border-neutral-900 flex items-center justify-center shadow-[0_0_15px_rgba(132,204,22,0.6)]">
-                  <div className="w-2.5 h-2.5 bg-neutral-950 rounded-full animate-pulse" />
+                <div style={{ textAlign: "center" }}>
+                  <p style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-.01em" }}>{user.name}</p>
+                  <p className="m-crumb" style={{ marginTop: 3, wordBreak: "break-all" }}>{user.email}</p>
                 </div>
+                <span className="m-chip m-chip-ac">
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--ac)" }}></span>
+                  MEMBER
+                </span>
               </div>
-
-              <div className="text-center z-10 mt-2">
-                <p className="text-2xl font-black text-white tracking-tight group-hover:text-lime-400 transition-colors duration-300">
-                  {user.name}
-                </p>
-                <p className="text-sm text-neutral-400 font-medium mt-1.5 break-all">
-                  {user.email}
-                </p>
-              </div>
-
-              <div className="w-full mt-auto pt-6 z-10">
-                <div className="flex items-center justify-between px-5 py-3.5 bg-neutral-950/80 rounded-2xl border border-neutral-800/80 group-hover:border-lime-500/30 transition-colors duration-300">
-                  <span className="text-xs font-bold text-neutral-500 uppercase tracking-widest">
-                    Role
-                  </span>
-                  <span className="text-xs font-black text-lime-500 uppercase tracking-widest bg-lime-500/10 px-4 py-1.5 rounded-full border border-lime-500/20 flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-lime-500 shadow-[0_0_8px_rgba(132,204,22,0.8)]"></span>
-                    Member
+              <div style={{ padding: "14px 18px" }}>
+                <div className="m-crumb" style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span>Meal dashboard meters</span>
+                  <span className="m-num" style={{ fontWeight: 600, color: "var(--t2)" }}>
+                    {(goalForm || goals).calories.toLocaleString()} kcal goal
                   </span>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Settings Cards */}
-          <div className="md:col-span-2 space-y-8">
-            {/* Preferences */}
-            <div className="stagger-item bg-gradient-to-br from-neutral-900/90 to-neutral-950/90 backdrop-blur-md border border-neutral-800/80 hover:border-lime-500/30 transition-all duration-500 shadow-2xl hover:shadow-[0_0_30px_rgba(132,204,22,0.1)] rounded-[2rem] p-8 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-lime-500/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/4 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
-              
-              <div className="flex items-center gap-4 mb-8 relative z-10">
-                <div className="bg-gradient-to-br from-lime-500/20 to-lime-500/5 p-3.5 rounded-2xl border border-lime-500/30 text-lime-500 shadow-[0_0_20px_rgba(132,204,22,0.15)] group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-6 h-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
+            {/* Settings stack */}
+            <div style={{ display: "grid", gap: 20 }}>
+              {/* Daily goals */}
+              <div className="m-card m-in">
+                <div className="m-card-h">
+                  <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ color: "var(--ac)" }}><Icon d={ICONS.target} /></span>
+                    Daily goals
+                  </h3>
+                  {editingGoals ? (
+                    <span className="m-chip m-chip-ac">EDITING</span>
+                  ) : (
+                    <button
+                      onClick={startEditGoals}
+                      className="m-btn"
+                      style={{ padding: "6px 12px", fontSize: 12, border: "1px solid var(--line)", color: "var(--t1)", background: "#fff", gap: 6 }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "#fafaf9")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "#fff")}
+                    >
+                      <Icon d={ICONS.pencil} className="w-3.5 h-3.5" />
+                      Edit
+                    </button>
+                  )}
                 </div>
-                <div>
-                  <h3 className="text-2xl font-black text-white uppercase tracking-tighter">
+                <div style={{ padding: 18 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                    {goalFields.map((item) => (
+                      <div key={item.field} className="m-field" style={{ display: "block", padding: "12px 14px", background: editingGoals ? "#fff" : "#fafaf9" }}>
+                        <label htmlFor={`goal-${item.field}`} className="m-lbl" style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                          <span style={{ width: 8, height: 8, borderRadius: 3, background: item.dot, display: "inline-block" }}></span>
+                          {item.label} ({item.unit})
+                        </label>
+                        {editingGoals ? (
+                          <input
+                            id={`goal-${item.field}`}
+                            type="number"
+                            min="1"
+                            max="10000"
+                            step="1"
+                            value={(goalForm || goals)[item.field] ?? ""}
+                            onChange={(e) => handleGoalChange(item.field, e.target.value)}
+                            className="m-num"
+                            style={{ width: "100%", border: 0, outline: "none", fontSize: 20, fontWeight: 700, color: "var(--t1)", background: "transparent", padding: 0 }}
+                          />
+                        ) : (
+                          <p className="m-num" style={{ fontSize: 20, fontWeight: 700, color: "var(--t1)" }} aria-live="off">
+                            {goals[item.field]}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {goalsMessage && (
+                    <p style={{ marginTop: 12, fontSize: 13, fontWeight: 600, color: "var(--red)" }}>{goalsMessage}</p>
+                  )}
+
+                  <div style={{ marginTop: 16, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+                    <p className="m-crumb">
+                      {editingGoals ? "Unsaved changes" : "All changes sync to your account"}
+                    </p>
+                    {editingGoals && (
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <button
+                          onClick={cancelEditGoals}
+                          disabled={savingGoals}
+                          className="m-btn"
+                          style={{ border: "1px solid var(--line)", color: "var(--t2)", background: "#fff" }}
+                        >
+                          Cancel
+                        </button>
+                        <button onClick={handleSaveGoals} disabled={savingGoals} className="m-btn m-btn-primary">
+                          <Icon d={ICONS.check} className="w-4 h-4" />
+                          {savingGoals ? "Saving…" : "Save goals"}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Preferences */}
+              <div className="m-card m-in">
+                <div className="m-card-h">
+                  <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ color: "var(--ac)" }}><Icon d={ICONS.gear} /></span>
                     Preferences
                   </h3>
-                  <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest mt-1">
-                    Customize your experience
-                  </p>
                 </div>
-              </div>
-
-              {/* Smooth Scroll Toggle */}
-              <div className="flex items-center justify-between p-6 bg-neutral-950/80 rounded-2xl border border-neutral-800 hover:border-lime-500/20 transition-all duration-300 relative z-10 shadow-inner group/toggle">
-                <div className="flex items-center gap-5">
-                  <div className="w-12 h-12 bg-neutral-900 group-hover/toggle:bg-neutral-800 rounded-xl flex items-center justify-center transition-colors border border-neutral-800 group-hover/toggle:border-neutral-700">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className={`w-6 h-6 transition-colors duration-300 ${smoothScroll ? 'text-lime-500' : 'text-neutral-400'}`}
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M8 9l4-4 4 4m0 6l-4 4-4-4"
-                      />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-base font-bold text-white">
-                      Smooth Scrolling
-                    </p>
-                    <p className="text-sm text-neutral-500 mt-1">
-                      {smoothScroll
-                        ? "Lenis smooth scroll is active"
-                        : "Native browser scrolling is active"}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Toggle Switch */}
-                <button
-                  id="smooth-scroll-toggle"
-                  onClick={() => handleToggleScroll(!smoothScroll)}
-                  className={`relative inline-flex h-8 w-16 flex-shrink-0 cursor-pointer rounded-full border-2 transition-all duration-500 ease-in-out focus:outline-none focus:ring-2 focus:ring-lime-500 focus:ring-offset-2 focus:ring-offset-neutral-950 ${
-                    smoothScroll
-                      ? "bg-lime-500 border-lime-500 shadow-[0_0_15px_rgba(132,204,22,0.4)]"
-                      : "bg-neutral-800 border-neutral-700 hover:border-neutral-600"
-                  }`}
-                  role="switch"
-                  aria-checked={smoothScroll}
-                  aria-label="Toggle smooth scrolling"
-                >
-                  <span
-                    className={`pointer-events-none inline-block h-7 w-7 transform rounded-full bg-white shadow-lg ring-0 transition-transform duration-500 ease-spring ${
-                      smoothScroll ? "translate-x-8" : "translate-x-0"
-                    }`}
-                  />
-                </button>
-              </div>
-
-              {/* Saved indicator */}
-              <div
-                className={`absolute bottom-8 right-8 flex items-center gap-2 text-xs font-black text-lime-500 uppercase tracking-widest transition-all duration-500 bg-lime-500/10 px-4 py-2 rounded-lg border border-lime-500/20 backdrop-blur-md ${
-                  saved ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-4 scale-95 pointer-events-none"
-                }`}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-4 h-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={3}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-                Saved
-              </div>
-            </div>
-
-            {/* Macro Goals */}
-            <div className="stagger-item bg-gradient-to-br from-neutral-900/90 to-neutral-950/90 backdrop-blur-md border border-neutral-800/80 hover:border-orange-500/20 transition-all duration-500 shadow-2xl hover:shadow-[0_0_30px_rgba(249,115,22,0.1)] rounded-[2rem] p-8 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/4 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
-
-              <div className="flex items-center gap-4 mb-8 relative z-10">
-                <div className="bg-gradient-to-br from-orange-500/20 to-orange-500/5 p-3.5 rounded-2xl border border-orange-500/30 text-orange-500 shadow-[0_0_20px_rgba(249,115,22,0.15)] group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-6 h-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M13 10V3L4 14h7v7l9-11h-7z"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-2xl font-black text-white uppercase tracking-tighter">
-                    Daily Goals
-                  </h3>
-                  <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest mt-1">
-                    Your personal macro targets
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 relative z-10">
-                {[
-                  { field: "calories", label: "Calories", unit: "kcal", color: "text-orange-500" },
-                  { field: "protein", label: "Protein", unit: "g", color: "text-blue-500" },
-                  { field: "carbs", label: "Carbs", unit: "g", color: "text-lime-500" },
-                  { field: "fats", label: "Fats", unit: "g", color: "text-purple-500" },
-                ].map((item) => (
-                  <div
-                    key={item.field}
-                    className="p-5 bg-neutral-950/80 rounded-2xl border border-neutral-800/80 focus-within:border-orange-500/50 transition-colors"
-                  >
-                    <label
-                      htmlFor={`goal-${item.field}`}
-                      className="text-[10px] font-black text-neutral-500 uppercase tracking-widest mb-2 block"
-                    >
-                      {item.label} ({item.unit})
-                    </label>
-                    <input
-                      id={`goal-${item.field}`}
-                      type="number"
-                      min="1"
-                      max="10000"
-                      step="1"
-                      value={(goalForm || goals)[item.field] ?? ""}
-                      onChange={(e) => handleGoalChange(item.field, e.target.value)}
-                      className={`w-full bg-transparent text-2xl font-black ${item.color} outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
-                    />
-                  </div>
-                ))}
-              </div>
-
-              {goalsMessage && (
-                <p className="mt-4 text-sm font-bold text-red-500 relative z-10">{goalsMessage}</p>
-              )}
-
-              <div className="mt-6 flex items-center justify-between relative z-10">
-                <p className="text-xs text-neutral-500">
-                  {goalForm ? "Unsaved changes" : "These targets power the meters on your meal dashboard"}
-                </p>
-                <button
-                  onClick={handleSaveGoals}
-                  disabled={savingGoals}
-                  className="px-6 py-3 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/40 hover:border-orange-500/70 rounded-xl text-orange-500 font-black uppercase tracking-widest text-xs transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  {savingGoals ? "Saving..." : "Save Goals"}
-                </button>
-              </div>
-            </div>
-
-            {/* Account Info */}
-            <div className="stagger-item bg-gradient-to-br from-neutral-900/90 to-neutral-950/90 backdrop-blur-md border border-neutral-800/80 hover:border-blue-500/20 transition-all duration-500 shadow-2xl hover:shadow-[0_0_30px_rgba(59,130,246,0.1)] rounded-[2rem] p-8 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/4 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
-
-              <div className="flex items-center gap-4 mb-8 relative z-10">
-                <div className="bg-gradient-to-br from-blue-500/20 to-blue-500/5 p-3.5 rounded-2xl border border-blue-500/30 text-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.15)] group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-6 h-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-2xl font-black text-white uppercase tracking-tighter">
-                    Account Info
-                  </h3>
-                  <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest mt-1">
-                    Your details
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-4 relative z-10">
-                {[
-                  { label: "Name", value: user.name, icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" },
-                  { label: "Email", value: user.email, icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" },
-                ].map((item, idx) => (
-                  <div
-                    key={item.label}
-                    className="flex items-center p-5 bg-neutral-950/80 rounded-2xl border border-neutral-800/80 hover:border-neutral-700 transition-colors group/item"
-                  >
-                    <div className="w-10 h-10 bg-neutral-900 rounded-lg flex items-center justify-center text-neutral-500 mr-5 group-hover/item:text-blue-400 group-hover/item:bg-blue-500/10 transition-colors border border-neutral-800 group-hover/item:border-blue-500/30">
-                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
-                       </svg>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-[10px] font-black text-neutral-500 uppercase tracking-widest mb-1">
-                        {item.label}
+                <div className="m-row" style={{ justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                    <span className="m-rowicon" style={{ color: smoothScroll ? "var(--ac)" : "var(--t2)" }}>
+                      <Icon d={ICONS.scroll} />
+                    </span>
+                    <div>
+                      <p style={{ fontWeight: 600, color: "var(--t1)" }}>Smooth scrolling</p>
+                      <p className="m-crumb" style={{ marginTop: 2 }}>
+                        {smoothScroll ? "Lenis smooth scroll is active" : "Native browser scrolling is active"}
                       </p>
-                      <p className="text-base font-bold text-white group-hover/item:text-blue-50 transition-colors">{item.value}</p>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Danger Zone */}
-            <div className="stagger-item bg-gradient-to-br from-neutral-900/90 to-neutral-950/90 backdrop-blur-md border border-red-900/20 hover:border-red-500/30 transition-all duration-500 shadow-2xl hover:shadow-[0_0_30px_rgba(239,68,68,0.15)] rounded-[2rem] p-8 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/4 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
-              
-              <div className="flex items-center gap-4 mb-8 relative z-10">
-                <div className="bg-gradient-to-br from-red-500/20 to-red-500/5 p-3.5 rounded-2xl border border-red-500/30 text-red-500 shadow-[0_0_20px_rgba(239,68,68,0.15)] group-hover:scale-110 transition-transform duration-300">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-6 h-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
+                  <button
+                    id="smooth-scroll-toggle"
+                    onClick={() => handleToggleScroll(!smoothScroll)}
+                    role="switch"
+                    aria-checked={smoothScroll}
+                    aria-label="Toggle smooth scrolling"
+                    className="m-num"
+                    style={{
+                      position: "relative", width: 46, height: 26, borderRadius: 999, border: "1px solid var(--line)",
+                      background: smoothScroll ? "var(--ac)" : "#e7e7e3", cursor: "pointer", transition: "background .2s ease", flexShrink: 0,
+                    }}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+                    <span
+                      style={{
+                        position: "absolute", top: 3, left: smoothScroll ? 23 : 3, width: 18, height: 18, borderRadius: "50%",
+                        background: "#fff", boxShadow: "0 1px 3px rgba(26,26,30,.25)", transition: "left .2s cubic-bezier(.22,1,.36,1)",
+                      }}
                     />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-2xl font-black text-white uppercase tracking-tighter">
-                    Session
-                  </h3>
-                  <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest mt-1">
-                    Manage your session
-                  </p>
+                  </button>
                 </div>
               </div>
 
-              <button
-                id="profile-logout-btn"
-                onClick={logout}
-                className="w-full flex items-center justify-center gap-3 px-6 py-5 bg-red-500/5 hover:bg-red-500/10 border border-red-500/30 hover:border-red-500/60 rounded-2xl text-red-500 font-black uppercase tracking-widest text-sm transition-all duration-300 relative overflow-hidden group/btn shadow-[0_0_15px_rgba(239,68,68,0.05)] hover:shadow-[0_0_20px_rgba(239,68,68,0.2)]"
-              >
-                <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-red-500/0 via-red-500/10 to-red-500/0 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000 ease-in-out"></span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2.5}
-                  stroke="currentColor"
-                  className="w-5 h-5 group-hover/btn:scale-110 group-hover/btn:-translate-y-0.5 transition-transform duration-300 relative z-10"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"
-                  />
-                </svg>
-                <span className="relative z-10">Sign Out</span>
-              </button>
+              {/* Account info */}
+              <div className="m-card m-in">
+                <div className="m-card-h">
+                  <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ color: "var(--ac)" }}><Icon d={ICONS.user} /></span>
+                    Account info
+                  </h3>
+                </div>
+                <div className="m-row">
+                  <span className="m-rowicon"><Icon d={ICONS.user} /></span>
+                  <div style={{ flex: 1 }}>
+                    <span className="m-lbl" style={{ marginBottom: 2 }}>Name</span>
+                    <p style={{ fontWeight: 600 }}>{user.name}</p>
+                  </div>
+                </div>
+                <div className="m-row">
+                  <span className="m-rowicon"><Icon d={ICONS.mail} /></span>
+                  <div style={{ flex: 1 }}>
+                    <span className="m-lbl" style={{ marginBottom: 2 }}>Email</span>
+                    <p style={{ fontWeight: 600 }}>{user.email}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Session */}
+              <div className="m-card m-in">
+                <div className="m-card-h">
+                  <h3>Session</h3>
+                  <span className="m-crumb">sign out of this device</span>
+                </div>
+                <div style={{ padding: 16 }}>
+                  <button
+                    id="profile-logout-btn"
+                    onClick={logout}
+                    className="m-btn"
+                    style={{ width: "100%", border: "1px solid #fecaca", color: "var(--red)", background: "#fff" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "#fef2f2")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "#fff")}
+                  >
+                    <Icon d={ICONS.logout} />
+                    Sign out
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </main>
-    </AppShell>
+      </AppShell>
+    </>
   );
 }

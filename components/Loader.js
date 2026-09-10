@@ -1,30 +1,24 @@
 "use client";
 
-export default function Loader({ text = "LOADING YOUR EXPERIENCE..." }) {
+/**
+ * Meridian loading state: light paper ground, single indigo spinner.
+ * Replaces the legacy dark/lime loader so navigation no longer flashes
+ * the old theme between the light shell and pages.
+ *
+ * Honors prefers-reduced-motion via the global rule in app/globals.css.
+ */
+export default function Loader({ text = "Loading" }) {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-neutral-950">
-      <div className="relative flex items-center justify-center">
-        <div className="absolute w-20 h-20 border border-lime-500/20 rounded-full animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite]"></div>
-        <div className="w-16 h-16 border-t-2 border-r-2 border-transparent border-t-lime-500 border-solid rounded-full animate-spin shadow-[0_0_15px_rgba(132,204,22,0.2)]"></div>
-        <div className="absolute w-10 h-10 bg-lime-500/5 rounded-full animate-pulse backdrop-blur-sm"></div>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={2}
-          stroke="currentColor"
-          className="w-6 h-6 absolute text-lime-500 animate-pulse drop-shadow-[0_0_8px_rgba(132,204,22,0.8)]"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"
-          />
-        </svg>
-      </div>
-      <div className="mt-8 text-[10px] font-black tracking-[0.4em] text-lime-500/70 uppercase animate-pulse">
+    <div
+      className="min-h-screen flex flex-col items-center justify-center bg-[#fafaf9] text-[#1a1a1e]"
+      role="status"
+      aria-live="polite"
+    >
+      <div className="w-8 h-8 rounded-full border-[3px] border-[#e7e7e3] border-t-[#4f46e5] animate-spin" />
+      <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6b76]">
         {text}
-      </div>
+      </p>
+      <span className="sr-only">Loading content</span>
     </div>
   );
 }

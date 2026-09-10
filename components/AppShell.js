@@ -7,6 +7,9 @@ import { useAuth } from "@/context/AuthContext";
 /**
  * Shared application shell: top navigation + content container.
  *
+ * Restyled in the Meridian design system: light paper chrome, ink wordmark,
+ * indigo accent — matching app/dashboard/meal/page.js.
+ *
  * Variants:
  *  - "dashboard" — full nav with Meal/Gym/Profile tab switcher
  *  - "admin"     — compact nav with an Admin label and logout
@@ -43,7 +46,7 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
       viewBox="0 0 24 24"
       strokeWidth={2}
       stroke="currentColor"
-      className="w-6 h-6"
+      className="w-5 h-5"
     >
       <path
         strokeLinecap="round"
@@ -54,22 +57,22 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
   );
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white font-sans selection:bg-lime-500 selection:text-black">
+    <div className="app-shell min-h-screen bg-[#fafaf9] text-[#1a1a1e] font-sans selection:bg-[#4f46e5] selection:text-white">
       <nav
-        className={`${isAdmin ? "sticky" : "fixed top-0 w-full"} top-0 z-50 bg-neutral-950/80 backdrop-blur-md border-b border-neutral-800`}
+        className={`${isAdmin ? "sticky" : "fixed top-0 w-full"} top-0 z-50 bg-white/90 backdrop-blur-md border-b border-[#e7e7e3]`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
+          <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-lime-500 rounded-lg flex items-center justify-center shadow-[0_0_10px_rgba(132,204,22,0.3)]">
+              <div className="w-8 h-8 bg-[#4f46e5] rounded-lg flex items-center justify-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
                   strokeWidth={2.5}
-                  stroke="black"
-                  className="w-6 h-6"
+                  stroke="white"
+                  className="w-4.5 h-4.5"
                 >
                   <path
                     strokeLinecap="round"
@@ -80,9 +83,9 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
               </div>
               <div>
                 <h1
-                  className={`text-2xl font-black tracking-tighter uppercase ${isAdmin ? "hidden sm:block" : ""}`}
+                  className={`text-xl font-extrabold tracking-tight ${isAdmin ? "hidden sm:block" : ""}`}
                 >
-                  Nutri<span className={`${isAdmin ? "ml-0.5 " : ""}text-lime-500`}>Gain</span>
+                  Nutri<span className="text-[#4f46e5]">Gain</span>
                 </h1>
                 {isAdmin && (
                   <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-[0.2em] leading-none">
@@ -93,22 +96,23 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
             </div>
 
             {/* Desktop Actions */}
-            <div className="hidden md:flex items-center gap-6">
+            <div className="hidden md:flex items-center gap-5">
               {navSlot && <div className="flex items-center gap-4">{navSlot}</div>}
 
               {!isAdmin && (
                 <>
-                  <div className="h-6 w-px bg-neutral-800"></div>
+                  <div className="h-6 w-px bg-[#e7e7e3]"></div>
 
-                  <div className="flex gap-1 bg-neutral-900 p-1 rounded-xl border border-neutral-800">
+                  <div className="flex gap-1 bg-[#f1f1ee] p-1 rounded-[10px]">
                     {dashboardTabs.map((tab) => (
                       <button
                         key={tab.href}
                         onClick={() => navigate(tab.href)}
-                        className={`px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all cursor-pointer uppercase tracking-wide ${
+                        aria-current={pathname === tab.href ? "page" : undefined}
+                        className={`px-3.5 py-1.5 rounded-lg font-semibold text-[13px] flex items-center gap-2 transition-all cursor-pointer ${
                           pathname === tab.href
-                            ? "bg-lime-500 text-black shadow-lg shadow-lime-500/20"
-                            : "text-neutral-400 hover:text-white hover:bg-neutral-800"
+                            ? "bg-[#4f46e5] text-white"
+                            : "text-[#5f5f68] hover:text-[#1a1a1e] hover:bg-white"
                         }`}
                       >
                         {tab.label}
@@ -118,17 +122,18 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
                 </>
               )}
 
-              <div className="flex items-center gap-4 pl-2">
+              <div className="flex items-center gap-3">
                 <div className="text-right hidden sm:block">
-                  <p className="text-xs text-neutral-400 uppercase tracking-widest font-bold">
-                    {isAdmin ? "Admin" : "Logged in as"}
+                  <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">
+                    {isAdmin ? "Admin" : "Signed in"}
                   </p>
-                  <p className="text-sm font-bold text-white">{user?.name}</p>
+                  <p className="text-[13px] font-semibold text-[#1a1a1e] leading-tight">{user?.name}</p>
                 </div>
                 <button
                   onClick={logout}
-                  className="text-neutral-500 hover:text-red-500 transition-colors cursor-pointer"
-                  title="Logout"
+                  className="text-neutral-500 hover:text-red-600 transition-colors cursor-pointer p-1.5 rounded-lg"
+                  aria-label="Log out"
+                  title="Log out"
                 >
                   {logoutIcon}
                 </button>
@@ -139,8 +144,10 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
             <div className="flex md:hidden items-center">
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 text-white hover:bg-neutral-800 rounded-lg transition cursor-pointer"
-                aria-label="Toggle menu"
+                className="p-2 text-[#1a1a1e] hover:bg-[#f1f1ee] rounded-lg transition cursor-pointer"
+                aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+                aria-expanded={mobileMenuOpen}
+                aria-controls="mobile-menu"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   {mobileMenuOpen ? (
@@ -166,14 +173,14 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-b border-neutral-800 bg-neutral-900">
+          <div id="mobile-menu" className="md:hidden border-b border-[#e7e7e3] bg-white">
             <div className="p-4 space-y-4">
               <div className="flex items-center gap-3 px-2 mb-4">
                 <div>
-                  <p className="text-xs text-neutral-400 uppercase tracking-widest font-bold">
-                    User
+                  <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">
+                    Signed in
                   </p>
-                  <p className="text-lg font-bold text-white">{user?.name}</p>
+                  <p className="text-lg font-bold text-[#1a1a1e]">{user?.name}</p>
                 </div>
               </div>
 
@@ -185,10 +192,10 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
                     <button
                       key={tab.href}
                       onClick={() => navigate(tab.href)}
-                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-bold uppercase tracking-wider ${
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-semibold ${
                         pathname === tab.href
-                          ? "bg-neutral-800 text-white"
-                          : "text-neutral-400 hover:bg-neutral-800"
+                          ? "bg-[#eef2ff] text-[#4f46e5]"
+                          : "text-[#5f5f68] hover:bg-[#f1f1ee]"
                       }`}
                     >
                       {tab.label === "Meal"
@@ -197,7 +204,7 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
                           ? "Gym Tracker"
                           : tab.label}
                       {pathname === tab.href && (
-                        <span className="text-lime-500">●</span>
+                        <span className="text-[#4f46e5]">●</span>
                       )}
                     </button>
                   ))}
@@ -208,20 +215,20 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
                 <div className="space-y-2">
                   <button
                     onClick={() => navigate("/admin")}
-                    className="w-full flex items-center justify-between px-4 py-3 text-neutral-400 hover:bg-neutral-800 rounded-xl font-bold uppercase tracking-wider"
+                    className="w-full flex items-center justify-between px-4 py-3 text-[#5f5f68] hover:bg-[#f1f1ee] rounded-xl font-semibold"
                   >
                     Admin Panel
                   </button>
                 </div>
               )}
 
-              <div className="pt-3 mt-3 border-t border-neutral-800">
+              <div className="pt-3 mt-3 border-t border-[#e7e7e3]">
                 <button
                   onClick={() => {
                     logout();
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-900/20 rounded-xl font-bold uppercase tracking-wider"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-semibold"
                 >
                   Logout
                 </button>
@@ -231,7 +238,7 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
         )}
       </nav>
 
-      <div className={isAdmin ? "" : "pt-20"}>{children}</div>
+      <div className={isAdmin ? "" : "pt-16"}>{children}</div>
     </div>
   );
 }
