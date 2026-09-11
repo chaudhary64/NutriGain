@@ -1,10 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTheme } from "@/context/ThemeContext";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+
+gsap.registerPlugin(useGSAP);
 
 const AUTH_CSS = `
 /* ============ Meridian Auth ============ */
@@ -77,6 +81,22 @@ export default function LoginPage() {
   const { login, user, loading: authLoading } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const router = useRouter();
+  const root = useRef(null);
+
+  // Entrance sequence: photo fades/scales in → brand copy rises → form rises.
+  useGSAP(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const tl = gsap.timeline({ defaults: { ease: "power2.out" } });
+    tl.fromTo(".auth-bimg", { opacity: 0, scale: 1.04 }, { opacity: 1, scale: 1, duration: 0.9 })
+      .fromTo(".auth-bshade", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0)
+      .fromTo(
+        ".auth-brand-top, .auth-btitle, .auth-bsign",
+        { opacity: 0, y: 14 },
+        { opacity: 1, y: 0, duration: 0.5, stagger: 0.08 },
+        "-=0.4"
+      )
+      .fromTo(".auth-card", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.55 }, "-=0.45");
+  }, { scope: root, dependencies: [] });
 
   // Redirect if already logged in
   useEffect(() => {
@@ -109,7 +129,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="auth">
+    <div className="auth" ref={root}>
       <style>{AUTH_CSS}</style>
       <div className="auth-split">
         {/* Form pane — follows the user's theme */}

@@ -1,9 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import { useTheme } from "@/context/ThemeContext";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+
+gsap.registerPlugin(useGSAP);
 
 const AUTH_CSS = `
 /* ============ Meridian Auth (shared) ============ */
@@ -75,6 +79,22 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const root = useRef(null);
+
+  // Entrance sequence: photo fades/scales in → brand copy rises → form rises.
+  useGSAP(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const tl = gsap.timeline({ defaults: { ease: "power2.out" } });
+    tl.fromTo(".auth-bimg", { opacity: 0, scale: 1.04 }, { opacity: 1, scale: 1, duration: 0.9 })
+      .fromTo(".auth-bshade", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0)
+      .fromTo(
+        ".auth-brand-top, .auth-btitle, .auth-bsign",
+ { opacity: 0, y: 14 },
+        { opacity: 1, y: 0, duration: 0.5, stagger: 0.08 },
+        "-=0.45"
+      )
+      .fromTo(".auth-card", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.55 }, "-=0.45");
+  }, { scope: root, dependencies: [] });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -108,7 +128,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="auth">
+    <div className="auth" ref={root}>
       <style>{AUTH_CSS}</style>
       <div className="auth-split">
         {/* Form pane — follows the user's theme */}
@@ -221,7 +241,7 @@ export default function RegisterPage() {
         <aside className="auth-brand" aria-hidden="true">
           <img
             className="auth-bimg"
-            src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=1600&auto=format&fit=crop"
+            src="https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=1600&auto=format&fit=crop"
             alt=""
             draggable={false}
           />
