@@ -45,7 +45,8 @@ html[data-theme="dark"] .mrd{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b
 .mrd .m-over{color:var(--red)!important}
 .mrd .m-ghost{position:absolute;top:0;left:0;height:100%;width:100%;transform-origin:left center;border-radius:999px;background:#4f46e533;transition:transform .3s ease}
 /* banner */
-.mrd .m-banner{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 18px;font-size:13px;color:var(--t2)}
+.mrd .m-banner{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 18px;font-size:13px;color:var(--t2)}
+.mrd .m-banner > span:nth-of-type(2){flex:1 1 220px;min-width:0}
 .mrd .m-banner b{font-weight:700;color:var(--t1)}
 .mrd .m-tag{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--ac);background:var(--ac-soft);border-radius:5px;padding:3px 8px;white-space:nowrap}
 /* entries */

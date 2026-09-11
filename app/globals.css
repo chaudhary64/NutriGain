@@ -34,30 +34,32 @@ h6 {
   font-family: inherit;
 }
 
-/* Custom Global Scrollbar — Meridian neutrals */
+/* Custom Global Scrollbar — Meridian neutrals, theme-driven via tokens.
+   Scoped rules (e.g. .m-in's thin scrollbar) win by specificity, no !important wars. */
+html {
+  --sb-thumb: #c5c5c0;
+  --sb-thumb-hover: #a1a1aa;
+  --sb-track: #ececea;
+  scrollbar-width: thin;
+  scrollbar-color: var(--sb-thumb) var(--sb-track);
+}
+
 ::-webkit-scrollbar {
-  width: 8px !important;
-  height: 8px !important;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #ececea !important;
+  background: var(--sb-track);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c5c5c0 !important;
+  background: var(--sb-thumb);
   border-radius: 4px;
-  transition: background 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a1a1aa !important;
-}
-
-/* Firefox compatibility */
-html {
-  scrollbar-width: thin !important;
-  scrollbar-color: #c5c5c0 #ececea !important;
+  background: var(--sb-thumb-hover);
 }
 
 /* App shell chrome tokens (theme-aware) */
@@ -144,12 +146,11 @@ html[data-theme="dark"] {
   color-scheme: dark;
   --background: #111113;
   --foreground: #f0f0f2;
-  scrollbar-color: #3a3a42 #161619 !important;
+  --sb-thumb: #3a3a42;
+  --sb-thumb-hover: #4a4a54;
+  --sb-track: #161619;
   background: #111113;
 }
-html[data-theme="dark"]::-webkit-scrollbar-track { background: #161619 !important; }
-html[data-theme="dark"]::-webkit-scrollbar-thumb { background: #3a3a42 !important; }
-html[data-theme="dark"]::-webkit-scrollbar-thumb:hover { background: #4a4a54 !important; }
 
 /* Visible keyboard focus — WCAG 2.4.7 (global: shell + all pages) */
 button:focus-visible,
