@@ -12,6 +12,155 @@ const toTitleCase = (str) => {
   return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
+/* ============ Meridian Admin — theme tokens (mirror of the dashboard systems) ============ */
+const ADM_CSS = `
+.adm *{box-sizing:border-box}
+.adm{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--t3:#6b6b76;--ac:#4f46e5;--ach:#4338ca;--red:#dc2626;--paper:#fafaf9;--card:#fff;--sunken:#f1f1ee;--track:#efefec;--on-ac:#fff;--ac-soft:#eef2ff;--ac-soft-b:#c7d2fe;--green:#047857;--green-soft:#ecfdf5;--red-soft:#fef2f2;--red-soft-b:#fecaca;--pro:#7c3aed;--pro-soft:#f5f3ff;--car:#b45309;--car-soft:#fffbeb;color:var(--t1);font-family:inherit}
+html[data-theme="dark"] .adm{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b96;--ac:#818cf8;--ach:#a5b4fc;--red:#f87171;--paper:#111113;--card:#1c1c1f;--sunken:#26262b;--track:#2e2e34;--on-ac:#111113;--ac-soft:#232347;--ac-soft-b:#3730a3;--green:#34d399;--green-soft:#0d2a22;--red-soft:#2b1b1b;--red-soft-b:#5c2b2b;--pro:#a78bfa;--pro-soft:#2b2140;--car:#fbbf24;--car-soft:#3a2d10}
+.adm-head{margin-bottom:28px}
+.adm-crumb{font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--t3);text-transform:uppercase;margin-bottom:6px}
+.adm-h1{font-size:26px;font-weight:800;letter-spacing:-.02em;color:var(--t1);margin:0}
+.adm-sub{font-size:13px;font-weight:500;color:var(--t2);margin-top:4px}
+/* tab switcher */
+.adm-tabs{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:32px}
+@media(min-width:640px){.adm-tabs{grid-template-columns:repeat(3,1fr)}}
+.adm-tab{position:relative;display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--card);border:1px solid var(--line);border-radius:12px;text-align:left;cursor:pointer;transition:border-color .15s ease,background .15s ease;font:inherit}
+.adm-tab:hover{background:var(--sunken)}
+.adm-tab:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.adm-tab.on{border-color:var(--ac);background:var(--card)}
+.adm-tab.on::before{content:"";position:absolute;left:-1px;top:12px;bottom:12px;width:3px;border-radius:3px;background:var(--ac)}
+.adm-tab-ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--sunken);color:var(--t2);flex-shrink:0;transition:background .15s ease,color .15s ease}
+.adm-tab.on .adm-tab-ico{background:var(--ac-soft);color:var(--ac)}
+.adm-tab-name{font-size:13px;font-weight:700;color:var(--t1)}
+.adm-tab.on .adm-tab-name{color:var(--ac)}
+.adm-tab-sub{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-top:2px}
+/* buttons */
+.adm-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:42px;padding:0 20px;background:var(--ac);color:var(--on-ac);border:none;border-radius:10px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:background .15s ease,transform .06s ease}
+.adm-btn:hover{background:var(--ach)}
+.adm-btn:active{transform:translateY(1px)}
+.adm-btn:disabled{opacity:.55;cursor:wait}
+.adm-btn:focus-visible,.adm-ghost:focus-visible,.adm-icon:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.adm-ghost{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:42px;padding:0 20px;background:transparent;color:var(--t2);border:1px solid var(--line);border-radius:10px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:background .15s ease,color .15s ease}
+.adm-ghost:hover{background:var(--sunken);color:var(--t1)}
+.adm-icon{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--t2);cursor:pointer;transition:background .15s ease,color .15s ease,border-color .15s ease}
+.adm-icon:hover{background:var(--sunken);color:var(--t1)}
+.adm-icon.danger:hover{background:var(--red-soft);border-color:var(--red-soft-b);color:var(--red)}
+/* cards & forms */
+.adm-card{background:var(--card);border:1px solid var(--line);border-radius:14px}
+.adm-form{padding:22px}
+.adm-form h3{font-size:16px;font-weight:800;letter-spacing:-.01em;color:var(--t1);margin:0}
+.adm-lbl{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:7px}
+.adm-in{width:100%;height:44px;padding:0 13px;background:var(--card);border:1px solid var(--line);border-radius:10px;font:inherit;font-size:14px;font-weight:500;color:var(--t1);outline:none;transition:border-color .15s ease,box-shadow .15s ease}
+.adm-in::placeholder{color:var(--t3);opacity:.7}
+.adm-in:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--ac-soft)}
+select.adm-in{appearance:none;cursor:pointer}
+.adm-dd{position:absolute;z-index:40;width:100%;margin-top:6px;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.14);max-height:240px;overflow:auto}
+.adm-dd button{display:block;width:100%;text-align:left;padding:11px 15px;background:transparent;border:none;border-bottom:1px solid var(--line);font:inherit;font-size:13px;font-weight:600;color:var(--t1);cursor:pointer}
+.adm-dd button:last-child{border-bottom:none}
+.adm-dd button:hover{background:var(--sunken)}
+/* table */
+.adm-tblwrap{overflow-x:auto}
+.adm table{width:100%;border-collapse:collapse;font-size:13px}
+.adm th{padding:13px 16px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);background:var(--sunken);border-bottom:1px solid var(--line);white-space:nowrap}
+.adm td{padding:13px 16px;border-top:1px solid var(--line);color:var(--t2);vertical-align:middle}
+.adm tbody tr{transition:background .12s ease}
+.adm tbody tr:hover{background:var(--sunken)}
+.adm .tname{font-weight:600;color:var(--t1)}
+.adm .tnum{font-variant-numeric:tabular-nums;font-weight:600;color:var(--t1)}
+.adm .tunit{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin-left:4px}
+.adm-chip{display:inline-flex;align-items:center;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
+.adm-chip.pro{background:var(--pro-soft);color:var(--pro)}
+.adm-chip.car{background:var(--car-soft);color:var(--car)}
+.adm-chip.fat{background:var(--green-soft);color:var(--green)}
+.adm-cat{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;background:var(--sunken);color:var(--t2);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.adm-cat i{width:6px;height:6px;border-radius:50%;background:var(--t3)}
+.adm-cat.breakfast i{background:var(--car)}
+.adm-cat.lunch i{background:var(--green)}
+.adm-cat.dinner i{background:var(--pro)}
+.adm-cat.general i{background:var(--ac)}
+/* section headers */
+.adm-sec{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:34px 0 18px}
+.adm-sec h2{font-size:17px;font-weight:800;letter-spacing:-.01em;color:var(--t1);margin:0}
+.adm-sec p{font-size:12px;font-weight:500;color:var(--t2);margin:2px 0 0}
+/* schedule grid */
+.adm-days{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(min-width:640px){.adm-days{grid-template-columns:repeat(4,1fr)}}
+@media(min-width:1024px){.adm-days{grid-template-columns:repeat(7,1fr)}}
+.adm-day{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.adm-day-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.adm-day-h span{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
+.adm-day-h button{display:inline-flex;border:none;background:transparent;color:var(--t3);cursor:pointer;padding:4px;border-radius:6px}
+.adm-day-h button:hover{color:var(--ac);background:var(--ac-soft)}
+.adm-day-chip{display:block;padding:6px 9px;border-radius:7px;background:var(--sunken);color:var(--t2);font-size:11px;font-weight:600;margin-bottom:5px}
+.adm-day-rest{padding:10px 0;text-align:center;font-size:11px;font-weight:600;color:var(--t3)}
+/* checkbox cards */
+.adm-check{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--card);border:1px solid var(--line);border-radius:10px;cursor:pointer;transition:border-color .15s ease,background .15s ease;font-size:13px;font-weight:600;color:var(--t2)}
+.adm-check:hover{background:var(--sunken)}
+.adm-check.on{border-color:var(--ac);background:var(--ac-soft);color:var(--ac)}
+.adm-check input{accent-color:var(--ac);width:15px;height:15px}
+/* exercise group cards */
+.adm-eg{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.adm-eg-h{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line);background:var(--sunken)}
+.adm-eg-h h4{font-size:14px;font-weight:800;letter-spacing:-.01em;color:var(--t1);margin:0}
+.adm-eg-h .count{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ac);background:var(--ac-soft);border-radius:999px;padding:3px 9px}
+.adm-eg table td:first-child{color:var(--t1);font-weight:600}
+.adm-type{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--sunken);color:var(--t2)}
+.adm-type i{width:6px;height:6px;border-radius:50%;background:var(--t3)}
+.adm-type.compound{background:var(--ac-soft);color:var(--ac)}
+.adm-type.compound i{background:var(--ac)}
+.adm-empty{padding:34px 16px;text-align:center;font-size:13px;font-weight:500;color:var(--t3);background:var(--sunken)}
+/* users */
+.adm-pill{display:inline-flex;align-items:center;gap:8px;padding:6px 13px;border-radius:999px;background:var(--ac-soft);color:var(--ac);font-size:12px;font-weight:700}
+.adm-user{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;cursor:pointer;transition:border-color .15s ease,transform .15s ease,box-shadow .15s ease}
+.adm-user:hover{border-color:var(--ac-soft-b);transform:translateY(-2px);box-shadow:0 10px 26px rgba(0,0,0,.08)}
+.adm-ava{width:50px;height:50px;border-radius:12px;background:var(--sunken);color:var(--ac);display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:800;flex-shrink:0}
+.adm-mini{background:var(--sunken);border-radius:10px;padding:11px;text-align:center}
+.adm-mini span{display:block;font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--t3)}
+.adm-mini b{display:block;font-size:17px;font-weight:800;color:var(--t1);margin-top:3px;font-variant-numeric:tabular-nums}
+.adm-mbar{display:flex;height:7px;border-radius:999px;overflow:hidden;background:var(--track);margin:9px 0}
+.adm-mbar i{height:100%}
+.adm-mrow{display:flex;justify-content:space-between;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+/* modal */
+.adm-overlay{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(10,10,12,.55);backdrop-filter:blur(4px)}
+.adm-modal{width:100%;max-width:520px;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.25)}
+.adm-modal-h{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 22px;border-bottom:1px solid var(--line)}
+.adm-modal-h h3{font-size:16px;font-weight:800;color:var(--t1);margin:0}
+.adm-modal-h p{font-size:12px;font-weight:500;color:var(--t2);margin:3px 0 0}
+.adm-modal-b{padding:20px 22px;max-height:56vh;overflow-y:auto}
+.adm-modal-f{display:flex;justify-content:flex-end;gap:10px;padding:16px 22px;border-top:1px solid var(--line);background:var(--sunken)}
+.adm-dayrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:11px;margin-bottom:10px}
+.adm-dayrow>span{font-size:13px;font-weight:600;color:var(--t1)}
+.adm-seg{display:flex;gap:4px;background:var(--sunken);border-radius:9px;padding:4px}
+.adm-seg button{padding:6px 13px;border:none;border-radius:6px;font:inherit;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:transparent;color:var(--t2);cursor:pointer}
+.adm-seg button.on{background:var(--ac);color:var(--on-ac)}
+@media(prefers-reduced-motion:reduce){.adm *{transition:none!important;animation:none!important}}
+`;
+
+/* Meridian stroke icons */
+const I = {
+  utensils: (
+    <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" /><path d="M7 2v20" /><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" /></svg>
+  ),
+  dumbbell: (
+    <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
+  ),
+  users: (
+    <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+  ),
+  pencil: (
+    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" /></svg>
+  ),
+  trash: (
+    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
+  ),
+  x: (
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 18L18 6M6 6l12 12" /></svg>
+  ),
+  calendar: (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M8 2v4" /><path d="M16 2v4" /><rect width="18" height="18" x="3" y="4" rx="2" /><path d="M3 10h18" /></svg>
+  ),
+};
+
 export default function AdminPage() {
   const { user } = useAuth();
   const router = useRouter();
@@ -87,69 +236,13 @@ export default function AdminPage() {
 
   // Gym workout state
   const [workoutSchedule, setWorkoutSchedule] = useState([
-    {
-      day: "Monday",
-      muscleGroups: [],
-      colorClasses: {
-        bg: "bg-blue-50",
-        border: "border-blue-200",
-        text: "text-blue-800",
-      },
-    },
-    {
-      day: "Tuesday",
-      muscleGroups: [],
-      colorClasses: {
-        bg: "bg-green-50",
-        border: "border-green-200",
-        text: "text-green-800",
-      },
-    },
-    {
-      day: "Wednesday",
-      muscleGroups: [],
-      colorClasses: {
-        bg: "bg-purple-50",
-        border: "border-purple-200",
-        text: "text-purple-800",
-      },
-    },
-    {
-      day: "Thursday",
-      muscleGroups: [],
-      colorClasses: {
-        bg: "bg-orange-50",
-        border: "border-orange-200",
-        text: "text-orange-800",
-      },
-    },
-    {
-      day: "Friday",
-      muscleGroups: [],
-      colorClasses: {
-        bg: "bg-pink-50",
-        border: "border-pink-200",
-        text: "text-pink-800",
-      },
-    },
-    {
-      day: "Saturday",
-      muscleGroups: [],
-      colorClasses: {
-        bg: "bg-teal-50",
-        border: "border-teal-200",
-        text: "text-teal-800",
-      },
-    },
-    {
-      day: "Sunday",
-      muscleGroups: [],
-      colorClasses: {
-        bg: "bg-gray-50",
-        border: "border-gray-200",
-        text: "text-gray-800",
-      },
-    },
+    { day: "Monday", muscleGroups: [] },
+    { day: "Tuesday", muscleGroups: [] },
+    { day: "Wednesday", muscleGroups: [] },
+    { day: "Thursday", muscleGroups: [] },
+    { day: "Friday", muscleGroups: [] },
+    { day: "Saturday", muscleGroups: [] },
+    { day: "Sunday", muscleGroups: [] },
   ]);
 
   const [exercises, setExercises] = useState([
@@ -271,44 +364,6 @@ export default function AdminPage() {
       const scheduleRes = await fetch("/api/workout-schedule");
       const scheduleData = await scheduleRes.json();
       if (scheduleData && Array.isArray(scheduleData)) {
-        // Map schedule data with color classes
-        const colorMap = {
-          Monday: {
-            bg: "bg-blue-50",
-            border: "border-blue-200",
-            text: "text-blue-800",
-          },
-          Tuesday: {
-            bg: "bg-green-50",
-            border: "border-green-200",
-            text: "text-green-800",
-          },
-          Wednesday: {
-            bg: "bg-purple-50",
-            border: "border-purple-200",
-            text: "text-purple-800",
-          },
-          Thursday: {
-            bg: "bg-orange-50",
-            border: "border-orange-200",
-            text: "text-orange-800",
-          },
-          Friday: {
-            bg: "bg-pink-50",
-            border: "border-pink-200",
-            text: "text-pink-800",
-          },
-          Saturday: {
-            bg: "bg-teal-50",
-            border: "border-teal-200",
-            text: "text-teal-800",
-          },
-          Sunday: {
-            bg: "bg-gray-50",
-            border: "border-gray-200",
-            text: "text-gray-800",
-          },
-        };
         const validMuscleGroups = [
           "Abs",
           "Back",
@@ -335,7 +390,6 @@ export default function AdminPage() {
             muscleGroups: (s.muscleGroups || []).filter((g) =>
               validMuscleGroups.includes(g),
             ),
-            colorClasses: colorMap[s.day] || colorMap.Sunday,
           }))
           .sort((a, b) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day));
         setWorkoutSchedule(sortedSchedule);
@@ -580,247 +634,126 @@ export default function AdminPage() {
 
   return (
     <AppShell variant="admin">
+      <style>{ADM_CSS}</style>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="adm max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page header */}
+        <div className="adm-head">
+          <p className="adm-crumb">Admin</p>
+          <h1 className="adm-h1">Console</h1>
+          <p className="adm-sub">Manage the meal database, exercise library, weekly split, and users.</p>
+        </div>
+
         {/* Tabs */}
-        {/* Tabs / Master Controls */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-10">
-          <button
-            onClick={() => setActiveTab("meals")}
-            className={`
-              group relative flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 overflow-hidden text-left cursor-pointer
-              ${activeTab === "meals"
-                ? "bg-lime-500/5 border-lime-500/40 shadow-[0_4px_20px_-5px_rgba(132,204,22,0.15)]"
-                : "bg-neutral-900/40 border-neutral-800/60 hover:bg-neutral-900 hover:border-neutral-700"
-              }
-            `}
-          >
-            {activeTab === "meals" && (
-              <div className="absolute left-0 top-0 w-1 h-full bg-lime-500 shadow-[0_0_15px_rgba(132,204,22,0.8)]"></div>
-            )}
-            <div className={`
-              p-3 rounded-xl transition-all duration-300 shrink-0
-              ${activeTab === "meals"
-                ? "bg-lime-500 text-black shadow-[0_0_15px_rgba(132,204,22,0.4)]"
-                : "bg-neutral-950 text-neutral-500 border border-neutral-800 group-hover:text-neutral-300 group-hover:border-neutral-600 group-hover:bg-neutral-900"}
-            `}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`${activeTab === 'meals' ? 'scale-110' : 'group-hover:scale-110'} transition-transform duration-300`}>
-                <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
-                <path d="M7 2v20" />
-                <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
-              </svg>
-            </div>
-            <div>
-              <h3 className={`font-black uppercase tracking-widest text-[11px] sm:text-xs mb-0.5 ${activeTab === 'meals' ? 'text-lime-500' : 'text-white'}`}>Meals</h3>
-              <p className="text-[9px] sm:text-[10px] font-bold text-neutral-500 uppercase tracking-wider">Database</p>
-            </div>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("gym")}
-            className={`
-              group relative flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 overflow-hidden text-left cursor-pointer
-              ${activeTab === "gym"
-                ? "bg-lime-500/5 border-lime-500/40 shadow-[0_4px_20px_-5px_rgba(132,204,22,0.15)]"
-                : "bg-neutral-900/40 border-neutral-800/60 hover:bg-neutral-900 hover:border-neutral-700"
-              }
-            `}
-          >
-            {activeTab === "gym" && (
-              <div className="absolute left-0 top-0 w-1 h-full bg-lime-500 shadow-[0_0_15px_rgba(132,204,22,0.8)]"></div>
-            )}
-            <div className={`
-              p-3 rounded-xl transition-all duration-300 shrink-0
-              ${activeTab === "gym"
-                ? "bg-lime-500 text-black shadow-[0_0_15px_rgba(132,204,22,0.4)]"
-                : "bg-neutral-950 text-neutral-500 border border-neutral-800 group-hover:text-neutral-300 group-hover:border-neutral-600 group-hover:bg-neutral-900"}
-            `}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`${activeTab === 'gym' ? 'scale-110' : 'group-hover:scale-110'} transition-transform duration-300`}>
-                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-              </svg>
-            </div>
-            <div>
-              <h3 className={`font-black uppercase tracking-widest text-[11px] sm:text-xs mb-0.5 ${activeTab === 'gym' ? 'text-lime-500' : 'text-white'}`}>Gym</h3>
-              <p className="text-[9px] sm:text-[10px] font-bold text-neutral-500 uppercase tracking-wider">Library</p>
-            </div>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("users")}
-            className={`
-              group relative flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 overflow-hidden text-left cursor-pointer
-              ${activeTab === "users"
-                ? "bg-lime-500/5 border-lime-500/40 shadow-[0_4px_20px_-5px_rgba(132,204,22,0.15)]"
-                : "bg-neutral-900/40 border-neutral-800/60 hover:bg-neutral-900 hover:border-neutral-700"
-              }
-            `}
-          >
-            {activeTab === "users" && (
-              <div className="absolute left-0 top-0 w-1 h-full bg-lime-500 shadow-[0_0_15px_rgba(132,204,22,0.8)]"></div>
-            )}
-            <div className={`
-              p-3 rounded-xl transition-all duration-300 shrink-0
-              ${activeTab === "users"
-                ? "bg-lime-500 text-black shadow-[0_0_15px_rgba(132,204,22,0.4)]"
-                : "bg-neutral-950 text-neutral-500 border border-neutral-800 group-hover:text-neutral-300 group-hover:border-neutral-600 group-hover:bg-neutral-900"}
-            `}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`${activeTab === 'users' ? 'scale-110' : 'group-hover:scale-110'} transition-transform duration-300`}>
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
-            </div>
-            <div>
-              <h3 className={`font-black uppercase tracking-widest text-[11px] sm:text-xs mb-0.5 ${activeTab === 'users' ? 'text-lime-500' : 'text-white'}`}>Users</h3>
-              <p className="text-[9px] sm:text-[10px] font-bold text-neutral-500 uppercase tracking-wider">Directory</p>
-            </div>
-          </button>
+        <div className="adm-tabs" role="tablist" aria-label="Admin sections">
+          {[
+            { id: "meals", name: "Meals", sub: "Database", icon: I.utensils },
+            { id: "gym", name: "Gym", sub: "Library", icon: I.dumbbell },
+            { id: "users", name: "Users", sub: "Directory", icon: I.users },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`adm-tab ${activeTab === tab.id ? "on" : ""}`}
+            >
+              <span className="adm-tab-ico">{tab.icon}</span>
+              <span>
+                <span className="adm-tab-name">{tab.name}</span>
+                <span className="adm-tab-sub" style={{ display: "block" }}>{tab.sub}</span>
+              </span>
+            </button>
+          ))}
         </div>
 
         {/* Meal Management Section */}
         {activeTab === "meals" && (
-          <div className="space-y-6">
+          <div className="space-y-5">
             {!showForm && (
               <div className="flex flex-col sm:flex-row justify-end gap-3">
-                <button
-                  onClick={() => setShowScheduleModal(true)}
-                  className="px-6 py-3 rounded-xl bg-neutral-900 text-lime-500 border border-neutral-800 hover:bg-neutral-800 font-bold uppercase tracking-widest text-xs transition-colors cursor-pointer"
-                >
-                  Manage Days
+                <button onClick={() => setShowScheduleModal(true)} className="adm-ghost">
+                  {I.calendar} Manage days
                 </button>
-                <button
-                  onClick={() => setShowForm(!showForm)}
-                  className="px-6 py-3 rounded-xl bg-lime-500 text-black font-bold uppercase tracking-widest text-xs hover:bg-lime-400 transition-colors shadow-lg shadow-lime-500/20 cursor-pointer"
-                >
-                  {showForm ? "Cancel" : "Add New Meal"}
+                <button onClick={() => setShowForm(true)} className="adm-btn">
+                  Add new meal
                 </button>
               </div>
             )}
 
             {showForm && (
-              <div ref={mealFormRef} className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 animate-in fade-in slide-in-from-top-4 duration-300">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">
-                    {editingMeal ? "Edit Meal" : "Add New Meal"}
-                  </h3>
-                  <button
-                    onClick={resetForm}
-                    className="h-8 w-8 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 hover:text-white transition-colors cursor-pointer"
-                  >
-                    ✕
+              <div ref={mealFormRef} className="adm-card adm-form">
+                <div className="flex items-center justify-between mb-5">
+                  <h3>{editingMeal ? "Edit meal" : "Add new meal"}</h3>
+                  <button onClick={resetForm} className="adm-icon" aria-label="Close form">
+                    {I.x}
                   </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
-                      <label className="block text-[10px] items-center gap-2 font-bold text-neutral-500 uppercase tracking-widest mb-2">
-                        Meal Name <span className="text-lime-500">*</span>
-                      </label>
+                      <label className="adm-lbl">Meal name</label>
                       <input
                         type="text"
                         placeholder="e.g. Grilled Chicken"
                         value={formData.name}
-                        onChange={(e) =>
-                          setFormData({ ...formData, name: e.target.value })
-                        }
-                        className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-lime-500 text-white font-bold text-sm transition-colors"
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        className="adm-in"
                         required
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-2">
-                        Category
-                      </label>
-                      <div className="relative">
-                        <select
-                          value={formData.category}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              category: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-lime-500 text-white font-bold text-sm appearance-none cursor-pointer"
-                        >
-                          <option value="breakfast">Breakfast</option>
-                          <option value="lunch">Lunch</option>
-                          <option value="dinner">Dinner</option>
-                          <option value="general">General</option>
-                        </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
-                          <svg
-                            className="h-4 w-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M19 9l-7 7-7-7"
-                            />
-                          </svg>
-                        </div>
-                      </div>
+                      <label className="adm-lbl">Category</label>
+                      <select
+                        value={formData.category}
+                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                        className="adm-in"
+                      >
+                        <option value="breakfast">Breakfast</option>
+                        <option value="lunch">Lunch</option>
+                        <option value="dinner">Dinner</option>
+                        <option value="general">General</option>
+                      </select>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div>
-                      <label className="block text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-2">
-                        Serving
-                      </label>
+                      <label className="adm-lbl">Serving</label>
                       <input
                         type="text"
                         placeholder="e.g. 100g"
                         value={formData.servingSize}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            servingSize: e.target.value,
-                          })
-                        }
-                        className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-lime-500 text-white font-bold text-sm"
+                        onChange={(e) => setFormData({ ...formData, servingSize: e.target.value })}
+                        className="adm-in"
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-2">
-                        Calories
-                      </label>
+                      <label className="adm-lbl">Calories</label>
                       <input
                         type="number"
                         step="0.1"
                         value={formData.calories}
-                        onChange={(e) =>
-                          setFormData({ ...formData, calories: e.target.value })
-                        }
-                        className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-lime-500 text-white font-bold text-sm"
+                        onChange={(e) => setFormData({ ...formData, calories: e.target.value })}
+                        className="adm-in"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-2">
-                        Protein
-                      </label>
+                      <label className="adm-lbl">Protein (g)</label>
                       <input
                         type="number"
                         step="0.1"
                         value={formData.protein}
-                        onChange={(e) =>
-                          setFormData({ ...formData, protein: e.target.value })
-                        }
-                        className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-lime-500 text-lime-500 font-bold text-sm"
+                        onChange={(e) => setFormData({ ...formData, protein: e.target.value })}
+                        className="adm-in"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-2">
-                        Carbs/Fats
-                      </label>
+                      <label className="adm-lbl">Carbs / Fats (g)</label>
                       <div className="grid grid-cols-2 gap-2">
                         <input
                           type="number"
@@ -828,10 +761,9 @@ export default function AdminPage() {
                           placeholder="C"
                           value={formData.carbs}
                           title="Carbs"
-                          onChange={(e) =>
-                            setFormData({ ...formData, carbs: e.target.value })
-                          }
-                          className="w-full px-2 py-3 bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-lime-500 text-white font-bold text-sm text-center"
+                          onChange={(e) => setFormData({ ...formData, carbs: e.target.value })}
+                          className="adm-in"
+                          style={{ textAlign: "center" }}
                           required
                         />
                         <input
@@ -840,266 +772,144 @@ export default function AdminPage() {
                           placeholder="F"
                           value={formData.fats}
                           title="Fats"
-                          onChange={(e) =>
-                            setFormData({ ...formData, fats: e.target.value })
-                          }
-                          className="w-full px-2 py-3 bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-lime-500 text-white font-bold text-sm text-center"
+                          onChange={(e) => setFormData({ ...formData, fats: e.target.value })}
+                          className="adm-in"
+                          style={{ textAlign: "center" }}
                           required
                         />
                       </div>
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t border-neutral-800 flex justify-end gap-3">
-                    <button
-                      type="button"
-                      onClick={resetForm}
-                      className="px-6 py-3 rounded-xl border border-neutral-800 text-neutral-400 font-bold uppercase tracking-widest text-xs hover:text-white hover:bg-neutral-800 transition-colors cursor-pointer"
-                    >
+                  <div className="pt-4 flex justify-end gap-3" style={{ borderTop: "1px solid var(--line)" }}>
+                    <button type="button" onClick={resetForm} className="adm-ghost">
                       Cancel
                     </button>
-                    <button
-                      type="submit"
-                      className="px-6 py-3 rounded-xl bg-lime-500 text-black font-bold uppercase tracking-widest text-xs hover:bg-lime-400 transition-colors shadow-lg shadow-lime-500/20 cursor-pointer"
-                    >
-                      {editingMeal ? "Update Meal" : "Add Meal"}
+                    <button type="submit" className="adm-btn">
+                      {editingMeal ? "Update meal" : "Add meal"}
                     </button>
                   </div>
                 </form>
               </div>
             )}
 
-            <div className="bg-neutral-900/50 backdrop-blur-xl rounded-[1.25rem] border border-neutral-800/80 overflow-hidden shadow-2xl relative">
-              <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none"></div>
-              <div className="overflow-x-auto relative">
-                <table className="min-w-full divide-y divide-neutral-800/50">
-                  <thead className="bg-neutral-950/80 backdrop-blur-md border-b border-neutral-800/80 sticky top-0 z-10">
-                    <tr className="divide-x divide-neutral-800/50">
-                      <th className="px-6 py-5 text-left text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em]">
-                        Name
-                      </th>
-                      <th className="px-6 py-5 text-left text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] hidden sm:table-cell">
-                        Serving
-                      </th>
-                      <th className="px-6 py-5 text-left text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] hidden sm:table-cell">
-                        Calories
-                      </th>
-                      <th className="px-6 py-5 text-left text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] hidden md:table-cell">
-                        Protein
-                      </th>
-                      <th className="px-6 py-5 text-left text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] hidden md:table-cell">
-                        Carbs
-                      </th>
-                      <th className="px-6 py-5 text-left text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] hidden md:table-cell">
-                        Fats
-                      </th>
-                      <th className="px-6 py-5 text-left text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] hidden lg:table-cell">
-                        Category
-                      </th>
-                      <th className="px-6 py-5 text-right text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em]">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-neutral-800/50 relative z-0">
-                    {meals.map((meal) => (
-                      <tr
-                        key={meal._id}
-                        className="group border-b border-neutral-800/50 hover:bg-neutral-800/40 hover:shadow-inner transition-all duration-300 divide-x divide-neutral-800/50"
-                      >
-                        <td className="px-6 py-5">
-                          <div className="flex flex-col">
-                            <span className="font-bold text-neutral-300 text-sm group-hover:text-white transition-colors">
-                              {toTitleCase(meal.name)}
+            <div className="adm-card adm-tblwrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th className="hidden sm:table-cell">Serving</th>
+                    <th className="hidden sm:table-cell">Calories</th>
+                    <th className="hidden md:table-cell">Protein</th>
+                    <th className="hidden md:table-cell">Carbs</th>
+                    <th className="hidden md:table-cell">Fats</th>
+                    <th className="hidden lg:table-cell">Category</th>
+                    <th style={{ textAlign: "right" }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {meals.map((meal) => (
+                    <tr key={meal._id}>
+                      <td>
+                        <div className="flex flex-col">
+                          <span className="tname">{toTitleCase(meal.name)}</span>
+                          {/* Mobile only details */}
+                          <div className="sm:hidden mt-2 flex flex-col gap-1.5">
+                            <span style={{ fontSize: 12 }}>
+                              {meal.servingSize} • <span className="tnum">{meal.macros.calories}</span><span className="tunit">kcal</span>
                             </span>
-                            {/* Mobile Only Details */}
-                            <div className="sm:hidden mt-2 flex flex-col gap-2">
-                              <span className="text-xs text-neutral-400">
-                                {meal.servingSize} • <span className="text-white font-mono font-bold">{meal.macros.calories}</span>kcal
-                              </span>
-                              <div className="flex gap-1.5 flex-wrap">
-                                <span className="px-1.5 py-0.5 rounded bg-lime-500/10 text-lime-500 border border-lime-500/20 font-mono text-[10px] font-bold">P: {meal.macros.protein}g</span>
-                                <span className="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 font-mono text-[10px] font-bold">C: {meal.macros.carbs}g</span>
-                                <span className="px-1.5 py-0.5 rounded bg-red-500/10 text-red-500 border border-red-500/20 font-mono text-[10px] font-bold">F: {meal.macros.fats}g</span>
-                              </div>
+                            <div className="flex gap-1.5 flex-wrap">
+                              <span className="adm-chip pro">P: {meal.macros.protein}g</span>
+                              <span className="adm-chip car">C: {meal.macros.carbs}g</span>
+                              <span className="adm-chip fat">F: {meal.macros.fats}g</span>
                             </div>
                           </div>
-                        </td>
-                        <td className="px-6 py-5 text-sm font-medium text-neutral-400 hidden sm:table-cell group-hover:text-neutral-300 transition-colors">
-                          {meal.servingSize}
-                        </td>
-                        <td className="px-6 py-5 text-sm hidden sm:table-cell">
-                          <span className="font-mono font-bold text-neutral-300 group-hover:text-white transition-colors">{meal.macros.calories}</span>
-                          <span className="text-[10px] font-bold text-neutral-600 ml-1 uppercase tracking-widest">kcal</span>
-                        </td>
-                        <td className="px-6 py-5 hidden md:table-cell">
-                          <span className="inline-flex items-center px-2 py-1 rounded bg-lime-500/10 text-lime-500 border border-lime-500/20 font-mono text-xs font-bold">
-                            {meal.macros.protein}g
-                          </span>
-                        </td>
-                        <td className="px-6 py-5 hidden md:table-cell">
-                          <span className="inline-flex items-center px-2 py-1 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 font-mono text-xs font-bold">
-                            {meal.macros.carbs}g
-                          </span>
-                        </td>
-                        <td className="px-6 py-5 hidden md:table-cell">
-                          <span className="inline-flex items-center px-2 py-1 rounded bg-red-500/10 text-red-500 border border-red-500/20 font-mono text-xs font-bold">
-                            {meal.macros.fats}g
-                          </span>
-                        </td>
-                        <td className="px-6 py-5 hidden lg:table-cell">
-                          <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border ${meal.category === "breakfast"
-                              ? "text-amber-500 border-amber-500/20 bg-amber-500/10"
-                              : meal.category === "lunch"
-                                ? "text-emerald-500 border-emerald-500/20 bg-emerald-500/10"
-                                : meal.category === "dinner"
-                                  ? "text-purple-500 border-purple-500/20 bg-purple-500/10"
-                                  : "text-blue-500 border-blue-500/20 bg-blue-500/10"
-                              }`}
-                          >
-                            <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
-                            {meal.category}
-                          </span>
-                        </td>
-                        <td className="px-6 py-5 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => handleEdit(meal)}
-                              className="p-2 bg-neutral-900/80 text-neutral-400 border border-neutral-800 hover:text-white hover:bg-neutral-800 hover:border-neutral-600 hover:shadow-lg rounded-lg transition-all duration-300 cursor-pointer"
-                              title="Edit Meal"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                              </svg>
-                            </button>
-                            <button
-                              onClick={() => handleDelete(meal._id)}
-                              className="p-2 bg-neutral-900/80 text-neutral-400 border border-neutral-800 hover:text-red-500 hover:bg-red-500/10 hover:border-red-500/30 hover:shadow-lg rounded-lg transition-all duration-300 cursor-pointer"
-                              title="Delete Meal"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                        </div>
+                      </td>
+                      <td className="hidden sm:table-cell">{meal.servingSize}</td>
+                      <td className="hidden sm:table-cell">
+                        <span className="tnum">{meal.macros.calories}</span>
+                        <span className="tunit">kcal</span>
+                      </td>
+                      <td className="hidden md:table-cell"><span className="adm-chip pro">{meal.macros.protein}g</span></td>
+                      <td className="hidden md:table-cell"><span className="adm-chip car">{meal.macros.carbs}g</span></td>
+                      <td className="hidden md:table-cell"><span className="adm-chip fat">{meal.macros.fats}g</span></td>
+                      <td className="hidden lg:table-cell">
+                        <span className={`adm-cat ${meal.category}`}><i />{meal.category}</span>
+                      </td>
+                      <td style={{ textAlign: "right" }}>
+                        <div className="flex items-center justify-end gap-2">
+                          <button onClick={() => handleEdit(meal)} className="adm-icon" title="Edit meal" aria-label={`Edit ${meal.name}`}>
+                            {I.pencil}
+                          </button>
+                          <button onClick={() => handleDelete(meal._id)} className="adm-icon danger" title="Delete meal" aria-label={`Delete ${meal.name}`}>
+                            {I.trash}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {meals.length === 0 && (
+                    <tr><td colSpan="8" className="adm-empty">No meals in the database yet.</td></tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
 
         {/* Gym Management Section */}
         {activeTab === "gym" && (
-          <div className="space-y-8">
+          <div>
             {/* Weekly Schedule Management */}
-            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="bg-lime-500/10 p-2.5 rounded-xl text-lime-500 border border-lime-500/20">
-                  <span className="text-xl">📅</span>
-                </div>
-                <div>
-                  <h2 className="text-lg font-black text-white uppercase italic tracking-tighter">
-                    Weekly Split
-                  </h2>
-                  <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest">
-                    Manage workout schedule
-                  </p>
-                </div>
+            <div className="adm-card adm-form">
+              <div className="mb-5">
+                <h3>Weekly split</h3>
+                <p style={{ fontSize: 12, fontWeight: 500, color: "var(--t2)", marginTop: 3 }}>
+                  Target muscle groups per training day.
+                </p>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
-                {workoutSchedule.map((schedule) => {
-                  const isCompact = schedule.muscleGroups.length >= 3;
-                  return (
-                    <div
-                      key={schedule.day}
-                      className="bg-neutral-950 rounded-xl p-3 border border-neutral-800 hover:border-lime-500/50 transition-colors group relative"
-                    >
-                      <div className="flex justify-between items-start mb-3">
-                        <span className="text-[10px] uppercase tracking-widest font-bold text-neutral-500 group-hover:text-white transition-colors">
-                          {schedule.day.substring(0, 3)}
-                        </span>
-                        <button
-                          onClick={() => handleEditSchedule(schedule)}
-                          className="text-neutral-600 hover:text-lime-500 transition-colors cursor-pointer"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="12"
-                            height="12"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                            <path d="m15 5 4 4" />
-                          </svg>
-                        </button>
-                      </div>
-
-                      <div className={`space-y-1.5`}>
-                        {schedule.muscleGroups.length > 0 ? (
-                          schedule.muscleGroups.map((group, idx) => (
-                            <div
-                              key={idx}
-                              className={`bg-neutral-900 px-2 py-1.5 text-[10px] rounded border border-neutral-800 font-bold text-neutral-300 truncate`}
-                            >
-                              {group}
-                            </div>
-                          ))
-                        ) : (
-                          <div className="flex items-center justify-center py-2 opacity-20">
-                            <span className="text-xl grayscale">💤</span>
-                          </div>
-                        )}
-                      </div>
+              <div className="adm-days">
+                {workoutSchedule.map((schedule) => (
+                  <div key={schedule.day} className="adm-day">
+                    <div className="adm-day-h">
+                      <span>{schedule.day.substring(0, 3)}</span>
+                      <button onClick={() => handleEditSchedule(schedule)} aria-label={`Edit ${schedule.day}`}>
+                        {I.pencil}
+                      </button>
                     </div>
-                  );
-                })}
+
+                    {schedule.muscleGroups.length > 0 ? (
+                      schedule.muscleGroups.map((group, idx) => (
+                        <span key={idx} className="adm-day-chip">{group}</span>
+                      ))
+                    ) : (
+                      <div className="adm-day-rest">Rest</div>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* Schedule Edit Form */}
             {showScheduleForm && editingDay && (
-              <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 mb-8">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">
-                      Edit{" "}
-                      <span className="text-lime-500">{editingDay.day}</span>
-                    </h3>
-                    <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest mt-1">
-                      Target muscle groups
-                    </p>
-                  </div>
+              <div className="adm-card adm-form" style={{ marginTop: 20 }}>
+                <div className="mb-5">
+                  <h3>Edit {editingDay.day}</h3>
+                  <p style={{ fontSize: 12, fontWeight: 500, color: "var(--t2)", marginTop: 3 }}>
+                    Target muscle groups
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                   {uniqueMuscleGroups.map((group) => {
                     const isSelected = editingDay.muscleGroups.includes(group);
                     return (
-                      <label
-                        key={group}
-                        className={`
-                          relative flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all duration-300 border
-                          ${isSelected
-                            ? "bg-lime-500/10 border-lime-500/20"
-                            : "bg-neutral-950 border-neutral-800 hover:border-neutral-700"
-                          }
-                        `}
-                      >
+                      <label key={group} className={`adm-check ${isSelected ? "on" : ""}`}>
                         <input
                           type="checkbox"
                           checked={isSelected}
-                          className="w-4 h-4 accent-lime-500 rounded border-neutral-700 bg-neutral-900"
                           onChange={(e) => {
                             const checked = e.target.checked;
                             const updatedMuscleGroups = checked
@@ -1119,23 +929,19 @@ export default function AdminPage() {
                             );
                           }}
                         />
-                        <span
-                          className={`text-sm font-bold uppercase tracking-wider ${isSelected ? "text-lime-500" : "text-neutral-400"}`}
-                        >
-                          {group}
-                        </span>
+                        {group}
                       </label>
                     );
                   })}
                 </div>
 
-                <div className="mt-8 flex justify-end">
+                <div className="mt-6 flex justify-end">
                   <button
                     onClick={() => {
                       setShowScheduleForm(false);
                       setEditingDay(null);
                     }}
-                    className="px-6 py-3 rounded-xl bg-lime-500 text-black font-bold uppercase tracking-widest text-xs hover:bg-lime-400 transition-colors shadow-lg shadow-lime-500/20"
+                    className="adm-btn"
                   >
                     Done
                   </button>
@@ -1144,682 +950,341 @@ export default function AdminPage() {
             )}
 
             {/* Exercise Management */}
-            <div>
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pt-8 border-t border-neutral-800">
-                <div className="flex items-center gap-3">
-                  <div className="hidden sm:flex p-2 bg-lime-500/10 rounded-xl border border-lime-500/20">
-                    <span className="text-xl text-lime-500">💪</span>
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">
-                      Exercise Library
-                    </h3>
-                    <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest mt-0.5">
-                      Manage exercise database
-                    </p>
-                  </div>
-                </div>
-                {!showExerciseForm && (
-                  <button
-                    onClick={() => setShowExerciseForm(true)}
-                    className="w-full sm:w-auto px-6 py-3 rounded-xl bg-lime-500 text-black font-bold uppercase tracking-widest text-xs hover:bg-lime-400 transition-colors shadow-lg shadow-lime-500/20 cursor-pointer"
-                  >
-                    Add New Exercise
-                  </button>
-                )}
+            <div className="adm-sec" style={{ borderTop: "1px solid var(--line)", paddingTop: 30 }}>
+              <div>
+                <h2>Exercise library</h2>
+                <p>Manage the exercise database.</p>
               </div>
+              {!showExerciseForm && (
+                <button onClick={() => setShowExerciseForm(true)} className="adm-btn">
+                  Add new exercise
+                </button>
+              )}
+            </div>
 
-              {/* Exercise Form */}
-              {showExerciseForm && (
-                <div ref={exerciseFormRef} className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 mb-8 relative animate-in fade-in slide-in-from-top-4 duration-300">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-lime-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+            {/* Exercise Form */}
+            {showExerciseForm && (
+              <div ref={exerciseFormRef} className="adm-card adm-form" style={{ marginBottom: 24 }}>
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5">
+                  <h3>{editingExercise ? "Edit exercise" : "Add new exercise"}</h3>
 
-                  <div className="relative z-10 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                      <h4 className="text-xl font-black text-white uppercase italic tracking-tighter flex items-center gap-3 cursor-pointer">
-                        {editingExercise ? "Edit Exercise" : "Add New Exercise"}
-                      </h4>
-                    </div>
+                  {/* Desktop buttons */}
+                  <div className="hidden md:flex gap-3">
+                    <button type="button" onClick={resetExerciseForm} className="adm-ghost">
+                      Cancel
+                    </button>
+                    <button type="submit" form="exercise-form" className="adm-btn">
+                      {editingExercise ? "Update" : "Save"}
+                    </button>
+                  </div>
+                </div>
 
-                    {/* Buttons moved to top-right (Desktop Only) */}
-                    <div className="hidden md:flex gap-3 w-full md:w-auto justify-end">
-                      <button
-                        type="button"
-                        onClick={resetExerciseForm}
-                        className="px-6 py-3 rounded-xl border border-neutral-800 text-neutral-400 font-bold uppercase tracking-widest text-xs hover:text-white hover:bg-neutral-800 transition-colors cursor-pointer"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        form="exercise-form"
-                        className="px-6 py-3 rounded-xl bg-lime-500 text-black font-bold uppercase tracking-widest text-xs hover:bg-lime-400 transition-colors shadow-lg shadow-lime-500/20 cursor-pointer"
-                      >
-                        {editingExercise ? "Update" : "Save"}
-                      </button>
-                    </div>
+                <form
+                  id="exercise-form"
+                  onSubmit={handleExerciseSubmit}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-5"
+                >
+                  <div className="relative muscle-group-dropdown">
+                    <label className="adm-lbl">Muscle group</label>
+                    <input
+                      type="text"
+                      value={muscleGroupSearch || exerciseFormData.muscleGroup}
+                      onChange={(e) => {
+                        setMuscleGroupSearch(e.target.value);
+                        setShowMuscleGroupDropdown(true);
+                      }}
+                      onFocus={() => setShowMuscleGroupDropdown(true)}
+                      className="adm-in"
+                      placeholder="Search or select…"
+                      required={!exerciseFormData.muscleGroup}
+                    />
+                    {showMuscleGroupDropdown && (
+                      <div className="adm-dd" data-lenis-prevent="true">
+                        {uniqueMuscleGroups
+                          .filter((group) => group !== "Rest Day")
+                          .filter((group) =>
+                            group
+                              .toLowerCase()
+                              .includes(muscleGroupSearch.toLowerCase()),
+                          )
+                          .map((group) => (
+                            <button
+                              key={group}
+                              type="button"
+                              onClick={() => {
+                                setExerciseFormData({
+                                  ...exerciseFormData,
+                                  muscleGroup: group,
+                                });
+                                setMuscleGroupSearch("");
+                                setShowMuscleGroupDropdown(false);
+                              }}
+                            >
+                              {group}
+                            </button>
+                          ))}
+                      </div>
+                    )}
                   </div>
 
-                  <form
-                    id="exercise-form"
-                    onSubmit={handleExerciseSubmit}
-                    className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10"
-                  >
-                    <div className="relative muscle-group-dropdown group">
-                      <label className="block text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-2">
-                        Muscle Group
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          value={
-                            muscleGroupSearch || exerciseFormData.muscleGroup
-                          }
-                          onChange={(e) => {
-                            setMuscleGroupSearch(e.target.value);
-                            setShowMuscleGroupDropdown(true);
-                          }}
-                          onFocus={() => setShowMuscleGroupDropdown(true)}
-                          className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-lime-500 text-white font-bold text-sm transition-colors"
-                          placeholder="Search or select..."
-                          required={!exerciseFormData.muscleGroup}
-                        />
-                        {showMuscleGroupDropdown && (
-                          <div className="absolute z-50 w-full mt-2 bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl max-h-60 overflow-auto custom-scrollbar" data-lenis-prevent="true">
-                            {uniqueMuscleGroups
-                              .filter((group) => group !== "Rest Day")
-                              .filter((group) =>
-                                group
-                                  .toLowerCase()
-                                  .includes(muscleGroupSearch.toLowerCase()),
-                              )
-                              .map((group) => (
-                                <div
-                                  key={group}
-                                  onClick={() => {
-                                    setExerciseFormData({
-                                      ...exerciseFormData,
-                                      muscleGroup: group,
-                                    });
-                                    setMuscleGroupSearch("");
-                                    setShowMuscleGroupDropdown(false);
-                                  }}
-                                  className="px-5 py-3.5 hover:bg-neutral-800 cursor-pointer text-neutral-300 hover:text-white transition-colors border-b border-neutral-800 last:border-0 font-bold text-sm"
-                                >
-                                  {group}
-                                </div>
-                              ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                  <div>
+                    <label className="adm-lbl">Exercise name</label>
+                    <input
+                      type="text"
+                      value={exerciseFormData.name}
+                      onChange={(e) =>
+                        setExerciseFormData({
+                          ...exerciseFormData,
+                          name: e.target.value,
+                        })
+                      }
+                      className="adm-in"
+                      placeholder="e.g., Incline Dumbbell Press"
+                      required
+                    />
+                  </div>
 
-                    <div className="group">
-                      <label className="block text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-2">
-                        Exercise Name
-                      </label>
-                      <input
-                        type="text"
-                        value={exerciseFormData.name}
-                        onChange={(e) =>
-                          setExerciseFormData({
-                            ...exerciseFormData,
-                            name: e.target.value,
-                          })
-                        }
-                        className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-lime-500 text-white font-bold text-sm transition-colors"
-                        placeholder="e.g., Incline Dumbbell Press"
-                        required
-                      />
-                    </div>
-
-                    <div className="group md:col-span-2">
-                      <label className="block text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-2">
-                        Exercise Type
-                      </label>
-                      <div className="relative">
-                        <select
-                          value={exerciseFormData.type}
-                          onChange={(e) =>
-                            setExerciseFormData({
-                              ...exerciseFormData,
-                              type: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-lime-500 text-white font-bold text-sm appearance-none cursor-pointer"
-                          required
-                        >
-                          <option value="COMPOUND">Compound Movement</option>
-                          <option value="ISOLATION">Isolation Movement</option>
-                        </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
-                          <svg
-                            className="h-4 w-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M19 9l-7 7-7-7"
-                            />
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Mobile Buttons (Bottom) */}
-                    <div className="md:col-span-2 flex flex-col-reverse gap-4 justify-end md:mt-4 md:pt-4 border-t border-neutral-800 md:hidden">
-                      <button
-                        type="button"
-                        onClick={resetExerciseForm}
-                        className="w-full px-8 py-3.5 rounded-xl border border-neutral-800 text-neutral-400 font-bold uppercase tracking-widest text-xs hover:text-white hover:bg-neutral-800 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        className="w-full px-10 py-3.5 rounded-xl bg-lime-500 text-black font-bold uppercase tracking-widest text-xs hover:bg-lime-400 transition-colors shadow-lg shadow-lime-500/20"
-                      >
-                        {editingExercise ? "Update" : "Save"}
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              )}
-
-              {/* Exercise List by Muscle Group */}
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                {uniqueMuscleGroups
-                  .filter((group) => group !== "Rest Day")
-                  .map((muscleGroup) => (
-                    <div
-                      key={muscleGroup}
-                      className="bg-neutral-900 rounded-2xl shadow-xl overflow-hidden border border-neutral-800"
+                  <div className="md:col-span-2">
+                    <label className="adm-lbl">Exercise type</label>
+                    <select
+                      value={exerciseFormData.type}
+                      onChange={(e) =>
+                        setExerciseFormData({
+                          ...exerciseFormData,
+                          type: e.target.value,
+                        })
+                      }
+                      className="adm-in"
+                      required
                     >
-                      <div className="bg-neutral-950/50 px-6 py-5 border-b border-neutral-800 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="w-1 h-8 rounded-full bg-lime-500 shadow-[0_0_10px_rgba(132,204,22,0.4)]"></div>
-                          <h4 className="text-lg font-black text-white italic uppercase tracking-wider">
-                            {muscleGroup}
-                          </h4>
-                        </div>
-                        <span className="text-[10px] font-bold text-lime-500 bg-lime-500/10 px-3 py-1.5 rounded-full uppercase tracking-widest border border-lime-500/20">
-                          {
-                            exercises.filter(
-                              (ex) => ex.muscleGroup === muscleGroup,
-                            ).length
-                          }{" "}
-                          exercises
-                        </span>
+                      <option value="COMPOUND">Compound movement</option>
+                      <option value="ISOLATION">Isolation movement</option>
+                    </select>
+                  </div>
+
+                  {/* Mobile buttons */}
+                  <div className="md:col-span-2 flex flex-col-reverse gap-3 md:hidden" style={{ borderTop: "1px solid var(--line)", paddingTop: 16 }}>
+                    <button type="button" onClick={resetExerciseForm} className="adm-ghost w-full">
+                      Cancel
+                    </button>
+                    <button type="submit" className="adm-btn w-full">
+                      {editingExercise ? "Update" : "Save"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {/* Exercise List by Muscle Group */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              {uniqueMuscleGroups
+                .filter((group) => group !== "Rest Day")
+                .map((muscleGroup) => {
+                  const groupExercises = exercises.filter((ex) => ex.muscleGroup === muscleGroup);
+                  return (
+                    <div key={muscleGroup} className="adm-eg">
+                      <div className="adm-eg-h">
+                        <h4>{muscleGroup}</h4>
+                        <span className="count">{groupExercises.length} exercises</span>
                       </div>
 
-                      {/* Desktop Table View */}
-                      <div className="hidden md:block overflow-x-auto">
-                        <table className="w-full border-collapse">
+                      {/* Desktop table */}
+                      <div className="hidden md:block adm-tblwrap">
+                        <table>
                           <thead>
-                            <tr className="bg-neutral-950/30 border-b border-neutral-800">
-                              <th className="w-1/2 px-6 py-4 text-left text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
-                                Exercise Name
-                              </th>
-                              <th className="w-1/4 px-6 py-4 text-left text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
-                                Type
-                              </th>
-                              <th className="w-1/4 px-6 py-4 text-right text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
-                                Actions
-                              </th>
+                            <tr>
+                              <th>Exercise name</th>
+                              <th>Type</th>
+                              <th style={{ textAlign: "right" }}>Actions</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-neutral-800">
-                            {exercises
-                              .filter((ex) => ex.muscleGroup === muscleGroup)
-                              .map((exercise) => (
-                                <tr
-                                  key={exercise.id}
-                                  className="hover:bg-neutral-800/40 transition-colors group"
-                                >
-                                  <td className="px-6 py-4 text-sm font-bold text-neutral-300 group-hover:text-white transition-colors">
-                                    {exercise.name}
-                                  </td>
-                                  <td className="px-6 py-4">
-                                    <span
-                                      className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${exercise.type === "COMPOUND"
-                                        ? "bg-lime-500/10 text-lime-500 border-lime-500/20"
-                                        : "bg-neutral-800 text-neutral-400 border-neutral-700"
-                                        }`}
-                                    >
-                                      {exercise.type === "COMPOUND" && (
-                                        <span className="w-1.5 h-1.5 rounded-full bg-lime-500 shadow-[0_0_5px_rgba(132,204,22,0.5)]"></span>
-                                      )}
-                                      {exercise.type}
-                                    </span>
-                                  </td>
-                                  <td className="px-6 py-4 text-right">
-                                    <div className="flex items-center justify-end gap-2">
-                                      <button
-                                        onClick={() =>
-                                          handleEditExercise(exercise)
-                                        }
-                                        className="p-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors active:scale-95"
-                                        title="Edit"
-                                      >
-                                        <svg
-                                          xmlns="http://www.w3.org/2000/svg"
-                                          width="16"
-                                          height="16"
-                                          viewBox="0 0 24 24"
-                                          fill="none"
-                                          stroke="currentColor"
-                                          strokeWidth="2"
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                        >
-                                          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                                          <path d="m15 5 4 4" />
-                                        </svg>
-                                      </button>
-                                      <button
-                                        onClick={() =>
-                                          handleDeleteExercise(exercise.id)
-                                        }
-                                        className="p-2 text-neutral-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors active:scale-95"
-                                        title="Delete"
-                                      >
-                                        <svg
-                                          xmlns="http://www.w3.org/2000/svg"
-                                          width="16"
-                                          height="16"
-                                          viewBox="0 0 24 24"
-                                          fill="none"
-                                          stroke="currentColor"
-                                          strokeWidth="2"
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                        >
-                                          <path d="M3 6h18" />
-                                          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                          <line
-                                            x1="10"
-                                            x2="10"
-                                            y1="11"
-                                            y2="17"
-                                          />
-                                          <line
-                                            x1="14"
-                                            x2="14"
-                                            y1="11"
-                                            y2="17"
-                                          />
-                                        </svg>
-                                      </button>
-                                    </div>
-                                  </td>
-                                </tr>
-                              ))}
-                            {exercises.filter(
-                              (ex) => ex.muscleGroup === muscleGroup,
-                            ).length === 0 && (
-                                <tr>
-                                  <td
-                                    colSpan="3"
-                                    className="px-6 py-12 text-center text-neutral-500 text-sm font-medium bg-neutral-950/20"
-                                  >
-                                    No exercises added yet for {muscleGroup}.
-                                  </td>
-                                </tr>
-                              )}
+                          <tbody>
+                            {groupExercises.map((exercise) => (
+                              <tr key={exercise.id}>
+                                <td>{exercise.name}</td>
+                                <td>
+                                  <span className={`adm-type ${exercise.type === "COMPOUND" ? "compound" : ""}`}>
+                                    {exercise.type === "COMPOUND" && <i />}
+                                    {exercise.type}
+                                  </span>
+                                </td>
+                                <td style={{ textAlign: "right" }}>
+                                  <div className="flex items-center justify-end gap-2">
+                                    <button onClick={() => handleEditExercise(exercise)} className="adm-icon" title="Edit" aria-label={`Edit ${exercise.name}`}>
+                                      {I.pencil}
+                                    </button>
+                                    <button onClick={() => handleDeleteExercise(exercise.id)} className="adm-icon danger" title="Delete" aria-label={`Delete ${exercise.name}`}>
+                                      {I.trash}
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                            {groupExercises.length === 0 && (
+                              <tr><td colSpan="3" className="adm-empty">No exercises added yet for {muscleGroup}.</td></tr>
+                            )}
                           </tbody>
                         </table>
                       </div>
 
-                      {/* Mobile Card View */}
+                      {/* Mobile cards */}
                       <div className="md:hidden">
-                        {exercises
-                          .filter((ex) => ex.muscleGroup === muscleGroup)
-                          .map((exercise) => (
-                            <div
-                              key={exercise.id}
-                              className="p-4 border-b border-neutral-800 last:border-0 hover:bg-neutral-800/30 transition-colors"
-                            >
-                              <div className="flex justify-between gap-3">
-                                <div className="space-y-2">
-                                  <h5 className="font-bold text-white text-sm">
-                                    {exercise.name}
-                                  </h5>
-                                  <span
-                                    className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${exercise.type === "COMPOUND"
-                                      ? "bg-lime-500/10 text-lime-500 border-lime-500/20"
-                                      : "bg-neutral-800 text-neutral-400 border-neutral-700"
-                                      }`}
-                                  >
-                                    {exercise.type === "COMPOUND" && (
-                                      <span className="w-1.5 h-1.5 rounded-full bg-lime-500 shadow-[0_0_5px_rgba(132,204,22,0.5)]"></span>
-                                    )}
-                                    {exercise.type}
-                                  </span>
-                                </div>
-                                <div className="flex flex-col gap-2">
-                                  <button
-                                    onClick={() => handleEditExercise(exercise)}
-                                    className="p-2 text-neutral-400 hover:text-white bg-neutral-800/50 rounded-lg active:scale-95 transition-colors"
-                                  >
-                                    <svg
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      width="16"
-                                      height="16"
-                                      viewBox="0 0 24 24"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      strokeWidth="2"
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                    >
-                                      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                                      <path d="m15 5 4 4" />
-                                    </svg>
-                                  </button>
-                                  <button
-                                    onClick={() =>
-                                      handleDeleteExercise(exercise.id)
-                                    }
-                                    className="p-2 text-neutral-400 hover:text-red-500 bg-neutral-800/50 rounded-lg active:scale-95 transition-colors"
-                                  >
-                                    <svg
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      width="16"
-                                      height="16"
-                                      viewBox="0 0 24 24"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      strokeWidth="2"
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                    >
-                                      <path d="M3 6h18" />
-                                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                      <line x1="10" x2="10" y1="11" y2="17" />
-                                      <line x1="14" x2="14" y1="11" y2="17" />
-                                    </svg>
-                                  </button>
-                                </div>
-                              </div>
+                        {groupExercises.map((exercise) => (
+                          <div key={exercise.id} className="p-4 flex justify-between gap-3" style={{ borderBottom: "1px solid var(--line)" }}>
+                            <div>
+                              <h5 style={{ fontSize: 13, fontWeight: 700, color: "var(--t1)", margin: 0 }}>{exercise.name}</h5>
+                              <span className={`adm-type ${exercise.type === "COMPOUND" ? "compound" : ""}`} style={{ marginTop: 8, display: "inline-flex" }}>
+                                {exercise.type === "COMPOUND" && <i />}
+                                {exercise.type}
+                              </span>
                             </div>
-                          ))}
-                        {exercises.filter(
-                          (ex) => ex.muscleGroup === muscleGroup,
-                        ).length === 0 && (
-                            <div className="p-6 text-center text-xs font-bold text-neutral-500 italic bg-neutral-950/20">
-                              No exercises added yet.
+                            <div className="flex flex-col gap-2">
+                              <button onClick={() => handleEditExercise(exercise)} className="adm-icon" aria-label={`Edit ${exercise.name}`}>{I.pencil}</button>
+                              <button onClick={() => handleDeleteExercise(exercise.id)} className="adm-icon danger" aria-label={`Delete ${exercise.name}`}>{I.trash}</button>
                             </div>
-                          )}
+                          </div>
+                        ))}
+                        {groupExercises.length === 0 && (
+                          <div className="adm-empty">No exercises added yet.</div>
+                        )}
                       </div>
                     </div>
-                  ))}
-              </div>
+                  );
+                })}
             </div>
           </div>
         )}
 
         {/* Users Management Section */}
         {activeTab === "users" && (
-          <div className="animate-in fade-in duration-500">
-            <div className="bg-neutral-900 rounded-xl sm:rounded-2xl shadow-xl border border-neutral-800 overflow-hidden">
-              <div className="p-4 sm:p-8 border-b border-neutral-800 bg-neutral-950/30">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <h2 className="text-xl sm:text-2xl font-black text-white italic uppercase tracking-wider flex items-center gap-3">
-                      <span className="flex items-center justify-center w-10 h-10 bg-lime-500/10 text-lime-500 rounded-xl text-xl shadow-[0_0_10px_rgba(132,204,22,0.2)]">
-                        👥
-                      </span>
-                      Registered Users
-                    </h2>
-                    <p className="text-sm font-bold text-neutral-500 mt-2 ml-13 uppercase tracking-wider">
-                      Manage and track user progress and statistics
-                    </p>
-                  </div>
-                  <div className="self-start sm:self-center ml-10 sm:ml-0">
-                    <span className="inline-flex items-center px-4 py-2 rounded-full text-xs font-bold bg-lime-500/10 text-lime-500 border border-lime-500/20 shadow-[0_0_10px_rgba(132,204,22,0.1)] uppercase tracking-wider">
-                      Total Users: {users.length}
-                    </span>
-                  </div>
-                </div>
+          <div>
+            <div className="adm-sec" style={{ marginTop: 0 }}>
+              <div>
+                <h2>Registered users</h2>
+                <p>Manage and review user progress and statistics.</p>
               </div>
+              <span className="adm-pill">Total users: {users.length}</span>
+            </div>
 
-              <div className="p-4 sm:p-8 bg-neutral-950/20 min-h-[400px]">
-                {/* Users Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {users.map((userData) => {
-                    const stats = userData.stats || {};
-                    const macros = stats.averageMacros || {};
-                    const p = Number(macros.protein) || 0;
-                    const c = Number(macros.carbs) || 0;
-                    const f = Number(macros.fats) || 0;
-                    // Avoid division by zero
-                    const totalWeight = p + c + f || 1;
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+              {users.map((userData) => {
+                const stats = userData.stats || {};
+                const macros = stats.averageMacros || {};
+                const p = Number(macros.protein) || 0;
+                const c = Number(macros.carbs) || 0;
+                const f = Number(macros.fats) || 0;
+                // Avoid division by zero
+                const totalWeight = p + c + f || 1;
 
-                    return (
-                      <div
-                        key={userData._id}
-                        className="group relative bg-neutral-950 rounded-2xl p-6 border border-neutral-800 shadow-lg hover:shadow-lime-500/10 hover:border-lime-500/30 hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden"
-                        onClick={() =>
-                          router.push(`/admin/user/${userData._id}`)
-                        }
-                      >
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-lime-500/5 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-lime-500/10 transition-colors duration-500" />
+                return (
+                  <div
+                    key={userData._id}
+                    className="adm-user"
+                    onClick={() =>
+                      router.push(`/admin/user/${userData._id}`)
+                    }
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        router.push(`/admin/user/${userData._id}`);
+                      }
+                    }}
+                  >
+                    {/* User header */}
+                    <div className="flex items-center gap-4 mb-5">
+                      <div className="adm-ava">{userData.name.charAt(0).toUpperCase()}</div>
+                      <div className="min-w-0">
+                        <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--t1)", margin: 0 }} className="truncate">
+                          {toTitleCase(userData.name)}
+                        </h3>
+                        <p style={{ fontSize: 12, fontWeight: 500, color: "var(--t3)", margin: 0 }} className="truncate">
+                          {userData.email}
+                        </p>
+                      </div>
+                    </div>
 
-                        {/* User Header */}
-                        <div className="relative flex items-start justify-between mb-6">
-                          <div className="flex items-center gap-4 w-full">
-                            <div className="relative shrink-0">
-                              <div className="w-14 h-14 bg-neutral-900 rounded-xl flex items-center justify-center text-lime-500 text-xl font-black border border-neutral-800 group-hover:border-lime-500/50 group-hover:text-lime-400 transition-all shadow-lg">
-                                {userData.name.charAt(0).toUpperCase()}
-                              </div>
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <h3 className="font-bold text-white text-lg group-hover:text-lime-500 transition-colors truncate">
-                                {toTitleCase(userData.name)}
-                              </h3>
-                              <p className="text-xs font-medium text-neutral-500 truncate">
-                                {userData.email}
-                              </p>
-                            </div>
-                          </div>
+                    {/* Stats summary */}
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      <div className="adm-mini">
+                        <span>Days logged</span>
+                        <b>{stats.daysLogged || 0}</b>
+                      </div>
+                      <div className="adm-mini">
+                        <span>Last activity</span>
+                        <b style={{ fontSize: 12, fontWeight: 700 }}>{stats.latestLogDate || "Inactive"}</b>
+                      </div>
+                    </div>
+
+                    {/* Average macros */}
+                    {stats.daysLogged > 0 ? (
+                      <div className="mb-4">
+                        <div className="flex items-end justify-between">
+                          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--t3)" }}>
+                            Avg intake
+                          </span>
+                          <span className="tnum" style={{ fontSize: 13 }}>
+                            {macros.calories}<span className="tunit">kcal</span>
+                          </span>
                         </div>
 
-                        {/* Stats Summary */}
-                        <div className="space-y-4 relative">
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="bg-neutral-900/50 rounded-xl p-3 border border-neutral-800 text-center">
-                              <span className="text-[9px] font-bold text-neutral-500 uppercase tracking-widest">
-                                Days Logged
-                              </span>
-                              <div className="text-xl font-black text-white mt-1">
-                                {stats.daysLogged || 0}
-                              </div>
-                            </div>
-                            <div className="bg-neutral-900/50 rounded-xl p-3 border border-neutral-800 text-center flex flex-col justify-center">
-                              <span className="text-[9px] font-bold text-neutral-500 uppercase tracking-widest">
-                                Last Activity
-                              </span>
-                              <div className="text-xs font-bold text-white mt-1 truncate px-1">
-                                {stats.latestLogDate || "Inactive"}
-                              </div>
-                            </div>
-                          </div>
+                        <div className="adm-mbar">
+                          <i style={{ width: `${(p / totalWeight) * 100}%`, background: "var(--pro)" }} title="Protein" />
+                          <i style={{ width: `${(c / totalWeight) * 100}%`, background: "var(--car)" }} title="Carbs" />
+                          <i style={{ width: `${(f / totalWeight) * 100}%`, background: "var(--green)" }} title="Fats" />
+                        </div>
 
-                          {/* Average Macros */}
-                          {stats.daysLogged > 0 ? (
-                            <div className="bg-neutral-900 rounded-xl p-3 border border-neutral-800 mt-2">
-                              <div className="flex items-end justify-between mb-2 px-1">
-                                <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
-                                  Avg Intake
-                                </span>
-                                <span className="text-xs font-bold text-white">
-                                  {macros.calories}{" "}
-                                  <span className="text-[9px] text-neutral-500">
-                                    kcal
-                                  </span>
-                                </span>
-                              </div>
-
-                              <div className="flex h-2 w-full rounded-full overflow-hidden bg-neutral-800 mb-3">
-                                <div
-                                  className="bg-blue-500 h-full"
-                                  style={{
-                                    width: `${(p / totalWeight) * 100}%`,
-                                  }}
-                                  title="Protein"
-                                />
-                                <div
-                                  className="bg-emerald-500 h-full"
-                                  style={{
-                                    width: `${(c / totalWeight) * 100}%`,
-                                  }}
-                                  title="Carbs"
-                                />
-                                <div
-                                  className="bg-yellow-500 h-full"
-                                  style={{
-                                    width: `${(f / totalWeight) * 100}%`,
-                                  }}
-                                  title="Fats"
-                                />
-                              </div>
-
-                              <div className="grid grid-cols-3 gap-2">
-                                <div className="flex flex-col items-center bg-neutral-800/50 rounded-lg py-1.5 border border-neutral-800">
-                                  <span className="text-[8px] text-blue-400 font-bold uppercase">
-                                    Protein
-                                  </span>
-                                  <span className="text-[10px] font-bold text-white">
-                                    {p}g
-                                  </span>
-                                </div>
-                                <div className="flex flex-col items-center bg-neutral-800/50 rounded-lg py-1.5 border border-neutral-800">
-                                  <span className="text-[8px] text-emerald-400 font-bold uppercase">
-                                    Carbs
-                                  </span>
-                                  <span className="text-[10px] font-bold text-white">
-                                    {c}g
-                                  </span>
-                                </div>
-                                <div className="flex flex-col items-center bg-neutral-800/50 rounded-lg py-1.5 border border-neutral-800">
-                                  <span className="text-[8px] text-yellow-400 font-bold uppercase">
-                                    Fats
-                                  </span>
-                                  <span className="text-[10px] font-bold text-white">
-                                    {f}g
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="bg-neutral-900/30 rounded-xl p-6 text-center border-2 border-dashed border-neutral-800">
-                              <p className="text-xs text-neutral-500 font-bold uppercase tracking-wider">
-                                No log data available
-                              </p>
-                            </div>
-                          )}
-
-                          {/* Member Since */}
-                          <div className="flex items-center justify-between pt-4 border-t border-neutral-800 mt-2">
-                            <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 font-bold uppercase tracking-wider">
-                              <svg
-                                className="w-3 h-3"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                ></path>
-                              </svg>
-                              {new Date(
-                                userData.createdAt,
-                              ).toLocaleDateString()}
-                            </div>
-                            <span className="text-[10px] font-bold text-lime-500 flex items-center gap-1 group-hover:translate-x-1 transition-transform uppercase tracking-wider cursor-pointer">
-                              View Profile
-                              <svg
-                                className="w-3 h-3"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M9 5l7 7-7 7"
-                                ></path>
-                              </svg>
-                            </span>
-                          </div>
+                        <div className="adm-mrow">
+                          <span style={{ color: "var(--pro)" }}>P {p}g</span>
+                          <span style={{ color: "var(--car)" }}>C {c}g</span>
+                          <span style={{ color: "var(--green)" }}>F {f}g</span>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
+                    ) : (
+                      <div className="adm-mini" style={{ marginBottom: 16, padding: "18px 11px" }}>
+                        <span>No log data available</span>
+                      </div>
+                    )}
 
-                {users.length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-24 text-center">
-                    <div className="w-24 h-24 bg-neutral-900 rounded-full flex items-center justify-center text-5xl mb-6 shadow-xl border border-neutral-800">
-                      👥
+                    {/* Member since */}
+                    <div className="flex items-center justify-between pt-4" style={{ borderTop: "1px solid var(--line)" }}>
+                      <div className="flex items-center gap-1.5" style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".07em", textTransform: "uppercase", color: "var(--t3)" }}>
+                        {I.calendar}
+                        {new Date(userData.createdAt).toLocaleDateString()}
+                      </div>
+                      <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".07em", textTransform: "uppercase", color: "var(--ac)" }}>
+                        View profile →
+                      </span>
                     </div>
-                    <h3 className="text-xl font-black text-white italic uppercase tracking-wider">
-                      No users found
-                    </h3>
-                    <p className="text-neutral-500 max-w-sm mx-auto mt-2 text-sm font-medium">
-                      Wait for users to register.
-                    </p>
                   </div>
-                )}
-              </div>
+                );
+              })}
             </div>
+
+            {users.length === 0 && (
+              <div className="adm-empty" style={{ borderRadius: 14 }}>
+                No users found — wait for users to register.
+              </div>
+            )}
           </div>
         )}
       </div>
 
       {showScheduleModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="bg-neutral-900 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 border border-neutral-800">
-            <div className="p-6 border-b border-neutral-800 flex justify-between items-center bg-neutral-950/50">
+        <div className="adm-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowScheduleModal(false); }}>
+          <div className="adm-modal" role="dialog" aria-modal="true" aria-label="Manage weekly schedule">
+            <div className="adm-modal-h">
               <div>
-                <h3 className="text-xl font-black text-white italic uppercase tracking-wider">
-                  Manage Weekly Schedule
-                </h3>
-                <p className="text-sm font-bold text-neutral-500 uppercase tracking-widest mt-1">
-                  Assign Chicken or Paneer days
-                </p>
+                <h3>Manage weekly schedule</h3>
+                <p>Assign Chicken or Paneer days.</p>
               </div>
-              <button
-                onClick={() => setShowScheduleModal(false)}
-                className="p-2 hover:bg-neutral-800 rounded-full text-neutral-500 hover:text-white transition-colors cursor-pointer"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+              <button onClick={() => setShowScheduleModal(false)} className="adm-icon" aria-label="Close">
+                {I.x}
               </button>
             </div>
 
-            <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar" data-lenis-prevent="true">
+            <div className="adm-modal-b" data-lenis-prevent="true">
               {[
                 "Sunday",
                 "Monday",
@@ -1829,26 +1294,19 @@ export default function AdminPage() {
                 "Friday",
                 "Saturday",
               ].map((day, index) => (
-                <div
-                  key={day}
-                  className="flex items-center justify-between p-4 rounded-xl border border-neutral-800 bg-neutral-950/30 hover:bg-neutral-800/50 transition-all group"
-                >
-                  <span className="font-bold text-neutral-300 group-hover:text-white transition-colors">
-                    {day}
-                  </span>
-                  <div className="flex bg-neutral-950 p-1.5 rounded-lg border border-neutral-800">
+                <div key={day} className="adm-dayrow">
+                  <span>{day}</span>
+                  <div className="adm-seg">
                     <button
                       onClick={() => {
                         const newSchedule = [...tempSchedule];
                         newSchedule[index] = "Chicken";
                         setTempSchedule(newSchedule);
                       }}
-                      className={`px-4 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${tempSchedule[index] === "Chicken"
-                        ? "bg-orange-500 text-black shadow-lg shadow-orange-500/20"
-                        : "text-neutral-500 hover:text-neutral-300"
-                        }`}
+                      className={tempSchedule[index] === "Chicken" ? "on" : ""}
+                      aria-pressed={tempSchedule[index] === "Chicken"}
                     >
-                      🍗 Chicken
+                      Chicken
                     </button>
                     <button
                       onClick={() => {
@@ -1856,30 +1314,22 @@ export default function AdminPage() {
                         newSchedule[index] = "Paneer";
                         setTempSchedule(newSchedule);
                       }}
-                      className={`px-4 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${tempSchedule[index] === "Paneer"
-                        ? "bg-lime-500 text-black shadow-lg shadow-lime-500/20"
-                        : "text-neutral-500 hover:text-neutral-300"
-                        }`}
+                      className={tempSchedule[index] === "Paneer" ? "on" : ""}
+                      aria-pressed={tempSchedule[index] === "Paneer"}
                     >
-                      🧀 Paneer
+                      Paneer
                     </button>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="p-6 border-t border-neutral-800 bg-neutral-950/50 flex justify-end gap-3">
-              <button
-                onClick={() => setShowScheduleModal(false)}
-                className="px-6 py-3 text-neutral-400 font-bold uppercase tracking-wider text-xs hover:text-white hover:bg-neutral-800 rounded-xl transition-colors cursor-pointer"
-              >
+            <div className="adm-modal-f">
+              <button onClick={() => setShowScheduleModal(false)} className="adm-ghost">
                 Cancel
               </button>
-              <button
-                onClick={handleSaveSchedule}
-                className="px-6 py-3 bg-lime-500 text-black font-bold uppercase tracking-widest text-xs rounded-xl hover:bg-lime-400 shadow-lg shadow-lime-500/20 transition-all flex items-center gap-2 cursor-pointer transform active:scale-95"
-              >
-                <span>Save Schedule</span>
+              <button onClick={handleSaveSchedule} className="adm-btn">
+                Save schedule
               </button>
             </div>
           </div>

@@ -1,124 +1,104 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import AppShell from "@/components/AppShell";
 
-export default function DashboardPage() {
-  const router = useRouter();
+/* ============ Meridian Hub — theme tokens (mirror of the dashboard systems) ============ */
+const HUB_CSS = `
+.hub *{box-sizing:border-box}
+.hub{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--t3:#6b6b76;--ac:#4f46e5;--ach:#4338ca;--on-ac:#fff;--paper:#fafaf9;color:var(--t1);font-family:inherit}
+html[data-theme="dark"] .hub{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b96;--ac:#818cf8;--ach:#a5b4fc;--on-ac:#111113;--paper:#111113}
+.hub-head{text-align:center;margin-bottom:32px}
+.hub-kicker{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ac);margin:0 0 10px}
+.hub-h1{font-size:36px;font-weight:800;letter-spacing:-.02em;color:var(--t1);margin:0;line-height:1.1}
+.hub-sub{font-size:14px;font-weight:500;color:var(--t2);margin:10px 0 0}
+@media(min-width:768px){.hub-h1{font-size:48px}}
+.hub-grid{display:grid;grid-template-columns:1fr;gap:24px}
+@media(min-width:768px){.hub-grid{grid-template-columns:1fr 1fr}}
+/* Cards: constant-dark photographic mounts (like the auth brand pane) —
+   guaranteed text legibility in both themes, chrome adapts around them */
+.hub-card{position:relative;display:block;height:384px;border-radius:16px;overflow:hidden;background:#111113;border:1px solid var(--line);text-decoration:none;transition:border-color .2s ease}
+.hub-card:hover{border-color:var(--ac)}
+.hub-card:focus-visible{outline:2px solid var(--ac);outline-offset:3px}
+.hub-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(30%) contrast(1.06) brightness(.6) saturate(.9);transition:transform .7s ease}
+.hub-card:hover img{transform:scale(1.06)}
+.hub-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(17,17,19,.12) 0%,rgba(17,17,19,.38) 45%,rgba(17,17,19,.92) 100%)}
+.hub-body{position:absolute;left:0;right:0;bottom:0;padding:24px}
+.hub-bar{width:64px;height:3px;border-radius:2px;background:var(--ac);margin-bottom:14px;transform-origin:left;transform:scaleX(.625);transition:transform .45s ease}
+.hub-card:hover .hub-bar{transform:scaleX(1)}
+.hub-row{display:flex;align-items:flex-end;justify-content:space-between;gap:14px}
+.hub-h2{font-size:24px;font-weight:800;letter-spacing:-.02em;color:#f0f0f2;margin:0 0 6px}
+.hub-p{font-size:13px;font-weight:500;color:#c9c9d2;margin:0;max-width:280px;line-height:1.5}
+.hub-arrow{width:42px;height:42px;border-radius:999px;background:var(--ac);color:var(--on-ac);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s ease,transform .45s ease}
+.hub-card:hover .hub-arrow{transform:translateX(4px);background:var(--ach)}
+@media(prefers-reduced-motion:reduce){.hub *{transition:none!important;animation:none!important}}
+`;
 
+const ArrowIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+  </svg>
+);
+
+export default function DashboardPage() {
   return (
     <AppShell>
+      <style>{HUB_CSS}</style>
 
-      {/* Main Content */}
-      <main className="pt-28 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto min-h-screen flex flex-col justify-center">
-        <div className="text-center mb-16">
-          <h2 className="text-sm font-bold text-lime-500 uppercase tracking-[0.2em] mb-4">
-            Dashboard
-          </h2>
-          <h3 className="text-4xl md:text-6xl font-black text-white italic tracking-tighter">
-            CHOOSE YOUR{" "}
-            <span className="text-transparent bg-clip-text bg-linear-to-r from-lime-400 to-lime-600 pr-2">
-              GRIND
-            </span>
-          </h3>
-        </div>
+      <main className="hub max-w-[1440px] mx-auto px-7 pt-8 pb-14">
+        {/* Header — fully theme-aware: Meridian ink on paper (light), light ink on charcoal (dark) */}
+        <header className="hub-head">
+          <p className="hub-kicker">Dashboard</p>
+          <h1 className="hub-h1">Choose your grind.</h1>
+          <p className="hub-sub">Two logs, one athlete — pick where today starts.</p>
+        </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto w-full">
-          {/* Meal Tracking Card */}
-          <div
-            onClick={() => router.push("/dashboard/meal")}
-            className="group relative h-96 w-full rounded-2xl overflow-hidden cursor-pointer border border-neutral-800 hover:border-lime-500/50 transition-all duration-500 ease-out"
-          >
-            {/* Background Image */}
-            <div className="absolute inset-0 bg-neutral-900">
-              <img
-                src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&q=80&w=800"
-                alt="Meal Planning"
-                className="w-full h-full object-cover opacity-40 group-hover:opacity-60 group-hover:scale-110 transition-all duration-700"
-              />
-              <div className="absolute inset-0 bg-linear-to-t from-neutral-950 via-neutral-950/60 to-transparent"></div>
-            </div>
-
-            {/* Content */}
-            <div className="absolute bottom-0 left-0 p-8 w-full z-10 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-              <div className="h-1 bg-lime-500 mb-6 w-0 group-hover:w-16 transition-all duration-500 delay-100"></div>
-              <div className="flex items-end justify-between">
+        <div className="hub-grid">
+          {/* Nutrition card — real link: keyboard reachable, ctrl/middle-click opens in new tab */}
+          <Link href="/dashboard/meal" className="hub-card">
+            <img
+              src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&q=80&w=800"
+              alt=""
+              draggable={false}
+              loading="lazy"
+            />
+            <div className="hub-scrim" />
+            <div className="hub-body">
+              <div className="hub-bar" />
+              <div className="hub-row">
                 <div>
-                  <h4 className="text-3xl font-black text-white uppercase tracking-tighter mb-2">
-                    Nutrition Log
-                  </h4>
-                  <p className="text-neutral-400 font-medium group-hover:text-white transition-colors delay-100 max-w-xs">
-                    Track macros, calories, and daily meals to fuel your body
-                    perfectly.
-                  </p>
+                  <h2 className="hub-h2">Nutrition log</h2>
+                  <p className="hub-p">Track macros, calories, and daily meals to fuel your body perfectly.</p>
                 </div>
-                <div className="bg-lime-500 p-3 rounded-full opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 delay-200">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2.5}
-                    stroke="black"
-                    className="w-6 h-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
-                    />
-                  </svg>
-                </div>
+                <span className="hub-arrow" aria-hidden="true">
+                  <ArrowIcon />
+                </span>
               </div>
             </div>
-          </div>
+          </Link>
 
-          {/* Gym Tracking Card */}
-          <div
-            onClick={() => router.push("/dashboard/gym")}
-            className="group relative h-96 w-full rounded-2xl overflow-hidden cursor-pointer border border-neutral-800 hover:border-lime-500/50 transition-all duration-500 ease-out"
-          >
-            {/* Background Image */}
-            <div className="absolute inset-0 bg-neutral-900">
-              <img
-                src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&q=80&w=800"
-                alt="Gym Workout"
-                className="w-full h-full object-cover opacity-40 group-hover:opacity-60 group-hover:scale-110 transition-all duration-700"
-              />
-              <div className="absolute inset-0 bg-linear-to-t from-neutral-950 via-neutral-950/60 to-transparent"></div>
-            </div>
-
-            {/* Content */}
-            <div className="absolute bottom-0 left-0 p-8 w-full z-10 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-              <div className="h-1 bg-lime-500 mb-6 w-0 group-hover:w-16 transition-all duration-500 delay-100"></div>
-              <div className="flex items-end justify-between">
+          {/* Workout card — distinct photo (no longer duplicating the login pane) */}
+          <Link href="/dashboard/gym" className="hub-card">
+            <img
+              src="https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&q=80&w=800"
+              alt=""
+              draggable={false}
+              loading="lazy"
+            />
+            <div className="hub-scrim" />
+            <div className="hub-body">
+              <div className="hub-bar" />
+              <div className="hub-row">
                 <div>
-                  <h4 className="text-3xl font-black text-white uppercase tracking-tighter mb-2">
-                    Workout Log
-                  </h4>
-                  <p className="text-neutral-400 font-medium group-hover:text-white transition-colors delay-100 max-w-xs">
-                    Record exercises, sets, reps, and track your strength
-                    progress.
-                  </p>
+                  <h2 className="hub-h2">Workout log</h2>
+                  <p className="hub-p">Record exercises, sets, reps, and track your strength progress.</p>
                 </div>
-                <div className="bg-lime-500 p-3 rounded-full opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 delay-200">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2.5}
-                    stroke="black"
-                    className="w-6 h-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
-                    />
-                  </svg>
-                </div>
+                <span className="hub-arrow" aria-hidden="true">
+                  <ArrowIcon />
+                </span>
               </div>
             </div>
-          </div>
+          </Link>
         </div>
       </main>
     </AppShell>
