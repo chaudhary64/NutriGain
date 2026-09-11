@@ -40,44 +40,23 @@ html[data-theme="dark"] .auth{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8
 .auth-toggle:hover{background:var(--sunken);color:var(--t1)}
 .auth-toggle:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
 /* Brand pane — constant dark world in both themes */
-.auth-brand{display:none;position:relative;flex:0 0 44%;background:#111113;border-left:1px solid #26262b;overflow:hidden}
-.auth-brand::before{content:"";position:absolute;top:-180px;right:-120px;width:520px;height:520px;border-radius:50%;background:radial-gradient(closest-side,rgba(99,102,241,.16),transparent)}
+.auth-brand{display:none;position:relative;flex:0 0 44%;background:#111113;border-right:1px solid #26262b;overflow:hidden}
+.auth-bimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(35%) contrast(1.08) brightness(.55) saturate(.85)}
+.auth-bshade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(17,17,19,.62) 0%,rgba(17,17,19,.18) 42%,rgba(17,17,19,.88) 100%)}
 .auth-brand-in{position:relative;z-index:1;display:flex;flex-direction:column;justify-content:flex-end;min-height:100vh;padding:44px 48px}
 .auth-brand-top{position:absolute;top:44px;left:48px;display:flex;align-items:center;gap:10px}
 .auth-brand-top .auth-name{color:#f0f0f2}
-.auth-bpanel{width:100%;max-width:380px;background:#1c1c1f;border:1px solid #26262b;border-radius:14px;padding:20px 22px;margin-bottom:40px}
-.auth-bhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.auth-bcrumb{font-size:10px;font-weight:700;letter-spacing:.1em;color:#8b8b96;text-transform:uppercase}
-.auth-bpill{font-size:10px;font-weight:700;letter-spacing:.08em;color:#a5b4fc;background:#232347;border-radius:5px;padding:3px 8px;text-transform:uppercase}
-.auth-bignum{font-size:30px;font-weight:800;letter-spacing:-.02em;color:#f0f0f2;line-height:1;font-variant-numeric:tabular-nums}
-.auth-bunit{font-size:12px;font-weight:600;color:#a1a1ac;margin-left:6px}
-.auth-btrack{height:6px;background:#2e2e34;border-radius:999px;overflow:hidden;margin:10px 0 18px}
-.auth-bfill{height:100%;border-radius:999px;background:#818cf8}
-.auth-brow{display:flex;align-items:center;gap:10px;margin-bottom:9px}
-.auth-blbl{width:32px;font-size:10px;font-weight:700;letter-spacing:.06em;color:#a1a1ac}
-.auth-bmini{flex:1;height:5px;background:#2e2e34;border-radius:999px;overflow:hidden}
-.auth-bmini i{display:block;height:100%;border-radius:999px}
-.auth-bval{width:64px;text-align:right;font-size:11px;font-weight:600;color:#a1a1ac;font-variant-numeric:tabular-nums}
-.auth-bval.over{color:#f87171}
-.auth-bheat{display:grid;grid-template-columns:repeat(17,1fr);gap:3px;margin-top:16px}
-.auth-bheat i{aspect-ratio:1;border-radius:2px;background:#26262b}
-.auth-bheat i.l1{background:#232347}.auth-bheat i.l2{background:#3730a3}.auth-bheat i.l3{background:#4f46e5}.auth-bheat i.l4{background:#818cf8}
 .auth-btitle{font-size:28px;font-weight:800;letter-spacing:-.02em;line-height:1.12;color:#f0f0f2;margin:0 0 14px;max-width:380px}
 .auth-bsign{display:flex;align-items:center;gap:12px}
 .auth-bsign i{width:28px;height:2px;background:#818cf8;border-radius:2px}
 .auth-bsign span{font-size:11px;font-weight:700;letter-spacing:.18em;color:#a1a1ac;text-transform:uppercase}
 @media(min-width:1024px){
   .auth-brand{display:block}
+  .auth-split{flex-direction:row-reverse}
   .auth-brandrow{display:none}
 }
 @media(prefers-reduced-motion:reduce){.auth *{transition:none!important;animation:none!important}}
 `;
-
-// Deterministic heatmap pattern (safe for SSR hydration — integer math only)
-const HEAT = Array.from({ length: 119 }, (_, i) => {
-  const v = ((i * 73) % 19) + ((i * 31) % 7);
-  return v > 22 ? 4 : v > 17 ? 3 : v > 12 ? 2 : v > 7 ? 1 : 0;
-});
 
 const LogoMark = () => (
   <div className="auth-mark" aria-hidden="true">
@@ -238,46 +217,19 @@ export default function RegisterPage() {
           </div>
         </main>
 
-        {/* Brand pane — the product's data, not a stock photo */}
+        {/* Brand pane — athlete imagery, constant dark world in both themes */}
         <aside className="auth-brand" aria-hidden="true">
+          <img
+            className="auth-bimg"
+            src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=1600&auto=format&fit=crop"
+            alt=""
+            draggable={false}
+          />
+          <div className="auth-bshade" />
           <div className="auth-brand-in">
             <div className="auth-brand-top">
               <LogoMark />
               <span className="auth-name">NutriGain</span>
-            </div>
-
-            <div className="auth-bpanel">
-              <div className="auth-bhead">
-                <span className="auth-bcrumb">Today · Fri Sep 12</span>
-                <span className="auth-bpill">On track</span>
-              </div>
-              <div>
-                <span className="auth-bignum">1,984</span>
-                <span className="auth-bunit">/ 2,000 kcal</span>
-              </div>
-              <div className="auth-btrack"><div className="auth-bfill" style={{ width: "92%" }} /></div>
-
-              <div className="auth-brow">
-                <span className="auth-blbl">PRO</span>
-                <span className="auth-bmini"><i style={{ width: "87%", background: "#a78bfa" }} /></span>
-                <span className="auth-bval">105 / 120 g</span>
-              </div>
-              <div className="auth-brow">
-                <span className="auth-blbl">CARB</span>
-                <span className="auth-bmini"><i style={{ width: "100%", background: "#f87171" }} /></span>
-                <span className="auth-bval over">231 / 170 g</span>
-              </div>
-              <div className="auth-brow">
-                <span className="auth-blbl">FAT</span>
-                <span className="auth-bmini"><i style={{ width: "63%", background: "#34d399" }} /></span>
-                <span className="auth-bval">76 / 60 g</span>
-              </div>
-
-              <div className="auth-bheat">
-                {HEAT.map((lvl, i) => (
-                  <i key={i} className={lvl ? `l${lvl}` : undefined} />
-                ))}
-              </div>
             </div>
 
             <h2 className="auth-btitle">Track your macros. Dominate your goals.</h2>
