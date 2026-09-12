@@ -198,7 +198,7 @@ export default function UserDetailPage() {
     >
       <style>{ADM_CSS}</style>
 
-      <div className="adm max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="adm ng-container py-8">
         {/* User info card */}
         <div className="adm-card adm-form" style={{ marginBottom: 28 }}>
           <div className="flex items-center gap-5">

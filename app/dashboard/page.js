@@ -45,7 +45,7 @@ export default function DashboardPage() {
     <AppShell>
       <style>{HUB_CSS}</style>
 
-      <main className="hub max-w-[1440px] mx-auto px-7 pt-8 pb-14">
+      <main className="hub ng-container pt-8 pb-14">
         {/* Header — fully theme-aware: Meridian ink on paper (light), light ink on charcoal (dark) */}
         <header className="hub-head">
           <p className="hub-kicker">Dashboard</p>

@@ -636,7 +636,7 @@ export default function AdminPage() {
     <AppShell variant="admin">
       <style>{ADM_CSS}</style>
 
-      <div className="adm max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="adm ng-container py-8">
         {/* Page header */}
         <div className="adm-head">
           <p className="adm-crumb">Admin</p>

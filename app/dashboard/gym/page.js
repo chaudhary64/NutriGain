@@ -74,6 +74,13 @@ html[data-theme="dark"] .gym{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b
 .gym .react-calendar-heatmap{color-scheme:light}
 .gym .rt-cell{display:flex;flex-direction:column;gap:2px;padding:8px 12px;border-radius:8px;font-size:13px;border:1px solid transparent}
 .gym .rt-cell:hover{background:var(--paper)}
+/* Status — Whisper-styled segmented switcher: all options visible, active
+   filled in ink. Full-width row on mobile, quiet right-aligned on desktop. */
+.gym .status-seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;background:var(--card);padding:3px;gap:2px}
+.gym .status-seg button{appearance:none;border:0;background:transparent;font-family:inherit;color:var(--t2);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:9px 14px;border-radius:6px;cursor:pointer;transition:.15s;white-space:nowrap}
+.gym .status-seg button:hover{color:var(--t1);background:var(--sunken)}
+.gym .status-seg button[aria-pressed="true"]{background:var(--t1);color:var(--card)}
+@media (max-width:640px){.gym .status-wrap{width:100%}.gym .status-seg{display:flex;width:100%}.gym .status-seg button{flex:1;padding:11px 4px;text-align:center}}
 @media (max-width:1024px){.gym .gym-layout{grid-template-columns:minmax(0,1fr) !important}}
 /* Sticky rail: pinned on desktop, capped to the viewport so the whole card
    stays visible; internal scroll if it ever grows taller. Static on mobile —
@@ -181,7 +188,6 @@ export default function GymTrackingPage() {
   const [newWeightDate, setNewWeightDate] = useState(
     new Date().toISOString().split("T")[0],
   );
-  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const [prExercise, setPrExercise] = useState(null); // exerciseId whose PR chart is open
   const [prSeries, setPrSeries] = useState([]);
 
@@ -410,7 +416,6 @@ export default function GymTrackingPage() {
       if (res.ok) {
         const data = await res.json();
         setTodayGymStatus(status);
-        setShowStatusDropdown(false);
         if (data.gymHistory) {
           setGymHistory(data.gymHistory);
           calculateStreaks(data.gymHistory);
@@ -678,99 +683,31 @@ export default function GymTrackingPage() {
     <>
       <style>{MERIDIAN_CSS}</style>
       <ToastHost toasts={toasts} onDismiss={dismissToast} />
-      <AppShell
-        navSlot={
-          <>
-            {/* Today's Status — nav pill */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: "var(--t3)" }}>Status</span>
-              <div style={{ position: "relative" }}>
-                <button
-                  onClick={() => setShowStatusDropdown(!showStatusDropdown)}
-                  aria-expanded={showStatusDropdown}
-                  className="m-chip"
-                  style={{
-                    ...STATUS_META[todayGymStatus]?.chip,
-                    cursor: "pointer",
-                    fontSize: 12,
-                    padding: "4px 10px",
-                  }}
-                >
-                  {STATUS_META[todayGymStatus]?.label}
-                  <Icon d={ICONS.chevron} className="w-3 h-3" />
-                </button>
-
-                {showStatusDropdown && (
-                  <div
-                    role="menu"
-                    className="m-card"
-                    style={{
-                      position: "absolute",
-                      top: "calc(100% + 6px)",
-                      right: 0,
-                      width: 176,
-                      padding: 4,
-                      boxShadow: "0 16px 40px -12px rgba(26,26,30,.22)",
-                      zIndex: 30,
-                    }}
-                  >
-                    {Object.entries(STATUS_META).map(([val, meta]) => (
-                      <button
-                        key={val}
-                        role="menuitem"
-                        onClick={() => handleGymStatusUpdate(val)}
-                        className="rt-cell"
-                        style={{
-                          width: "100%",
-                          textAlign: "left",
-                          background: todayGymStatus === val ? "var(--sunken)" : "transparent",
-                          fontWeight: todayGymStatus === val ? 700 : 500,
-                          color: "var(--t1)",
-                          cursor: "pointer",
-                          fontSize: 12.5,
-                          padding: "8px 10px",
-                        }}
-                      >
-                        {meta.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
+      <AppShell>
+        <div className="gym ng-container" style={{ padding: "32px var(--layout-gutter) 56px" }}>
+          {/* Page header — title left, today's status right */}
+          <div style={{ marginBottom: 24, display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
+            <div>
+              <div className="m-h1">Gym</div>
+              <div className="m-sub">
+                {format(new Date(), "EEEE, d MMMM")} — {muscleGroups.join(" & ")} day.
               </div>
             </div>
-          </>
-        }
-        mobileSlot={
-          <>
-            {/* Mobile status controls */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
-              {Object.entries(STATUS_META).map(([val, meta]) => (
-                <button
-                  key={val}
-                  onClick={() => handleGymStatusUpdate(val)}
-                  className="m-chip"
-                  style={{
-                    justifyContent: "center",
-                    padding: "9px 4px",
-                    cursor: "pointer",
-                    ...(todayGymStatus === val
-                      ? STATUS_META[val].chip
-                      : { background: "var(--card)", color: "var(--t2)", border: "1px solid var(--line)" }),
-                  }}
-                >
-                  {meta.label}
-                </button>
-              ))}
-            </div>
-          </>
-        }
-      >
-        <div className="gym" style={{ maxWidth: 1440, margin: "0 auto", padding: "32px 28px 56px" }}>
-          {/* Page header */}
-          <div style={{ marginBottom: 24 }}>
-            <div className="m-h1">Gym</div>
-            <div className="m-sub">
-              {format(new Date(), "EEEE, d MMMM")} — {muscleGroups.join(" & ")} day.
+
+            {/* Today's status — segmented switcher, Whisper-styled */}
+            <div className="status-wrap" style={{ flex: "0 0 auto" }}>
+              <span className="m-lbl" style={{ display: "block", marginBottom: 6 }}>Today&apos;s status</span>
+              <div className="status-seg" role="group" aria-label="Today's gym status">
+                {Object.entries(STATUS_META).map(([val, meta]) => (
+                  <button
+                    key={val}
+                    onClick={() => handleGymStatusUpdate(val)}
+                    aria-pressed={todayGymStatus === val}
+                  >
+                    {meta.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 

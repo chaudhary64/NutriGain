@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
@@ -8,15 +8,17 @@ import { useTheme } from "@/context/ThemeContext";
 /**
  * Shared application shell: top navigation + content container.
  *
- * Restyled in the Meridian design system: light paper chrome, ink wordmark,
- * indigo accent — matching app/dashboard/meal/page.js.
+ * Restyled in the Whisper design system: a slim 56px hairline bar — ink "N."
+ * monogram, wide-tracked NUTRIGAIN. wordmark (W2 lockup), uppercase tabs with
+ * a hairline accent underline, quiet right rail. Theme-aware via the
+ * --shell-* tokens in globals.css.
  *
  * Variants:
  *  - "dashboard" — full nav with Meal/Gym/Profile tab switcher
- *  - "admin"     — compact nav with an Admin label and logout
+ *  - "admin"     — compact nav with the MASTER CONTROL TERMINAL tag and logout
  *
  * Slots let pages inject their own controls into the nav:
- *  - navSlot    — rendered in the desktop bar, left of the tab switcher
+ *  - navSlot    — rendered in the desktop bar, right of the tabs
  *  - mobileSlot — rendered inside the mobile dropdown above the links
  *
  * The shell owns mobile-menu state so pages don't have to.
@@ -30,6 +32,20 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
 
   const isAdmin = variant === "admin";
 
+  // Lock body scroll and close on Escape while the full-screen menu is open.
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    document.body.style.overflow = "hidden";
+    const onKey = (e) => {
+      if (e.key === "Escape") setMobileMenuOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = "";
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [mobileMenuOpen]);
+
   const navigate = (href) => {
     router.push(href);
     setMobileMenuOpen(false);
@@ -41,6 +57,15 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
     { label: "Profile", href: "/dashboard/profile" },
   ];
 
+  const initials =
+    (user?.name || "")
+      .split(" ")
+      .filter(Boolean)
+      .map((w) => w[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "·";
+
   const logoutIcon = (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -48,7 +73,7 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
       viewBox="0 0 24 24"
       strokeWidth={2}
       stroke="currentColor"
-      className="w-5 h-5"
+      className="w-[18px] h-[18px]"
     >
       <path
         strokeLinecap="round"
@@ -58,26 +83,99 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
     </svg>
   );
 
-  // Theme toggle — Meridian stroke style, matches the logout icon weight.
+  // Theme toggle — hairline ghost button, matches the logout weight.
   const themeToggle = (
     <button
       onClick={toggleTheme}
-      className="p-2 rounded-lg transition-colors cursor-pointer text-[var(--shell-ink-2)] hover:text-[var(--shell-ink)] hover:bg-[var(--shell-sunken)]"
+      className="p-1.5 rounded-lg transition-colors cursor-pointer text-[var(--shell-muted)] hover:text-[var(--shell-ink)] hover:bg-[var(--shell-sunken)]"
       role="switch"
       aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
       aria-checked={theme === "dark"}
       title={theme === "dark" ? "Light mode" : "Dark mode"}
     >
       {theme === "dark" ? (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-5 h-5" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-[18px] h-[18px]" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
         </svg>
       ) : (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-5 h-5" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-[18px] h-[18px]" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
         </svg>
       )}
     </button>
+  );
+
+  // W2 lockup — ink monogram + wide-tracked NUTRIGAIN. wordmark.
+  const brand = (
+    <div className="flex items-center gap-2.5 min-w-0">
+      <span
+        aria-hidden="true"
+        className="w-6 h-6 rounded-md bg-[var(--shell-ink)] text-[var(--shell-on-ink)] flex items-center justify-center text-[11px] font-extrabold leading-none select-none flex-none"
+      >
+        N.
+      </span>
+      <span className="text-[13px] font-extrabold uppercase tracking-[0.24em] leading-none whitespace-nowrap text-[var(--shell-ink)]">
+        NUTRIGAIN<span className="text-[var(--shell-accent)]">.</span>
+      </span>
+      {isAdmin && (
+        <span className="hidden sm:inline-flex items-center font-mono text-[8.5px] font-semibold uppercase tracking-[0.14em] text-[var(--shell-accent)] bg-[var(--shell-accent-soft)] border border-[var(--shell-line)] rounded px-1.5 py-[3px] whitespace-nowrap">
+          Master Control Terminal
+        </span>
+      )}
+    </div>
+  );
+
+  // Desktop tabs — uppercase micro-links with a hairline accent underline.
+  const tabs = (
+    <nav className="hidden md:flex h-full items-center gap-6" aria-label="Primary">
+      {dashboardTabs.map((tab) => {
+        const active = pathname === tab.href;
+        return (
+          <button
+            key={tab.href}
+            onClick={() => navigate(tab.href)}
+            aria-current={active ? "page" : undefined}
+            className={`h-full flex items-center px-0.5 text-[11px] font-bold uppercase tracking-[0.16em] border-b-[1.5px] -mb-px transition-colors cursor-pointer ${
+              active
+                ? "border-[var(--shell-accent)] text-[var(--shell-ink)]"
+                : "border-transparent text-[var(--shell-muted)] hover:text-[var(--shell-ink)]"
+            }`}
+          >
+            {tab.label}
+          </button>
+        );
+      })}
+    </nav>
+  );
+
+  // Right rail — page controls, theme, user, logout.
+  const rightRail = (
+    <div className="flex items-center gap-2.5">
+      {navSlot && <div className="hidden md:flex items-center gap-3 min-w-0">{navSlot}</div>}
+      {themeToggle}
+      <div className="flex items-center gap-2">
+        <span
+          aria-hidden="true"
+          className="w-7 h-7 rounded-lg bg-[var(--shell-sunken)] border border-[var(--shell-line)] text-[var(--shell-ink)] flex items-center justify-center text-[10px] font-extrabold flex-none"
+        >
+          {initials}
+        </span>
+        <div className="hidden sm:block leading-tight">
+          <p className="text-[8px] font-extrabold uppercase tracking-[0.16em] text-[var(--shell-muted)]">
+            {isAdmin ? "Admin" : "Signed in"}
+          </p>
+          <p className="text-[12px] font-bold text-[var(--shell-ink)] max-w-[140px] truncate">{user?.name}</p>
+        </div>
+      </div>
+      <button
+        onClick={logout}
+        className="p-1.5 rounded-lg transition-colors cursor-pointer text-[var(--shell-muted)] hover:text-[var(--shell-danger)] hover:bg-[var(--shell-danger-soft)]"
+        aria-label="Log out"
+        title="Log out"
+      >
+        {logoutIcon}
+      </button>
+    </div>
   );
 
   return (
@@ -85,78 +183,16 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
       <nav
         className={`${isAdmin ? "sticky" : "fixed top-0 w-full"} top-0 z-50 bg-[var(--shell-chrome)] backdrop-blur-md border-b border-[var(--shell-line)]`}
       >
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-[#4f46e5] rounded-lg flex items-center justify-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2.5}
-                  stroke="white"
-                  className="w-4.5 h-4.5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"
-                  />
-                </svg>
-              </div>
-              <div>
-                <h1
-                  className={`text-xl font-extrabold tracking-tight ${isAdmin ? "hidden sm:block" : ""}`}
-                >
-                  Nutri<span className="text-[#4f46e5]">Gain</span>
-                </h1>
-                {isAdmin && (
-                  <p className="text-[10px] text-[var(--shell-muted)] font-bold uppercase tracking-[0.2em] leading-none">
-                    Master Control Terminal
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Desktop Actions */}
-            <div className="hidden md:flex items-center gap-5">
-              {navSlot && <div className="flex items-center gap-4">{navSlot}</div>}
-
-              {!isAdmin && (
-                <>
-                  <div className="h-6 w-px bg-[var(--shell-line)]"></div>
-
-                  <div className="flex gap-1 bg-[var(--shell-sunken)] p-1 rounded-[10px]">
-                    {dashboardTabs.map((tab) => (
-                      <button
-                        key={tab.href}
-                        onClick={() => navigate(tab.href)}
-                        aria-current={pathname === tab.href ? "page" : undefined}
-                        className={`px-3.5 py-1.5 rounded-lg font-semibold text-[13px] flex items-center gap-2 transition-all cursor-pointer ${
-                          pathname === tab.href
-                            ? "bg-[var(--shell-accent)] text-[var(--shell-on-accent)]"
-                            : "text-[var(--shell-ink-2)] hover:text-[var(--shell-ink)] hover:bg-[var(--shell-raised)]"
-                        }`}
-                      >
-                        {tab.label}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-
-              <div className="flex items-center gap-2">
+        <div className="ng-container">
+          {isAdmin ? (
+            <div className="flex justify-between items-center h-14">
+              {brand}
+              <div className="flex items-center gap-2.5">
+                {navSlot && <div className="hidden md:flex items-center gap-3 min-w-0">{navSlot}</div>}
                 {themeToggle}
-                <div className="text-right hidden sm:block pl-1">
-                  <p className="text-[10px] text-[var(--shell-muted)] uppercase tracking-widest font-bold">
-                    {isAdmin ? "Admin" : "Signed in"}
-                  </p>
-                  <p className="text-[13px] font-semibold text-[var(--shell-ink)] leading-tight">{user?.name}</p>
-                </div>
                 <button
                   onClick={logout}
-                  className="text-[var(--shell-muted)] hover:text-[var(--shell-danger)] transition-colors cursor-pointer p-1.5 rounded-lg"
+                  className="p-1.5 rounded-lg transition-colors cursor-pointer text-[var(--shell-muted)] hover:text-[var(--shell-danger)] hover:bg-[var(--shell-danger-soft)]"
                   aria-label="Log out"
                   title="Log out"
                 >
@@ -164,107 +200,137 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
                 </button>
               </div>
             </div>
-
-            {/* Mobile Toggle */}
-            <div className="flex md:hidden items-center">
-              {themeToggle}
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 text-[var(--shell-ink)] hover:bg-[var(--shell-sunken)] rounded-lg transition cursor-pointer"
-                aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-                aria-expanded={mobileMenuOpen}
-                aria-controls="mobile-menu"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {mobileMenuOpen ? (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  ) : (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6h16M4 12h16M4 18h16"
-                    />
-                  )}
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div id="mobile-menu" className="md:hidden border-b border-[var(--shell-line)] bg-[var(--shell-menu)]">
-            <div className="p-4 space-y-4">
-              <div className="flex items-center gap-3 px-2 mb-4">
-                <div>
-                  <p className="text-[10px] text-[var(--shell-muted)] uppercase tracking-widest font-bold">
-                    Signed in
-                  </p>
-                  <p className="text-lg font-bold text-[var(--shell-ink)]">{user?.name}</p>
-                </div>
+          ) : (
+            <>
+              {/* Desktop — brand left / centered tabs / right rail */}
+              <div className="hidden md:grid grid-cols-[1fr_auto_1fr] items-center h-14 gap-3">
+                <div className="flex h-full items-center">{brand}</div>
+                <div className="flex justify-center h-full">{tabs}</div>
+                <div className="flex justify-end h-full items-center">{rightRail}</div>
               </div>
-
-              {mobileSlot}
-
-              {!isAdmin && (
-                <div className="space-y-2">
-                  {dashboardTabs.map((tab) => (
-                    <button
-                      key={tab.href}
-                      onClick={() => navigate(tab.href)}
-                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-semibold ${
-                        pathname === tab.href
-                          ? "bg-[var(--shell-accent-soft)] text-[var(--shell-accent)]"
-                          : "text-[var(--shell-ink-2)] hover:bg-[var(--shell-sunken)]"
-                      }`}
-                    >
-                      {tab.label === "Meal"
-                        ? "Meal Tracker"
-                        : tab.label === "Gym"
-                          ? "Gym Tracker"
-                          : tab.label}
-                      {pathname === tab.href && (
-                        <span className="text-[var(--shell-accent)]">●</span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {isAdmin && (
-                <div className="space-y-2">
+          {/* Mobile bar — brand + theme + hamburger */}
+              <div className="md:hidden flex items-center justify-between h-14">
+                {brand}
+                <div className="flex items-center gap-1.5">
+                  {themeToggle}
                   <button
-                    onClick={() => navigate("/admin")}
-                    className="w-full flex items-center justify-between px-4 py-3 text-[var(--shell-ink-2)] hover:bg-[var(--shell-sunken)] rounded-xl font-semibold"
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    className="p-2 text-[var(--shell-ink)] hover:bg-[var(--shell-sunken)] rounded-lg transition cursor-pointer"
+                    aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+                    aria-expanded={mobileMenuOpen}
+                    aria-controls="mobile-menu"
                   >
-                    Admin Panel
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      {mobileMenuOpen ? (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      ) : (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                      )}
+                    </svg>
                   </button>
                 </div>
-              )}
-
-              <div className="pt-3 mt-3 border-t border-[var(--shell-line)]">
-                <button
-                  onClick={() => {
-                    logout();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-[var(--shell-danger)] hover:bg-[var(--shell-danger-soft)] rounded-xl font-semibold"
-                >
-                  Logout
-                </button>
               </div>
-            </div>
-          </div>
-        )}
+            </>
+          )}
+        </div>
+
       </nav>
 
-      <div className={isAdmin ? "" : "pt-16"}>{children}</div>
+      {/* Mobile full-screen menu — rendered outside <nav> so the bar's
+          backdrop-filter can't become its containing block and clip it. */}
+      {mobileMenuOpen && (
+        <div
+          id="mobile-menu"
+          className="md:hidden fixed inset-0 z-[60] bg-[var(--shell-bg)] flex flex-col"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu"
+        >
+          {/* Index header — mirrors the top bar so chrome doesn't jump.
+              Theme toggle lives here too: the overlay hides the bar's rail. */}
+          <div className="ng-container h-14 flex items-center justify-between border-b border-[var(--shell-line)] bg-[var(--shell-chrome)] backdrop-blur-md flex-none">
+            {brand}
+            <div className="flex items-center gap-1.5">
+              {themeToggle}
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 text-[var(--shell-ink)] hover:bg-[var(--shell-sunken)] rounded-lg transition cursor-pointer"
+                aria-label="Close menu"
+              >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            </div>
+          </div>
+
+          {/* Rows */}
+          <nav className="flex-1 flex flex-col justify-center px-7 overflow-y-auto" aria-label="Mobile">
+            {mobileSlot && <div className="mb-8 pb-2">{mobileSlot}</div>}
+
+            <p className="text-[9px] font-extrabold uppercase tracking-[0.18em] text-[var(--shell-muted)] mb-4">
+              {isAdmin ? "Master control" : "Index"}
+            </p>
+
+            {!isAdmin &&
+              dashboardTabs.map((tab, i) => {
+                const active = pathname === tab.href;
+                return (
+                  <button
+                    key={tab.href}
+                    onClick={() => navigate(tab.href)}
+                    aria-current={active ? "page" : undefined}
+                    style={{ animationDelay: `${80 + i * 70}ms` }}
+                    className={`wg-row-in group w-full text-left flex items-baseline gap-3 py-4 border-b border-[var(--shell-line)] cursor-pointer transition-colors ${
+                      active ? "text-[var(--shell-ink)]" : "text-[var(--shell-muted)] active:text-[var(--shell-ink)]"
+                    }`}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`text-[10px] font-bold tracking-[0.08em] pt-1 ${
+                        active ? "text-[var(--shell-accent)]" : "text-[var(--shell-muted)]"
+                      }`}
+                    >
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span className="text-[26px] font-extrabold uppercase tracking-[0.1em] leading-none">
+                      {tab.label}
+                    </span>
+                    {active && (
+                      <span
+                        aria-hidden="true"
+                        className="ml-auto w-6 h-[2px] bg-[var(--shell-accent)] self-center"
+                      />
+                    )}
+                  </button>
+                );
+              })}
+
+            {isAdmin && (
+              <button
+                onClick={() => navigate("/admin")}
+                style={{ animationDelay: "80ms" }}
+                className="wg-row-in w-full text-left flex items-baseline gap-3 py-4 border-b border-[var(--shell-line)] text-[var(--shell-ink)] cursor-pointer"
+              >
+                <span aria-hidden="true" className="text-[10px] font-bold tracking-[0.08em] pt-1 text-[var(--shell-accent)]">
+                  01
+                </span>
+                <span className="text-[26px] font-extrabold uppercase tracking-[0.1em] leading-none">Admin</span>
+              </button>
+            )}
+          </nav>
+
+          {/* Foot */}
+          <div className="flex-none px-7 pb-10 pt-4">
+            <p className="text-[9px] font-extrabold uppercase tracking-[0.18em] text-[var(--shell-muted)]">
+              {isAdmin ? "Admin" : "Signed in"}
+            </p>
+            <p className="text-[15px] font-bold text-[var(--shell-ink)] truncate mt-0.5">{user?.name}</p>
+          </div>
+        </div>
+      )}
+
+      <div className={isAdmin ? "" : "pt-14"}>{children}</div>
     </div>
   );
 }

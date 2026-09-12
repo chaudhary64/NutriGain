@@ -707,10 +707,16 @@ export default function MealTrackingPage() {
     <>
       <style>{MERIDIAN_CSS}</style>
       <ToastHost toasts={toasts} onDismiss={dismissToast} />
-      <AppShell
-        navSlot={
-          <div className="mrd">
-            <div className="m-datepill">
+      <AppShell>
+        <div className="mrd ng-container" style={{ padding: "32px var(--layout-gutter) 56px" }}>
+          {/* Page header — title left, functional date picker right
+              (moved out of the nav; this replaces the old static pill) */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
+            <div>
+              <div className="m-h1">{selectedIsToday ? "Today" : format(selDate, "EEEE, MMMM d")}</div>
+              <div className="m-sub">{daySummary}</div>
+            </div>
+            <div className="m-datepill" style={{ cursor: "pointer" }}>
               {selectedIsToday ? (
                 <span className="m-live"><span className="m-dot"></span>Today</span>
               ) : (
@@ -726,40 +732,6 @@ export default function MealTrackingPage() {
                   aria-label="Select date"
                 />
               </div>
-            </div>
-          </div>
-        }
-        mobileSlot={
-          <div className="mrd" style={{ paddingBottom: 8 }}>
-            <p className="m-crumb" style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 6 }}>
-              Select date {selectedIsToday ? "· Today" : ""}
-            </p>
-            <div className="m-datepill" style={{ width: "100%", justifyContent: "space-between" }}>
-              <span className="m-live"><span className="m-dot"></span>{format(selDate, "EEE, MMM d")}</span>
-              <div className="m-datewrap" style={{ position: "static", display: "contents" }}>
-                <Icon d={ICONS.calendar} className="m-ic" />
-                <input
-                  type="date"
-                  value={currentDate}
-                  onChange={(e) => setCurrentDate(e.target.value)}
-                  aria-label="Select date"
-                  style={{ position: "static", opacity: 0, width: 24, height: 24, marginLeft: -24 }}
-                />
-              </div>
-            </div>
-          </div>
-        }
-      >
-        <div className="mrd" style={{ maxWidth: 1440, margin: "0 auto", padding: "32px 28px 56px" }}>
-          {/* Page header */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
-            <div>
-              <div className="m-h1">{selectedIsToday ? "Today" : format(selDate, "EEEE, MMMM d")}</div>
-              <div className="m-sub">{daySummary}</div>
-            </div>
-            <div className="m-datepill">
-              <Icon d={ICONS.calendar} className="m-ic" />
-              <span className="m-num">{format(selDate, "MMM d, yyyy")}</span>
             </div>
           </div>
 

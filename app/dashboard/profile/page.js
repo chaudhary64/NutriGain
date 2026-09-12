@@ -186,7 +186,7 @@ export default function ProfilePage() {
       <style>{MERIDIAN_CSS}</style>
       <ToastHost toasts={toasts} onDismiss={dismissToast} />
       <AppShell>
-        <div className="mrd" style={{ maxWidth: 1440, margin: "0 auto", padding: "32px 28px 56px" }}>
+        <div className="mrd ng-container" style={{ padding: "32px var(--layout-gutter) 56px" }}>
           {/* Page header */}
           <div style={{ marginBottom: 24 }}>
             <div className="m-h1">Profile</div>
