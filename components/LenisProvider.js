@@ -3,20 +3,22 @@
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Lenis from "lenis";
-import { useUserSettings } from "@/context/UserSettingsContext";
 
 /**
- * Lenis smooth-scroll provider.
+ * Lenis smooth-scroll provider — scoped to the home page only.
+ *
+ * Smooth scrolling is a landing-page feel, not an app feel: dashboards need
+ * native, instant, predictable scrolling. The provider therefore mounts
+ * Lenis only while the pathname is "/" and destroys it on every other route.
  *
  * Hardened against the "page won't scroll" failure mode, which had two
  * interacting causes:
  *
  *  1. Stale zero limit. With a window wrapper, Lenis only re-measures on
- *     window resize. The dashboard renders through an auth gate (null ->
- *     content), so content mounts after Lenis boots and its limit stays 0 —
- *     every wheel event becomes a no-op. Fixed by ResizeObserver on <body>,
- *     plus a self-healing guard that compares the limit to the real document
- *     each beat.
+ *     window resize. Content that mounts after Lenis boots (fonts, images,
+ *     client data) leaves its limit stale — every wheel event becomes a
+ *     no-op. Fixed by ResizeObserver on <body>/<html>, plus a self-healing
+ *     guard that compares the limit to the real document each beat.
  *
  *  2. Dead animation loop. An external rAF chain can be cancelled (StrictMode
  *     double-mounts, provider re-runs) and Lenis then never advances its
@@ -25,12 +27,12 @@ import { useUserSettings } from "@/context/UserSettingsContext";
  *
  * All resizes are gated on !isScrolling: resize() mid-animation resets
  * animatedScroll and visibly kills smooth scrolling.
- * Route changes reset the scroll position to the top.
  */
 export default function LenisProvider({ children }) {
-  const { smoothScroll, mounted } = useUserSettings();
-  const lenisRef = useRef(null);
   const pathname = usePathname();
+  const lenisRef = useRef(null);
+
+  const onHome = pathname === "/";
 
   // Reset scroll to top on navigation so pages never open mid-scroll.
   useEffect(() => {
@@ -42,7 +44,8 @@ export default function LenisProvider({ children }) {
   }, [pathname]);
 
   useEffect(() => {
-    if (!mounted || !smoothScroll) {
+    // Native scrolling everywhere except the home page.
+    if (!onHome) {
       if (lenisRef.current) {
         lenisRef.current.destroy();
         lenisRef.current = null;
@@ -81,10 +84,9 @@ export default function LenisProvider({ children }) {
         const t1 = setTimeout(safeSync, 300);
         const t2 = setTimeout(safeSync, 1200);
 
-        // Self-healing guard: on slow connections the auth gate can resolve
-        // after every sync above, leaving a stale zero limit (the page then
-        // refuses to scroll). Compare against the real document each beat and
-        // re-measure on mismatch.
+        // Self-healing guard: late-mounting content can leave a stale limit
+        // (the page then refuses to scroll). Compare against the real document
+        // each beat and re-measure on mismatch.
         const guard = setInterval(() => {
           const l = lenisRef.current;
           if (!l || l.isScrolling) return;
@@ -120,7 +122,7 @@ export default function LenisProvider({ children }) {
         delete window.lenis;
       }
     };
-  }, [smoothScroll, mounted]);
+  }, [onHome]);
 
   return <>{children}</>;
 }

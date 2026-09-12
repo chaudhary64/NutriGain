@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { useUserSettings } from "@/context/UserSettingsContext";
 import AppShell from "@/components/AppShell";
 
 /* ------------------------------------------------------------------ */
@@ -94,7 +93,6 @@ function ToastHost({ toasts, onDismiss }) {
 
 export default function ProfilePage() {
   const { user, logout, checkAuth } = useAuth();
-  const { smoothScroll, toggleSmoothScroll } = useUserSettings();
   const [goalForm, setGoalForm] = useState(null);
   const [editingGoals, setEditingGoals] = useState(false);
   const [savingGoals, setSavingGoals] = useState(false);
@@ -158,11 +156,6 @@ export default function ProfilePage() {
     setGoalForm(null);
     setGoalsMessage("");
     setEditingGoals(false);
-  };
-
-  const handleToggleScroll = (val) => {
-    toggleSmoothScroll(val);
-    pushToast(val ? "Smooth scrolling on." : "Native scrolling on.");
   };
 
   const initials = user.name
@@ -305,48 +298,6 @@ export default function ProfilePage() {
                       </div>
                     )}
                   </div>
-                </div>
-              </div>
-
-              {/* Preferences */}
-              <div className="m-card m-in">
-                <div className="m-card-h">
-                  <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <span style={{ color: "var(--ac)" }}><Icon d={ICONS.gear} /></span>
-                    Preferences
-                  </h3>
-                </div>
-                <div className="m-row" style={{ justifyContent: "space-between" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                    <span className="m-rowicon" style={{ color: smoothScroll ? "var(--ac)" : "var(--t2)" }}>
-                      <Icon d={ICONS.scroll} />
-                    </span>
-                    <div>
-                      <p style={{ fontWeight: 600, color: "var(--t1)" }}>Smooth scrolling</p>
-                      <p className="m-crumb" style={{ marginTop: 2 }}>
-                        {smoothScroll ? "Lenis smooth scroll is active" : "Native browser scrolling is active"}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    id="smooth-scroll-toggle"
-                    onClick={() => handleToggleScroll(!smoothScroll)}
-                    role="switch"
-                    aria-checked={smoothScroll}
-                    aria-label="Toggle smooth scrolling"
-                    className="m-num"
-                    style={{
-                      position: "relative", width: 46, height: 26, borderRadius: 999, border: "1px solid var(--line)",
-                      background: smoothScroll ? "var(--ac)" : "var(--track)", cursor: "pointer", transition: "background .2s ease", flexShrink: 0,
-                    }}
-                  >
-                    <span
-                      style={{
-                        position: "absolute", top: 3, left: smoothScroll ? 23 : 3, width: 18, height: 18, borderRadius: "50%",
-                        background: "var(--card)", boxShadow: "0 1px 3px rgba(26,26,30,.25)", transition: "left .2s cubic-bezier(.22,1,.36,1)",
-                      }}
-                    />
-                  </button>
                 </div>
               </div>
 

@@ -35,7 +35,6 @@ export const GET = withAuth(async (request, user) => {
         name: userData.name,
         isAdmin: userData.isAdmin,
         mealDays: userData.mealDays || DEFAULT_MEAL_DAYS,
-        smoothScroll: userData.smoothScroll !== undefined ? userData.smoothScroll : true,
         theme: userData.theme || null,
         macroGoals: userData.macroGoals,
       },
@@ -54,7 +53,7 @@ export const GET = withAuth(async (request, user) => {
 
 export const PUT = withAuth(async (request, user) => {
   const body = await request.json().catch(() => ({}));
-  const { mealDays, smoothScroll, macroGoals, theme } = body;
+  const { mealDays, macroGoals, theme } = body;
 
   const updateFields = {};
 
@@ -64,8 +63,6 @@ export const PUT = withAuth(async (request, user) => {
       return NextResponse.json({ error: validationErrors[0], errors: validationErrors }, { status: 400 });
     }
     updateFields.mealDays = mealDays;
-  }  if (smoothScroll !== undefined) {
-      updateFields.smoothScroll = Boolean(smoothScroll);
   }
 
   if (theme !== undefined) {
@@ -104,7 +101,6 @@ export const PUT = withAuth(async (request, user) => {
       name: userData.name,
       isAdmin: userData.isAdmin,
       mealDays: userData.mealDays,
-      smoothScroll: userData.smoothScroll !== undefined ? userData.smoothScroll : true,
       theme: userData.theme || null,
       macroGoals: userData.macroGoals,
     },
