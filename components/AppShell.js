@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
@@ -16,6 +17,7 @@ import { useTheme } from "@/context/ThemeContext";
  * Variants:
  *  - "dashboard" — full nav with Meal/Gym/Profile tab switcher
  *  - "admin"     — compact nav with the MASTER CONTROL TERMINAL tag and logout
+ *  - "marketing" — public pages (home): same bar, auth actions instead of tabs
  *
  * Slots let pages inject their own controls into the nav:
  *  - navSlot    — rendered in the desktop bar, right of the tabs
@@ -31,6 +33,7 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isAdmin = variant === "admin";
+  const isMarketing = variant === "marketing";
 
   // Lock body scroll and close on Escape while the full-screen menu is open.
   useEffect(() => {
@@ -200,6 +203,82 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
                 </button>
               </div>
             </div>
+          ) : isMarketing ? (
+            <>
+              {/* Marketing desktop — brand left, auth actions right */}
+              <div className="hidden md:flex h-14 items-center justify-between">
+                {brand}
+                <div className="flex items-center gap-5">
+                  {themeToggle}
+                  {user ? (
+                    <>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span
+                          aria-hidden="true"
+                          className="w-7 h-7 rounded-lg bg-[var(--shell-sunken)] border border-[var(--shell-line)] text-[var(--shell-ink)] flex items-center justify-center text-[10px] font-extrabold flex-none"
+                        >
+                          {initials}
+                        </span>
+                        <span className="text-[12px] font-bold text-[var(--shell-ink)] max-w-[140px] truncate">{user.name}</span>
+                      </div>
+                      <span aria-hidden="true" className="h-4 w-px bg-[var(--shell-line)]" />
+                      <Link
+                        href="/dashboard"
+                        className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--shell-ink)] hover:text-[var(--shell-accent)] transition-colors"
+                      >
+                        Dashboard
+                      </Link>
+                      <button
+                        onClick={logout}
+                        className="p-1.5 rounded-lg transition-colors cursor-pointer text-[var(--shell-muted)] hover:text-[var(--shell-danger)] hover:bg-[var(--shell-danger-soft)]"
+                        aria-label="Log out"
+                        title="Log out"
+                      >
+                        {logoutIcon}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        href="/login"
+                        className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--shell-muted)] hover:text-[var(--shell-ink)] transition-colors"
+                      >
+                        Login
+                      </Link>
+                      <Link
+                        href="/register"
+                        className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[var(--shell-on-accent)] bg-[var(--shell-accent)] hover:opacity-90 transition-opacity rounded-lg px-4 py-2"
+                      >
+                        Get started
+                      </Link>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Marketing mobile bar — brand + theme + hamburger */}
+              <div className="md:hidden flex items-center justify-between h-14">
+                {brand}
+                <div className="flex items-center gap-1.5">
+                  {themeToggle}
+                  <button
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    className="p-2 text-[var(--shell-ink)] hover:bg-[var(--shell-sunken)] rounded-lg transition cursor-pointer"
+                    aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+                    aria-expanded={mobileMenuOpen}
+                    aria-controls="mobile-menu"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      {mobileMenuOpen ? (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      ) : (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                      )}
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </>
           ) : (
             <>
               {/* Desktop — brand left / centered tabs / right rail */}
@@ -269,10 +348,43 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
             {mobileSlot && <div className="mb-8 pb-2">{mobileSlot}</div>}
 
             <p className="text-[9px] font-extrabold uppercase tracking-[0.18em] text-[var(--shell-muted)] mb-4">
-              {isAdmin ? "Master control" : "Index"}
+              {isAdmin ? "Master control" : isMarketing ? "Menu" : "Index"}
             </p>
 
-            {!isAdmin &&
+            {isMarketing &&
+              (user
+                ? [
+                    { label: "Dashboard", href: "/dashboard", action: null },
+                    { label: "Log out", action: logout },
+                  ]
+                : [
+                    { label: "Login", href: "/login", action: null },
+                    { label: "Get started", href: "/register", action: null, accent: true },
+                  ]
+              ).map((row, i) => (
+                <button
+                  key={row.label}
+                  onClick={() => (row.action ? (row.action(), setMobileMenuOpen(false)) : navigate(row.href))}
+                  style={{ animationDelay: `${80 + i * 70}ms` }}
+                  className="wg-row-in group w-full text-left flex items-baseline gap-3 py-4 border-b border-[var(--shell-line)] cursor-pointer text-[var(--shell-ink)]"
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`text-[10px] font-bold tracking-[0.08em] pt-1 ${row.accent ? "text-[var(--shell-accent)]" : "text-[var(--shell-muted)]"}`}
+                  >
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="text-[26px] font-extrabold uppercase tracking-[0.1em] leading-none">{row.label}</span>
+                  <span
+                    aria-hidden="true"
+                    className={`ml-auto self-center text-[var(--shell-muted)] ${row.accent ? "text-[var(--shell-accent)]" : ""}`}
+                  >
+                    →
+                  </span>
+                </button>
+              ))}
+
+            {!isMarketing && !isAdmin &&
               dashboardTabs.map((tab, i) => {
                 const active = pathname === tab.href;
                 return (
@@ -323,9 +435,11 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
           {/* Foot */}
           <div className="flex-none px-7 pb-10 pt-4">
             <p className="text-[9px] font-extrabold uppercase tracking-[0.18em] text-[var(--shell-muted)]">
-              {isAdmin ? "Admin" : "Signed in"}
+              {isAdmin ? "Admin" : user ? "Signed in" : "NutriGain"}
             </p>
-            <p className="text-[15px] font-bold text-[var(--shell-ink)] truncate mt-0.5">{user?.name}</p>
+            <p className="text-[15px] font-bold text-[var(--shell-ink)] truncate mt-0.5">
+              {user?.name || "Track macros. Dominate goals."}
+            </p>
           </div>
         </div>
       )}
