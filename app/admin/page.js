@@ -121,7 +121,7 @@ select.adm-in{appearance:none;cursor:pointer}
 .adm-mbar i{height:100%}
 .adm-mrow{display:flex;justify-content:space-between;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
 /* modal */
-.adm-overlay{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(10,10,12,.55);backdrop-filter:blur(4px)}
+.adm-overlay{position:fixed;inset:0;z-index:var(--pop-z-overlay, 90);display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(10,10,12,.55);backdrop-filter:blur(4px)}
 .adm-modal{width:100%;max-width:520px;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.25)}
 .adm-modal-h{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 22px;border-bottom:1px solid var(--line)}
 .adm-modal-h h3{font-size:16px;font-weight:800;color:var(--t1);margin:0}

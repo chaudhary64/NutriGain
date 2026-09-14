@@ -61,9 +61,9 @@ html[data-theme="dark"] .gym{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b
 .gym .m-in{animation:gym-in .45s cubic-bezier(.22,1,.36,1) both}
 .gym .m-in:nth-child(2){animation-delay:.06s}
 .gym .m-in:nth-child(3){animation-delay:.12s}
-.gym-toast{position:fixed;bottom:24px;right:24px;z-index:100;display:flex;flex-direction:column;gap:10px;width:calc(100% - 48px);max-width:380px}
-.gym-toast-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:var(--card);box-shadow:0 16px 40px -12px rgba(0,0,0,.5)}
-.gym-toast-item.err{background:var(--red-soft);border-color:var(--red-soft-b)}
+.gym-toast{position:fixed;bottom:24px;right:24px;z-index:var(--pop-z-toast, 80);display:flex;flex-direction:column;gap:10px;width:calc(100% - 48px);max-width:380px}
+.gym-toast-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:color-mix(in srgb, var(--card) 88%, transparent);-webkit-backdrop-filter:var(--pop-blur, blur(16px) saturate(1.4));backdrop-filter:var(--pop-blur, blur(16px) saturate(1.4));box-shadow:0 16px 40px -12px rgba(0,0,0,.5)}
+.gym-toast-item.err{background:color-mix(in srgb, var(--red-soft) 88%, transparent);border-color:var(--red-soft-b)}
 .gym-toast-item p{font-size:13px;color:var(--t1);flex:1;line-height:1.45}
 .gym-toast-item.err p{color:#991b1b}
 .gym-toast-dot{width:8px;height:8px;border-radius:50%;background:var(--ac);flex-shrink:0}
@@ -121,7 +121,7 @@ let toastSeq = 0;
 
 function ToastHost({ toasts, onDismiss }) {
   return (
-    <div className="gym-toast" aria-live="polite" role="status">
+    <div className="gym gym-toast" aria-live="polite" role="status">
       {toasts.map((t) => (
         <div key={t.id} className={`gym-toast-item ${t.tone === "error" ? "err" : ""}`}>
           <span className="gym-toast-dot"></span>

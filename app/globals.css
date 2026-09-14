@@ -83,6 +83,38 @@ html {
   padding-inline: var(--layout-gutter);
 }
 
+/* ----------------------------------------------------------------------
+   Popup elevation standard.
+
+   One z-order for every floating layer, above the navbar (z-50):
+   dropdowns/popovers 70, toasts 80, modal overlays 90. Panels sit on a
+   frosted --card glass so content never reads as merged with the page
+   beneath, in either theme. Applies to pages that use --card tokens.
+   ---------------------------------------------------------------------- */
+:root {
+  --pop-z-dropdown: 70;
+  --pop-z-toast: 80;
+  --pop-z-overlay: 90;
+  --pop-blur: blur(16px) saturate(1.4);
+}
+
+.mrd .m-dd,
+.adm .adm-dd {
+  z-index: var(--pop-z-dropdown);
+  background: color-mix(in srgb, var(--card, #fff) 88%, transparent);
+  -webkit-backdrop-filter: var(--pop-blur);
+  backdrop-filter: var(--pop-blur);
+}
+
+/* The toast host is fixed and carries its own theme scope class
+   (.mrd.mrd-toast / .gym.gym-toast) so tokens resolve outside AppShell. */
+.mrd .mrd-toast,
+.mrd.mrd-toast,
+.gym .gym-toast,
+.gym.gym-toast {
+  z-index: var(--pop-z-toast);
+}
+
 /* App shell chrome tokens (theme-aware) */
 .app-shell {
   --shell-bg: #fafaf9;
