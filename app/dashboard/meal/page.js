@@ -233,26 +233,6 @@ function MacroMeter({ label, value, max, macroKey, preview, previewValue }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* DayBanner — Chicken / Paneer protein-plan banner.                  */
-/* ------------------------------------------------------------------ */
-
-function DayBanner({ dayType, weekday }) {
-  const isChickenDay = dayType === "Chicken";
-  return (
-    <div className="m-banner">
-      <span className="m-tag">PROTEIN PLAN</span>
-      <span>
-        <b>{isChickenDay ? "Chicken Day" : "Paneer Day"}</b> —{" "}
-        {isChickenDay
-          ? "prioritize lean protein across lunch and dinner to hit 120 g."
-          : "vegetarian protein and healthy fats are prioritized today."}
-      </span>
-      <span className="m-crumb" style={{ marginLeft: "auto", whiteSpace: "nowrap" }}>{weekday}</span>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
 /* MealSection — breakfast / lunch / dinner card.                     */
 /* ------------------------------------------------------------------ */
 
@@ -365,15 +345,6 @@ export default function MealTrackingPage() {
   const [currentDate, setCurrentDate] = useState(
     format(new Date(), "yyyy-MM-dd"),
   );
-  const [globalSchedule, setGlobalSchedule] = useState([
-    "Paneer",
-    "Chicken",
-    "Paneer",
-    "Chicken",
-    "Paneer",
-    "Chicken",
-    "Paneer",
-  ]);
 
   // Designed feedback — replaces native alert()/confirm() everywhere.
   const pushToast = (message, tone = "success", action = null, ttl = 5000) => {
@@ -388,28 +359,14 @@ export default function MealTrackingPage() {
   const dismissToast = (id) =>
     setToasts((prev) => prev.filter((t) => t.id !== id));
 
-  // Fetch global meal schedule
-  const fetchGlobalSchedule = async () => {
-    try {
-      const res = await fetch(`/api/settings/meal-schedule?_=${Date.now()}`);
-      if (res.ok) {
-        const data = await res.json();
-        setGlobalSchedule(data.mealDays);
-      }
-    } catch (error) {
-      console.error("Error fetching global schedule:", error);
-    }
-  };
 
-  // Refresh user data and schedule when component mounts or becomes visible
+  // Refresh user data when component mounts or becomes visible
   useEffect(() => {
     checkAuth();
-    fetchGlobalSchedule();
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
         checkAuth();
-        fetchGlobalSchedule();
       }
     };
 
@@ -464,13 +421,6 @@ export default function MealTrackingPage() {
     return () => window.removeEventListener("keydown", handleShortcuts);
   }, [showMealDropdown]);
 
-  useEffect(() => {
-    if (user && !user.isAdmin) {
-      fetchDailyLog();
-      fetchMeals();
-    }
-  }, [user, currentDate]);
-
   const fetchDailyLog = async () => {
     try {
       const res = await fetch(`/api/daily-log?date=${currentDate}`);
@@ -496,6 +446,14 @@ export default function MealTrackingPage() {
       console.error("Error fetching meals:", error);
     }
   };
+
+  useEffect(() => {
+    if (user && !user.isAdmin) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      fetchDailyLog();
+      fetchMeals();
+    }
+  }, [user, currentDate]);
 
   const handleAddMeal = async (e) => {
     e.preventDefault();
@@ -688,14 +646,12 @@ export default function MealTrackingPage() {
     fats: 60,
   };
 
-  // Day banner info from the global schedule
+  // Selected-date info
   const [selY, selM, selD] = currentDate.split("-").map(Number);
   const selDate = new Date(selY, selM - 1, selD);
-  const dayType = globalSchedule[selDate.getDay()] || "Paneer";
-  const weekday = selDate.toLocaleDateString("en-US", { weekday: "long" });
   const selectedIsToday = isToday(selDate);
 
-  const daySummary = `${dayType} Day · ${dailyLog?.meals?.length || 0} ${
+  const daySummary = `${dailyLog?.meals?.length || 0} ${
     (dailyLog?.meals?.length || 0) === 1 ? "meal" : "meals"
   } logged`;
 
@@ -710,8 +666,7 @@ export default function MealTrackingPage() {
       <AppShell>
         <div className="mrd ng-container" style={{ padding: "32px var(--layout-gutter) 56px" }}>
           {/* Page header — title left, functional date picker right
-              (moved out of the nav; this replaces the old static pill) */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
+              (moved out of the nav; this replaces the old static pill) */}          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
             <div>
               <div className="m-h1">{selectedIsToday ? "Today" : format(selDate, "EEEE, MMMM d")}</div>
               <div className="m-sub">{daySummary}</div>
@@ -733,11 +688,6 @@ export default function MealTrackingPage() {
                 />
               </div>
             </div>
-          </div>
-
-          {/* Protein plan banner */}
-          <div style={{ marginTop: 16 }}>
-            <DayBanner dayType={dayType} weekday={weekday} />
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "min(340px,100%) 1fr", gap: 24, marginTop: 24 }} className="mrd-layout">

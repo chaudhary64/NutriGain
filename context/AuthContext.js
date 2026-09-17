@@ -10,10 +10,6 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
   const checkAuth = async () => {
     try {
       // Add timestamp to prevent caching
@@ -39,6 +35,13 @@ export function AuthProvider({ children }) {
     }
   };
 
+  useEffect(() => {
+    // checkAuth's setState calls all run after `await`, never synchronously
+    // within this effect — the rule can't see through the function boundary.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    checkAuth();
+  }, []);
+
   const login = async (email, password) => {
     try {
       const res = await fetch('/api/auth/login', {
@@ -52,7 +55,11 @@ export function AuthProvider({ children }) {
       if (res.ok) {
         setUser(data.user);
         // Use window.location for a hard redirect to ensure cookie is set
-        const redirectUrl = data.user.isAdmin ? '/admin' : '/dashboard';
+        const redirectUrl = data.user.isAdmin
+          ? '/admin'
+          : data.user.onboardedAt
+            ? '/dashboard'
+            : '/onboarding';
         window.location.href = redirectUrl;
         return { success: true };
       } else {
@@ -76,8 +83,8 @@ export function AuthProvider({ children }) {
 
       if (res.ok) {
         setUser(data.user);
-        // Use window.location for a hard redirect to ensure cookie is set
-        window.location.href = '/dashboard';
+        // New accounts always go through onboarding first
+        window.location.href = '/onboarding';
         return { success: true };
       } else {
         return { success: false, error: data.error || 'Registration failed' };
@@ -88,6 +95,10 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const completeOnboarding = (updatedUser) => {
+    setUser((prev) => ({ ...prev, ...updatedUser }));
+  };
+
   const logout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
     setUser(null);
@@ -95,7 +106,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, checkAuth }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, checkAuth, completeOnboarding }}>
       {children}
     </AuthContext.Provider>
   );

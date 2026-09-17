@@ -43,6 +43,7 @@ export async function POST(request) {
           email: user.email,
           name: user.name,
           isAdmin: user.isAdmin,
+          onboardedAt: user.onboardedAt || null,
         },
       },
       { status: 201 }

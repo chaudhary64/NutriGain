@@ -15,7 +15,7 @@ import { getJwtSecret } from '@/lib/auth';
  * — this is the outer net, not the only check.
  */
 
-const PROTECTED_PAGE_PREFIXES = ['/dashboard', '/admin'];
+const PROTECTED_PAGE_PREFIXES = ['/dashboard', '/admin', '/onboarding'];
 const PROTECTED_API_PREFIXES = [
   '/api/meals',
   '/api/users',
@@ -66,6 +66,16 @@ export default async function proxy(request) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
+  // Onboarding page is for signed-in non-admins who haven't completed it yet.
+  if (isPage && pathname.startsWith('/onboarding')) {
+    if (payload.isAdmin) {
+      return NextResponse.redirect(new URL('/admin', request.url));
+    }
+    if (payload.onboardedAt) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+  }
+
   const res = NextResponse.next();
   res.headers.set('x-auth-checked', '1');
   return res;
@@ -75,6 +85,7 @@ export const config = {
   matcher: [
     '/dashboard/:path*',
     '/admin/:path*',
+    '/onboarding/:path*',
     '/api/meals/:path*',
     '/api/users/:path*',
     '/api/workout-schedule/:path*',

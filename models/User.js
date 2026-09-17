@@ -40,10 +40,6 @@ const UserSchema = new mongoose.Schema({
     type: Number,
     default: 75,
   },
-  mealDays: {
-    type: [String],
-    default: ["Paneer", "Chicken", "Paneer", "Chicken", "Paneer", "Chicken", "Paneer"], // 0=Sun, 1=Mon, ...
-  },
   smoothScroll: {
     type: Boolean,
     default: true,
@@ -58,6 +54,20 @@ const UserSchema = new mongoose.Schema({
     protein: { type: Number, default: 120 },
     carbs: { type: Number, default: 170 },
     fats: { type: Number, default: 60 },
+  },
+  // Onboarding profile (optional — only set once the wizard is completed).
+  profile: {
+    sex: { type: String, enum: ['male', 'female', 'other', ''] , default: '' },
+    age: { type: Number, min: 13, max: 100 },
+    heightCm: { type: Number, min: 100, max: 250 },
+    activityLevel: { type: String, enum: ['sedentary', 'light', 'moderate', 'active', 'athlete', ''], default: '' },
+    goal: { type: String, enum: ['cut', 'maintain', 'bulk', ''], default: '' },
+  },
+  // Set once onboarding (or its skip) completes. Null = not onboarded —
+  // the dashboard layout gates on this; profile-editable via /api/onboarding.
+  onboardedAt: {
+    type: Date,
+    default: null,
   },
   createdAt: {
     type: Date,

@@ -3,13 +3,11 @@ import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 import { withAuth } from '@/lib/auth';
 import { getDefaultMacroGoals } from '@/lib/goals';
-import { validateMacroGoals, validateMealSchedule } from '@/lib/validation';
+import { validateMacroGoals } from '@/lib/validation';
 
 // Disable caching for this route
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-
-const DEFAULT_MEAL_DAYS = ['Paneer', 'Chicken', 'Paneer', 'Chicken', 'Paneer', 'Chicken', 'Paneer'];
 
 export const GET = withAuth(async (request, user) => {
   await dbConnect();
@@ -34,9 +32,10 @@ export const GET = withAuth(async (request, user) => {
         email: userData.email,
         name: userData.name,
         isAdmin: userData.isAdmin,
-        mealDays: userData.mealDays || DEFAULT_MEAL_DAYS,
         theme: userData.theme || null,
         macroGoals: userData.macroGoals,
+        profile: userData.profile || null,
+        onboardedAt: userData.onboardedAt || null,
       },
     },
     {
@@ -53,17 +52,9 @@ export const GET = withAuth(async (request, user) => {
 
 export const PUT = withAuth(async (request, user) => {
   const body = await request.json().catch(() => ({}));
-  const { mealDays, macroGoals, theme } = body;
+  const { macroGoals, theme } = body;
 
   const updateFields = {};
-
-  if (mealDays !== undefined) {
-    const [validationErrors] = validateMealSchedule(mealDays);
-    if (validationErrors.length > 0) {
-      return NextResponse.json({ error: validationErrors[0], errors: validationErrors }, { status: 400 });
-    }
-    updateFields.mealDays = mealDays;
-  }
 
   if (theme !== undefined) {
     if (theme !== "light" && theme !== "dark" && theme !== "") {
@@ -100,7 +91,6 @@ export const PUT = withAuth(async (request, user) => {
       email: userData.email,
       name: userData.name,
       isAdmin: userData.isAdmin,
-      mealDays: userData.mealDays,
       theme: userData.theme || null,
       macroGoals: userData.macroGoals,
     },

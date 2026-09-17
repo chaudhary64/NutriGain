@@ -8,9 +8,10 @@ import Loader from "@/components/Loader";
 /**
  * Auth gate shared by all /dashboard pages.
  *
- * Visitors are redirected to /login and admins to /admin; children render
- * only for signed-in non-admin users. Pages render their own <AppShell> so
- * they can inject page-specific controls into the nav via slots.
+ * Visitors are redirected to /login, admins to /admin, and users who have
+ * not completed onboarding to /onboarding; children render only for
+ * signed-in, onboarded non-admin users. Pages render their own <AppShell>
+ * so they can inject page-specific controls into the nav via slots.
  */
 export default function DashboardLayout({ children }) {
   const { user, loading: authLoading } = useAuth();
@@ -28,11 +29,17 @@ export default function DashboardLayout({ children }) {
     }
   }, [user, router]);
 
+  useEffect(() => {
+    if (user && !user.isAdmin && user.onboardedAt === null) {
+      router.push("/onboarding");
+    }
+  }, [user, router]);
+
   if (authLoading) {
     return <Loader />;
   }
 
-  if (!user || user.isAdmin) {
+  if (!user || user.isAdmin || user.onboardedAt === null) {
     return null;
   }
 

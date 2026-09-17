@@ -73,7 +73,7 @@ Instead of scattered spreadsheets and basic calorie counters, NutriGain gives yo
 - **[Next.js API Routes](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)** — Serverless REST API endpoints
 - **[MongoDB](https://www.mongodb.com/) + [Mongoose 8](https://mongoosejs.com/)** — NoSQL database with schema validation
 - **[bcryptjs](https://www.npmjs.com/package/bcryptjs)** — Password hashing
-- **[jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken)** — JWT-based session management (verified at the edge with `jose`)
+- **[jose](https://www.npmjs.com/package/jose)** — JWT session cookies (signed in API routes, verified at the edge in the proxy)
 
 ### Dev Tools
 - **ESLint** — Code linting with Next.js config
@@ -92,7 +92,6 @@ NutriGain/
 │   │   ├── daily-log/          # GET/POST/PATCH daily log, PUT/DELETE meal entries
 │   │   ├── exercises/          # GET exercise library, PUT/DELETE per-user PR data
 │   │   ├── meals/              # GET meal database (admin CRUD)
-│   │   ├── settings/           # GET/PUT global meal schedule (admin)
 │   │   ├── users/              # GET all users & details (admin)
 │   │   ├── weight/             # GET/POST/PUT/DELETE body weight entries
 │   │   ├── workout-schedule/   # GET weekly schedule, PUT single day (admin)
@@ -146,7 +145,12 @@ NutriGain/
    ├── Register: POST /api/auth/register → creates User, sets JWT cookie
    └── Login:    POST /api/auth/login    → validates credentials (rate limited), sets JWT cookie
 
-3. Dashboard (/dashboard)
+3. Onboarding (/onboarding, new accounts only)
+   ├── Profile + activity + goal → Mifflin-St Jeor TDEE suggestion, live-previewed
+   ├── POST /api/onboarding 'apply' → saves profile, seeds today's weight entry, sets macro goals
+   └── POST /api/onboarding 'skip'  → marks onboardedAt, uses defaults
+
+4. Dashboard (/dashboard)
    ├── Overview of today's macros, gym status, and streaks
    ├── Quick-navigate to Meal or Gym sub-dashboards
    └── Date navigation for past logs
@@ -168,7 +172,7 @@ NutriGain/
 6. Admin Panel (/admin)
    ├── Manage the global meal database (add, edit, delete meals)
    ├── Manage the exercise library (add, edit, delete exercises)
-   ├── Edit the weekly workout schedule and global meal schedule
+   ├── Edit the weekly workout schedule and manage the meal/exercise databases
    └── View registered users and their stats
 
 7. Sign Out

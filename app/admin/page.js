@@ -120,19 +120,7 @@ select.adm-in{appearance:none;cursor:pointer}
 .adm-mbar{display:flex;height:7px;border-radius:999px;overflow:hidden;background:var(--track);margin:9px 0}
 .adm-mbar i{height:100%}
 .adm-mrow{display:flex;justify-content:space-between;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
-/* modal */
-.adm-overlay{position:fixed;inset:0;z-index:var(--pop-z-overlay, 90);display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(10,10,12,.55);backdrop-filter:blur(4px)}
-.adm-modal{width:100%;max-width:520px;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.25)}
-.adm-modal-h{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 22px;border-bottom:1px solid var(--line)}
-.adm-modal-h h3{font-size:16px;font-weight:800;color:var(--t1);margin:0}
-.adm-modal-h p{font-size:12px;font-weight:500;color:var(--t2);margin:3px 0 0}
-.adm-modal-b{padding:20px 22px;max-height:56vh;overflow-y:auto}
-.adm-modal-f{display:flex;justify-content:flex-end;gap:10px;padding:16px 22px;border-top:1px solid var(--line);background:var(--sunken)}
-.adm-dayrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:11px;margin-bottom:10px}
-.adm-dayrow>span{font-size:13px;font-weight:600;color:var(--t1)}
-.adm-seg{display:flex;gap:4px;background:var(--sunken);border-radius:9px;padding:4px}
-.adm-seg button{padding:6px 13px;border:none;border-radius:6px;font:inherit;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:transparent;color:var(--t2);cursor:pointer}
-.adm-seg button.on{background:var(--ac);color:var(--on-ac)}
+/* (modal/overlay CSS removed with the meal-days modal — no modals remain) */
 @media(prefers-reduced-motion:reduce){.adm *{transition:none!important;animation:none!important}}
 `;
 
@@ -182,54 +170,6 @@ export default function AdminPage() {
     category: "general",
   });
 
-  const [showScheduleModal, setShowScheduleModal] = useState(false);
-  const [tempSchedule, setTempSchedule] = useState([
-    "Paneer",
-    "Chicken",
-    "Paneer",
-    "Chicken",
-    "Paneer",
-    "Chicken",
-    "Paneer",
-  ]);
-
-  useEffect(() => {
-    const fetchSchedule = async () => {
-      try {
-        const res = await fetch("/api/settings/meal-schedule");
-        if (res.ok) {
-          const data = await res.json();
-          setTempSchedule(data.mealDays);
-        }
-      } catch (error) {
-        console.error("Error fetching schedule:", error);
-      }
-    };
-    if (showScheduleModal) {
-      fetchSchedule();
-    }
-  }, [showScheduleModal]);
-
-  const handleSaveSchedule = async () => {
-    try {
-      const res = await fetch("/api/settings/meal-schedule", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mealDays: tempSchedule }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setShowScheduleModal(false);
-      } else {
-        alert("Failed to update schedule");
-      }
-    } catch (error) {
-      console.error("Error updating schedule:", error);
-      alert("Failed to update schedule");
-    }
-  };
-
   // Users state
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -245,58 +185,7 @@ export default function AdminPage() {
     { day: "Sunday", muscleGroups: [] },
   ]);
 
-  const [exercises, setExercises] = useState([
-    {
-      id: 1,
-      muscleGroup: "Chest",
-      name: "Incline Dumbbell Press",
-      type: "COMPOUND",
-      warmUp: "20 kg",
-      working: "35 kg",
-      lastPR: "42.5 kg",
-      lastPRDate: "Jan 2, 2026",
-    },
-    {
-      id: 2,
-      muscleGroup: "Chest",
-      name: "Flat Bench Press",
-      type: "COMPOUND",
-      warmUp: "40 kg",
-      working: "70 kg",
-      lastPR: "85 kg",
-      lastPRDate: "Dec 28, 2025",
-    },
-    {
-      id: 3,
-      muscleGroup: "Chest",
-      name: "Cable Flyes",
-      type: "ISOLATION",
-      warmUp: "15 kg",
-      working: "25 kg",
-      lastPR: "30 kg",
-      lastPRDate: "Jan 9, 2026",
-    },
-    {
-      id: 4,
-      muscleGroup: "Triceps",
-      name: "Tricep Pushdowns",
-      type: "ISOLATION",
-      warmUp: "20 kg",
-      working: "35 kg",
-      lastPR: "42.5 kg",
-      lastPRDate: "Jan 13, 2026",
-    },
-    {
-      id: 5,
-      muscleGroup: "Triceps",
-      name: "Overhead Tricep Extension",
-      type: "ISOLATION",
-      warmUp: "12 kg",
-      working: "20 kg",
-      lastPR: "25 kg",
-      lastPRDate: "Jan 6, 2026",
-    },
-  ]);
+  const [exercises, setExercises] = useState([]);
 
   const [showExerciseForm, setShowExerciseForm] = useState(false);
   const [editingExercise, setEditingExercise] = useState(null);
@@ -330,14 +219,6 @@ export default function AdminPage() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showMuscleGroupDropdown]);
-
-  useEffect(() => {
-    if (user && user.isAdmin) {
-      fetchMeals();
-      fetchGymData();
-      fetchUsers();
-    }
-  }, [user]);
 
   const fetchUsers = async () => {
     try {
@@ -414,6 +295,15 @@ export default function AdminPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (user && user.isAdmin) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      fetchMeals();
+      fetchGymData();
+      fetchUsers();
+    }
+  }, [user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -672,9 +562,6 @@ export default function AdminPage() {
           <div className="space-y-5">
             {!showForm && (
               <div className="flex flex-col sm:flex-row justify-end gap-3">
-                <button onClick={() => setShowScheduleModal(true)} className="adm-ghost">
-                  {I.calendar} Manage days
-                </button>
                 <button onClick={() => setShowForm(true)} className="adm-btn">
                   Add new meal
                 </button>
@@ -1271,70 +1158,6 @@ export default function AdminPage() {
         )}
       </div>
 
-      {showScheduleModal && (
-        <div className="adm-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowScheduleModal(false); }}>
-          <div className="adm-modal" role="dialog" aria-modal="true" aria-label="Manage weekly schedule">
-            <div className="adm-modal-h">
-              <div>
-                <h3>Manage weekly schedule</h3>
-                <p>Assign Chicken or Paneer days.</p>
-              </div>
-              <button onClick={() => setShowScheduleModal(false)} className="adm-icon" aria-label="Close">
-                {I.x}
-              </button>
-            </div>
-
-            <div className="adm-modal-b" data-lenis-prevent="true">
-              {[
-                "Sunday",
-                "Monday",
-                "Tuesday",
-                "Wednesday",
-                "Thursday",
-                "Friday",
-                "Saturday",
-              ].map((day, index) => (
-                <div key={day} className="adm-dayrow">
-                  <span>{day}</span>
-                  <div className="adm-seg">
-                    <button
-                      onClick={() => {
-                        const newSchedule = [...tempSchedule];
-                        newSchedule[index] = "Chicken";
-                        setTempSchedule(newSchedule);
-                      }}
-                      className={tempSchedule[index] === "Chicken" ? "on" : ""}
-                      aria-pressed={tempSchedule[index] === "Chicken"}
-                    >
-                      Chicken
-                    </button>
-                    <button
-                      onClick={() => {
-                        const newSchedule = [...tempSchedule];
-                        newSchedule[index] = "Paneer";
-                        setTempSchedule(newSchedule);
-                      }}
-                      className={tempSchedule[index] === "Paneer" ? "on" : ""}
-                      aria-pressed={tempSchedule[index] === "Paneer"}
-                    >
-                      Paneer
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="adm-modal-f">
-              <button onClick={() => setShowScheduleModal(false)} className="adm-ghost">
-                Cancel
-              </button>
-              <button onClick={handleSaveSchedule} className="adm-btn">
-                Save schedule
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </AppShell>
   );
 }
