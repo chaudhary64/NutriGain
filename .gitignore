@@ -36,6 +36,9 @@ yarn-error.log*
 .impeccable/
 design/
 
+# local ops scripts (one-off migrations & seeding; kept on disk, not shipped)
+/scripts/
+
 # env files (can opt-in for committing if needed)
 .env*
 !.env.local.example

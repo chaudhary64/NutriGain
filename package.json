@@ -6,10 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "seed": "node scripts/seed-admin.js",
-    "migrate-sets": "node scripts/migrate-sets.js",
-    "cleanup-schedule": "node scripts/cleanup-legacy-schedule.js"
+    "lint": "eslint"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

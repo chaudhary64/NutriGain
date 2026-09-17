@@ -123,9 +123,6 @@ NutriGain/
 │   └── workout-session.js      # Session validation, merge modes, auto-PR logic
 ├── models/                     # Mongoose schemas (User, Meal, DailyLog, WorkoutSession, ...)
 ├── proxy.js                    # Route guard for protected pages & APIs
-├── scripts/
-│   ├── migrate-sets.js         # Legacy lift strings → numeric sets (pnpm run migrate-sets)
-│   └── seed-admin.js           # Manual admin seeding (pnpm run seed)
 ├── public/                     # Icons & web manifest
 ├── .env.local.example          # Environment variable template
 └── package.json
@@ -234,38 +231,7 @@ pnpm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### 5. (Optional) Seed the admin account
-
-Create (or promote) an admin account with the seed script:
-
-```bash
-pnpm run seed
-```
-
-Defaults come from optional env overrides — set these before running to customize:
-
-```env
-SEED_ADMIN_EMAIL=you@example.com
-SEED_ADMIN_NAME=Your Name
-SEED_ADMIN_PASSWORD=choose-a-strong-password
-```
-
-Then access the admin panel at `/admin`.
-
-### 6. (Optional) Migrate legacy lift data
-
-If your database was created before numeric set logging, parse the old
-weight strings into the numeric set fields — dry-run first, then write:
-
-```bash
-pnpm run migrate-sets            # preview what would change
-pnpm run migrate-sets -- --write # persist
-```
-
-The migration is additive: legacy string fields are never modified, so it is
-safe to re-run.
-
-### 7. Build for production
+### 5. Build for production
 
 ```bash
 pnpm run build
