@@ -43,12 +43,7 @@ html[data-theme="dark"] .mrd{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b
 .mrd .b-cal{background:var(--ac)}.mrd .b-pro{background:var(--pro)}.mrd .b-car{background:var(--car)}.mrd .b-fat{background:var(--green)}
 .mrd .m-bar i.m-overbar{background:var(--red)!important}
 .mrd .m-over{color:var(--red)!important}
-.mrd .m-ghost{position:absolute;top:0;left:0;height:100%;width:100%;transform-origin:left center;border-radius:999px;background:#4f46e533;transition:transform .3s ease}
 /* banner */
-.mrd .m-banner{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 18px;font-size:13px;color:var(--t2)}
-.mrd .m-banner > span:nth-of-type(2){flex:1 1 220px;min-width:0}
-.mrd .m-banner b{font-weight:700;color:var(--t1)}
-.mrd .m-tag{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--ac);background:var(--ac-soft);border-radius:5px;padding:3px 8px;white-space:nowrap}
 /* entries */
 .mrd .m-entry{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--line);font-size:13px;flex-wrap:wrap}
 .mrd .m-entry:last-child{border-bottom:0}
@@ -197,16 +192,13 @@ function ToastHost({ toasts, onDismiss }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* MacroMeter — Meridian row + bar, with live preview ghost fill.     */
+/* MacroMeter — Meridian row + bar.                                   */
 /* ------------------------------------------------------------------ */
 
-function MacroMeter({ label, value, max, macroKey, preview, previewValue }) {
+function MacroMeter({ label, value, max, macroKey }) {
   const meta = MACRO_META[macroKey];
   const percentage = Math.min((value / max) * 100, 100);
   const isOverLimit = value > max;
-  const hasPreview = preview !== undefined && previewValue !== value;
-  const previewDelta = hasPreview ? Math.round((previewValue - value) * 10) / 10 : 0;
-  const previewPct = hasPreview ? Math.min((previewValue / max) * 100, 100) : percentage;
 
   return (
     <div className="m-meter">
@@ -217,15 +209,9 @@ function MacroMeter({ label, value, max, macroKey, preview, previewValue }) {
         </span>
         <span className={`m-meter-val m-num ${isOverLimit ? "m-over" : ""}`}>
           {value} <span className="m-meter-goal m-num">/ {max}{macroKey === "calories" ? "" : " g"}</span>
-          {hasPreview && (
-            <span className="ml-2 text-[11px] font-bold" style={{ color: "var(--ac)" }}>
-              +{label === "Calories" ? Math.round(previewDelta) : previewDelta}
-            </span>
-          )}
         </span>
       </div>
       <div className="m-bar">
-        {hasPreview && <div className="m-ghost" style={{ transform: `scaleX(${previewPct / 100})` }}></div>}
         <i className={`${meta.barCls}${isOverLimit ? " m-overbar" : ""}`} style={{ transform: `scaleX(${percentage / 100})` }}></i>
       </div>
     </div>
@@ -448,7 +434,7 @@ export default function MealTrackingPage() {
   };
 
   useEffect(() => {
-    if (user && !user.isAdmin) {
+    if (user) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchDailyLog();
       fetchMeals();
@@ -617,27 +603,6 @@ export default function MealTrackingPage() {
     fats: 0,
   };
 
-  // Calculate preview macros when a meal is selected
-  const getPreviewMacros = () => {
-    if (!selectedMeal || !quantity) return totalMacros;
-
-    const meal = meals.find((m) => m._id === selectedMeal);
-    if (!meal) return totalMacros;
-
-    const qty = parseFloat(quantity) || 0;
-    return {
-      calories: totalMacros.calories + Math.round(meal.macros.calories * qty),
-      protein:
-        Math.round((totalMacros.protein + meal.macros.protein * qty) * 10) / 10,
-      carbs:
-        Math.round((totalMacros.carbs + meal.macros.carbs * qty) * 10) / 10,
-      fats: Math.round((totalMacros.fats + meal.macros.fats * qty) * 10) / 10,
-    };
-  };
-
-  const previewMacros = getPreviewMacros();
-  const hasPreview = Boolean(selectedMeal && quantity > 0);
-
   // Per-user daily goals (editable on the profile page)
   const goals = user?.macroGoals || {
     calories: 1900,
@@ -703,14 +668,10 @@ export default function MealTrackingPage() {
                 </span>
               </div>
 
-              <MacroMeter label="Calories" macroKey="calories" value={totalMacros.calories} max={goals.calories}
-                preview={hasPreview ? previewMacros.calories : undefined} previewValue={previewMacros.calories} />
-              <MacroMeter label="Protein" macroKey="protein" value={totalMacros.protein} max={goals.protein}
-                preview={hasPreview ? previewMacros.protein : undefined} previewValue={previewMacros.protein} />
-              <MacroMeter label="Carbs" macroKey="carbs" value={totalMacros.carbs} max={goals.carbs}
-                preview={hasPreview ? previewMacros.carbs : undefined} previewValue={previewMacros.carbs} />
-              <MacroMeter label="Fats" macroKey="fats" value={totalMacros.fats} max={goals.fats}
-                preview={hasPreview ? previewMacros.fats : undefined} previewValue={previewMacros.fats} />
+              <MacroMeter label="Calories" macroKey="calories" value={totalMacros.calories} max={goals.calories} />
+              <MacroMeter label="Protein" macroKey="protein" value={totalMacros.protein} max={goals.protein} />
+              <MacroMeter label="Carbs" macroKey="carbs" value={totalMacros.carbs} max={goals.carbs} />
+              <MacroMeter label="Fats" macroKey="fats" value={totalMacros.fats} max={goals.fats} />
 
               {/* Remaining */}
               <div style={{ padding: "16px 18px", borderTop: "1px solid var(--line)" }}>
@@ -896,22 +857,6 @@ export default function MealTrackingPage() {
                       </button>
                     </div>
                   </div>
-
-                  {/* Live preview banner */}
-                  {hasPreview && (
-                    <div className="m-banner" style={{ marginTop: 14, background: "var(--ac-soft)", borderColor: "var(--ac-soft-b)", color: "var(--t2)" }}>
-                      <span className="m-tag">PREVIEW</span>
-                      <span>
-                        After adding at qty {quantity}: <b className="m-num">{previewMacros.calories} kcal</b>
-                        <span className="m-crumb"> · </span>
-                        <b className="m-num" style={{ color: "var(--pro)" }}>{previewMacros.protein}g P</b>
-                        <span className="m-crumb"> · </span>
-                        <b className="m-num" style={{ color: "var(--car)" }}>{previewMacros.carbs}g C</b>
-                        <span className="m-crumb"> · </span>
-                        <b className="m-num" style={{ color: "var(--green)" }}>{previewMacros.fats}g F</b>
-                      </span>
-                    </div>
-                  )}
 
                   {/* Per-serving stats panel */}
                   {showMealStats && selectedMeal && (
