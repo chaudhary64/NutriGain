@@ -182,6 +182,9 @@ export default function GymTrackingPage() {
   const [longestStreak, setLongestStreak] = useState(0);
   const [todayGymStatus, setTodayGymStatus] = useState("not-completed");
   const [targetWeight, setTargetWeight] = useState(75);
+  const [editingTarget, setEditingTarget] = useState(false);
+  const [targetDraft, setTargetDraft] = useState("");
+  const [savingTarget, setSavingTarget] = useState(false);
 
   // Forms
   const [newWeight, setNewWeight] = useState("");
@@ -459,6 +462,36 @@ export default function GymTrackingPage() {
     } catch (error) {
       console.error("Error adding weight:", error);
       pushToast("Network error — your weight wasn't logged. Try again.", "error");
+    }
+  };
+
+  const handleSaveTargetWeight = async () => {
+    const parsed = parseFloat(targetDraft);
+    if (!Number.isFinite(parsed) || parsed < 20 || parsed > 400) {
+      pushToast("Target weight must be between 20 and 400 kg.", "error");
+      return;
+    }
+
+    setSavingTarget(true);
+    try {
+      const res = await fetch("/api/weight", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetWeight: parsed }),
+      });
+      if (res.ok) {
+        setTargetWeight(parsed);
+        setEditingTarget(false);
+        pushToast(`Target weight set to ${parsed} kg.`);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        pushToast(data.error || "Couldn't update the target weight. Try again.", "error");
+      }
+    } catch (error) {
+      console.error("Error updating target weight:", error);
+      pushToast("Network error — target weight wasn't saved. Try again.", "error");
+    } finally {
+      setSavingTarget(false);
     }
   };
 
@@ -784,7 +817,53 @@ export default function GymTrackingPage() {
                     <span style={{ color: "var(--ac)" }}><Icon d={ICONS.scale} /></span>
                     Body weight
                   </h3>
-                  <span className="m-crumb m-num">Target: {targetWeight} kg</span>
+                  {editingTarget ? (
+                    <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <input
+                        type="number"
+                        step="0.1"
+                        min="20"
+                        max="400"
+                        aria-label="Target weight in kilograms"
+                        className="m-field m-num"
+                        value={targetDraft}
+                        autoFocus
+                        onChange={(e) => setTargetDraft(e.target.value)}
+                        onKeyDown={(e) => e.key === "Escape" && setEditingTarget(false)}
+                        style={{ width: 96, padding: "6px 10px" }}
+                      />
+                      <button
+                        onClick={handleSaveTargetWeight}
+                        disabled={savingTarget}
+                        aria-label="Save target weight"
+                        className="m-btn m-btn-primary"
+                        style={{ padding: "6px 10px" }}
+                      >
+                        <Icon d={ICONS.check} className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => setEditingTarget(false)}
+                        disabled={savingTarget}
+                        aria-label="Cancel editing target weight"
+                        className="m-btn"
+                        style={{ padding: "6px 10px", border: "1px solid var(--line)", color: "var(--t2)", background: "var(--card)" }}
+                      >
+                        <Icon d={ICONS.x} className="w-3.5 h-3.5" />
+                      </button>
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setTargetDraft(String(targetWeight));
+                        setEditingTarget(true);
+                      }}
+                      className="m-crumb m-num"
+                      style={{ background: "none", border: 0, padding: 0, cursor: "pointer", font: "inherit", color: "inherit", borderBottom: "1px dashed var(--t3)" }}
+                      title="Edit target weight"
+                    >
+                      Target: {targetWeight} kg
+                    </button>
+                  )}
                 </div>
                 <div style={{ padding: 18 }}>
                   <div style={{ height: 240, marginBottom: 14 }}>

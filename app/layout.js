@@ -1,7 +1,6 @@
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
-import { UserSettingsProvider } from "@/context/UserSettingsContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import LenisProvider from "@/components/LenisProvider";
 const inter = Inter({
@@ -46,9 +45,7 @@ export default function RootLayout({ children }) {
         />
         <AuthProvider>
           <ThemeProvider>
-            <UserSettingsProvider>
-              <LenisProvider>{children}</LenisProvider>
-            </UserSettingsProvider>
+            <LenisProvider>{children}</LenisProvider>
           </ThemeProvider>
         </AuthProvider>
       </body>

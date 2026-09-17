@@ -40,10 +40,6 @@ const UserSchema = new mongoose.Schema({
     type: Number,
     default: 75,
   },
-  smoothScroll: {
-    type: Boolean,
-    default: true,
-  },
   theme: {
     type: String,
     enum: ["light", "dark", ""],

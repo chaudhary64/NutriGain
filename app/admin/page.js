@@ -172,7 +172,6 @@ export default function AdminPage() {
 
   // Users state
   const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
 
   // Gym workout state
   const [workoutSchedule, setWorkoutSchedule] = useState([
@@ -356,13 +355,9 @@ export default function AdminPage() {
     });
     setShowForm(true);
 
-    // Scroll to the form with Lenis
+    // Scroll to the form once it renders
     setTimeout(() => {
-      if (mealFormRef.current && window.lenis) {
-        window.lenis.scrollTo(mealFormRef.current, { offset: -100, duration: 1.2 });
-      } else if (window.lenis) {
-        window.lenis.scrollTo(0, { duration: 1.2 });
-      }
+      mealFormRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 100);
   };
 
@@ -431,13 +426,9 @@ export default function AdminPage() {
     setExerciseFormData(exercise);
     setShowExerciseForm(true);
 
-    // Scroll to the form with Lenis
+    // Scroll to the form once it renders
     setTimeout(() => {
-      if (exerciseFormRef.current && window.lenis) {
-        window.lenis.scrollTo(exerciseFormRef.current, { offset: -100, duration: 1.2 });
-      } else if (window.lenis) {
-        window.lenis.scrollTo(0, { duration: 1.2 });
-      }
+      exerciseFormRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 100);
   };
 
