@@ -155,12 +155,12 @@ NutriGain/
    ├── Quick-navigate to Meal or Gym sub-dashboards
    └── Date navigation for past logs
 
-4. Meal Dashboard (/dashboard/meal)
+5. Meal Dashboard (/dashboard/meal)
    ├── Search the meal database → add entries at breakfast, lunch, or dinner
    ├── Real-time macro countdown meters (calories, protein, carbs, fats)
    └── Daily log backed by GET/POST /api/daily-log
 
-5. Gym Dashboard (/dashboard/gym)
+6. Gym Dashboard (/dashboard/gym)
    ├── Today's scheduled muscle groups → inline kg × reps editor per exercise
    ├── Log Sets → PUT /api/workout-sessions (merge-upsert per day)
    ├── Heavier set logged → PR auto-updates with a 🏆 badge
@@ -169,13 +169,19 @@ NutriGain/
    ├── Body weight chart via Recharts (GET /api/weight)
    └── Mark workout as completed → updates gymStatus in DailyLog
 
-6. Admin Panel (/admin)
+7. Progress Page (/dashboard/stats)
+   ├── Weekly macro averages vs. goals, training volume and frequency (GET /api/stats)
+   ├── Weight trend chart against target (GET /api/weight)
+   ├── Consistency: streak, logged-days %, 28-day meals/sessions strip
+   └── 7/30/90-day window selector; 7d/30d/90d range
+
+8. Admin Panel (/admin)
    ├── Manage the global meal database (add, edit, delete meals)
    ├── Manage the exercise library (add, edit, delete exercises)
    ├── Edit the weekly workout schedule and manage the meal/exercise databases
    └── View registered users and their stats
 
-7. Sign Out
+9. Sign Out
    └── POST /api/auth/logout → clears JWT cookie → redirect to /
 ```
 

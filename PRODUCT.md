@@ -51,7 +51,8 @@ Most fitness apps track food *or* training. NutriGain does both in one place, ti
 
 ## Evidence on Hand
 
-- Full working implementation in this repo: dashboard surfaces (`/dashboard/meal`, `/dashboard/gym`, `/dashboard/profile`), admin panel, REST API routes, and Mongoose models.
+- Full working implementation in this repo: dashboard surfaces (`/dashboard/meal`, `/dashboard/gym`, `/dashboard/stats`, `/dashboard/profile`), admin panel, REST API routes, and Mongoose models.
+- Progress page: weekly macro averages vs. goals, training volume/frequency, weight trend, and consistency streaks from a single aggregation endpoint.
 - README.md documents the complete feature set, stack, and application flow.
 - No real users, testimonials, benchmarks, or marketing claims exist — future work must not fabricate any.
 

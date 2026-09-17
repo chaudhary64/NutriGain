@@ -57,6 +57,7 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
   const dashboardTabs = [
     { label: "Meal", href: "/dashboard/meal" },
     { label: "Gym", href: "/dashboard/gym" },
+    { label: "Stats", href: "/dashboard/stats" },
     { label: "Profile", href: "/dashboard/profile" },
   ];
 
@@ -108,9 +109,17 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
     </button>
   );
 
+  // Role-aware home: marketing → landing, dashboard → hub, admin → console.
+  const homeHref = isAdmin ? "/admin" : isMarketing ? "/" : "/dashboard";
+
   // W2 lockup — ink monogram + wide-tracked NUTRIGAIN. wordmark.
+  // The brand links to the variant's home so it's always a way back.
   const brand = (
-    <div className="flex items-center gap-2.5 min-w-0">
+    <Link
+      href={homeHref}
+      className="flex items-center gap-2.5 min-w-0 hover:opacity-80 transition-opacity"
+      aria-label={isAdmin ? "NutriGain admin home" : isMarketing ? "NutriGain home" : "NutriGain dashboard home"}
+    >
       <span
         aria-hidden="true"
         className="w-6 h-6 rounded-md bg-[var(--shell-ink)] text-[var(--shell-on-ink)] flex items-center justify-center text-[11px] font-extrabold leading-none select-none flex-none"
@@ -125,7 +134,7 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
           Master Control Terminal
         </span>
       )}
-    </div>
+    </Link>
   );
 
   // Desktop tabs — uppercase micro-links with a hairline accent underline.
@@ -151,10 +160,22 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
     </nav>
   );
 
+  // Escape hatch from the admin console — admins are users too, and the
+  // console previously offered no way back to the tracking side.
+  const myDashboardLink = isAdmin ? (
+    <Link
+      href="/dashboard"
+      className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--shell-ink)] hover:text-[var(--shell-accent)] transition-colors"
+    >
+      My dashboard
+    </Link>
+  ) : null;
+
   // Right rail — page controls, theme, user, logout.
   const rightRail = (
     <div className="flex items-center gap-2.5">
       {navSlot && <div className="hidden md:flex items-center gap-3 min-w-0">{navSlot}</div>}
+      {myDashboardLink}
       {themeToggle}
       <div className="flex items-center gap-2">
         <span
@@ -181,6 +202,32 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
     </div>
   );
 
+  // Shared mobile bar — brand + theme + hamburger. One definition so all
+  // three variants (marketing, dashboard, admin) can't drift apart again.
+  const mobileBar = (
+    <div className="md:hidden flex items-center justify-between h-14">
+      {brand}
+      <div className="flex items-center gap-1.5">
+        {themeToggle}
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="p-2 text-[var(--shell-ink)] hover:bg-[var(--shell-sunken)] rounded-lg transition cursor-pointer"
+          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={mobileMenuOpen}
+          aria-controls="mobile-menu"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {mobileMenuOpen ? (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            ) : (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            )}
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="app-shell min-h-screen bg-[var(--shell-bg)] text-[var(--shell-ink)] font-sans selection:bg-[var(--shell-accent)] selection:text-[var(--shell-on-accent)]">
       <nav
@@ -188,21 +235,17 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
       >
         <div className="ng-container">
           {isAdmin ? (
-            <div className="flex justify-between items-center h-14">
-              {brand}
-              <div className="flex items-center gap-2.5">
-                {navSlot && <div className="hidden md:flex items-center gap-3 min-w-0">{navSlot}</div>}
-                {themeToggle}
-                <button
-                  onClick={logout}
-                  className="p-1.5 rounded-lg transition-colors cursor-pointer text-[var(--shell-muted)] hover:text-[var(--shell-danger)] hover:bg-[var(--shell-danger-soft)]"
-                  aria-label="Log out"
-                  title="Log out"
-                >
-                  {logoutIcon}
-                </button>
+            <>
+              {/* Admin desktop — the console rail now shares the standard
+                  right rail, adding identity and the 'My dashboard' escape. */}
+              <div className="hidden md:flex justify-between items-center h-14">
+                {brand}
+                {rightRail}
               </div>
-            </div>
+              {/* Admin mobile — previously missing entirely; now the shared
+                  bar, which finally makes the mobile menu reachable. */}
+              {mobileBar}
+            </>
           ) : isMarketing ? (
             <>
               {/* Marketing desktop — brand left, auth actions right */}
@@ -256,28 +299,8 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
                 </div>
               </div>
 
-              {/* Marketing mobile bar — brand + theme + hamburger */}
-              <div className="md:hidden flex items-center justify-between h-14">
-                {brand}
-                <div className="flex items-center gap-1.5">
-                  {themeToggle}
-                  <button
-                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                    className="p-2 text-[var(--shell-ink)] hover:bg-[var(--shell-sunken)] rounded-lg transition cursor-pointer"
-                    aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-                    aria-expanded={mobileMenuOpen}
-                    aria-controls="mobile-menu"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      {mobileMenuOpen ? (
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      ) : (
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                      )}
-                    </svg>
-                  </button>
-                </div>
-              </div>
+              {/* Marketing mobile — shared bar (brand + theme + hamburger) */}
+              {mobileBar}
             </>
           ) : (
             <>
@@ -287,28 +310,8 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
                 <div className="flex justify-center h-full">{tabs}</div>
                 <div className="flex justify-end h-full items-center">{rightRail}</div>
               </div>
-          {/* Mobile bar — brand + theme + hamburger */}
-              <div className="md:hidden flex items-center justify-between h-14">
-                {brand}
-                <div className="flex items-center gap-1.5">
-                  {themeToggle}
-                  <button
-                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                    className="p-2 text-[var(--shell-ink)] hover:bg-[var(--shell-sunken)] rounded-lg transition cursor-pointer"
-                    aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-                    aria-expanded={mobileMenuOpen}
-                    aria-controls="mobile-menu"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      {mobileMenuOpen ? (
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      ) : (
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                      )}
-                    </svg>
-                  </button>
-                </div>
-              </div>
+              {/* Dashboard mobile — shared bar (brand + theme + hamburger) */}
+              {mobileBar}
             </>
           )}
         </div>
@@ -418,18 +421,37 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
                 );
               })}
 
-            {isAdmin && (
-              <button
-                onClick={() => navigate("/admin")}
-                style={{ animationDelay: "80ms" }}
-                className="wg-row-in w-full text-left flex items-baseline gap-3 py-4 border-b border-[var(--shell-line)] text-[var(--shell-ink)] cursor-pointer"
-              >
-                <span aria-hidden="true" className="text-[10px] font-bold tracking-[0.08em] pt-1 text-[var(--shell-accent)]">
-                  01
-                </span>
-                <span className="text-[26px] font-extrabold uppercase tracking-[0.1em] leading-none">Admin</span>
-              </button>
-            )}
+            {isAdmin &&
+              [
+                { label: "Admin", href: "/admin" },
+                { label: "My dashboard", href: "/dashboard" },
+              ].map((row, i) => {
+                const active = pathname === row.href;
+                return (
+                  <button
+                    key={row.href}
+                    onClick={() => navigate(row.href)}
+                    aria-current={active ? "page" : undefined}
+                    style={{ animationDelay: `${80 + i * 70}ms` }}
+                    className={`wg-row-in group w-full text-left flex items-baseline gap-3 py-4 border-b border-[var(--shell-line)] cursor-pointer transition-colors ${
+                      active ? "text-[var(--shell-ink)]" : "text-[var(--shell-muted)] active:text-[var(--shell-ink)]"
+                    }`}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`text-[10px] font-bold tracking-[0.08em] pt-1 ${
+                        active ? "text-[var(--shell-accent)]" : "text-[var(--shell-muted)]"
+                      }`}
+                    >
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span className="text-[26px] font-extrabold uppercase tracking-[0.1em] leading-none">{row.label}</span>
+                    {active && (
+                      <span aria-hidden="true" className="ml-auto w-6 h-[2px] bg-[var(--shell-accent)] self-center" />
+                    )}
+                  </button>
+                );
+              })}
           </nav>
 
           {/* Foot */}
