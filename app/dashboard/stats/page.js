@@ -63,6 +63,16 @@ html[data-theme="dark"] .st .st-week .st-wk-bar{background:var(--track,#2e2e34)}
 .st-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:11px;font-weight:600;color:var(--t3)}
 .st-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px;border:1px solid var(--line)}
 .st-empty{padding:18px;border:1px dashed var(--line);border-radius:10px;font-size:13px;color:var(--t3);text-align:center}
+/* Inline loading + error states (same ring language as components/Loader) */
+.st-loading{display:flex;flex-direction:column;align-items:center;gap:16px;padding:64px 0;color:var(--t3)}
+.st-loading i{display:block;width:32px;height:32px;border-radius:9999px;border:3px solid var(--line);border-top-color:var(--ac);animation:st-spin .8s linear infinite}
+.st-loading p{font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin:0}
+@keyframes st-spin{to{transform:rotate(360deg)}}
+.st-error{display:flex;flex-direction:column;align-items:flex-start;gap:14px;padding:22px;border:1px solid var(--red-soft-b);background:var(--red-soft);border-radius:12px}
+.st-error p{font-size:13px;font-weight:600;color:var(--red);margin:0}
+.st-error button{font:inherit;font-size:13px;font-weight:700;color:var(--on-ac);background:var(--red);border:none;border-radius:8px;padding:9px 16px;cursor:pointer}
+.st-error button:hover{filter:brightness(.94)}
+.st-error button:focus-visible{outline:2px solid var(--red);outline-offset:2px}
 .st-layout{display:grid;grid-template-columns:1fr;gap:20px}
 @media(min-width:1000px){.st-layout{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.st-strip{grid-template-columns:repeat(7,1fr)}}
@@ -104,7 +114,10 @@ export default function StatsPage() {
   const [days, setDays] = useState(30);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [tick, setTick] = useState(0);
   const [weight, setWeight] = useState({ entries: [], targetWeight: 75 });
+  const [weightError, setWeightError] = useState("");
 
   useEffect(() => {
     if (!user) return;
@@ -112,24 +125,34 @@ export default function StatsPage() {
     // Note: no synchronous setLoading(true) here — while a new range
     // loads, the previous range's stats stay visible (stale-while-revalidate).
     fetch(`/api/stats?days=${days}`)
-      .then((res) => (res.ok ? res.json() : null))
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error(`HTTP ${res.status}`))))
       .then((data) => {
-        if (!cancelled) setStats(data);
+        if (!cancelled) {
+          setStats(data);
+          setError("");
+        }
       })
-      .catch(() => {})
+      .catch((err) => {
+        if (!cancelled) setError(err?.message || "Network error");
+      })
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
     fetch("/api/weight")
-      .then((res) => (res.ok ? res.json() : null))
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error(`HTTP ${res.status}`))))
       .then((data) => {
-        if (!cancelled && data) setWeight({ entries: data.weightEntries || [], targetWeight: data.targetWeight || 75 });
+        if (!cancelled && data) {
+          setWeight({ entries: data.weightEntries || [], targetWeight: data.targetWeight || 75 });
+          setWeightError("");
+        }
       })
-      .catch(() => {});
+      .catch((err) => {
+        if (!cancelled) setWeightError(err?.message || "Network error");
+      });
     return () => {
       cancelled = true;
     };
-  }, [user, days]);
+  }, [user, days, tick]);
 
   const goals = user?.macroGoals || { calories: 1900, protein: 120, carbs: 170, fats: 60 };
 
@@ -177,9 +200,29 @@ export default function StatsPage() {
           </div>
         </div>
 
-        {loading && !stats && <p className="m-crumb">Loading your stats…</p>}
+        {loading && !stats && (
+          <div className="st-loading" role="status" aria-live="polite">
+            <i aria-hidden="true" />
+            <p>Loading your stats…</p>
+          </div>
+        )}
 
-        {!loading && stats && (
+        {!loading && !stats && error && (
+          <div className="st-error" role="alert">
+            <p>Couldn&apos;t load your stats — {error}. Check your connection and try again.</p>
+            <button type="button" onClick={() => setTick((t) => t + 1)}>
+              Try again
+            </button>
+          </div>
+        )}
+
+        {stats && error && !loading && (
+          <p className="m-crumb" role="alert" style={{ color: "var(--red)", fontWeight: 600, margin: "-8px 0 12px" }}>
+            Couldn&apos;t refresh — showing the last loaded data.
+          </p>
+        )}
+
+        {stats && (
           <div className="st-layout">
             {/* ---------------------- Weekly macros vs goals ---------------------- */}
             <div className="m-card m-in">
@@ -320,7 +363,19 @@ export default function StatsPage() {
                 )}
               </div>
               <div style={{ padding: 18 }}>
-                {weightRows.length < 2 ? (
+                {weightError && weightRows.length > 0 && (
+                  <p className="m-crumb" role="alert" style={{ color: "var(--red)", fontWeight: 600, margin: "0 0 12px" }}>
+                    Couldn&apos;t refresh your weight — showing the last loaded entries.
+                  </p>
+                )}
+                {weightError && weightRows.length === 0 ? (
+                  <div className="st-error" role="alert">
+                    <p>Couldn&apos;t load your weight data — {weightError}.</p>
+                    <button type="button" onClick={() => setTick((t) => t + 1)}>
+                      Try again
+                    </button>
+                  </div>
+                ) : weightRows.length < 2 ? (
                   <div className="st-empty">
                     Need at least two weight entries to draw a trend.
                     <div style={{ marginTop: 10 }}>

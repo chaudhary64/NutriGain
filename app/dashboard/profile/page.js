@@ -128,6 +128,7 @@ export default function ProfilePage() {
   const [profileMessage, setProfileMessage] = useState("");
   const [weightInfo, setWeightInfo] = useState({ entries: [], targetWeight: 75 });
   const [weightTick, setWeightTick] = useState(0);
+  const [weightError, setWeightError] = useState("");
 
   const pushToast = (message, tone = "success", ttl = 4000) => {
     const id = ++toastSeq;
@@ -144,13 +145,16 @@ export default function ProfilePage() {
     if (!user) return;
     let cancelled = false;
     fetch("/api/weight")
-      .then((res) => (res.ok ? res.json() : null))
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error(`HTTP ${res.status}`))))
       .then((data) => {
         if (!cancelled && data) {
           setWeightInfo({ entries: data.weightEntries || [], targetWeight: data.targetWeight || 75 });
+          setWeightError("");
         }
       })
-      .catch(() => {});
+      .catch((err) => {
+        if (!cancelled) setWeightError(err?.message || "Network error");
+      });
     return () => {
       cancelled = true;
     };
@@ -581,7 +585,23 @@ export default function ProfilePage() {
                                   <span className="m-crumb" style={{ fontWeight: 500 }}>
                                     {" "}· logged {new Date(latestEntry.date).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
                                   </span>
+                                  {weightError && (
+                                    <span className="m-crumb" role="alert" style={{ color: "var(--red)", fontWeight: 600 }}>
+                                      {" "}· refresh failed
+                                    </span>
+                                  )}
                                 </>
+                              ) : weightError ? (
+                                <span className="m-crumb" role="alert" style={{ fontWeight: 500, color: "var(--red)" }}>
+                                  Couldn&apos;t load weight data — {weightError}.{" "}
+                                  <button
+                                    type="button"
+                                    onClick={() => setWeightTick((n) => n + 1)}
+                                    style={{ background: "none", border: "none", padding: 0, color: "var(--red)", fontWeight: 700, textDecoration: "underline", cursor: "pointer", font: "inherit" }}
+                                  >
+                                    Try again
+                                  </button>
+                                </span>
                               ) : (
                                 <span className="m-crumb" style={{ fontWeight: 500 }}>No entries yet — save your profile to seed today&apos;s weight</span>
                               )}
