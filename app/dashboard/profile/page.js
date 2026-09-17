@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import AppShell from "@/components/AppShell";
 import { suggestMacroGoals, ACTIVITY_LEVELS, GOALS } from "@/lib/tdee";
+import { FALLBACK_MACRO_GOALS } from "@/lib/goals";
 
 /* ------------------------------------------------------------------ */
 /* Meridian design system — same tokens as app/dashboard/meal.        */
@@ -179,7 +180,7 @@ export default function ProfilePage() {
     return null;
   }
 
-  const goals = user.macroGoals || { calories: 1900, protein: 120, carbs: 170, fats: 60 };
+  const goals = user.macroGoals || FALLBACK_MACRO_GOALS;
   const latestEntry = weightInfo.entries.length > 0 ? weightInfo.entries[weightInfo.entries.length - 1] : null;
   const profile = user.profile || null;
 

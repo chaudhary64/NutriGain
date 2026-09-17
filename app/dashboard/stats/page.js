@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import AppShell from "@/components/AppShell";
 import { format, parseISO } from "date-fns";
+import { FALLBACK_MACRO_GOALS } from "@/lib/goals";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ResponsiveContainer } from "recharts";
 
 /* ------------------------------------------------------------------ */
@@ -154,7 +155,7 @@ export default function StatsPage() {
     };
   }, [user, days, tick]);
 
-  const goals = user?.macroGoals || { calories: 1900, protein: 120, carbs: 170, fats: 60 };
+  const goals = user?.macroGoals || FALLBACK_MACRO_GOALS;
 
   const weightRows = useMemo(
     () =>

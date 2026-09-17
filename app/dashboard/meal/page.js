@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { format, isToday } from "date-fns";
 import AppShell from "@/components/AppShell";
 import Loader from "@/components/Loader";
+import { FALLBACK_MACRO_GOALS } from "@/lib/goals";
 
 /* ------------------------------------------------------------------ */
 /* Meridian design system — restrained SaaS.                          */
@@ -604,12 +605,7 @@ export default function MealTrackingPage() {
   };
 
   // Per-user daily goals (editable on the profile page)
-  const goals = user?.macroGoals || {
-    calories: 1900,
-    protein: 120,
-    carbs: 170,
-    fats: 60,
-  };
+  const goals = user?.macroGoals || FALLBACK_MACRO_GOALS;
 
   // Selected-date info
   const [selY, selM, selD] = currentDate.split("-").map(Number);
