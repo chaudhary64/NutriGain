@@ -10,6 +10,7 @@ import { format, parseISO, startOfYear } from "date-fns";
 import { mergeSessionsIntoHeatmap } from "@/lib/heatmap";
 import AppShell from "@/components/AppShell";
 import Loader from "@/components/Loader";
+import SplitManager from "@/components/SplitManager";
 import {
   LineChart,
   Line,
@@ -93,6 +94,7 @@ html[data-theme="dark"] .gym{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b
 .gym .gym-stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
 .gym .gym-layout > *{min-width:0}
 .gym .m-card{min-width:0}
+/* Training split card styles live in components/SplitManager.js */
 `;
 
 const Icon = ({ d, className = "m-ic" }) => (
@@ -118,6 +120,8 @@ const ICONS = {
 };
 
 let toastSeq = 0;
+
+const SPLIT_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 function ToastHost({ toasts, onDismiss }) {
   return (
@@ -160,7 +164,9 @@ export default function GymTrackingPage() {
 
   // Data State
   const [exercises, setExercises] = useState([]);
-  const [workoutSchedule, setWorkoutSchedule] = useState([]);
+  const [workoutSchedule, setWorkoutSchedule] = useState([]); // derived: [{day, muscleGroups}]
+  const [splitDays, setSplitDays] = useState({}); // raw user schedule: { Monday: [...], ... }
+  const [splitSource, setSplitSource] = useState(null); // template name the split came from
   const [weightEntries, setWeightEntries] = useState([]);
   const [gymHistory, setGymHistory] = useState([]);
 
@@ -209,7 +215,7 @@ export default function GymTrackingPage() {
   }, []);
 
   useEffect(() => {
-    if (user && !user.isAdmin) {
+    if (user) {
       fetchData();
     }
   }, [user]);
@@ -219,7 +225,7 @@ export default function GymTrackingPage() {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
         checkAuth();
-        if (user && !user.isAdmin) {
+        if (user) {
           fetchData();
         }
       }
@@ -268,36 +274,14 @@ export default function GymTrackingPage() {
 
       if (Array.isArray(exercisesData)) setExercises(exercisesData);
 
-      if (Array.isArray(scheduleData)) {
-        const validMuscleGroups = [
-          "Abs",
-          "Back",
-          "Bicep",
-          "Chest",
-          "Forearms",
-          "Legs",
-          "Rest Day",
-          "Shoulders",
-          "Tricep",
-        ];
-        const dayOrder = [
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday",
-          "Sunday",
-        ];
-        const filteredSchedule = scheduleData
-          .map((s) => ({
-            ...s,
-            muscleGroups: (s.muscleGroups || []).filter((g) =>
-              validMuscleGroups.includes(g),
-            ),
-          }))
-          .sort((a, b) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day));
-        setWorkoutSchedule(filteredSchedule);
+      const rawDays = scheduleData?.days;
+      const days = Array.isArray(rawDays) ? Object.fromEntries(rawDays) : rawDays;
+      if (days && typeof days === "object") {
+        setSplitDays(days);
+        setSplitSource(scheduleData.sourceTemplateName || null);
+        setWorkoutSchedule(
+          SPLIT_DAYS.map((day) => ({ day, muscleGroups: days[day] || ["Rest Day"] }))
+        );
       }
     } catch (error) {
       console.error("Error fetching gym data:", error);
@@ -705,12 +689,21 @@ export default function GymTrackingPage() {
   };
 
   const getTodayMuscleGroups = () => {
-    const dayName = new Date().toLocaleDateString("en-US", { weekday: "long" });
-    const todaySchedule = workoutSchedule.find((s) => s.day === dayName);
-    return todaySchedule ? todaySchedule.muscleGroups : ["Rest Day"];
+    const dayIndex = (new Date().getDay() + 6) % 7; // Monday = 0 … Sunday = 6
+    const groups = splitDays[SPLIT_DAYS[dayIndex]];
+    return Array.isArray(groups) && groups.length > 0 ? groups : ["Rest Day"];
   };
 
   const muscleGroups = getTodayMuscleGroups();
+
+  // SplitManager reports back after a template apply or custom save — keep
+  // the gym page's derived views (today's plan, week grid) in sync.
+  const handleSplitChanged = (nextDays) => {
+    setSplitDays(nextDays);
+    setWorkoutSchedule(
+      SPLIT_DAYS.map((day) => ({ day, muscleGroups: nextDays[day] || ["Rest Day"] }))
+    );
+  };
 
   return (
     <>
@@ -974,12 +967,20 @@ export default function GymTrackingPage() {
 
             {/* Right column: plan + exercises */}
             <div style={{ display: "grid", gap: 20 }}>
+              {/* Training split — shared manager (gallery + custom editor) */}
+              <SplitManager
+                initialDays={splitDays}
+                initialSource={splitSource}
+                onChanged={handleSplitChanged}
+                pushToast={pushToast}
+              />
+
               {/* Today's plan card */}
               <div className="m-card m-in">
                 <div className="m-card-h">
                   <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <span style={{ color: "var(--ac)" }}><Icon d={ICONS.calendar} /></span>
-                    Today's plan
+                    Today&apos;s plan
                   </h3>
                   <span className="m-chip m-chip-ac">{format(new Date(), "EEEE")}</span>
                 </div>
@@ -1026,7 +1027,7 @@ export default function GymTrackingPage() {
                         Rest & recovery
                       </p>
                       <p className="m-sub" style={{ maxWidth: 420, margin: "0 auto" }}>
-                        Micro-tears build muscle, but rest repairs them. Fuel up today — tomorrow's session is where the plan resumes.
+                        Micro-tears build muscle, but rest repairs them. Fuel up today — tomorrow&apos;s session is where the plan resumes.
                       </p>
                     </div>
                   );

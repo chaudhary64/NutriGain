@@ -173,16 +173,13 @@ export default function AdminPage() {
   // Users state
   const [users, setUsers] = useState([]);
 
-  // Gym workout state
-  const [workoutSchedule, setWorkoutSchedule] = useState([
-    { day: "Monday", muscleGroups: [] },
-    { day: "Tuesday", muscleGroups: [] },
-    { day: "Wednesday", muscleGroups: [] },
-    { day: "Thursday", muscleGroups: [] },
-    { day: "Friday", muscleGroups: [] },
-    { day: "Saturday", muscleGroups: [] },
-    { day: "Sunday", muscleGroups: [] },
-  ]);
+  // Gym workout state — split templates
+  const TEMPLATE_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  const TEMPLATE_GROUPS = ["Abs", "Arms", "Back", "Bicep", "Chest", "Forearms", "Legs", "Shoulders", "Tricep", "Push", "Pull", "Upper Body", "Lower Body", "Full Body", "Rest Day"];
+  const [templates, setTemplates] = useState([]);
+  const [showTemplateForm, setShowTemplateForm] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState(null); // {_id|null, name, description, days}
+  const [savingTemplate, setSavingTemplate] = useState(false);
 
   const [exercises, setExercises] = useState([]);
 
@@ -240,39 +237,11 @@ export default function AdminPage() {
         setExercises(exercisesData.map((ex) => ({ ...ex, id: ex._id })));
       }
 
-      // Fetch workout schedule
-      const scheduleRes = await fetch("/api/workout-schedule");
-      const scheduleData = await scheduleRes.json();
-      if (scheduleData && Array.isArray(scheduleData)) {
-        const validMuscleGroups = [
-          "Abs",
-          "Back",
-          "Bicep",
-          "Chest",
-          "Forearms",
-          "Legs",
-          "Rest Day",
-          "Shoulders",
-          "Tricep",
-        ];
-        const dayOrder = [
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday",
-          "Sunday",
-        ];
-        const sortedSchedule = scheduleData
-          .map((s) => ({
-            ...s,
-            muscleGroups: (s.muscleGroups || []).filter((g) =>
-              validMuscleGroups.includes(g),
-            ),
-          }))
-          .sort((a, b) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day));
-        setWorkoutSchedule(sortedSchedule);
+      // Fetch split templates
+      const templatesRes = await fetch("/api/workout-templates");
+      if (templatesRes.ok) {
+        const templatesData = await templatesRes.json();
+        if (Array.isArray(templatesData)) setTemplates(templatesData);
       }
     } catch (error) {
       console.error("Error fetching gym data:", error);
@@ -465,36 +434,92 @@ export default function AdminPage() {
     setShowMuscleGroupDropdown(false);
   };
 
-  const handleEditSchedule = (daySchedule) => {
-    setEditingDay(daySchedule);
-    setShowScheduleForm(true);
+  const openNewTemplate = () => {
+    setEditingTemplate({
+      _id: null,
+      name: "",
+      description: "",
+      isDefault: false,
+      days: Object.fromEntries(TEMPLATE_DAYS.map((d) => [d, ["Rest Day"]])),
+    });
+    setShowTemplateForm(true);
   };
 
-  const handleScheduleUpdate = async (day, muscleGroups) => {
-    try {
-      const res = await fetch("/api/workout-schedule", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ day, muscleGroups }),
-      });
+  const openEditTemplate = (tpl) => {
+    setEditingTemplate({
+      _id: tpl._id,
+      name: tpl.name,
+      description: tpl.description || "",
+      isDefault: !!tpl.isDefault,
+      days: Object.fromEntries(TEMPLATE_DAYS.map((d) => [d, tpl.days?.[d]?.length ? tpl.days[d] : ["Rest Day"]])),
+    });
+    setShowTemplateForm(true);
+  };
 
-      if (res.ok) {
-        await fetchGymData();
-        // Update editingDay to reflect the new muscle groups
-        if (editingDay && editingDay.day === day) {
-          setEditingDay({
-            ...editingDay,
-            muscleGroups: muscleGroups,
-          });
+  const handleTemplateSubmit = async (e) => {
+    e.preventDefault();
+    if (!editingTemplate) return;
+    setSavingTemplate(true);
+    try {
+      const payload = {
+        name: editingTemplate.name,
+        description: editingTemplate.description,
+        isDefault: !!editingTemplate.isDefault,
+        days: editingTemplate.days,
+      };
+      const res = await fetch(
+        editingTemplate._id ? `/api/workout-templates/${editingTemplate._id}` : "/api/workout-templates",
+        {
+          method: editingTemplate._id ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
         }
-      } else {
-        const data = await res.json();
-        alert(data.error || "Failed to update schedule");
+      );
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        alert(data.error || "Failed to save template");
+        return;
       }
+      setShowTemplateForm(false);
+      setEditingTemplate(null);
+      await fetchGymData();
     } catch (error) {
-      console.error("Error updating schedule:", error);
-      alert("Failed to update schedule");
+      console.error("Error saving template:", error);
+      alert("Failed to save template");
+    } finally {
+      setSavingTemplate(false);
     }
+  };
+
+  const handleDeleteTemplate = async (tpl) => {
+    if (!window.confirm(`Delete the "${tpl.name}" template? Users who forked it keep their copy.`)) return;
+    try {
+      const res = await fetch(`/api/workout-templates/${tpl._id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || "Failed to delete template");
+        return;
+      }
+      await fetchGymData();
+    } catch (error) {
+      console.error("Error deleting template:", error);
+      alert("Failed to delete template");
+    }
+  };
+
+  const toggleTemplateDayGroup = (day, group) => {
+    setEditingTemplate((prev) => {
+      if (!prev) return prev;
+      const current = prev.days[day] || [];
+      let next;
+      if (current.includes(group)) {
+        next = current.filter((g) => g !== group);
+        if (next.length === 0) next = ["Rest Day"];
+      } else {
+        next = [...current.filter((g) => g !== "Rest Day"), group].slice(0, 4);
+      }
+      return { ...prev, days: { ...prev.days, [day]: next } };
+    });
   };
 
   const uniqueMuscleGroups = [
@@ -522,7 +547,7 @@ export default function AdminPage() {
         <div className="adm-head">
           <p className="adm-crumb">Admin</p>
           <h1 className="adm-h1">Console</h1>
-          <p className="adm-sub">Manage the meal database, exercise library, weekly split, and users.</p>
+          <p className="adm-sub">Manage the meal database, exercise library, split templates, and users.</p>
         </div>
 
         {/* Tabs */}
@@ -739,92 +764,160 @@ export default function AdminPage() {
         {/* Gym Management Section */}
         {activeTab === "gym" && (
           <div>
-            {/* Weekly Schedule Management */}
-            <div className="adm-card adm-form">
-              <div className="mb-5">
-                <h3>Weekly split</h3>
-                <p style={{ fontSize: 12, fontWeight: 500, color: "var(--t2)", marginTop: 3 }}>
-                  Target muscle groups per training day.
-                </p>
+            {/* Split Templates Management */}
+            <div className="adm-sec" style={{ marginTop: 0, marginBottom: 18 }}>
+              <div>
+                <h2>Split templates</h2>
+                <p>Curated training splits users can adopt, then customize freely — their fork is their own.</p>
               </div>
-
-              <div className="adm-days">
-                {workoutSchedule.map((schedule) => (
-                  <div key={schedule.day} className="adm-day">
-                    <div className="adm-day-h">
-                      <span>{schedule.day.substring(0, 3)}</span>
-                      <button onClick={() => handleEditSchedule(schedule)} aria-label={`Edit ${schedule.day}`}>
-                        {I.pencil}
-                      </button>
-                    </div>
-
-                    {schedule.muscleGroups.length > 0 ? (
-                      schedule.muscleGroups.map((group, idx) => (
-                        <span key={idx} className="adm-day-chip">{group}</span>
-                      ))
-                    ) : (
-                      <div className="adm-day-rest">Rest</div>
-                    )}
-                  </div>
-                ))}
-              </div>
+              {!showTemplateForm && (
+                <button onClick={openNewTemplate} className="adm-btn">
+                  New template
+                </button>
+              )}
             </div>
 
-            {/* Schedule Edit Form */}
-            {showScheduleForm && editingDay && (
-              <div className="adm-card adm-form" style={{ marginTop: 20 }}>
-                <div className="mb-5">
-                  <h3>Edit {editingDay.day}</h3>
-                  <p style={{ fontSize: 12, fontWeight: 500, color: "var(--t2)", marginTop: 3 }}>
-                    Target muscle groups
-                  </p>
-                </div>
+            {!showTemplateForm && (
+              <div style={{ display: "grid", gap: 14 }}>
+                {templates.map((tpl) => (
+                  <div key={tpl._id} className="adm-card" style={{ padding: 18 }}>
+                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                          <h3 style={{ fontSize: 15, fontWeight: 800, letterSpacing: "-.01em", color: "var(--t1)", margin: 0 }}>{tpl.name}</h3>
+                          {tpl.isDefault && (
+                            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--ac)", background: "var(--ac-soft)", padding: "3px 8px", borderRadius: 6 }}>
+                              Default
+                            </span>
+                          )}
+                        </div>
+                        {tpl.description && (
+                          <p style={{ fontSize: 12, fontWeight: 500, color: "var(--t2)", margin: "3px 0 0" }}>{tpl.description}</p>
+                        )}
+                      </div>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <button onClick={() => openEditTemplate(tpl)} className="adm-icon" aria-label={`Edit ${tpl.name}`}>
+                          {I.pencil}
+                        </button>
+                        <button onClick={() => handleDeleteTemplate(tpl)} className="adm-icon danger" aria-label={`Delete ${tpl.name}`}>
+                          {I.trash}
+                        </button>
+                      </div>
+                    </div>
+                    <div className="adm-days" style={{ marginTop: 14 }}>
+                      {TEMPLATE_DAYS.map((day) => (
+                        <div key={day} className="adm-day" style={{ padding: 10 }}>
+                          <div className="adm-day-h"><span>{day.substring(0, 3)}</span></div>
+                          {(tpl.days?.[day] || []).length > 0 ? (
+                            tpl.days[day].map((group, idx) => (
+                              <span key={idx} className="adm-day-chip">{group}</span>
+                            ))
+                          ) : (
+                            <div className="adm-day-rest">Rest</div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                {templates.length === 0 && (
+                  <div className="adm-empty">No templates yet — create one so users have a starting split.</div>
+                )}
+              </div>
+            )}
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                  {uniqueMuscleGroups.map((group) => {
-                    const isSelected = editingDay.muscleGroups.includes(group);
-                    return (
-                      <label key={group} className={`adm-check ${isSelected ? "on" : ""}`}>
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={(e) => {
-                            const checked = e.target.checked;
-                            const updatedMuscleGroups = checked
-                              ? [...editingDay.muscleGroups, group]
-                              : editingDay.muscleGroups.filter(
-                                (g) => g !== group,
-                              );
-
-                            setEditingDay({
-                              ...editingDay,
-                              muscleGroups: updatedMuscleGroups,
-                            });
-
-                            handleScheduleUpdate(
-                              editingDay.day,
-                              updatedMuscleGroups,
-                            );
-                          }}
-                        />
-                        {group}
-                      </label>
-                    );
-                  })}
-                </div>
-
-                <div className="mt-6 flex justify-end">
+            {/* Template Form */}
+            {showTemplateForm && editingTemplate && (
+              <form onSubmit={handleTemplateSubmit} className="adm-card adm-form" style={{ marginBottom: 24 }}>
+                <div className="flex items-center justify-between mb-5">
+                  <h3>{editingTemplate._id ? "Edit template" : "New template"}</h3>
                   <button
+                    type="button"
                     onClick={() => {
-                      setShowScheduleForm(false);
-                      setEditingDay(null);
+                      setShowTemplateForm(false);
+                      setEditingTemplate(null);
                     }}
-                    className="adm-btn"
+                    className="adm-icon"
+                    aria-label="Close form"
                   >
-                    Done
+                    {I.x}
                   </button>
                 </div>
-              </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div>
+                    <label className="adm-lbl" htmlFor="tpl-name">Template name</label>
+                    <input
+                      id="tpl-name"
+                      className="adm-in"
+                      value={editingTemplate.name}
+                      onChange={(e) => setEditingTemplate({ ...editingTemplate, name: e.target.value })}
+                      placeholder="e.g. Push Pull Legs"
+                      maxLength={40}
+                      minLength={2}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="adm-lbl" htmlFor="tpl-desc">Description (optional)</label>
+                    <input
+                      id="tpl-desc"
+                      className="adm-in"
+                      value={editingTemplate.description}
+                      onChange={(e) => setEditingTemplate({ ...editingTemplate, description: e.target.value })}
+                      placeholder="One line on who it's for"
+                      maxLength={140}
+                    />
+                  </div>
+                </div>
+
+                <label className={`adm-check ${editingTemplate.isDefault ? "on" : ""}`} style={{ marginTop: 16, width: "fit-content" }}>
+                  <input
+                    type="checkbox"
+                    checked={editingTemplate.isDefault}
+                    onChange={(e) => setEditingTemplate({ ...editingTemplate, isDefault: e.target.checked })}
+                  />
+                  Set as default — new users start with this split
+                </label>
+
+                <div className="mt-5">
+                  <label className="adm-lbl">Weekly split — pick 1-4 muscle groups per day</label>
+                  <div className="adm-days">
+                    {TEMPLATE_DAYS.map((day) => (
+                      <div key={day} className="adm-day">
+                        <div className="adm-day-h"><span>{day.substring(0, 3)}</span></div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                          {TEMPLATE_GROUPS.map((group) => {
+                            const on = (editingTemplate.days[day] || []).includes(group);
+                            return (
+                              <label key={group} className={`adm-check ${on ? "on" : ""}`} style={{ padding: "7px 10px", fontSize: 12 }}>
+                                <input type="checkbox" checked={on} onChange={() => toggleTemplateDayGroup(day, group)} />
+                                {group}
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-6 flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowTemplateForm(false);
+                      setEditingTemplate(null);
+                    }}
+                    className="adm-ghost"
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className="adm-btn" disabled={savingTemplate}>
+                    {savingTemplate ? "Saving…" : editingTemplate._id ? "Update template" : "Create template"}
+                  </button>
+                </div>
+              </form>
             )}
 
             {/* Exercise Management */}

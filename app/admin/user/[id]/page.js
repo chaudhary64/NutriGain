@@ -128,6 +128,7 @@ export default function UserDetailPage() {
   const [userData, setUserData] = useState(null);
   const [dailyLogs, setDailyLogs] = useState([]);
   const [stats, setStats] = useState(null);
+  const [activeSplit, setActiveSplit] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedLog, setSelectedLog] = useState(null);
 
@@ -140,6 +141,7 @@ export default function UserDetailPage() {
         setUserData(data.user);
         setDailyLogs(data.dailyLogs);
         setStats(data.stats);
+        setActiveSplit(data.activeSplit);
       } else {
         alert("Failed to fetch user data");
         router.push("/admin");
@@ -245,6 +247,27 @@ export default function UserDetailPage() {
             <div className="adm-metric"><span>Carbs</span><b className="car">{stats.averageCarbs}g</b></div>
             <div className="adm-metric"><span>Fats</span><b className="fat">{stats.averageFats}g</b></div>
           </div>
+        </div>
+
+        {/* Training split & goals */}
+        <div className="adm-card adm-sec" style={{ marginBottom: 28 }}>
+          <h3>Training split &amp; goals</h3>
+          <div className="adm-m4">
+            <div className="adm-metric">
+              <span>Active split</span>
+              <b>{activeSplit?.sourceTemplateName || (activeSplit ? "Custom" : "None selected")}</b>
+            </div>
+            <div className="adm-metric"><span>Calorie goal</span><b className="cal">{userData.macroGoals?.calories ?? "—"}</b></div>
+            <div className="adm-metric"><span>Protein goal</span><b className="pro">{userData.macroGoals?.protein != null ? `${userData.macroGoals.protein}g` : "—"}</b></div>
+            <div className="adm-metric"><span>Target weight</span><b>{userData.targetWeight != null ? `${userData.targetWeight} kg` : "—"}</b></div>
+          </div>
+          {activeSplit && (
+            <p className="adm-sub" style={{ marginTop: 10 }}>
+              {Object.entries(activeSplit.days)
+                .map(([day, groups]) => `${day}: ${groups.length === 1 && groups[0] === "Rest Day" ? "Rest" : groups.join(" / ")}`)
+                .join(" · ")}
+            </p>
+          )}
         </div>
 
         {/* Charts */}

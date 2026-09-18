@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 import DailyLog from '@/models/DailyLog';
+import UserSchedule from '@/models/UserSchedule';
+import WorkoutTemplate from '@/models/WorkoutTemplate';
 import { withAuth } from '@/lib/auth';
 import { calculateStreaks } from '@/lib/daily-log';
 import { isValidObjectId } from '@/lib/validation';
@@ -67,10 +69,39 @@ export const GET = withAuth(
       stats.longestStreak = longestStreak;
     }
 
+    // Active training split (private fork created from an admin template or
+    // edited by the user) — surfaced in the admin user drawer. Users without
+    // a fork yet effectively follow the default template, same as the
+    // schedule endpoint's lazy fork, so surface that instead of "none".
+    const schedule = await UserSchedule.findOne({ user: id }).lean();
+
+    let activeSplit = null;
+    if (schedule) {
+      activeSplit = {
+        days: Object.fromEntries(schedule.days instanceof Map ? schedule.days : Object.entries(schedule.days || {})),
+        sourceTemplateName: schedule.sourceTemplateName || "Custom edit",
+        updatedAt: schedule.updatedAt,
+      };
+    } else {
+      const defaultTemplate = await WorkoutTemplate.findOne({ isDefault: true })
+        .sort({ updatedAt: -1 })
+        .lean();
+      if (defaultTemplate) {
+        activeSplit = {
+          days: Object.fromEntries(
+            defaultTemplate.days instanceof Map ? defaultTemplate.days : Object.entries(defaultTemplate.days || {})
+          ),
+          sourceTemplateName: `${defaultTemplate.name} (default)`,
+          updatedAt: null,
+        };
+      }
+    }
+
     return NextResponse.json({
       user: targetUser,
       dailyLogs,
       stats,
+      activeSplit,
     });
   },
   { admin: true }
