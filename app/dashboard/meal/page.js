@@ -743,19 +743,20 @@ export default function MealTrackingPage() {
                             type="text"
                             ref={searchInputRef}
                             autoComplete="off"
-                            value={
-                              mealSearch ||
-                              (selectedMeal
-                                ? meals.find((m) => m._id === selectedMeal)?.name
-                                  ? toTitleCase(meals.find((m) => m._id === selectedMeal).name)
-                                  : ""
-                                : "")
-                            }
+                            value={mealSearch}
                             onChange={(e) => {
+                              // Editing the text means searching again — drop any
+                              // picked meal so the input is a single source of truth.
+                              setSelectedMeal("");
                               setMealSearch(e.target.value);
                               setShowMealDropdown(true);
                             }}
-                            onFocus={() => setShowMealDropdown(true)}
+                            onFocus={(e) => {
+                              setShowMealDropdown(true);
+                              // Revisiting a picked meal: select-all so typing or one
+                              // backspace replaces it cleanly.
+                              if (selectedMeal) e.target.select();
+                            }}
                             onKeyDown={(e) => {
                               if (e.key === "ArrowDown" && !showMealDropdown) {
                                 setShowMealDropdown(true);
@@ -768,7 +769,7 @@ export default function MealTrackingPage() {
                                 );
                                 if (list.length === 1) {
                                   setSelectedMeal(list[0]._id);
-                                  setMealSearch("");
+                                  setMealSearch(toTitleCase(list[0].name));
                                   setShowMealDropdown(false);
                                   qtyInputRef.current?.focus();
                                 } else if (list.length > 1) {
@@ -791,7 +792,7 @@ export default function MealTrackingPage() {
                                   tabIndex={-1}
                                   onClick={() => {
                                     setSelectedMeal(meal._id);
-                                    setMealSearch("");
+                                    setMealSearch(toTitleCase(meal.name));
                                     setShowMealDropdown(false);
                                     qtyInputRef.current?.focus();
                                   }}
