@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
-import WorkoutTemplate, { TEMPLATE_DAY_KEYS, TEMPLATE_MUSCLE_GROUP_OPTIONS } from "@/models/WorkoutTemplate";
+import WorkoutTemplate, { TEMPLATE_DAY_KEYS, TEMPLATE_MUSCLE_GROUP_OPTIONS, toPlainDays } from "@/models/WorkoutTemplate";
 import UserSchedule from "@/models/UserSchedule";
 import { withAuth } from "@/lib/auth";
 import { isValidObjectId } from "@/lib/validation";
@@ -37,7 +37,11 @@ export const GET = withAuth(
       return NextResponse.json({ error: "Template not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ ...template, days: Object.fromEntries(template.days instanceof Map ? template.days : []) });
+    // .lean() returns days as a plain object; non-lean as a Map — handle both.
+    return NextResponse.json({
+      ...template,
+      days: toPlainDays(template.days),
+    });
   }
 );
 
@@ -101,7 +105,7 @@ export const PUT = withAuth(
       await WorkoutTemplate.updateMany({ _id: { $ne: id } }, { $set: { isDefault: false } });
     }
 
-    return NextResponse.json({ ...template.toObject(), days: Object.fromEntries(template.days) });
+    return NextResponse.json({ ...template.toObject(), days: toPlainDays(template.days) });
   },
   { admin: true }
 );

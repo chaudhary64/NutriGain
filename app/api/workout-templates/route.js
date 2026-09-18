@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
-import WorkoutTemplate, { TEMPLATE_DAY_KEYS, TEMPLATE_MUSCLE_GROUP_OPTIONS } from "@/models/WorkoutTemplate";
+import WorkoutTemplate, { TEMPLATE_DAY_KEYS, TEMPLATE_MUSCLE_GROUP_OPTIONS, toPlainDays } from "@/models/WorkoutTemplate";
 import { withAuth } from "@/lib/auth";
 
 function validateTemplateBody(body) {
@@ -53,7 +53,7 @@ export const GET = withAuth(async () => {
     .lean();
 
   return NextResponse.json(
-    templates.map((t) => ({ ...t, days: Object.fromEntries(t.days instanceof Map ? t.days : []) }))
+    templates.map((t) => ({ ...t, days: toPlainDays(t.days) }))
   );
 });
 
@@ -87,7 +87,7 @@ export const POST = withAuth(
     }
 
     return NextResponse.json(
-      { ...template.toObject(), days: Object.fromEntries(template.days) },
+      { ...template.toObject(), days: toPlainDays(template.days) },
       { status: 201 }
     );
   },

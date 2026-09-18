@@ -3,7 +3,7 @@ import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 import DailyLog from '@/models/DailyLog';
 import UserSchedule from '@/models/UserSchedule';
-import WorkoutTemplate from '@/models/WorkoutTemplate';
+import WorkoutTemplate, { toPlainDays } from '@/models/WorkoutTemplate';
 import { withAuth } from '@/lib/auth';
 import { calculateStreaks } from '@/lib/daily-log';
 import { isValidObjectId } from '@/lib/validation';
@@ -78,7 +78,7 @@ export const GET = withAuth(
     let activeSplit = null;
     if (schedule) {
       activeSplit = {
-        days: Object.fromEntries(schedule.days instanceof Map ? schedule.days : Object.entries(schedule.days || {})),
+        days: toPlainDays(schedule.days),
         sourceTemplateName: schedule.sourceTemplateName || "Custom edit",
         updatedAt: schedule.updatedAt,
       };
@@ -88,9 +88,7 @@ export const GET = withAuth(
         .lean();
       if (defaultTemplate) {
         activeSplit = {
-          days: Object.fromEntries(
-            defaultTemplate.days instanceof Map ? defaultTemplate.days : Object.entries(defaultTemplate.days || {})
-          ),
+          days: toPlainDays(defaultTemplate.days),
           sourceTemplateName: `${defaultTemplate.name} (default)`,
           updatedAt: null,
         };

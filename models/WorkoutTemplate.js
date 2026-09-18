@@ -3,6 +3,19 @@ import mongoose from 'mongoose';
 const TEMPLATE_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const TEMPLATE_MUSCLE_GROUPS = ['Abs', 'Arms', 'Back', 'Bicep', 'Chest', 'Forearms', 'Legs', 'Shoulders', 'Tricep', 'Push', 'Pull', 'Upper Body', 'Lower Body', 'Full Body', 'Rest Day'];
 
+/**
+ * Serialize a Map-typed `days` field (WorkoutTemplate / UserSchedule) to a
+ * plain object for JSON responses. Handles BOTH runtime shapes: full
+ * documents expose a Mongoose Map, while .lean() queries return a plain
+ * object. Every API that returns `days` must go through this — the
+ * single-shape variants of this logic are how the admin "all Rest" bug
+ * happened.
+ */
+export function toPlainDays(days) {
+  if (days instanceof Map) return Object.fromEntries(days);
+  return days && typeof days === 'object' ? { ...days } : {};
+}
+
 const WorkoutTemplateSchema = new mongoose.Schema({
   name: {
     type: String,

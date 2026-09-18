@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import WorkoutSchedule from "@/models/WorkoutSchedule";
-import WorkoutTemplate, { TEMPLATE_DAY_KEYS } from "@/models/WorkoutTemplate";
+import WorkoutTemplate, { TEMPLATE_DAY_KEYS, toPlainDays } from "@/models/WorkoutTemplate";
 import UserSchedule from "@/models/UserSchedule";
 import { withAuth } from "@/lib/auth";
 
@@ -41,10 +41,6 @@ async function migrateGlobalScheduleToTemplate(adminUserId) {
     isDefault: true,
     createdBy: adminUserId,
   });
-}
-
-function toPlainDays(days) {
-  return Object.fromEntries(days instanceof Map ? days : Object.entries(days || {}));
 }
 
 // GET — the current user's private training split. Ensures one exists: the
