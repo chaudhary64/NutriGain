@@ -81,6 +81,9 @@ const ICONS = {
   check: <path d="M5 13l4 4L19 7" />,
   pencil: <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />,
   x: <path d="M18 6 6 18M6 6l12 12" />,
+  lock: <><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></>,
+  eye: <><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></>,
+  eyeOff: <><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><path d="m2 2 20 20" /></>,
   moon: <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />,
   scale: <><rect x="3" y="3" width="18" height="18" rx="3" /><path d="M8 8a4 4 0 0 1 8 0" /><path d="M12 8v.01" /></>,
   activity: <path d="M22 12h-4l-3 9L9 3l-3 9H2" />,
@@ -132,6 +135,12 @@ export default function ProfilePage() {
   const [weightTick, setWeightTick] = useState(0);
   const [weightError, setWeightError] = useState("");
 
+  // Password change (revokes sessions on other devices via tokenVersion).
+  const [pwForm, setPwForm] = useState({ current: "", next: "", confirm: "" });
+  const [pwShow, setPwShow] = useState({ current: false, next: false, confirm: false });
+  const [savingPw, setSavingPw] = useState(false);
+  const [pwMessage, setPwMessage] = useState("");
+
   const pushToast = (message, tone = "success", ttl = 4000) => {
     const id = ++toastSeq;
     setToasts((prev) => [...prev, { id, message, tone }]);
@@ -140,6 +149,48 @@ export default function ProfilePage() {
     }
   };
   const dismissToast = (id) => setToasts((prev) => prev.filter((t) => t.id !== id));
+
+  // Live requirement checks for the new-password fields.
+  const pwChecks = [
+    { ok: pwForm.next.length >= 6, label: "At least 6 characters" },
+    { ok: pwForm.next.length > 0 && pwForm.next === pwForm.confirm, label: "Both new fields match" },
+  ];
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    setPwMessage("");
+    if (pwForm.next !== pwForm.confirm) {
+      setPwMessage("New passwords don't match.");
+      return;
+    }
+    if (pwForm.next.length < 6 || pwForm.next.length > 128) {
+      setPwMessage("New password must be between 6 and 128 characters.");
+      return;
+    }
+    if (pwForm.next === pwForm.current) {
+      setPwMessage("New password must be different from your current password.");
+      return;
+    }
+    setSavingPw(true);
+    try {
+      const res = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword: pwForm.current, newPassword: pwForm.next }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setPwMessage(data.error || "Couldn't change your password. Try again.");
+        return;
+      }
+      setPwForm({ current: "", next: "", confirm: "" });
+      pushToast("Password changed. Other devices have been signed out.");
+    } catch {
+      setPwMessage("Couldn't change your password. Check your connection and retry.");
+    } finally {
+      setSavingPw(false);
+    }
+  };
 
   // Weight entries + target weight (prefills the profile form and the
   // "current weight" display; refreshed after a profile save).
@@ -679,6 +730,82 @@ export default function ProfilePage() {
                     <p style={{ fontWeight: 600 }}>{user.email}</p>
                   </div>
                 </div>
+              </div>
+
+              {/* Password */}
+              <div className="m-card m-in">
+                <div className="m-card-h">
+                  <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ color: "var(--ac)" }}><Icon d={ICONS.lock} /></span>
+                    Password
+                  </h3>
+                  <span className="m-crumb">changing it signs out other devices</span>
+                </div>
+                <form onSubmit={handlePasswordChange} style={{ padding: 16, display: "grid", gap: 10 }}>
+                  {[
+                    { key: "current", label: "Current password", autoComplete: "current-password" },
+                    { key: "next", label: "New password", autoComplete: "new-password" },
+                    { key: "confirm", label: "Confirm new password", autoComplete: "new-password" },
+                  ].map(({ key, label, autoComplete }) => (
+                    <div key={key} style={{ display: "grid", gap: 4 }}>
+                      <label htmlFor={`pw-${key}`} className="m-lbl">{label}</label>
+                      <div style={{ position: "relative" }}>
+                        <input
+                          id={`pw-${key}`}
+                          type={pwShow[key] ? "text" : "password"}
+                          autoComplete={autoComplete}
+                          value={pwForm[key]}
+                          onChange={(e) => setPwForm((prev) => ({ ...prev, [key]: e.target.value }))}
+                          className="m-field"
+                          style={{ width: "100%", paddingRight: 40 }}
+                          required
+                          minLength={key === "current" ? undefined : 6}
+                          maxLength={128}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setPwShow((prev) => ({ ...prev, [key]: !prev[key] }))}
+                          aria-label={pwShow[key] ? `Hide ${label.toLowerCase()}` : `Show ${label.toLowerCase()}`}
+                          aria-pressed={pwShow[key]}
+                          title={pwShow[key] ? "Hide password" : "Show password"}
+                          className="m-iconbtn"
+                          style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", height: 28, width: 28, display: "flex", alignItems: "center", justifyContent: "center", border: 0, background: "transparent", color: "var(--t3)", cursor: "pointer", padding: 0 }}
+                          onMouseEnter={(e) => (e.currentTarget.style.color = "var(--t1)")}
+                          onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t3)")}
+                        >
+                          <Icon d={pwShow[key] ? ICONS.eyeOff : ICONS.eye} />
+                        </button>
+                      </div>
+                      {key === "confirm" && pwMessage && (
+                        <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "var(--red)" }}>{pwMessage}</p>
+                      )}
+                      {key === "next" && (
+                        <ul style={{ margin: "4px 0 0", padding: 0, listStyle: "none", display: "grid", gap: 3 }}>
+                          {pwChecks.map(({ ok, label: checkLabel }) => (
+                            <li
+                              key={checkLabel}
+                              style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, color: ok ? "var(--green)" : "var(--t3)" }}
+                            >
+                              <span style={{ display: "inline-flex", color: ok ? "var(--green)" : "var(--t3)" }}>
+                                <Icon d={ok ? ICONS.check : ICONS.x} />
+                              </span>
+                              {checkLabel}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ))}
+                  <button
+                    type="submit"
+                    disabled={savingPw}
+                    className="m-btn m-btn-primary"
+                    style={{ justifyContent: "center", marginTop: 4 }}
+                  >
+                    <Icon d={ICONS.check} className="w-4 h-4" />
+                    {savingPw ? "Updating…" : "Update password"}
+                  </button>
+                </form>
               </div>
 
               {/* Session */}

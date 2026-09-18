@@ -61,6 +61,13 @@ const UserSchema = new mongoose.Schema({
   },
   // Set once onboarding (or its skip) completes. Null = not onboarded —
   // the dashboard layout gates on this; profile-editable via /api/onboarding.
+  // Bumped on password change. Embedded in the session JWT and checked in
+  // withAuth, so changing the password instantly invalidates sessions that
+  // were signed before the change (other devices).
+  tokenVersion: {
+    type: Number,
+    default: 0,
+  },
   onboardedAt: {
     type: Date,
     default: null,
