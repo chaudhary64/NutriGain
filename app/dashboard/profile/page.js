@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import AppShell from "@/components/AppShell";
+import SplitManager from "@/components/SplitManager";
 import { suggestMacroGoals, ACTIVITY_LEVELS, GOALS } from "@/lib/tdee";
 import { FALLBACK_MACRO_GOALS } from "@/lib/goals";
 
@@ -449,6 +450,9 @@ export default function ProfilePage() {
                   </div>
                 </div>
               </div>
+
+              {/* Training split — shared manager (template gallery + custom editor) */}
+              <SplitManager pushToast={pushToast} />
 
               {/* Body profile & targets */}
               <div className="m-card m-in">
