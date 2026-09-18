@@ -97,6 +97,13 @@ html[data-theme="dark"] .gym{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b
 /* Training split card styles live in components/SplitManager.js */
 `;
 
+/* Inline dataset-failure notice — matches the stats-page error pattern. */
+const STALE_NOTICE_CSS = `
+.gym .st-notice{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px;border:1px solid var(--red-soft-b);background:var(--red-soft);border-radius:8px;font-size:12px;font-weight:600;color:var(--red);margin-bottom:12px}
+.gym .st-notice button{flex-shrink:0;background:var(--red);color:#fff;border:0;border-radius:6px;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer}
+.gym .st-notice button:hover{filter:brightness(1.08)}
+`;
+
 const Icon = ({ d, className = "m-ic" }) => (
   <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     {d}
@@ -170,6 +177,24 @@ export default function GymTrackingPage() {
   const [weightEntries, setWeightEntries] = useState([]);
   const [gymHistory, setGymHistory] = useState([]);
 
+  // Per-dataset failure flags — every initial-load fetch surfaces its own
+  // inline notice (with retry) instead of failing silently.
+  const [dataErrors, setDataErrors] = useState({});
+  const [dataErrorsTick, setDataErrorsTick] = useState(0); // retry lever
+  const setDataError = (key, failed) =>
+    setDataErrors((prev) => (prev[key] === failed ? prev : { ...prev, [key]: failed }));
+
+  /** Inline "couldn't load X" notice with a retry button, for dataset `key`. */
+  const renderStaleNotice = (key, message) =>
+    dataErrors[key] ? (
+      <div className="st-notice" role="alert">
+        <span>{message}</span>
+        <button type="button" onClick={() => setDataErrorsTick((t) => t + 1)}>
+          Retry
+        </button>
+      </div>
+    ) : null;
+
   // UI State
   const [loading, setLoading] = useState(true);
   const [todaySession, setTodaySession] = useState(null);
@@ -218,7 +243,7 @@ export default function GymTrackingPage() {
     if (user) {
       fetchData();
     }
-  }, [user]);
+  }, [user, dataErrorsTick]);
 
   // Handle visibility change
   useEffect(() => {
@@ -247,18 +272,19 @@ export default function GymTrackingPage() {
   const fetchGymHistory = async () => {
     try {
       const res = await fetch(`/api/daily-log?date=${currentDate}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.gymHistory) {
-          setGymHistory(data.gymHistory);
-          calculateStreaks(data.gymHistory);
-        }
-        if (data.dailyLog) {
-          setTodayGymStatus(data.dailyLog.gymStatus || "not-completed");
-        }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data.gymHistory) {
+        setGymHistory(data.gymHistory);
+        calculateStreaks(data.gymHistory);
       }
+      if (data.dailyLog) {
+        setTodayGymStatus(data.dailyLog.gymStatus || "not-completed");
+      }
+      setDataError("history", false);
     } catch (error) {
       console.error("Error fetching gym history:", error);
+      setDataError("history", true);
     }
   };
 
@@ -272,7 +298,7 @@ export default function GymTrackingPage() {
       const exercisesData = await exercisesRes.json();
       const scheduleData = await scheduleRes.json();
 
-      if (Array.isArray(exercisesData)) setExercises(exercisesData);
+      if (Array.isArray(exercisesData) && exercisesData.length > 0) setExercises(exercisesData);
 
       const rawDays = scheduleData?.days;
       const days = Array.isArray(rawDays) ? Object.fromEntries(rawDays) : rawDays;
@@ -283,20 +309,23 @@ export default function GymTrackingPage() {
           SPLIT_DAYS.map((day) => ({ day, muscleGroups: days[day] || ["Rest Day"] }))
         );
       }
+      setDataError("plan", false);
     } catch (error) {
       console.error("Error fetching gym data:", error);
+      setDataError("plan", true);
     }
   };
 
   const fetchSession = async () => {
     try {
       const res = await fetch(`/api/workout-sessions?date=${currentDate}`);
-      if (res.ok) {
-        const data = await res.json();
-        setTodaySession(data.session || null);
-      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setTodaySession(data.session || null);
+      setDataError("session", false);
     } catch (error) {
       console.error("Error fetching workout session:", error);
+      setDataError("session", true);
     }
   };
 
@@ -305,25 +334,27 @@ export default function GymTrackingPage() {
       const from = format(startOfYear(new Date()), "yyyy-MM-dd");
       const to = format(new Date(), "yyyy-MM-dd");
       const res = await fetch(`/api/workout-sessions?from=${from}&to=${to}`);
-      if (res.ok) {
-        const data = await res.json();
-        setYearSessions(data.sessions || []);
-      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setYearSessions(data.sessions || []);
+      setDataError("consistency", false);
     } catch (error) {
       console.error("Error fetching year sessions:", error);
+      setDataError("consistency", true);
     }
   };
 
   const fetchWeightData = async () => {
     try {
       const res = await fetch("/api/weight");
-      if (res.ok) {
-        const data = await res.json();
-        setWeightEntries(data.weightEntries || []);
-        setTargetWeight(data.targetWeight || 75);
-      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setWeightEntries(data.weightEntries || []);
+      setTargetWeight(data.targetWeight || 75);
+      setDataError("weight", false);
     } catch (error) {
-      console.error("Error adding weight:", error);
+      console.error("Error fetching weight data:", error);
+      setDataError("weight", true);
     }
   };
 
@@ -597,13 +628,14 @@ export default function GymTrackingPage() {
     setPrExercise(exerciseId);
     try {
       const res = await fetch(`/api/workout-sessions?exerciseId=${exerciseId}&months=6`);
-      if (res.ok) {
-        const data = await res.json();
-        setPrSeries(data.series || []);
-      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setPrSeries(data.series || []);
+      setDataError("pr", false);
     } catch (error) {
       console.error("Error fetching PR series:", error);
       setPrSeries([]);
+      setDataError("pr", true);
     }
   };
 
@@ -708,6 +740,7 @@ export default function GymTrackingPage() {
   return (
     <>
       <style>{MERIDIAN_CSS}</style>
+      <style>{STALE_NOTICE_CSS}</style>
       <ToastHost toasts={toasts} onDismiss={dismissToast} />
       <AppShell>
         <div className="gym ng-container" style={{ padding: "32px var(--layout-gutter) 56px" }}>
@@ -749,6 +782,7 @@ export default function GymTrackingPage() {
               <span className="m-crumb">This year</span>
             </div>
             <div style={{ padding: 18 }}>
+              {renderStaleNotice("consistency", "Couldn't refresh your training history — showing the last loaded data.")}
               <div className="gym-stats-row">
                 <div className="m-stat" style={{ background: "var(--sunken)", borderRadius: 8 }}>
                   <b className="m-num">{currentStreak}</b>
@@ -859,6 +893,7 @@ export default function GymTrackingPage() {
                   )}
                 </div>
                 <div style={{ padding: 18 }}>
+                  {renderStaleNotice("weight", "Couldn't refresh your weight — showing the last loaded entries.")}
                   <div style={{ height: 240, marginBottom: 14 }}>
                     <ResponsiveContainer width="100%" height={240}>
                       <LineChart
@@ -985,6 +1020,7 @@ export default function GymTrackingPage() {
                   <span className="m-chip m-chip-ac">{format(new Date(), "EEEE")}</span>
                 </div>
                 <div style={{ padding: "20px 18px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+                  {renderStaleNotice("plan", "Couldn't load today's plan or exercises.")}
                   <div style={{ flex: 1, minWidth: 220 }}>
                     <p style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-.02em", lineHeight: 1.2 }}>
                       {muscleGroups.join(" & ")}
@@ -1169,6 +1205,7 @@ export default function GymTrackingPage() {
                               {prExercise === ex._id && (
                                 <div style={{ marginTop: 14, background: "var(--sunken)", borderRadius: 8, padding: 14 }}>
                                   <p className="m-lbl" style={{ marginBottom: 10 }}>Top set weight — last 6 months</p>
+                                  {renderStaleNotice("pr", "Couldn't load your PR history.")}
                                   {prSeries.length === 0 ? (
                                     <p className="m-sub" style={{ margin: 0 }}>
                                       No sets logged yet — save your working sets to build history.
