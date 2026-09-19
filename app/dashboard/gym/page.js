@@ -8,6 +8,7 @@ import { Tooltip as ReactTooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
 import { format, parseISO, startOfYear } from "date-fns";
 import { mergeSessionsIntoHeatmap } from "@/lib/heatmap";
+import { expandMuscleGroups } from "@/lib/muscle-groups";
 import AppShell from "@/components/AppShell";
 import Loader from "@/components/Loader";
 import SplitManager from "@/components/SplitManager";
@@ -124,6 +125,7 @@ const ICONS = {
   calendar: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 10h18" /></>,
   trophy: <><path d="M8 21h8" /><path d="M12 17v4" /><path d="M7 4h10v5a5 5 0 0 1-10 0V4z" /><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4" /></>,
   dumbbell: <><path d="M6.5 6.5 17.5 17.5" /><path d="m21 21-1-1" /><path d="m3 3 1 1" /><path d="M18 22l4-4" /><path d="M2 6l4-4" /><path d="M3 9l6-6" /><path d="M21 15l-6 6" /></>,
+  pencil: <><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z" /></>,
 };
 
 let toastSeq = 0;
@@ -200,6 +202,7 @@ export default function GymTrackingPage() {
   const [todaySession, setTodaySession] = useState(null);
   const [yearSessions, setYearSessions] = useState([]); // lean sessions feeding the heatmap
   const [setDrafts, setSetDrafts] = useState({}); // exerciseId -> [{weight, reps}]
+  const [historySessions, setHistorySessions] = useState(null); // session for the selected date (source of set editor seeds)
   const [savingExercise, setSavingExercise] = useState(null); // exerciseId being saved
   const [savedExercises, setSavedExercises] = useState({}); // exerciseId -> true (flash)
   const [newPRs, setNewPRs] = useState({}); // exerciseId -> { newPR, previousPR }
@@ -222,8 +225,18 @@ export default function GymTrackingPage() {
   const [newWeightDate, setNewWeightDate] = useState(
     new Date().toISOString().split("T")[0],
   );
-  const [prExercise, setPrExercise] = useState(null); // exerciseId whose PR chart is open
+  const [prExerciseId, setPrExerciseId] = useState(null); // exerciseId whose PR chart is open
   const [prSeries, setPrSeries] = useState([]);
+
+  // Warm-up editor — per-exercise, persisted via PUT /api/exercises/[id]
+  const [wuExerciseId, setWuExerciseId] = useState(null);
+  const [wuDraft, setWuDraft] = useState([]);
+  const [savingWarmUp, setSavingWarmUp] = useState(null); // exerciseId being saved
+
+  // Manual PR editor — weight + optional date (auto-detection only fires on heavier logged sets)
+  const [prEditExerciseId, setPrEditExerciseId] = useState(null);
+  const [prEditDraft, setPrEditDraft] = useState({ weight: "", date: "" });
+  const [savingPrEdit, setSavingPrEdit] = useState(false);
 
   const pushToast = (message, tone = "success", ttl = 4000) => {
     const id = ++toastSeq;
@@ -243,7 +256,7 @@ export default function GymTrackingPage() {
     if (user) {
       fetchData();
     }
-  }, [user, dataErrorsTick]);
+  }, [user, dataErrorsTick, currentDate]);
 
   // Handle visibility change
   useEffect(() => {
@@ -322,6 +335,7 @@ export default function GymTrackingPage() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setTodaySession(data.session || null);
+      setHistorySessions(data.session || null); // the set editor seeds from this date's session
       setDataError("session", false);
     } catch (error) {
       console.error("Error fetching workout session:", error);
@@ -438,7 +452,7 @@ export default function GymTrackingPage() {
           setGymHistory(data.gymHistory);
           calculateStreaks(data.gymHistory);
         }
-        pushToast(status === prev ? `Status set to ${STATUS_META[status]?.label}.` : `Marked ${STATUS_META[status]?.label.toLowerCase()} for today.`);
+        pushToast(status === prev ? `Status set to ${STATUS_META[status]?.label}.` : `Marked ${STATUS_META[status]?.label.toLowerCase()}${isToday ? " for today" : ` for ${format(parseISO(currentDate), "d MMM")}`}.`);
       } else {
         pushToast("Couldn't update status. Check your connection and retry.", "error");
       }
@@ -530,10 +544,98 @@ export default function GymTrackingPage() {
 
   const getSetsFor = (exerciseId) => {
     if (setDrafts[exerciseId] !== undefined) return setDrafts[exerciseId];
-    const logged = (todaySession?.exercises || []).find(
+    const logged = (historySessions?.exercises || []).find(
       (e) => e.exercise === exerciseId || e.exercise?.toString() === exerciseId,
     );
     return logged?.sets?.length ? [...logged.sets] : [{ weight: "", reps: "" }];
+  };
+
+  // Warm-up set editing — mirrors the working-set rows, but saves to the
+  // per-user exercise profile so it persists across every training day.
+  const openWarmUpEdit = (ex) => {
+    setWuExerciseId(ex._id);
+    setWuDraft(ex.warmUpSets?.length > 0 ? ex.warmUpSets.map((s) => ({ ...s })) : [{ weight: "", reps: "" }]);
+  };
+
+  const updateWuSet = (index, field, value) => {
+    setWuDraft((prev) => prev.map((s, i) => (i === index ? { ...s, [field]: value } : s)));
+  };
+
+  const addWuRow = () => setWuDraft((prev) => [...prev, { weight: "", reps: "" }]);
+
+  const removeWuRow = (index) =>
+    setWuDraft((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== index) : [{ weight: "", reps: "" }]));
+
+  const handleSaveWarmUp = async () => {
+    const sets = wuDraft
+      .map((s) => ({ weight: parseFloat(s.weight), reps: parseInt(s.reps, 10) }))
+      .filter((s) => Number.isFinite(s.weight) && s.weight >= 0 && Number.isInteger(s.reps) && s.reps >= 0);
+
+    setSavingWarmUp(wuExerciseId);
+    try {
+      const res = await fetch(`/api/exercises/${wuExerciseId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ warmUpSets: sets }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setExercises((prev) => prev.map((e) => (e._id === wuExerciseId ? { ...e, warmUpSets: data.warmUpSets || [] } : e)));
+        setWuExerciseId(null);
+        pushToast("Warm-up saved for this exercise.");
+      } else {
+        pushToast(data.error || "Couldn't save the warm-up. Try again.", "error");
+      }
+    } catch (error) {
+      console.error("Error saving warm-up:", error);
+      pushToast("Network error — warm-up wasn't saved. Try again.", "error");
+    } finally {
+      setSavingWarmUp(null);
+    }
+  };
+
+  // Manual PR — for weights set before the app or on untracked machines.
+  // Safe alongside auto-detection: the logger only promotes strictly heavier sets.
+  const openPrEdit = (ex) => {
+    setPrEditExerciseId(ex._id);
+    setPrEditDraft({
+      weight: ex.prWeight != null ? String(ex.prWeight) : "",
+      date: ex.lastPRDate || format(new Date(), "yyyy-MM-dd"),
+    });
+  };
+
+  const handleSavePrEdit = async () => {
+    const parsed = parseFloat(prEditDraft.weight);
+    if (!Number.isFinite(parsed) || parsed < 0 || parsed > 1000) {
+      pushToast("PR weight must be between 0 and 1000 kg.", "error");
+      return;
+    }
+
+    setSavingPrEdit(true);
+    try {
+      const res = await fetch(`/api/exercises/${prEditExerciseId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prWeight: parsed, lastPRDate: prEditDraft.date }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setExercises((prev) =>
+          prev.map((e) =>
+            e._id === prEditExerciseId ? { ...e, prWeight: data.prWeight ?? null, lastPR: data.lastPR ?? "", lastPRDate: data.lastPRDate ?? "" } : e,
+          ),
+        );
+        setPrEditExerciseId(null);
+        pushToast(`Personal best updated — ${parsed} kg.`);
+      } else {
+        pushToast(data.error || "Couldn't update the PR. Try again.", "error");
+      }
+    } catch (error) {
+      console.error("Error updating PR:", error);
+      pushToast("Network error — PR wasn't updated. Try again.", "error");
+    } finally {
+      setSavingPrEdit(false);
+    }
   };
 
   const updateSet = (exerciseId, index, field, value) => {
@@ -588,6 +690,7 @@ export default function GymTrackingPage() {
       const data = await res.json();
       if (res.ok) {
         setTodaySession(data.session || null);
+        setHistorySessions(data.session || null);
         setSetDrafts((prev) => {
           const next = { ...prev };
           delete next[exerciseId];
@@ -606,7 +709,7 @@ export default function GymTrackingPage() {
           fetchGymData();
           fetchGymHistory();
         } else {
-          pushToast("Sets logged for today.");
+          pushToast(isToday ? "Sets logged for today." : `Sets saved for ${format(parseISO(currentDate), "d MMM")}.`);
         }
         fetchYearSessions();
       } else {
@@ -621,11 +724,11 @@ export default function GymTrackingPage() {
   };
 
   const handleOpenPRChart = async (exerciseId) => {
-    if (prExercise === exerciseId) {
-      setPrExercise(null);
+    if (prExerciseId === exerciseId) {
+      setPrExerciseId(null);
       return;
     }
-    setPrExercise(exerciseId);
+    setPrExerciseId(exerciseId);
     try {
       const res = await fetch(`/api/workout-sessions?exerciseId=${exerciseId}&months=6`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -720,16 +823,39 @@ export default function GymTrackingPage() {
     );
   };
 
-  const getTodayMuscleGroups = () => {
-    const dayIndex = (new Date().getDay() + 6) % 7; // Monday = 0 … Sunday = 6
-    const groups = splitDays[SPLIT_DAYS[dayIndex]];
+  const getDayMuscleGroups = (dayName) => {
+    const groups = splitDays[dayName];
     return Array.isArray(groups) && groups.length > 0 ? groups : ["Rest Day"];
   };
 
-  const muscleGroups = getTodayMuscleGroups();
+  const TODAY = format(new Date(), "yyyy-MM-dd");
+  const isToday = currentDate === TODAY;
+  const selectedDayName = SPLIT_DAYS[(parseISO(currentDate).getDay() + 6) % 7]; // Monday = 0 … Sunday = 6
+  // Composite template groups (Push, Lower Body, …) expand into the granular
+  // muscle groups the exercise library actually tags; granular names pass through.
+  const expandedGroups = expandMuscleGroups(getDayMuscleGroups(selectedDayName));
+  const muscleGroups = getDayMuscleGroups(selectedDayName);
 
   // SplitManager reports back after a template apply or custom save — keep
   // the gym page's derived views (today's plan, week grid) in sync.
+  // Date navigation — view and edit any past day (the API accepts any non-future date).
+  const shiftDate = (days) => {
+    const next = new Date(currentDate);
+    next.setDate(next.getDate() + days);
+    const nextStr = format(next, "yyyy-MM-dd");
+    if (nextStr > TODAY) return; // never navigate into the future
+    setCurrentDate(nextStr);
+    setSetDrafts({}); // stale drafts from another date would mislead
+    setPrExerciseId(null);
+  };
+
+  const goToday = () => {
+    if (currentDate === TODAY) return;
+    setCurrentDate(TODAY);
+    setSetDrafts({});
+    setPrExerciseId(null);
+  };
+
   const handleSplitChanged = (nextDays) => {
     setSplitDays(nextDays);
     setWorkoutSchedule(
@@ -749,7 +875,9 @@ export default function GymTrackingPage() {
             <div>
               <div className="m-h1">Gym</div>
               <div className="m-sub">
-                {format(new Date(), "EEEE, d MMMM")} — {muscleGroups.join(" & ")} day.
+                {isToday
+                  ? `${format(new Date(), "EEEE, d MMMM")} — ${muscleGroups.join(" & ")} day.`
+                  : `${format(parseISO(currentDate), "EEEE, d MMMM")} — ${muscleGroups.join(" & ")} day.`}
               </div>
             </div>
 
@@ -1015,9 +1143,28 @@ export default function GymTrackingPage() {
                 <div className="m-card-h">
                   <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <span style={{ color: "var(--ac)" }}><Icon d={ICONS.calendar} /></span>
-                    Today&apos;s plan
+                    {isToday ? "Today's plan" : "Workout plan"}
                   </h3>
-                  <span className="m-chip m-chip-ac">{format(new Date(), "EEEE")}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 4 }} role="group" aria-label="Change the plan date">
+                    <button
+                      onClick={() => shiftDate(-1)}
+                      aria-label="View the previous day"
+                      style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 26, height: 26, borderRadius: 8, border: "1px solid var(--line)", background: "var(--card)", color: "var(--t2)", cursor: "pointer" }}
+                    >
+                      <span style={{ display: "inline-flex", transform: "rotate(90deg)" }} aria-hidden="true"><Icon d={ICONS.chevron} className="w-3.5 h-3.5" /></span>
+                    </button>
+                    <span className="m-chip m-chip-ac">
+                      {isToday ? format(new Date(), "EEEE") : format(parseISO(currentDate), "EEE d MMM")}
+                    </span>
+                    <button
+                      onClick={() => shiftDate(1)}
+                      aria-label="View the next day"
+                      disabled={isToday}
+                      style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 26, height: 26, borderRadius: 8, border: "1px solid var(--line)", background: "var(--card)", color: "var(--t2)", cursor: isToday ? "default" : "pointer", opacity: isToday ? 0.4 : 1 }}
+                    >
+                      <span style={{ display: "inline-flex", transform: "rotate(-90deg)" }} aria-hidden="true"><Icon d={ICONS.chevron} className="w-3.5 h-3.5" /></span>
+                    </button>
+                  </div>
                 </div>
                 <div style={{ padding: "20px 18px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
                   {renderStaleNotice("plan", "Couldn't load today's plan or exercises.")}
@@ -1026,9 +1173,20 @@ export default function GymTrackingPage() {
                       {muscleGroups.join(" & ")}
                     </p>
                     <p className="m-sub" style={{ marginTop: 4 }}>
-                      Track every set as you work — the log saves per exercise.
+                      {isToday
+                        ? "Track every set as you work — the log saves per exercise."
+                        : "Viewing a past session — edits update that day's log."}
                     </p>
                   </div>
+                  {!isToday && (
+                    <button
+                      onClick={goToday}
+                      className="m-btn"
+                      style={{ color: "var(--ac)", background: "none", fontSize: 12.5, padding: "6px 10px" }}
+                    >
+                      Back to today
+                    </button>
+                  )}
                   <span style={{ color: "var(--ac)", opacity: 0.85 }}>
                     <Icon d={ICONS.dumbbell} className="w-8 h-8" />
                   </span>
@@ -1037,11 +1195,7 @@ export default function GymTrackingPage() {
 
               {/* Exercises */}
               {(() => {
-                const todaySchedule = workoutSchedule.find(
-                  (d) =>
-                    d.day ===
-                    new Date().toLocaleDateString("en-US", { weekday: "long" }),
-                );
+                const todaySchedule = workoutSchedule.find((d) => d.day === selectedDayName);
 
                 // If rest day or no schedule
                 if (
@@ -1069,11 +1223,24 @@ export default function GymTrackingPage() {
                   );
                 }
 
+                // Composite split names (from templates) expand to the granular
+                // muscleGroup values the exercise library is actually tagged with.
+                const COMPOSITE_GROUPS = {
+                  "Upper Body": ["Chest", "Back", "Shoulders", "Bicep", "Tricep", "Forearms"],
+                  "Lower Body": ["Legs", "Abs"],
+                  "Push": ["Chest", "Shoulders", "Tricep"],
+                  "Pull": ["Back", "Bicep", "Forearms"],
+                  "Full Body": ["Chest", "Back", "Shoulders", "Bicep", "Tricep", "Forearms", "Legs", "Abs"],
+                };
+                const seenExerciseIds = new Set();
+
                 // Group exercises by muscle group
-                return todaySchedule.muscleGroups.map((group) => {
+                return expandMuscleGroups(todaySchedule.muscleGroups).map((group) => {
+                  const memberGroups = COMPOSITE_GROUPS[group] || [group];
                   const groupExercises = exercises.filter(
-                    (ex) => ex.muscleGroup === group,
+                    (ex) => memberGroups.includes(ex.muscleGroup) && !seenExerciseIds.has(ex._id),
                   );
+                  groupExercises.forEach((ex) => seenExerciseIds.add(ex._id));
 
                   if (groupExercises.length === 0) return null;
 
@@ -1110,7 +1277,7 @@ export default function GymTrackingPage() {
                               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                 <button
                                   onClick={() => handleOpenPRChart(ex._id)}
-                                  aria-expanded={prExercise === ex._id}
+                                  aria-expanded={prExerciseId === ex._id}
                                   aria-label={`${toTitleCase(ex.name)} PR progression`}
                                   className="m-btn m-btn-ghost"
                                   style={{ padding: "7px 9px" }}
@@ -1129,24 +1296,154 @@ export default function GymTrackingPage() {
                             </div>
 
                             <div style={{ padding: 16 }}>
-                              {/* Template + PR summary row */}
+                              {/* Warm-up + PR summary row — pencil affordances open inline editors */}
                               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 12 }}>
                                 <div style={{ background: "var(--sunken)", borderRadius: 8, padding: "10px 12px" }}>
-                                  <span className="m-lbl" style={{ marginBottom: 3 }}>Warm up</span>
-                                  <p style={{ fontSize: 13, fontWeight: 600, color: "var(--t1)" }}>
-                                    {ex.warmUpSets?.length > 0 ? formatSetsDisplay(ex.warmUpSets) : ex.warmUp || "Not set"}
-                                  </p>
+                                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                                    <span className="m-lbl">Warm up</span>
+                                    <button
+                                      onClick={() => openWarmUpEdit(ex)}
+                                      aria-label={`Edit warm-up for ${ex.name}`}
+                                      style={{ color: "var(--t3)", background: "none", border: 0, cursor: "pointer", padding: 4, borderRadius: 6, flexShrink: 0 }}
+                                      onMouseEnter={(e) => (e.currentTarget.style.color = "var(--ac)")}
+                                      onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t3)")}
+                                    >
+                                      <Icon d={ICONS.pencil} className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                  {wuExerciseId === ex._id ? (
+                                    <div style={{ display: "grid", gap: 6, marginTop: 6 }}>
+                                      {wuDraft.map((set, idx) => (
+                                        <div key={idx} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                          <input
+                                            type="number"
+                                            step="0.5"
+                                            min="0"
+                                            placeholder="kg"
+                                            aria-label={`Warm-up set ${idx + 1} weight in kilograms`}
+                                            value={set.weight}
+                                            onChange={(e) => updateWuSet(idx, "weight", e.target.value)}
+                                            className="m-field m-num"
+                                            style={{ width: 78, padding: "5px 8px" }}
+                                          />
+                                          <span style={{ color: "var(--t3)", fontSize: 12 }}>×</span>
+                                          <input
+                                            type="number"
+                                            min="0"
+                                            placeholder="reps"
+                                            aria-label={`Warm-up set ${idx + 1} repetitions`}
+                                            value={set.reps}
+                                            onChange={(e) => updateWuSet(idx, "reps", e.target.value)}
+                                            className="m-field m-num"
+                                            style={{ width: 64, padding: "5px 8px" }}
+                                          />
+                                          <button
+                                            onClick={() => removeWuRow(idx)}
+                                            aria-label={`Remove warm-up set ${idx + 1}`}
+                                            style={{ color: "var(--t3)", background: "none", border: 0, cursor: "pointer", padding: 6, borderRadius: 6, flexShrink: 0 }}
+                                            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--red)")}
+                                            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t3)")}
+                                          >
+                                            <Icon d={ICONS.trash} className="w-3.5 h-3.5" />
+                                          </button>
+                                        </div>
+                                      ))}
+                                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 2 }}>
+                                        <button
+                                          onClick={addWuRow}
+                                          className="m-btn"
+                                          style={{ color: "var(--ac)", background: "none", padding: "3px 2px", fontSize: 12, width: "fit-content" }}
+                                        >
+                                          <Icon d={ICONS.plus} className="w-3.5 h-3.5" />
+                                          Add
+                                        </button>
+                                        <button
+                                          onClick={handleSaveWarmUp}
+                                          disabled={savingWarmUp === wuExerciseId}
+                                          className="m-btn m-btn-primary"
+                                          style={{ padding: "5px 12px", fontSize: 12 }}
+                                        >
+                                          {savingWarmUp === wuExerciseId ? "Saving…" : "Save warm-up"}
+                                        </button>
+                                        <button
+                                          onClick={() => setWuExerciseId(null)}
+                                          aria-label="Cancel warm-up editing"
+                                          style={{ color: "var(--t3)", background: "none", border: 0, cursor: "pointer", padding: 6 }}
+                                        >
+                                          <Icon d={ICONS.x} className="w-3.5 h-3.5" />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <p style={{ fontSize: 13, fontWeight: 600, color: "var(--t1)", marginTop: 3 }}>
+                                      {ex.warmUpSets?.length > 0 ? formatSetsDisplay(ex.warmUpSets) : ex.warmUp || "Not set"}
+                                    </p>
+                                  )}
                                 </div>
                                 <div style={{ background: "var(--sunken)", borderRadius: 8, padding: "10px 12px" }}>
-                                  <span className="m-lbl" style={{ marginBottom: 3, color: "var(--amber)" }}>Personal best</span>
-                                  <p className="m-num" style={{ fontSize: 13, fontWeight: 700, color: "var(--t1)" }}>
-                                    {ex.prWeight != null ? `${ex.prWeight} kg` : ex.lastPR ? ex.lastPR : "None"}
-                                    {ex.lastPRDate && (
-                                      <span className="m-crumb" style={{ fontWeight: 500, marginLeft: 8 }}>
-                                        {format(new Date(ex.lastPRDate), "d MMM yyyy")}
-                                      </span>
-                                    )}
-                                  </p>
+                                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                                    <span className="m-lbl" style={{ color: "var(--amber)" }}>Personal best</span>
+                                    <button
+                                      onClick={() => openPrEdit(ex)}
+                                      aria-label={`Edit personal best for ${ex.name}`}
+                                      style={{ color: "var(--t3)", background: "none", border: 0, cursor: "pointer", padding: 4, borderRadius: 6, flexShrink: 0 }}
+                                      onMouseEnter={(e) => (e.currentTarget.style.color = "var(--ac)")}
+                                      onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t3)")}
+                                    >
+                                      <Icon d={ICONS.pencil} className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                  {prEditExerciseId === ex._id ? (
+                                    <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
+                                      <input
+                                        type="number"
+                                        step="0.5"
+                                        min="0"
+                                        max="1000"
+                                        placeholder="kg"
+                                        aria-label={`Personal best weight in kilograms for ${ex.name}`}
+                                        className="m-field m-num"
+                                        value={prEditDraft.weight}
+                                        autoFocus
+                                        onChange={(e) => setPrEditDraft((prev) => ({ ...prev, weight: e.target.value }))}
+                                        style={{ width: 76, padding: "5px 8px" }}
+                                      />
+                                      <input
+                                        type="date"
+                                        max={TODAY}
+                                        aria-label={`Date the personal best was set`}
+                                        className="m-field m-num"
+                                        value={prEditDraft.date}
+                                        onChange={(e) => setPrEditDraft((prev) => ({ ...prev, date: e.target.value }))}
+                                        style={{ width: 128, padding: "4px 8px", fontSize: 12 }}
+                                      />
+                                      <button
+                                        onClick={handleSavePrEdit}
+                                        disabled={savingPrEdit}
+                                        aria-label="Save personal best"
+                                        className="m-btn m-btn-primary"
+                                        style={{ padding: "5px 8px" }}
+                                      >
+                                        <Icon d={ICONS.check} className="w-3.5 h-3.5" />
+                                      </button>
+                                      <button
+                                        onClick={() => setPrEditExerciseId(null)}
+                                        aria-label="Cancel personal best editing"
+                                        style={{ color: "var(--t3)", background: "none", border: 0, cursor: "pointer", padding: 6 }}
+                                      >
+                                        <Icon d={ICONS.x} className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <p className="m-num" style={{ fontSize: 13, fontWeight: 700, color: "var(--t1)", marginTop: 3 }}>
+                                      {ex.prWeight != null ? `${ex.prWeight} kg` : ex.lastPR ? ex.lastPR : "None"}
+                                      {ex.lastPRDate && (
+                                        <span className="m-crumb" style={{ fontWeight: 500, marginLeft: 8 }}>
+                                          {format(new Date(ex.lastPRDate), "d MMM yyyy")}
+                                        </span>
+                                      )}
+                                    </p>
+                                  )}
                                 </div>
                               </div>
 
@@ -1202,7 +1499,7 @@ export default function GymTrackingPage() {
                               </div>
 
                               {/* PR progression chart */}
-                              {prExercise === ex._id && (
+                              {prExerciseId === ex._id && (
                                 <div style={{ marginTop: 14, background: "var(--sunken)", borderRadius: 8, padding: 14 }}>
                                   <p className="m-lbl" style={{ marginBottom: 10 }}>Top set weight — last 6 months</p>
                                   {renderStaleNotice("pr", "Couldn't load your PR history.")}
