@@ -6,7 +6,7 @@ import { withAuth } from '@/lib/auth';
 import {
   calculateEntryMacros,
   createEmptyDailyLog,
-  oneYearAgoDateString,
+  heatmapHistoryFromDateString,
   recalculateTotals,
   todayDateString,
 } from '@/lib/daily-log';
@@ -39,10 +39,12 @@ export const GET = withAuth(async (request, user) => {
     updatedAt: null,
   };
 
-  // Gym history for the calendar (last 365 days) — lean projection.
+  // Gym history for the calendar (up to 3 years, bounded by signup) — lean
+  // projection. The heatmap renders one row per year since the account
+  // existed, so the window must reach the signup month.
   const gymHistory = await DailyLog.find({
     user: user.id,
-    date: { $gte: oneYearAgoDateString() },
+    date: { $gte: heatmapHistoryFromDateString(user.createdAt) },
   })
     .sort({ date: 1 })
     .select('date gymStatus gymCompletedAt')
@@ -137,10 +139,12 @@ export const PATCH = withAuth(async (request, user) => {
     { new: true, upsert: true }
   );
 
-  // Gym history for the calendar (last 365 days) — lean projection.
+  // Gym history for the calendar (up to 3 years, bounded by signup) — lean
+  // projection. The heatmap renders one row per year since the account
+  // existed, so the window must reach the signup month.
   const gymHistory = await DailyLog.find({
     user: user.id,
-    date: { $gte: oneYearAgoDateString() },
+    date: { $gte: heatmapHistoryFromDateString(user.createdAt) },
   })
     .sort({ date: 1 })
     .select('date gymStatus gymCompletedAt');

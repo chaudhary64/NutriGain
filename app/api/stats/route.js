@@ -4,6 +4,7 @@ import dbConnect from '@/lib/mongodb';
 import DailyLog from '@/models/DailyLog';
 import WorkoutSession from '@/models/WorkoutSession';
 import { withAuth } from '@/lib/auth';
+import { heatmapHistoryFromDateString } from '@/lib/daily-log';
 
 export const dynamic = 'force-dynamic';
 
@@ -62,15 +63,21 @@ export const GET = withAuth(async (request, user) => {
   const last7From = addDays(today, -6);
   const last30From = addDays(today, -29);
 
+  // The consistency heatmap renders a full calendar year selectable by
+  // year chips (GitHub-profile model), so the window must reach Jan 1 of
+  // the oldest eligible year — bounded by signup the same way.
+  const heatmapFloor = heatmapHistoryFromDateString(user.createdAt);
+  const windowFrom = from < heatmapFloor ? from : heatmapFloor;
+
   await dbConnect();
 
   const [logs, volumeRows] = await Promise.all([
-    DailyLog.find({ user: user.id, date: { $gte: from } })
+    DailyLog.find({ user: user.id, date: { $gte: windowFrom } })
       .select('date totalMacros gymStatus')
       .sort({ date: 1 })
       .lean(),
     WorkoutSession.aggregate([
-      { $match: { user: new mongoose.Types.ObjectId(user.id), date: { $gte: from } } },
+      { $match: { user: new mongoose.Types.ObjectId(user.id), date: { $gte: windowFrom } } },
       { $unwind: '$exercises' },
       { $unwind: '$exercises.sets' },
       {
@@ -173,11 +180,14 @@ export const GET = withAuth(async (request, user) => {
     cursor = addDays(cursor, -1);
   }
 
-  const strip = [];
-  for (let i = 27; i >= 0; i -= 1) {
-    const date = addDays(today, -i);
-    strip.push({ date, meals: mealDays.has(date), session: sessionDays.has(date) });
-  }
+  // Full-window per-day activity flags feeding the year-switcher heatmap
+  // (client builds Jan 1 → Dec 31 per selected year from this).
+  const allDates = [...new Set([...mealDays, ...sessionDays])].sort();
+  const yearMap = allDates.map((date) => ({
+    date,
+    meals: mealDays.has(date),
+    session: sessionDays.has(date),
+  }));
 
   return NextResponse.json({
     range: { days, from, to: today },
@@ -206,7 +216,7 @@ export const GET = withAuth(async (request, user) => {
       loggedDays: mealDays.size + [...sessionDays].filter((d) => !mealDays.has(d)).length,
       totalDays: days,
       loggedPct: Math.round(((mealDays.size + [...sessionDays].filter((d) => !mealDays.has(d)).length) / days) * 100),
-      strip,
+      yearMap,
     },
   });
 });

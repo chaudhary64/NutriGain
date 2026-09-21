@@ -93,6 +93,39 @@ html[data-theme="dark"] .gym{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b
 .gym .gym-rail::-webkit-scrollbar-thumb,.gym .gym-entries::-webkit-scrollbar-thumb{background:var(--track);border-radius:99px}
 @media (max-width:1024px){.gym .gym-rail{position:static;max-height:none;overflow:visible}}
 .gym .gym-stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+/* Consistency hero — a "story strip": the streak number is the point, the
+   year map is the evidence. Sunken, hairline-divided cells keep the top
+   band quiet; the calendar scrolls below with its legend on one baseline. */
+.gym .gy-hero{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:10px;background:var(--sunken);overflow:hidden}
+.gym .gy-hero-cell{flex:1 1 0;min-width:0;padding:16px 18px;display:flex;flex-direction:column;justify-content:center}
+.gym .gy-hero-cell+.gy-hero-cell{border-left:1px solid var(--line)}
+.gym .gy-hero-row{display:flex;flex:1 1 0;min-width:0;border-left:1px solid var(--line)}
+.gym .gy-hero-cell.is-hero{flex:0 0 auto;min-width:150px;background:var(--ac)}
+.gym .gy-hero-cell.is-hero .gy-hero-num{color:var(--on-ac, #fff)}
+.gym .gy-hero-cell.is-hero .gy-hero-lbl{color:color-mix(in srgb, var(--on-ac, #fff) 72%, transparent)}
+.gym .gy-hero-num{font-size:26px;font-weight:800;line-height:1;letter-spacing:-.02em;color:var(--t1)}
+.gym .gy-hero-lbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-top:6px}
+.gym .gy-legend{display:inline-flex;align-items:center;gap:5px}
+.gym .gy-legend i{width:9px;height:9px;border-radius:2px;display:inline-block}
+.gym .gy-cell-hd{display:flex;align-items:baseline;gap:10px;padding-top:14px;padding-bottom:6px}
+.gym .gy-cell-hd .m-crumb{margin:0}
+/* Year switcher — GitHub-profile model: one calendar on screen; the chip
+   row in the card header selects the year. Accent chip = active year. */
+.gym .gy-years{display:grid;gap:8px}
+.gym .gy-year{display:grid;gap:8px}
+.gym .gy-year-hd{display:flex;align-items:baseline;gap:10px}
+.gym .gy-year-tabs{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.gym .gy-year-tab{appearance:none;border:1px solid var(--line);background:var(--sunken);color:var(--t2);font:inherit;font-size:12px;font-weight:800;letter-spacing:.06em;font-variant-numeric:tabular-nums;padding:4px 12px;border-radius:999px;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+.gym .gy-year-tab:hover{color:var(--t1);border-color:var(--t2)}
+.gym .gy-year-tab.is-active{background:var(--ac);border-color:var(--ac);color:var(--on-ac)}
+.gym .gy-year-map{overflow-x:auto;width:100%;max-width:100%}
+@media (max-width:640px){
+  .gym .gy-hero{flex-direction:column}
+  .gym .gy-hero-row{border-left:0;border-top:1px solid var(--line)}
+  .gym .gy-hero-cell.is-hero{flex-direction:row;align-items:baseline;gap:10px;padding:13px 18px}
+  .gym .gy-hero-cell.is-hero .gy-hero-num{font-size:20px}
+  .gym .gy-hero-cell.is-hero .gy-hero-lbl{margin-top:0}
+}
 .gym .gym-layout > *{min-width:0}
 .gym .m-card{min-width:0}
 /* Training split card styles live in components/SplitManager.js */
@@ -201,6 +234,7 @@ export default function GymTrackingPage() {
   const [loading, setLoading] = useState(true);
   const [todaySession, setTodaySession] = useState(null);
   const [yearSessions, setYearSessions] = useState([]); // lean sessions feeding the heatmap
+  const [heatmapYear, setHeatmapYear] = useState(new Date().getFullYear()); // selected calendar year (chip switcher)
   const [setDrafts, setSetDrafts] = useState({}); // exerciseId -> [{weight, reps}]
   const [historySessions, setHistorySessions] = useState(null); // session for the selected date (source of set editor seeds)
   const [savingExercise, setSavingExercise] = useState(null); // exerciseId being saved
@@ -345,7 +379,9 @@ export default function GymTrackingPage() {
 
   const fetchYearSessions = async () => {
     try {
-      const from = format(startOfYear(new Date()), "yyyy-MM-dd");
+      // Match the heatmap window: up to 3 stacked year rows (current + two
+      // prior), so every rendered year can show real session volume.
+      const from = format(startOfYear(new Date(new Date().getFullYear() - 2, 0, 1)), "yyyy-MM-dd");
       const to = format(new Date(), "yyyy-MM-dd");
       const res = await fetch(`/api/workout-sessions?from=${from}&to=${to}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -761,21 +797,20 @@ export default function GymTrackingPage() {
 
   // Render Helpers
   const renderCalendar = () => {
-    const currentYear = new Date().getFullYear();
-    const startDate = new Date(currentYear, 0, 1);
-    const endDate = new Date(currentYear, 11, 31);
-
-    // Real training data (sessions with numeric sets) merged under the
-    // self-reported gym status — sessions only ever raise a day's level.
+    // GitHub-profile model: one calendar on screen; the chip row in the
+    // card header selects the year (default = current). The view spans
+    // Jan 1 → Dec 31; future days of the running year stay blank blocks,
+    // as GitHub's profile graph does.
     const merged = mergeSessionsIntoHeatmap(gymHistory, yearSessions);
     const statusMap = new Map(merged.map((day) => [day.date, day]));
 
-    const data = [];
-    let curr = new Date(startDate);
+    const yearData = [];
+    const endDate = new Date(heatmapYear, 11, 31);
+    let curr = new Date(heatmapYear, 0, 1);
     while (curr <= endDate) {
       const dateStr = format(curr, "yyyy-MM-dd");
       const day = statusMap.get(dateStr);
-      data.push({
+      yearData.push({
         date: dateStr,
         count: day?.level || 0,
         level: day?.level || 0,
@@ -785,41 +820,54 @@ export default function GymTrackingPage() {
       });
       curr.setDate(curr.getDate() + 1);
     }
+    // Summary follows the selection, as GitHub's contribution total does.
+    const yearVolume = yearData.reduce((sum, d) => sum + (d.volume || 0), 0);
+    const yearSessionsCount = yearData.filter((d) => d.hasSession).length;
 
     return (
-      <>
-        <ActivityCalendar
-          data={data}
-          theme={{
-            light: LIGHT_RAMP,
-            dark: DARK_RAMP,
-          }}
-          blockSize={10}
-          blockMargin={4}
-          colorScheme={theme === "dark" ? "dark" : "light"}
-          showTotalCount={false}
-          showColorLegend={false}
-          showWeekdayLabels={["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]}
-          style={{ width: "100%", minWidth: "800px" }}
-          renderBlock={(block, activity) =>
-            cloneElement(block, {
-              "data-tooltip-id": "react-tooltip",
-              "data-tooltip-content": `${format(parseISO(activity.date), "d MMMM yyyy")} • ${
-                activity.hasSession && activity.volume > 0
-                  ? `${activity.volume.toLocaleString()} kg volume`
-                  : activity.level === 4
-                    ? "Completed"
-                    : activity.level === 2
-                      ? "Partially Completed"
-                      : activity.level >= 1
-                        ? "Trained"
-                        : "No Activity"
-              }`,
-            })
-          }
-        />
+      <div className="gy-years">
+        <div className="gy-year">
+          <div className="gy-year-hd">
+            <span className="m-crumb">
+              {yearSessionsCount} session{yearSessionsCount === 1 ? "" : "s"} · {yearVolume.toLocaleString()} kg
+            </span>
+          </div>
+          <div className="gy-year-map">
+                <ActivityCalendar
+                  data={yearData}
+                  theme={{
+                    light: LIGHT_RAMP,
+                    dark: DARK_RAMP,
+                  }}
+                  blockSize={10}
+                  blockMargin={4}
+                  colorScheme={theme === "dark" ? "dark" : "light"}
+                  showTotalCount={false}
+                  showColorLegend={false}
+                  showMonthLabels="if-needed"
+                  showWeekdayLabels={["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]}
+                  style={{ width: "100%", minWidth: "800px" }}
+                  renderBlock={(block, activity) =>
+                    cloneElement(block, {
+                      "data-tooltip-id": "react-tooltip",
+                      "data-tooltip-content": `${format(parseISO(activity.date), "d MMMM yyyy")} • ${
+                        activity.hasSession && activity.volume > 0
+                          ? `${activity.volume.toLocaleString()} kg volume`
+                          : activity.level === 4
+                            ? "Completed"
+                            : activity.level === 2
+                              ? "Partially Completed"
+                              : activity.level >= 1
+                                ? "Trained"
+                                : "No Activity"
+                      }`,
+                    })
+                  }
+                />
+          </div>
+        </div>
         <ReactTooltip id="react-tooltip" />
-      </>
+      </div>
     );
   };
 
@@ -835,6 +883,25 @@ export default function GymTrackingPage() {
   // muscle groups the exercise library actually tags; granular names pass through.
   const expandedGroups = expandMuscleGroups(getDayMuscleGroups(selectedDayName));
   const muscleGroups = getDayMuscleGroups(selectedDayName);
+  // Consistency hero: trained-day count over the fetched window.
+  const trainedDays = yearSessions.length;
+
+  // Heatmap year switcher: current year plus prior years the account
+  // existed for, capped at 3 — derived client-side from the signup month
+  // so a fresh account never sees an empty year chip.
+  const heatmapYears = (() => {
+    const now = new Date();
+    const signup = user?.createdAt ? new Date(user.createdAt) : null;
+    const maxRows = 3;
+    const years = [];
+    for (let i = 0; i < maxRows; i += 1) {
+      const y = now.getFullYear() - i;
+      if (signup && y < signup.getFullYear()) break; // account didn't exist this year
+      if (signup && y === signup.getFullYear() && now < signup && i === 0) break;
+      years.push(y);
+    }
+    return years;
+  })();
 
   // SplitManager reports back after a template apply or custom save — keep
   // the gym page's derived views (today's plan, week grid) in sync.
@@ -900,65 +967,60 @@ export default function GymTrackingPage() {
 
           {/* Consistency band — full width so the year map always fits.
               An 800px calendar can never live in a 360px sidebar without
-              either bleeding over the workbench or shrinking to a sliver. */}
+              either bleeding over the workbench or shrinking to a sliver.
+              Layout: streak-led hero strip (the number is the point), the
+              year map as evidence below, legend riding one baseline. */}
           <div className="m-card m-in" style={{ marginBottom: 24 }}>
             <div className="m-card-h">
               <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <span style={{ color: "var(--ac)" }}><Icon d={ICONS.flame} /></span>
                 Consistency
               </h3>
-              <span className="m-crumb">This year</span>
+              <div className="gy-year-tabs" role="tablist" aria-label="Heatmap year">
+                {heatmapYears.map((year) => (
+                  <button
+                    key={year}
+                    type="button"
+                    role="tab"
+                    aria-selected={heatmapYear === year}
+                    className={`gy-year-tab${heatmapYear === year ? " is-active" : ""}`}
+                    onClick={() => setHeatmapYear(year)}
+                  >
+                    {year}
+                  </button>
+                ))}
+              </div>
             </div>
             <div style={{ padding: 18 }}>
               {renderStaleNotice("consistency", "Couldn't refresh your training history — showing the last loaded data.")}
-              <div className="gym-stats-row">
-                <div className="m-stat" style={{ background: "var(--sunken)", borderRadius: 8 }}>
-                  <b className="m-num">{currentStreak}</b>
-                  <span>Current streak</span>
+              <div className="gy-hero">
+                <div className="gy-hero-cell is-hero">
+                  <b className="m-num gy-hero-num">{currentStreak}</b>
+                  <span className="gy-hero-lbl">Day streak</span>
                 </div>
-                <div className="m-stat" style={{ background: "var(--sunken)", borderRadius: 8 }}>
-                  <b className="m-num">{longestStreak}</b>
-                  <span>Longest streak</span>
+                <div className="gy-hero-row">
+                  <div className="gy-hero-cell">
+                    <b className="m-num gy-hero-num">{longestStreak}</b>
+                    <span className="gy-hero-lbl">Longest</span>
+                  </div>
+                  <div className="gy-hero-cell">
+                    <b className="m-num gy-hero-num">{trainedDays}</b>
+                    <span className="gy-hero-lbl">Trained days</span>
+                  </div>
                 </div>
-                {(() => {
-                  const yearVolume = yearSessions.reduce(
-                    (total, s) =>
-                      total +
-                      (s.exercises || []).reduce(
-                        (t, ex) =>
-                          t + (ex.sets || []).reduce((sum, set) => sum + set.weight * set.reps, 0),
-                        0,
-                      ),
-                    0,
-                  );
-                  const trainedDays = yearSessions.length;
-                  if (trainedDays === 0) return null;
-                  return (
-                    <>
-                      <div className="m-stat" style={{ background: "var(--sunken)", borderRadius: 8 }}>
-                        <b className="m-num">{trainedDays}</b>
-                        <span>Trained days</span>
-                      </div>
-                      <div className="m-stat" style={{ background: "var(--sunken)", borderRadius: 8 }}>
-                        <b className="m-num">{Math.round(yearVolume).toLocaleString()}</b>
-                        <span>Kg lifted</span>
-                      </div>
-                    </>
-                  );
-                })()}
               </div>
 
-              <div style={{ overflowX: "auto", width: "100%", maxWidth: "100%", paddingBottom: 8 }}>{renderCalendar()}</div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10, flexWrap: "wrap", gap: 6 }}>
-                <p className="m-crumb">Every logged set feeds this map.</p>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }} aria-hidden="true">
-                  <span className="m-crumb">Less</span>
+              <div className="gy-cell-hd">
+                <span className="m-crumb">Every logged set feeds this map.</span>
+                <span className="m-crumb" style={{ marginLeft: "auto" }}>Less</span>
+                <span className="gy-legend" aria-hidden="true">
                   {(theme === "dark" ? DARK_RAMP : LIGHT_RAMP).map((c) => (
-                    <span key={c} style={{ width: 9, height: 9, borderRadius: 2, background: c }}></span>
+                    <i key={c} style={{ background: c }}></i>
                   ))}
-                  <span className="m-crumb">More</span>
                 </span>
+                <span className="m-crumb">More</span>
               </div>
+              <div style={{ overflowX: "auto", width: "100%", maxWidth: "100%" }}>{renderCalendar()}</div>
             </div>
           </div>
 

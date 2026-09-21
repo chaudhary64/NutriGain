@@ -1,10 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, cloneElement } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import AppShell from "@/components/AppShell";
 import { format, parseISO } from "date-fns";
+import { ActivityCalendar } from "react-activity-calendar";
+import { Tooltip as ReactTooltip } from "react-tooltip";
+import "react-tooltip/dist/react-tooltip.css";
+import { useTheme } from "@/context/ThemeContext";
 import { FALLBACK_MACRO_GOALS } from "@/lib/goals";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ResponsiveContainer } from "recharts";
 
@@ -22,8 +26,6 @@ html[data-theme="dark"] .st{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b9
 .st .m-h1{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
 .st .m-sub{color:var(--t3);font-size:13px;margin-top:4px}
 .st .m-crumb{font-size:12px;color:var(--t3)}
-.st .m-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px}
-.st .m-chip-ac{background:var(--ac-soft);color:var(--ac)}
 .st .m-num{font-variant-numeric:tabular-nums}
 .st .m-ic{width:16px;height:16px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 .st .m-lbl{display:block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:5px}
@@ -55,15 +57,18 @@ html[data-theme="dark"] .st{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b9
 html[data-theme="dark"] .st .st-week .st-wk-bar{background:var(--track,#2e2e34)}
 .st-week .st-wk-bar i{display:block;height:100%;border-radius:3px;background:var(--ac)}
 .st-week .st-wk-val{width:150px;text-align:right;color:var(--t1);font-weight:700;font-variant-numeric:tabular-nums;flex-shrink:0}
-/* 28-day consistency strip */
-.st-strip{display:grid;grid-template-columns:repeat(14,1fr);gap:4px}
-.st-cell{aspect-ratio:1;border-radius:3px;background:var(--sunken);border:1px solid var(--line);position:relative}
-.st-cell.meals{background:var(--ac-soft);border-color:var(--ac-soft-b)}
-.st-cell.session{background:color-mix(in srgb,var(--pro) 26%,var(--card))}
-.st-cell.both{background:var(--ac);border-color:var(--ac)}
+/* Consistency legend */
 .st-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:11px;font-weight:600;color:var(--t3)}
 .st-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px;border:1px solid var(--line)}
 .st-empty{padding:18px;border:1px dashed var(--line);border-radius:10px;font-size:13px;color:var(--t3);text-align:center}
+/* Year switcher — GitHub-profile model, shared with the gym card: one
+   calendar on screen; the chip row in the card header selects the year. */
+.gy-year-tabs{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.gy-year-tab{appearance:none;border:1px solid var(--line);background:var(--sunken);color:var(--t2);font:inherit;font-size:12px;font-weight:800;letter-spacing:.06em;font-variant-numeric:tabular-nums;padding:4px 12px;border-radius:999px;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+.gy-year-tab:hover{color:var(--t1);border-color:var(--t2)}
+.gy-year-tab.is-active{background:var(--ac);border-color:var(--ac);color:var(--on-ac)}
+.gy-year-map{overflow-x:auto;width:100%;max-width:100%}
+.gy-year-hd{display:flex;align-items:baseline;gap:10px;margin:14px 0 8px}
 /* Inline loading + error states (same ring language as components/Loader) */
 .st-loading{display:flex;flex-direction:column;align-items:center;gap:16px;padding:64px 0;color:var(--t3)}
 .st-loading i{display:block;width:32px;height:32px;border-radius:9999px;border:3px solid var(--line);border-top-color:var(--ac);animation:st-spin .8s linear infinite}
@@ -74,9 +79,11 @@ html[data-theme="dark"] .st .st-week .st-wk-bar{background:var(--track,#2e2e34)}
 .st-error button{font:inherit;font-size:13px;font-weight:700;color:var(--on-ac);background:var(--red);border:none;border-radius:8px;padding:9px 16px;cursor:pointer}
 .st-error button:hover{filter:brightness(.94)}
 .st-error button:focus-visible{outline:2px solid var(--red);outline-offset:2px}
-.st-layout{display:grid;grid-template-columns:1fr;gap:20px}
-@media(min-width:1000px){.st-layout{grid-template-columns:1fr 1fr}}
-@media(max-width:560px){.st-strip{grid-template-columns:repeat(7,1fr)}}
+/* minmax(0,1fr): a plain 1fr track sizes to min-content, so wide
+   children (charts, calendars) blow the column out on mid widths
+   instead of shrinking. */
+.st-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
+@media(min-width:1000px){.st-layout{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(prefers-reduced-motion:reduce){.st *{animation:none!important;transition:none!important}}
 `;
 
@@ -95,6 +102,36 @@ const ICONS = {
 
 const RANGES = [7, 30, 90];
 
+const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+const LIGHT_RAMP = ["#ececea", "#c7d2fe", "#a5b4fc", "#818cf8", "#4f46e5"];
+const DARK_RAMP = ["#2e2e34", "#3730a3", "#4f46e5", "#818cf8", "#a5b4fc"];
+
+/**
+ * Build the selected year's Jan 1 → Dec 31 day list from the sparse
+ * yearMap — future days of the running year stay blank, as GitHub's
+ * profile graph does.
+ */
+function buildYearCalendarData(yearMap, year) {
+  const byDate = new Map((yearMap || []).map((d) => [d.date, d]));
+  const data = [];
+  const end = new Date(year, 11, 31);
+  let curr = new Date(year, 0, 1);
+  while (curr <= end) {
+    const dateStr = format(curr, "yyyy-MM-dd");
+    const day = byDate.get(dateStr);
+    data.push({
+      date: dateStr,
+      count: day ? 1 : 0,
+      level: day ? 1 : 0,
+      meals: Boolean(day?.meals),
+      session: Boolean(day?.session),
+    });
+    curr.setDate(curr.getDate() + 1);
+  }
+  return data;
+}
+
 const fmtDate = (dateStr) => format(parseISO(`${dateStr}T00:00:00`), "MMM d");
 
 /** Delta vs goal, rendered as "−120" / "+85" with a tone class. */
@@ -112,11 +149,13 @@ function GoalDelta({ value, goal }) {
 
 export default function StatsPage() {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const [days, setDays] = useState(30);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [tick, setTick] = useState(0);
+  const [heatmapYear, setHeatmapYear] = useState(new Date().getFullYear()); // selected calendar year (chip switcher)
   const [weight, setWeight] = useState({ entries: [], targetWeight: 75 });
   const [weightError, setWeightError] = useState("");
 
@@ -182,6 +221,80 @@ export default function StatsPage() {
   const trainingWeeks = (training?.weekly || []).slice(-5);
   const maxTrainingVolume = Math.max(1, ...trainingWeeks.map((w) => w.volume));
 
+  // Consistency year switcher — GitHub-profile model, matching the gym
+  // card: one calendar on screen; chips select the year (current year
+  // plus prior years the account existed for, capped at 3).
+  const heatmapYears = (() => {
+    const now = new Date();
+    const signup = user?.createdAt ? new Date(user.createdAt) : null;
+    const maxRows = 3;
+    const years = [];
+    for (let i = 0; i < maxRows; i += 1) {
+      const y = now.getFullYear() - i;
+      if (signup && y < signup.getFullYear()) break; // account didn't exist this year
+      if (signup && y === signup.getFullYear() && now < signup && i === 0) break;
+      years.push(y);
+    }
+    return years;
+  })();
+
+  // Activity-state fills keep the strip's semantic families (accent for
+  // meals+session, soft accent for meals, violet "pro" for session) in
+  // both themes — solid enough to read on the calendar's grid.
+  const dark = theme === "dark";
+  const yearFill = {
+    both: dark ? "#818cf8" : "#4f46e5",
+    meals: dark ? "#3730a3" : "#c7d2fe",
+    session: dark ? "#a78bfa" : "#7c3aed",
+  };
+
+  const renderYearHeatmap = () => {
+    const yearData = buildYearCalendarData(consistency?.yearMap, heatmapYear);
+    const yearSessions = yearData.filter((d) => d.session).length;
+    const yearActive = yearData.filter((d) => d.meals || d.session).length;
+    return (
+      <>
+        <div className="gy-year-hd">
+          <span className="m-crumb m-num">
+            {yearActive} active {yearActive === 1 ? "day" : "days"} · {yearSessions} {yearSessions === 1 ? "session" : "sessions"}
+          </span>
+        </div>
+        <div className="gy-year-map">
+          <ActivityCalendar
+            data={yearData}
+            theme={{ light: LIGHT_RAMP, dark: DARK_RAMP }}
+            blockSize={10}
+            blockMargin={4}
+            colorScheme={dark ? "dark" : "light"}
+            showTotalCount={false}
+            showColorLegend={false}
+            showMonthLabels="if-needed"
+            showWeekdayLabels={WEEKDAY_LABELS}
+            style={{ width: "100%", minWidth: "800px" }}
+            renderBlock={(block, activity) =>
+              cloneElement(block, {
+                ...(activity.meals || activity.session
+                  ? { fill: activity.meals && activity.session ? yearFill.both : activity.meals ? yearFill.meals : yearFill.session }
+                  : {}),
+                "data-tooltip-id": "st-tooltip",
+                "data-tooltip-content": `${format(parseISO(activity.date), "d MMMM yyyy")} • ${
+                  activity.meals && activity.session
+                    ? "Meals + session"
+                    : activity.meals
+                      ? "Meals logged"
+                      : activity.session
+                        ? "Workout session"
+                        : "No activity"
+                }`,
+              })
+            }
+          />
+        </div>
+        <ReactTooltip id="st-tooltip" />
+      </>
+    );
+  };
+
   return (
     <AppShell>
       <style>{STATS_CSS}</style>
@@ -221,6 +334,131 @@ export default function StatsPage() {
           <p className="m-crumb" role="alert" style={{ color: "var(--red)", fontWeight: 600, margin: "-8px 0 12px" }}>
             Couldn&apos;t refresh — showing the last loaded data.
           </p>
+        )}
+
+        {stats && (
+          <>
+            {/* ---------------------- Weight trend ---------------------- */}
+            <div className="m-card m-in" style={{ marginBottom: 20 }}>
+              <div className="m-card-h">
+                <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ color: "var(--ac)" }}><Icon d={ICONS.scale} /></span>
+                  Weight trend
+                </h3>
+                {latestWeight != null && (
+                  <span className="m-crumb m-num">
+                    {latestWeight} kg
+                    {weightChange != null && weightChange !== 0 && (
+                      <> · {weightChange > 0 ? "+" : "−"}{Math.abs(weightChange)} kg over {weightRows.length} entries</>
+                    )}
+                  </span>
+                )}
+              </div>
+              <div style={{ padding: 18 }}>
+                {weightError && weightRows.length > 0 && (
+                  <p className="m-crumb" role="alert" style={{ color: "var(--red)", fontWeight: 600, margin: "0 0 12px" }}>
+                    Couldn&apos;t refresh your weight — showing the last loaded entries.
+                  </p>
+                )}
+                {weightError && weightRows.length === 0 ? (
+                  <div className="st-error" role="alert">
+                    <p>Couldn&apos;t load your weight data — {weightError}.</p>
+                    <button type="button" onClick={() => setTick((t) => t + 1)}>
+                      Try again
+                    </button>
+                  </div>
+                ) : weightRows.length < 2 ? (
+                  <div className="st-empty">
+                    Need at least two weight entries to draw a trend.
+                    <div style={{ marginTop: 10 }}>
+                      <Link href="/dashboard/gym" className="m-crumb" style={{ color: "var(--ac)", fontWeight: 700 }}>
+                        Log your weight →
+                      </Link>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ height: 200 }}>
+                      <ResponsiveContainer width="100%" height={200}>
+                        <LineChart data={weightRows}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="var(--line)" vertical={false} />
+                          <XAxis
+                            dataKey="date"
+                            tick={{ fontSize: 10, fill: "var(--t3)" }}
+                            axisLine={{ stroke: "var(--line)" }}
+                            tickLine={false}
+                            tickFormatter={(str) => fmtDate(str)}
+                            minTickGap={28}
+                          />
+                          <YAxis domain={["dataMin - 1", "dataMax + 1"]} tick={{ fontSize: 10, fill: "var(--t3)" }} axisLine={false} tickLine={false} width={34} />
+                          <Tooltip
+                            contentStyle={{ backgroundColor: "var(--card)", border: "1px solid var(--line)", borderRadius: "8px", fontSize: 12 }}
+                            itemStyle={{ color: "var(--t1)", fontWeight: 600 }}
+                            labelStyle={{ color: "var(--t3)" }}
+                            labelFormatter={(label) => format(parseISO(`${label}T00:00:00`), "MMMM d, yyyy")}
+                          />
+                          <ReferenceLine y={weight.targetWeight} stroke="var(--ac)" strokeDasharray="4 4" />
+                          <Line type="monotone" dataKey="weight" stroke="#4f46e5" strokeWidth={2} dot={{ fill: "var(--card)", stroke: "#4f46e5", strokeWidth: 2, r: 3 }} activeDot={{ r: 4 }} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <p className="m-crumb" style={{ marginTop: 10 }}>
+                      Dashed line: target {weight.targetWeight} kg (editable on the gym page).
+                    </p>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* ---------------------- Consistency (full width — the year map needs the canvas, like the gym card) ---------------------- */}
+            <div className="m-card m-in" style={{ marginBottom: 20 }}>
+              <div className="m-card-h">
+                <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ color: "var(--ac)" }}><Icon d={ICONS.spark} /></span>
+                  Consistency
+                </h3>
+                <div className="gy-year-tabs" role="tablist" aria-label="Heatmap year">
+                  {heatmapYears.map((year) => (
+                    <button
+                      key={year}
+                      type="button"
+                      role="tab"
+                      aria-selected={heatmapYear === year}
+                      className={`gy-year-tab${heatmapYear === year ? " is-active" : ""}`}
+                      onClick={() => setHeatmapYear(year)}
+                    >
+                      {year}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div style={{ padding: 18 }}>
+                <div className="st-tiles" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(120px,1fr))", marginBottom: 18 }}>
+                  <div className="st-tile">
+                    <b className="m-num">{consistency.currentStreak}</b>
+                    <span>day streak</span>
+                  </div>
+                  <div className="st-tile">
+                    <b className="m-num">{consistency.loggedDays}</b>
+                    <span>logged days</span>
+                  </div>
+                  <div className="st-tile">
+                    <b className="m-num">{consistency.loggedPct}%</b>
+                    <span>of {consistency.totalDays}-day window</span>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: 18 }}>{renderYearHeatmap()}</div>
+                <div className="st-legend">
+                  <span><i style={{ background: yearFill.both }} />meals + session</span>
+                  <span><i style={{ background: yearFill.meals }} />meals</span>
+                  <span><i style={{ background: yearFill.session }} />session</span>
+                  <span><i style={{ background: "var(--sunken)" }} />none</span>
+                </div>
+              </div>
+            </div>
+
+          </>
         )}
 
         {stats && (
@@ -347,117 +585,6 @@ export default function StatsPage() {
               </div>
             </div>
 
-            {/* ---------------------- Weight trend ---------------------- */}
-            <div className="m-card m-in">
-              <div className="m-card-h">
-                <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ color: "var(--ac)" }}><Icon d={ICONS.scale} /></span>
-                  Weight trend
-                </h3>
-                {latestWeight != null && (
-                  <span className="m-crumb m-num">
-                    {latestWeight} kg
-                    {weightChange != null && weightChange !== 0 && (
-                      <> · {weightChange > 0 ? "+" : "−"}{Math.abs(weightChange)} kg over {weightRows.length} entries</>
-                    )}
-                  </span>
-                )}
-              </div>
-              <div style={{ padding: 18 }}>
-                {weightError && weightRows.length > 0 && (
-                  <p className="m-crumb" role="alert" style={{ color: "var(--red)", fontWeight: 600, margin: "0 0 12px" }}>
-                    Couldn&apos;t refresh your weight — showing the last loaded entries.
-                  </p>
-                )}
-                {weightError && weightRows.length === 0 ? (
-                  <div className="st-error" role="alert">
-                    <p>Couldn&apos;t load your weight data — {weightError}.</p>
-                    <button type="button" onClick={() => setTick((t) => t + 1)}>
-                      Try again
-                    </button>
-                  </div>
-                ) : weightRows.length < 2 ? (
-                  <div className="st-empty">
-                    Need at least two weight entries to draw a trend.
-                    <div style={{ marginTop: 10 }}>
-                      <Link href="/dashboard/gym" className="m-crumb" style={{ color: "var(--ac)", fontWeight: 700 }}>
-                        Log your weight →
-                      </Link>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div style={{ height: 200 }}>
-                      <ResponsiveContainer width="100%" height={200}>
-                        <LineChart data={weightRows}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="var(--line)" vertical={false} />
-                          <XAxis
-                            dataKey="date"
-                            tick={{ fontSize: 10, fill: "var(--t3)" }}
-                            axisLine={{ stroke: "var(--line)" }}
-                            tickLine={false}
-                            tickFormatter={(str) => fmtDate(str)}
-                            minTickGap={28}
-                          />
-                          <YAxis domain={["dataMin - 1", "dataMax + 1"]} tick={{ fontSize: 10, fill: "var(--t3)" }} axisLine={false} tickLine={false} width={34} />
-                          <Tooltip
-                            contentStyle={{ backgroundColor: "var(--card)", border: "1px solid var(--line)", borderRadius: "8px", fontSize: 12 }}
-                            itemStyle={{ color: "var(--t1)", fontWeight: 600 }}
-                            labelStyle={{ color: "var(--t3)" }}
-                            labelFormatter={(label) => format(parseISO(`${label}T00:00:00`), "MMMM d, yyyy")}
-                          />
-                          <ReferenceLine y={weight.targetWeight} stroke="var(--ac)" strokeDasharray="4 4" />
-                          <Line type="monotone" dataKey="weight" stroke="#4f46e5" strokeWidth={2} dot={{ fill: "var(--card)", stroke: "#4f46e5", strokeWidth: 2, r: 3 }} activeDot={{ r: 4 }} />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
-                    <p className="m-crumb" style={{ marginTop: 10 }}>
-                      Dashed line: target {weight.targetWeight} kg (editable on the gym page).
-                    </p>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* ---------------------- Consistency ---------------------- */}
-            <div className="m-card m-in">
-              <div className="m-card-h">
-                <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ color: "var(--ac)" }}><Icon d={ICONS.spark} /></span>
-                  Consistency
-                </h3>
-                <span className="m-chip m-chip-ac">{consistency.loggedPct}% of {consistency.totalDays} days</span>
-              </div>
-              <div style={{ padding: 18 }}>
-                <div className="st-tiles" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(120px,1fr))", marginBottom: 18 }}>
-                  <div className="st-tile">
-                    <b className="m-num">{consistency.currentStreak}</b>
-                    <span>day streak</span>
-                  </div>
-                  <div className="st-tile">
-                    <b className="m-num">{consistency.loggedDays}</b>
-                    <span>logged days</span>
-                  </div>
-                </div>
-
-                <span className="m-lbl">Last 28 days</span>
-                <div className="st-strip" role="img" aria-label="28-day activity strip: meals logged and workout sessions per day">
-                  {consistency.strip.map((d) => (
-                    <div
-                      key={d.date}
-                      className={`st-cell ${d.meals && d.session ? "both" : d.meals ? "meals" : d.session ? "session" : ""}`}
-                      title={`${fmtDate(d.date)}${d.meals ? " · meals" : ""}${d.session ? " · session" : ""}`}
-                    />
-                  ))}
-                </div>
-                <div className="st-legend">
-                  <span><i style={{ background: "var(--ac)" }} />meals + session</span>
-                  <span><i style={{ background: "var(--ac-soft)", borderColor: "var(--ac-soft-b)" }} />meals</span>
-                  <span><i style={{ background: "color-mix(in srgb,var(--pro) 26%,var(--card))" }} />session</span>
-                  <span><i style={{ background: "var(--sunken)" }} />rest</span>
-                </div>
-              </div>
-            </div>
           </div>
         )}
       </div>

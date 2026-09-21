@@ -36,6 +36,7 @@ export const GET = withAuth(async (request, user) => {
         macroGoals: userData.macroGoals,
         profile: userData.profile || null,
         onboardedAt: userData.onboardedAt || null,
+        createdAt: userData.createdAt || null,
       },
     },
     {

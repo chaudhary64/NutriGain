@@ -44,6 +44,7 @@ export async function POST(request) {
           name: user.name,
           isAdmin: user.isAdmin,
           onboardedAt: user.onboardedAt || null,
+          createdAt: user.createdAt || null,
         },
       },
       { status: 201 }
