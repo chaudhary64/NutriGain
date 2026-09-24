@@ -6,7 +6,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { ActivityCalendar } from "react-activity-calendar";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
-import { format, parseISO, startOfYear } from "date-fns";
+import { format, parseISO, startOfYear, differenceInCalendarDays } from "date-fns";
 import { mergeSessionsIntoHeatmap } from "@/lib/heatmap";
 import { expandMuscleGroups } from "@/lib/muscle-groups";
 import AppShell from "@/components/AppShell";
@@ -246,8 +246,6 @@ export default function GymTrackingPage() {
   const [toasts, setToasts] = useState([]);
 
   // Stats
-  const [currentStreak, setCurrentStreak] = useState(0);
-  const [longestStreak, setLongestStreak] = useState(0);
   const [todayGymStatus, setTodayGymStatus] = useState("not-completed");
   const [targetWeight, setTargetWeight] = useState(75);
   const [editingTarget, setEditingTarget] = useState(false);
@@ -323,7 +321,6 @@ export default function GymTrackingPage() {
       const data = await res.json();
       if (data.gymHistory) {
         setGymHistory(data.gymHistory);
-        calculateStreaks(data.gymHistory);
       }
       if (data.dailyLog) {
         setTodayGymStatus(data.dailyLog.gymStatus || "not-completed");
@@ -408,66 +405,6 @@ export default function GymTrackingPage() {
     }
   };
 
-  const calculateStreaks = (history) => {
-    if (!history || history.length === 0) {
-      setCurrentStreak(0);
-      setLongestStreak(0);
-      return;
-    }
-
-    const completedDates = new Set(
-      history
-        .filter(
-          (log) =>
-            log.gymStatus === "completed" ||
-            log.gymStatus === "partially-completed",
-        )
-        .map((log) => log.date),
-    );
-
-    let current = 0;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    for (let i = 0; i < 365; i++) {
-      const checkDate = new Date(today);
-      checkDate.setDate(today.getDate() - i);
-      const dateStr = format(checkDate, "yyyy-MM-dd");
-
-      if (completedDates.has(dateStr)) {
-        current++;
-      } else if (i > 0) {
-        break;
-      }
-    }
-
-    let longest = 0;
-    let tempStreak = 0;
-    const sortedDates = Array.from(completedDates).sort();
-
-    for (let i = 0; i < sortedDates.length; i++) {
-      if (i === 0) {
-        tempStreak = 1;
-      } else {
-        const prevDate = new Date(sortedDates[i - 1]);
-        const currDate = new Date(sortedDates[i]);
-        const diffDays = Math.round(
-          (currDate - prevDate) / (1000 * 60 * 60 * 24),
-        );
-
-        if (diffDays === 1) {
-          tempStreak++;
-        } else {
-          longest = Math.max(longest, tempStreak);
-          tempStreak = 1;
-        }
-      }
-    }
-    longest = Math.max(longest, tempStreak);
-
-    setCurrentStreak(current);
-    setLongestStreak(longest);
-  };
 
   const handleGymStatusUpdate = async (status) => {
     const prev = todayGymStatus;
@@ -486,7 +423,6 @@ export default function GymTrackingPage() {
         setTodayGymStatus(status);
         if (data.gymHistory) {
           setGymHistory(data.gymHistory);
-          calculateStreaks(data.gymHistory);
         }
         pushToast(status === prev ? `Status set to ${STATUS_META[status]?.label}.` : `Marked ${STATUS_META[status]?.label.toLowerCase()}${isToday ? " for today" : ` for ${format(parseISO(currentDate), "d MMM")}`}.`);
       } else {
@@ -883,8 +819,59 @@ export default function GymTrackingPage() {
   // muscle groups the exercise library actually tags; granular names pass through.
   const expandedGroups = expandMuscleGroups(getDayMuscleGroups(selectedDayName));
   const muscleGroups = getDayMuscleGroups(selectedDayName);
-  // Consistency hero: trained-day count over the fetched window.
-  const trainedDays = yearSessions.length;
+  // Consistency hero stats — computed for the selected heatmap year so the
+  // headline numbers follow the year chips (GitHub's contribution model)
+  // instead of silently counting all fetched history. Derived in render
+  // scope, so they can never drift from the selection. A day counts as
+  // trained when it was marked completed/partially-completed OR has a
+  // logged session — matching what the calendar colors.
+  const heroStats = (() => {
+    const inYear = mergeSessionsIntoHeatmap(gymHistory, yearSessions)
+      .filter((day) => day.date.startsWith(`${heatmapYear}-`))
+      .filter(
+        (day) =>
+          day.gymStatus === "completed" ||
+          day.gymStatus === "partially-completed" ||
+          day.hasSession,
+      )
+      .map((day) => day.date)
+      .sort();
+
+    // Longest run of consecutive trained days within the selected year.
+    let longestStreak = 0;
+    let run = 0;
+    let prev = null;
+    for (const dateStr of inYear) {
+      run =
+        prev && differenceInCalendarDays(parseISO(dateStr), prev) === 1
+          ? run + 1
+          : 1;
+      if (run > longestStreak) longestStreak = run;
+      prev = parseISO(dateStr);
+    }
+
+    // Current streak: consecutive trained days ending today — or ending
+    // yesterday when today isn't trained yet, so an open day doesn't reset
+    // the count. Past years have no open day, so the streak is measured at
+    // that year's end.
+    const completedSet = new Set(inYear);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const windowEnd =
+      heatmapYear === today.getFullYear() ? today : new Date(heatmapYear, 11, 31);
+    let currentStreak = 0;
+    const cursor = new Date(windowEnd);
+    while (cursor >= new Date(heatmapYear, 0, 1)) {
+      if (completedSet.has(format(cursor, "yyyy-MM-dd"))) {
+        currentStreak += 1;
+      } else if (cursor.getTime() !== windowEnd.getTime()) {
+        break;
+      }
+      cursor.setDate(cursor.getDate() - 1);
+    }
+
+    return { currentStreak, longestStreak, trainedDays: inYear.length };
+  })();
 
   // Heatmap year switcher: current year plus prior years the account
   // existed for, capped at 3 — derived client-side from the signup month
@@ -995,16 +982,16 @@ export default function GymTrackingPage() {
               {renderStaleNotice("consistency", "Couldn't refresh your training history — showing the last loaded data.")}
               <div className="gy-hero">
                 <div className="gy-hero-cell is-hero">
-                  <b className="m-num gy-hero-num">{currentStreak}</b>
+                  <b className="m-num gy-hero-num">{heroStats.currentStreak}</b>
                   <span className="gy-hero-lbl">Day streak</span>
                 </div>
                 <div className="gy-hero-row">
                   <div className="gy-hero-cell">
-                    <b className="m-num gy-hero-num">{longestStreak}</b>
+                    <b className="m-num gy-hero-num">{heroStats.longestStreak}</b>
                     <span className="gy-hero-lbl">Longest</span>
                   </div>
                   <div className="gy-hero-cell">
-                    <b className="m-num gy-hero-num">{trainedDays}</b>
+                    <b className="m-num gy-hero-num">{heroStats.trainedDays}</b>
                     <span className="gy-hero-lbl">Trained days</span>
                   </div>
                 </div>
