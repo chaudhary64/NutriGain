@@ -6,7 +6,7 @@ import UserSchedule from "@/models/UserSchedule";
 import { withAuth } from "@/lib/auth";
 
 const MUSCLE_GROUP_OPTIONS = [
-  "Abs", "Arms", "Back", "Bicep", "Chest", "Forearms", "Legs", "Shoulders", "Tricep",
+  "Abs", "Back", "Bicep", "Chest", "Forearms", "Legs", "Shoulders", "Tricep",
   "Push", "Pull", "Upper Body", "Lower Body", "Full Body", "Rest Day",
 ];
 

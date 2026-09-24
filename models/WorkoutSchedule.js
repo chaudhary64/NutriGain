@@ -9,7 +9,7 @@ const WorkoutScheduleSchema = new mongoose.Schema({
   },
   muscleGroups: [{
     type: String,
-    enum: ['Chest', 'Back', 'Bicep', 'Tricep', 'Legs', 'Forearms', 'Shoulders', 'Arms', 'Rest Day'],
+    enum: ['Chest', 'Back', 'Bicep', 'Tricep', 'Legs', 'Forearms', 'Shoulders', 'Rest Day'],
   }],
   updatedAt: {
     type: Date,

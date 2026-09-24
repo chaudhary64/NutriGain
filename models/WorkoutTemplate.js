@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const TEMPLATE_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-const TEMPLATE_MUSCLE_GROUPS = ['Abs', 'Arms', 'Back', 'Bicep', 'Chest', 'Forearms', 'Legs', 'Shoulders', 'Tricep', 'Push', 'Pull', 'Upper Body', 'Lower Body', 'Full Body', 'Rest Day'];
+const TEMPLATE_MUSCLE_GROUPS = ['Abs', 'Back', 'Bicep', 'Chest', 'Forearms', 'Legs', 'Shoulders', 'Tricep', 'Push', 'Pull', 'Upper Body', 'Lower Body', 'Full Body', 'Rest Day'];
 
 /**
  * Serialize a Map-typed `days` field (WorkoutTemplate / UserSchedule) to a

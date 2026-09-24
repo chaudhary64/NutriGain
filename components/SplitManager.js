@@ -16,7 +16,7 @@ import { useEffect, useRef, useState } from "react";
 
 const SPLIT_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const SPLIT_GROUPS = [
-  "Abs", "Arms", "Back", "Bicep", "Chest", "Forearms", "Legs", "Shoulders", "Tricep",
+  "Abs", "Back", "Bicep", "Chest", "Forearms", "Legs", "Shoulders", "Tricep",
   "Push", "Pull", "Upper Body", "Lower Body", "Full Body", "Rest Day",
 ];
 

@@ -175,7 +175,7 @@ export default function AdminPage() {
 
   // Gym workout state — split templates
   const TEMPLATE_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-  const TEMPLATE_GROUPS = ["Abs", "Arms", "Back", "Bicep", "Chest", "Forearms", "Legs", "Shoulders", "Tricep", "Push", "Pull", "Upper Body", "Lower Body", "Full Body", "Rest Day"];
+  const TEMPLATE_GROUPS = ["Abs", "Back", "Bicep", "Chest", "Forearms", "Legs", "Shoulders", "Tricep", "Push", "Pull", "Upper Body", "Lower Body", "Full Body", "Rest Day"];
   const [templates, setTemplates] = useState([]);
   const [showTemplateForm, setShowTemplateForm] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState(null); // {_id|null, name, description, days}
