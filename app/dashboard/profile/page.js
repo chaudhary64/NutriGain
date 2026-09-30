@@ -13,44 +13,12 @@ import { FALLBACK_MACRO_GOALS } from "@/lib/goals";
 /* ------------------------------------------------------------------ */
 
 const MERIDIAN_CSS = `
-.mrd{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--t3:#6b6b76;--ac:#4f46e5;--ach:#4338ca;--red:#dc2626;--paper:#fafaf9;--card:#fff;--sunken:#f1f1ee;--track:#efefec;--on-ac:#fff;--ac-soft:#eef2ff;--ac-soft-b:#c7d2fe;--red-soft:#fef2f2;--red-soft-b:#fecaca;--pro:#7c3aed;--car:#b45309;--green:#047857;color:var(--t1)}
-html[data-theme="dark"] .mrd{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b96;--ac:#818cf8;--ach:#a5b4fc;--red:#f87171;--paper:#111113;--card:#1c1c1f;--sunken:#26262b;--track:#2e2e34;--on-ac:#111113;--ac-soft:#232347;--ac-soft-b:#3730a3;--red-soft:#2b1b1b;--red-soft-b:#5c2b2b;--pro:#a78bfa;--car:#fbbf24;--green:#34d399}
+.mrd{color:var(--t1)}
 .mrd{background:var(--paper)}
-.mrd .m-card{background:var(--card);border:1px solid var(--line);border-radius:12px}
-.mrd .m-card-h{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
-.mrd .m-card-h h3{font-size:13px;font-weight:700;color:var(--t1)}
-.mrd .m-h1{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
-.mrd .m-sub{color:var(--t3);font-size:13px;margin-top:4px}
-.mrd .m-crumb{font-size:12px;color:var(--t3)}
-.mrd .m-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px}
-.mrd .m-chip-ac{background:var(--ac-soft);color:var(--ac)}
-.mrd .m-num{font-variant-numeric:tabular-nums}
-.mrd .m-ic{width:16px;height:16px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
-.mrd .m-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:600;font-size:13px;border-radius:8px;padding:10px 16px;cursor:pointer;border:1px solid transparent;transition:.15s}
-.mrd .m-btn-primary{background:var(--ac);color:var(--on-ac)}
-.mrd .m-btn-primary:hover{background:var(--ach)}
-.mrd .m-btn-primary:disabled{opacity:.6;cursor:wait}
-.mrd .m-field{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--t1);background:var(--card);transition:.15s}
-.mrd .m-field:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px #4f46e51f}
 .mrd .m-row{display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid var(--line);font-size:13px}
 .mrd .m-row:last-child{border-bottom:0}
 .mrd .m-row:hover{background:var(--paper)}
 .mrd .m-rowicon{width:34px;height:34px;border-radius:9px;background:var(--sunken);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--t2);flex-shrink:0}
-.mrd .m-lbl{display:block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:5px}
-@keyframes mrd-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.mrd .m-in{animation:mrd-in .45s cubic-bezier(.22,1,.36,1) both}
-.mrd .m-in:nth-child(2){animation-delay:.06s}
-.mrd .m-in:nth-child(3){animation-delay:.12s}
-.mrd-toast{position:fixed;bottom:24px;right:24px;z-index:var(--pop-z-toast, 80);display:flex;flex-direction:column;gap:10px;width:calc(100% - 48px);max-width:380px}
-.mrd-toast-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:color-mix(in srgb, var(--card) 88%, transparent);-webkit-backdrop-filter:var(--pop-blur, blur(16px) saturate(1.4));backdrop-filter:var(--pop-blur, blur(16px) saturate(1.4));box-shadow:0 16px 40px -12px rgba(0,0,0,.5)}
-.mrd-toast-item.err{background:color-mix(in srgb, var(--red-soft) 88%, transparent);border-color:var(--red-soft-b)}
-.mrd-toast-item p{font-size:13px;color:var(--t1);flex:1;line-height:1.45}
-.mrd-toast-item.err p{color:#991b1b}
-.mrd-toast-dot{width:8px;height:8px;border-radius:50%;background:var(--ac);flex-shrink:0}
-.mrd-toast-item.err .mrd-toast-dot{background:var(--red)}
-.mrd-toast-x{flex-shrink:0;position:relative;color:var(--t3);background:none;border:0;cursor:pointer;padding:4px;border-radius:6px}
-.mrd-toast-x::after{content:"";position:absolute;inset:-6px}
-.mrd-toast-x:hover{color:var(--t1);background:var(--sunken)}
 /* Theme segmented control */
 .prf-seg{display:inline-flex;gap:4px;background:var(--sunken);border:1px solid var(--line);border-radius:10px;padding:4px}
 .prf-seg button{border:0;background:transparent;font:inherit;font-size:12.5px;font-weight:700;color:var(--t2);padding:7px 16px;border-radius:7px;cursor:pointer;transition:background .15s,color .15s}

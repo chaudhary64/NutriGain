@@ -7,8 +7,7 @@ import Link from "next/link";
  */
 
 const NF_CSS = `
-.nf{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--ac:#4f46e5;--ach:#4338ca;--on-ac:#fff;--sunken:#f1f1ee;min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--paper,#fafaf9);color:var(--t1);font-family:var(--font-inter),system-ui,sans-serif;padding:24px}
-html[data-theme="dark"] .nf{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--ac:#818cf8;--ach:#a5b4fc;--on-ac:#111113;--sunken:#26262b;--paper:#111113}
+.nf{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--paper,#fafaf9);color:var(--t1);font-family:var(--font-inter),system-ui,sans-serif;padding:24px}
 .nf-box{max-width:460px;text-align:center;display:grid;gap:14px;justify-items:center}
 .nf-eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--t2)}
 .nf-code{font-family:var(--font-playfair),Georgia,serif;font-size:96px;font-weight:700;letter-spacing:-.02em;line-height:1;background:linear-gradient(135deg,var(--ac),var(--ach));-webkit-background-clip:text;background-clip:text;color:transparent}

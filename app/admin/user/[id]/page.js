@@ -20,11 +20,7 @@ import {
 
 /* ============ Meridian Admin — theme tokens (mirror of the dashboard systems) ============ */
 const ADM_CSS = `
-.adm *{box-sizing:border-box}
-.adm{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--t3:#6b6b76;--ac:#4f46e5;--ach:#4338ca;--red:#dc2626;--paper:#fafaf9;--card:#fff;--sunken:#f1f1ee;--track:#efefec;--on-ac:#fff;--ac-soft:#eef2ff;--ac-soft-b:#c7d2fe;--green:#047857;--green-soft:#ecfdf5;--red-soft:#fef2f2;--red-soft-b:#fecaca;--pro:#7c3aed;--pro-soft:#f5f3ff;--car:#b45309;--car-soft:#fffbeb;color:var(--t1);font-family:inherit}
-html[data-theme="dark"] .adm{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b96;--ac:#818cf8;--ach:#a5b4fc;--red:#f87171;--paper:#111113;--card:#1c1c1f;--sunken:#26262b;--track:#2e2e34;--on-ac:#111113;--ac-soft:#232347;--ac-soft-b:#3730a3;--green:#34d399;--green-soft:#0d2a22;--red-soft:#2b1b1b;--red-soft-b:#5c2b2b;--pro:#a78bfa;--pro-soft:#2b2140;--car:#fbbf24;--car-soft:#3a2d10}
-.adm-head{margin-bottom:28px}
-.adm-crumb{font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--t3);text-transform:uppercase;margin-bottom:6px}
+.adm{color:var(--t1);font-family:inherit}
 .adm-h1{font-size:24px;font-weight:800;letter-spacing:-.02em;color:var(--t1);margin:0}
 .adm-sub{font-size:13px;font-weight:500;color:var(--t2);margin-top:4px}
 .adm-ava{width:56px;height:56px;border-radius:14px;background:var(--ac-soft);color:var(--ac);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;flex-shrink:0}
@@ -69,7 +65,6 @@ html[data-theme="dark"] .adm{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b
 .adm-meal-v .car{color:var(--car)}
 .adm-meal-v .fat{color:var(--green)}
 .adm-empty{padding:34px 16px;text-align:center;font-size:13px;font-weight:500;color:var(--t3);background:var(--sunken);border-radius:12px}
-@media(prefers-reduced-motion:reduce){.adm *{transition:none!important;animation:none!important}}
 `;
 
 /* Meridian stroke icons */

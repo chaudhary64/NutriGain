@@ -28,41 +28,16 @@ import {
 /* ------------------------------------------------------------------ */
 
 const MERIDIAN_CSS = `
-.gym{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--t3:#6b6b76;--ac:#4f46e5;--ach:#4338ca;--red:#dc2626;--amber:#b45309;--green:#047857;--paper:#fafaf9;--card:#fff;--sunken:#f1f1ee;--track:#efefec;--on-ac:#fff;--ac-soft:#eef2ff;--ac-soft-b:#c7d2fe;--green-soft:#ecfdf5;--amber-soft:#fef3c7;--red-soft:#fef2f2;--red-soft-b:#fecaca;color:var(--t1)}
-html[data-theme="dark"] .gym{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b96;--ac:#818cf8;--ach:#a5b4fc;--red:#f87171;--amber:#fbbf24;--green:#34d399;--paper:#111113;--card:#1c1c1f;--sunken:#26262b;--track:#2e2e34;--on-ac:#111113;--ac-soft:#232347;--ac-soft-b:#3730a3;--green-soft:#0d2a22;--amber-soft:#3a2d10;--red-soft:#2b1b1b;--red-soft-b:#5c2b2b}
+.gym{color:var(--t1)}
 .gym{background:var(--paper)}
-.gym .m-card{background:var(--card);border:1px solid var(--line);border-radius:12px}
 /* Theme-aware chart + heatmap chrome (overrides SVG presentation attrs) */
 .gym .recharts-cartesian-grid line{stroke:var(--track)!important}
 .gym .recharts-dot{fill:var(--card)!important}
 .gym .recharts-line-curve{stroke:var(--ac)}
 .gym .recharts-cartesian-axis-tick text{fill:var(--t3)}
-.gym .m-card-h{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
-.gym .m-card-h h3{font-size:13px;font-weight:700;color:var(--t1)}
-.gym .m-h1{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
-.gym .m-sub{color:var(--t3);font-size:13px;margin-top:4px}
-.gym .m-crumb{font-size:12px;color:var(--t3)}
-.gym .m-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px}
-.gym .m-chip-ac{background:var(--ac-soft);color:var(--ac)}
-.gym .m-num{font-variant-numeric:tabular-nums}
-.gym .m-ic{width:16px;height:16px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
-.gym .m-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:600;font-size:13px;border-radius:8px;padding:10px 16px;cursor:pointer;border:1px solid transparent;transition:.15s}
-.gym .m-btn-primary{background:var(--ac);color:var(--on-ac)}
-.gym .m-btn-primary:hover{background:var(--ach)}
-.gym .m-btn-primary:disabled{opacity:.6;cursor:wait}
 .gym .m-btn-ghost{border:1px solid var(--line);color:var(--t1);background:var(--card)}
 .gym .m-btn-ghost:hover{background:var(--sunken)}
-.gym .m-field{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--t1);background:var(--card);transition:.15s}
-.gym .m-field:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px #4f46e51f}
-.gym .m-lbl{display:block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:5px}
-.gym .m-stat{padding:14px 16px}
-.gym .m-stat b{display:block;font-size:26px;font-weight:700;letter-spacing:-.02em;color:var(--t1)}
-.gym .m-stat span{display:block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-top:3px}
 .gym .m-sep{height:1px;background:var(--line)}
-@keyframes gym-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.gym .m-in{animation:gym-in .45s cubic-bezier(.22,1,.36,1) both}
-.gym .m-in:nth-child(2){animation-delay:.06s}
-.gym .m-in:nth-child(3){animation-delay:.12s}
 .gym-toast{position:fixed;bottom:24px;right:24px;z-index:var(--pop-z-toast, 80);display:flex;flex-direction:column;gap:10px;width:calc(100% - 48px);max-width:380px}
 .gym-toast-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:color-mix(in srgb, var(--card) 88%, transparent);-webkit-backdrop-filter:var(--pop-blur, blur(16px) saturate(1.4));backdrop-filter:var(--pop-blur, blur(16px) saturate(1.4));box-shadow:0 16px 40px -12px rgba(0,0,0,.5)}
 .gym-toast-item.err{background:color-mix(in srgb, var(--red-soft) 88%, transparent);border-color:var(--red-soft-b)}
@@ -73,7 +48,6 @@ html[data-theme="dark"] .gym{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b
 .gym-toast-x{flex-shrink:0;position:relative;color:var(--t3);background:none;border:0;cursor:pointer;padding:4px;border-radius:6px}
 .gym-toast-x::after{content:"";position:absolute;inset:-6px}
 .gym-toast-x:hover{color:var(--t1);background:var(--sunken)}
-.gym .react-calendar-heatmap{color-scheme:light}
 .gym .rt-cell{display:flex;flex-direction:column;gap:2px;padding:8px 12px;border-radius:8px;font-size:13px;border:1px solid transparent}
 .gym .rt-cell:hover{background:var(--paper)}
 /* Status — Whisper-styled segmented switcher: all options visible, active
@@ -92,7 +66,6 @@ html[data-theme="dark"] .gym{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b
 .gym .gym-rail::-webkit-scrollbar,.gym .gym-entries::-webkit-scrollbar{width:5px}
 .gym .gym-rail::-webkit-scrollbar-thumb,.gym .gym-entries::-webkit-scrollbar-thumb{background:var(--track);border-radius:99px}
 @media (max-width:1024px){.gym .gym-rail{position:static;max-height:none;overflow:visible}}
-.gym .gym-stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
 /* Consistency hero — a "story strip": the streak number is the point, the
    year map is the evidence. Sunken, hairline-divided cells keep the top
    band quiet; the calendar scrolls below with its legend on one baseline. */
@@ -146,7 +119,6 @@ const Icon = ({ d, className = "m-ic" }) => (
 
 const ICONS = {
   flame: <><path d="M12 3s-6 5.2-6 10a6 6 0 0 0 12 0c0-1.6-.6-3.1-1.4-4.4-.9 1-1.9 1.5-1.9 1.5.3-2.3-.9-5.4-2.7-7.1z" /><path d="M12 21a3 3 0 0 1-3-3c0-1.7 1.5-3.2 3-4 1.5.8 3 2.3 3 4a3 3 0 0 1-3 3z" /></>,
-  target: <><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1" /></>,
   scale: <><path d="M12 3v3" /><path d="m7 6-4 8a4.5 4.5 0 0 0 8 0L7 6z" /><path d="m17 6-4 8a4.5 4.5 0 0 0 8 0l-4-8z" /><path d="M4 21h16" /><path d="M5 6h14" /></>,
   trend: <><path d="M3 17l6-6 4 4 8-8" /><path d="M15 7h6v6" /></>,
   check: <path d="M5 13l4 4L19 7" />,

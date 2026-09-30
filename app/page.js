@@ -22,7 +22,6 @@ const HOME_CSS = `
 .home .wm-kicker{font-size:10px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--shell-muted)}
 .home .wm-hairline{height:1px;background:var(--shell-line)}
 .home .wm-card{background:var(--shell-raised);border:1px solid var(--shell-line);border-radius:14px}
-.home .wm-chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--shell-line);border-radius:999px;padding:6px 14px;font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--shell-ink-2);background:var(--shell-chrome)}
 .home .wm-dot{width:6px;height:6px;border-radius:50%;background:var(--shell-accent)}
 .home .wm-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;border-radius:10px;padding:15px 28px;transition:.18s;cursor:pointer}
 .home .wm-btn-primary{background:var(--shell-accent);color:var(--shell-on-accent)}
@@ -57,7 +56,6 @@ html[data-theme="dark"] .home .wm-hm i.l4{background:#a5b4fc}
 /* Anchor targets clear the fixed 56px bar when jumped to from the footer menu. */
 #features,#gym,#nutrition{scroll-margin-top:80px}
 @keyframes home-in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion: reduce){.home *{animation:none!important;transition:none!important}}
 `;
 
 const CHECK = (

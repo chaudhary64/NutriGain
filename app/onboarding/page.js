@@ -12,9 +12,7 @@ import { suggestMacroGoals, ACTIVITY_LEVELS, GOALS } from "@/lib/tdee";
 /* ------------------------------------------------------------------ */
 
 const ONB_CSS = `
-.onb *{box-sizing:border-box}
-.onb{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--t3:#6b6b76;--ac:#4f46e5;--ach:#4338ca;--red:#dc2626;--paper:#fafaf9;--card:#fff;--sunken:#f1f1ee;--on-ac:#fff;--ac-soft:#eef2ff;--red-soft:#fef2f2;--red-soft-b:#fecaca;--green:#047857;color:var(--t1);background:var(--paper);min-height:100vh;font-family:inherit}
-html[data-theme="dark"] .onb{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b96;--ac:#818cf8;--ach:#a5b4fc;--red:#f87171;--paper:#111113;--card:#1c1c1f;--sunken:#26262b;--on-ac:#111113;--ac-soft:#232347;--red-soft:#2b1b1b;--red-soft-b:#5c2b2b;--green:#34d399}
+.onb{color:var(--t1);background:var(--paper);min-height:100vh;font-family:inherit}
 .onb-pane{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:48px 20px}
 .onb-card{width:100%;max-width:640px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:32px;animation:onb-in .5s cubic-bezier(.22,1,.36,1) both}
 @keyframes onb-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
@@ -55,7 +53,6 @@ html[data-theme="dark"] .onb{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b
 .onb-toggle:hover{background:var(--sunken);color:var(--t1)}
 .onb-toggle:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
 @media(max-width:560px){.onb-grid{grid-template-columns:1fr}.onb-grid-3{grid-template-columns:1fr}.onb-card{padding:24px}}
-@media(prefers-reduced-motion:reduce){.onb *{transition:none!important;animation:none!important}}
 `;
 
 export default function OnboardingPage() {

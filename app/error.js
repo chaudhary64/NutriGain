@@ -9,8 +9,7 @@ import { useEffect } from "react";
  */
 
 const ER_CSS = `
-.er{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--ac:#4f46e5;--ach:#4338ca;--on-ac:#fff;--red:#dc2626;--red-soft:#fef2f2;--red-soft-b:#fecaca;--sunken:#f1f1ee;--paper:#fafaf9;min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--paper);color:var(--t1);font-family:var(--font-inter),system-ui,sans-serif;padding:24px}
-html[data-theme="dark"] .er{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--ac:#818cf8;--ach:#a5b4fc;--on-ac:#111113;--red:#f87171;--red-soft:#2b1b1b;--red-soft-b:#5c2b2b;--sunken:#26262b;--paper:#111113}
+.er{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--paper);color:var(--t1);font-family:var(--font-inter),system-ui,sans-serif;padding:24px}
 .er-box{max-width:460px;text-align:center;display:grid;gap:14px;justify-items:center}
 .er-eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--t2)}
 .er-badge{width:44px;height:44px;border-radius:50%;border:1px solid var(--red-soft-b);background:var(--red-soft);color:var(--red);display:inline-flex;align-items:center;justify-content:center}

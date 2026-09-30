@@ -21,8 +21,7 @@ const SPLIT_GROUPS = [
 ];
 
 const SPLIT_CSS = `
-.splitmgr{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--t3:#6b6b76;--ac:#4f46e5;--paper:#fafaf9;--card:#fff;--sunken:#f1f1ee;--on-ac:#fff;--ac-soft:#eef2ff;--ac-soft-b:#c7d2fe;color:var(--t1)}
-html[data-theme="dark"] .splitmgr{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b96;--ac:#818cf8;--paper:#111113;--card:#1c1c1f;--sunken:#26262b;--on-ac:#111113;--ac-soft:#232347;--ac-soft-b:#3730a3}
+.splitmgr{color:var(--t1)}
 .splitmgr .sm-card{background:var(--card);border:1px solid var(--line);border-radius:12px}
 .splitmgr .sm-card-h{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line);gap:12px;flex-wrap:wrap}
 .splitmgr .sm-card-h h3{font-size:13px;font-weight:700;color:var(--t1);display:flex;align-items:center;gap:10px;margin:0}

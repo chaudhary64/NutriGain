@@ -5,9 +5,7 @@ import AppShell from "@/components/AppShell";
 
 /* ============ Meridian Hub — theme tokens (mirror of the dashboard systems) ============ */
 const HUB_CSS = `
-.hub *{box-sizing:border-box}
-.hub{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--t3:#6b6b76;--ac:#4f46e5;--ach:#4338ca;--on-ac:#fff;--paper:#fafaf9;color:var(--t1);font-family:inherit}
-html[data-theme="dark"] .hub{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b96;--ac:#818cf8;--ach:#a5b4fc;--on-ac:#111113;--paper:#111113}
+.hub{color:var(--t1);font-family:inherit}
 .hub-head{text-align:center;margin-bottom:32px}
 .hub-kicker{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ac);margin:0 0 10px}
 .hub-h1{font-size:36px;font-weight:800;letter-spacing:-.02em;color:var(--t1);margin:0;line-height:1.1}
@@ -53,7 +51,6 @@ html[data-theme="dark"] .hub{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b
   .hub-wide-img::before{background:linear-gradient(180deg,rgba(17,17,19,0) 40%,#111113 100%)}
   .hub-wide-body{flex:none;max-width:100%;gap:16px;padding:22px}
 }
-@media(prefers-reduced-motion:reduce){.hub *{transition:none!important;animation:none!important}}
 `;
 
 const ArrowIcon = () => (

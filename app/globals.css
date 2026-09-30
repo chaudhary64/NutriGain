@@ -87,14 +87,13 @@ html {
    Popup elevation standard.
 
    One z-order for every floating layer, above the navbar (z-50):
-   dropdowns/popovers 70, toasts 80, modal overlays 90. Panels sit on a
+   dropdowns/popovers 70, toasts 80. Panels sit on a
    frosted --card glass so content never reads as merged with the page
    beneath, in either theme. Applies to pages that use --card tokens.
    ---------------------------------------------------------------------- */
 :root {
   --pop-z-dropdown: 70;
   --pop-z-toast: 80;
-  --pop-z-overlay: 90;
   --pop-blur: blur(16px) saturate(1.4);
 }
 
@@ -122,7 +121,6 @@ html {
   --shell-line: #e7e7e3;
   --shell-sunken: #f1f1ee;
   --shell-raised: #ffffff;
-  --shell-menu: #ffffff;
   --shell-ink: #1a1a1e;
   --shell-ink-2: #5f5f68;
   --shell-muted: #737373;
@@ -141,7 +139,6 @@ html[data-theme="dark"] .app-shell {
   --shell-line: #2a2a30;
   --shell-sunken: #26262b;
   --shell-raised: #2e2e34;
-  --shell-menu: #161619;
   --shell-ink: #f0f0f2;
   --shell-ink-2: #c0c0c9;
   --shell-muted: #a1a1ac;

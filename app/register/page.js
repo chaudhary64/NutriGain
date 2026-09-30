@@ -9,59 +9,6 @@ import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(useGSAP);
 
-const AUTH_CSS = `
-/* ============ Meridian Auth (shared) ============ */
-.auth *{box-sizing:border-box}
-.auth{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--t3:#6b6b76;--ac:#4f46e5;--ach:#4338ca;--red:#dc2626;--paper:#fafaf9;--card:#fff;--sunken:#f1f1ee;--on-ac:#fff;--ac-soft:#eef2ff;--red-soft:#fef2f2;--red-soft-b:#fecaca;color:var(--t1);background:var(--paper);min-height:100vh;font-family:inherit}
-html[data-theme="dark"] .auth{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b96;--ac:#818cf8;--ach:#a5b4fc;--red:#f87171;--paper:#111113;--card:#1c1c1f;--sunken:#26262b;--on-ac:#111113;--ac-soft:#232347;--red-soft:#2b1b1b;--red-soft-b:#5c2b2b}
-.auth-split{display:flex;min-height:100vh}
-.auth-pane{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;position:relative;background:var(--paper)}
-.auth-card{width:100%;max-width:400px}
-.auth-brandrow{display:flex;align-items:center;gap:10px;margin-bottom:28px}
-.auth-mark{width:34px;height:34px;background:#4f46e5;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.auth-mark svg{width:18px;height:18px}
-.auth-name{font-size:15px;font-weight:800;letter-spacing:-.01em;color:var(--t1)}
-.auth-h1{font-size:28px;font-weight:800;letter-spacing:-.02em;line-height:1.15;margin:0 0 8px}
-.auth-sub{font-size:14px;font-weight:500;color:var(--t2);margin:0 0 26px}
-.auth-err{display:flex;align-items:flex-start;gap:10px;background:var(--red-soft);border:1px solid var(--red-soft-b);color:var(--red);padding:11px 14px;border-radius:10px;font-size:13px;font-weight:500;margin-bottom:18px}
-.auth-err svg{flex-shrink:0;margin-top:1px}
-.auth-form{display:flex;flex-direction:column;gap:16px}
-.auth-lbl{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:7px}
-.auth-in{width:100%;height:46px;padding:0 14px;background:var(--card);border:1px solid var(--line);border-radius:10px;font:inherit;font-size:14px;font-weight:500;color:var(--t1);outline:none;transition:border-color .15s ease,box-shadow .15s ease}
-.auth-in::placeholder{color:var(--t3);opacity:.7}
-.auth-in:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--ac-soft)}
-.auth-row{display:flex;align-items:center;justify-content:space-between}
-.auth-hint{font-size:12px;font-weight:500;color:var(--t3);margin-top:6px}
-.auth-btn{width:100%;height:46px;margin-top:6px;background:var(--ac);color:var(--on-ac);border:none;border-radius:10px;font:inherit;font-size:14px;font-weight:700;letter-spacing:.01em;cursor:pointer;transition:background .15s ease,transform .06s ease,opacity .15s ease}
-.auth-btn:hover{background:var(--ach)}
-.auth-btn:active{transform:translateY(1px)}
-.auth-btn:disabled{opacity:.55;cursor:wait;transform:none}
-.auth-btn:focus-visible,.auth-link:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
-.auth-foot{font-size:13px;font-weight:500;color:var(--t2);text-align:center;margin:24px 0 0}
-.auth-link{color:var(--ac);font-weight:700;text-decoration:none;border-radius:4px}
-.auth-link:hover{color:var(--ach);text-decoration:underline}
-.auth-toggle{position:absolute;top:18px;right:20px;display:flex;align-items:center;justify-content:center;width:38px;height:38px;border:none;border-radius:10px;background:transparent;color:var(--t2);cursor:pointer;transition:background .15s ease,color .15s ease}
-.auth-toggle:hover{background:var(--sunken);color:var(--t1)}
-.auth-toggle:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
-/* Brand pane — constant dark world in both themes */
-.auth-brand{display:none;position:relative;flex:0 0 44%;background:#111113;border-right:1px solid #26262b;overflow:hidden}
-.auth-bimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(35%) contrast(1.08) brightness(.55) saturate(.85)}
-.auth-bshade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(17,17,19,.62) 0%,rgba(17,17,19,.18) 42%,rgba(17,17,19,.88) 100%)}
-.auth-brand-in{position:relative;z-index:1;display:flex;flex-direction:column;justify-content:flex-end;min-height:100vh;padding:44px 48px}
-.auth-brand-top{position:absolute;top:44px;left:48px;display:flex;align-items:center;gap:10px}
-.auth-brand-top .auth-name{color:#f0f0f2}
-.auth-btitle{font-size:28px;font-weight:800;letter-spacing:-.02em;line-height:1.12;color:#f0f0f2;margin:0 0 14px;max-width:380px}
-.auth-bsign{display:flex;align-items:center;gap:12px}
-.auth-bsign i{width:28px;height:2px;background:#818cf8;border-radius:2px}
-.auth-bsign span{font-size:11px;font-weight:700;letter-spacing:.18em;color:#a1a1ac;text-transform:uppercase}
-@media(min-width:1024px){
-  .auth-brand{display:block}
-  .auth-split{flex-direction:row-reverse}
-  .auth-brandrow{display:none}
-}
-@media(prefers-reduced-motion:reduce){.auth *{transition:none!important;animation:none!important}}
-`;
-
 const LogoMark = () => (
   <div className="auth-mark" aria-hidden="true">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="#fff">
@@ -129,7 +76,6 @@ export default function RegisterPage() {
 
   return (
     <div className="auth" ref={root}>
-      <style>{AUTH_CSS}</style>
       <div className="auth-split">
         {/* Form pane — follows the user's theme */}
         <main className="auth-pane">

@@ -1,5 +1,7 @@
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
+/* Meridian design system — shared tokens + components for every surface. */
+import "./meridian.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import LenisProvider from "@/components/LenisProvider";

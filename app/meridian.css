@@ -1,0 +1,732 @@
+/* ==========================================================================
+   Meridian — the shared design system.
+
+   Every dashboard, admin, and auth surface used to inline its own copy of
+   these rules in a <style> tag. The tokens and the component classes that
+   were byte-identical across pages now live here, once.
+
+   Two conventions keep this safe:
+
+   1. Every rule is scoped by the surface's root class (.mrd, .gym, .st,
+      .adm, .auth, .onb), so nothing leaks between pages.
+   2. Page-specific CSS still lives in the page. Because a page's <style>
+      sits in <body> and this file is linked in <head>, page rules win any
+      specificity tie — a page can override a shared class without giving
+      up the shared defaults.
+
+   Deliberately NOT here: rules whose bodies diverge between pages, even
+   when their class names match (e.g. .m-field is a flex wrapper in the
+   meal page but a plain input/select elsewhere). Those stay page-local.
+
+   Imported once by app/layout.js. See app/globals.css for the shell
+   tokens (--shell-*), layout container, and popup elevation scale.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Tokens — one definition per theme for every Meridian surface. Values are
+   identical to the per-page copies this file replaces; pages that never
+   used a particular token simply never read it.
+   -------------------------------------------------------------------------- */
+
+:is(.mrd, .gym, .st, .adm, .auth, .onb, .hub, .splitmgr, .er, .nf) {
+  --line: #e7e7e3;
+  --t1: #1a1a1e;
+  --t2: #5f5f68;
+  --t3: #6b6b76;
+  --ac: #4f46e5;
+  --ach: #4338ca;
+  --red: #dc2626;
+  --paper: #fafaf9;
+  --card: #fff;
+  --sunken: #f1f1ee;
+  --track: #efefec;
+  --on-ac: #fff;
+  --ac-soft: #eef2ff;
+  --ac-soft-b: #c7d2fe;
+  --green: #047857;
+  --green-soft: #ecfdf5;
+  --red-soft: #fef2f2;
+  --red-soft-b: #fecaca;
+  --pro: #7c3aed;
+  --pro-soft: #f5f3ff;
+  --car: #b45309;
+  --car-soft: #fffbeb;
+}
+
+html[data-theme="dark"] :is(.mrd, .gym, .st, .adm, .auth, .onb, .hub, .splitmgr, .er, .nf) {
+  --line: #2a2a30;
+  --t1: #f0f0f2;
+  --t2: #a1a1ac;
+  --t3: #8b8b96;
+  --ac: #818cf8;
+  --ach: #a5b4fc;
+  --red: #f87171;
+  --paper: #111113;
+  --card: #1c1c1f;
+  --sunken: #26262b;
+  --track: #2e2e34;
+  --on-ac: #111113;
+  --ac-soft: #232347;
+  --ac-soft-b: #3730a3;
+  --green: #34d399;
+  --green-soft: #0d2a22;
+  --red-soft: #2b1b1b;
+  --red-soft-b: #5c2b2b;
+  --pro: #a78bfa;
+  --pro-soft: #2b2140;
+  --car: #fbbf24;
+  --car-soft: #3a2d10;
+}
+
+/* Scope-only extras: tokens exactly one surface reads. */
+.mrd {
+  --name: #3a3a42;
+}
+
+html[data-theme="dark"] .mrd {
+  --name: #d4d4da;
+}
+
+.gym {
+  --amber: #b45309;
+  --amber-soft: #fef3c7;
+}
+
+html[data-theme="dark"] .gym {
+  --amber: #fbbf24;
+  --amber-soft: #3a2d10;
+}
+
+/* --------------------------------------------------------------------------
+   Reset — the five surfaces that used to declare this themselves. Grouped so
+   the rule keeps the specificity of the single-scoped copies it replaces
+   (:is() takes the specificity of its most specific argument).
+   -------------------------------------------------------------------------- */
+
+:is(.adm, .auth, .st, .hub, .onb) * {
+  box-sizing: border-box;
+}
+
+/* --------------------------------------------------------------------------
+   Shared components — cards, type, chips, buttons, fields, entrance motion.
+   Grouped selectors keep each rule's specificity identical to the single
+   scoped copies they replace.
+   -------------------------------------------------------------------------- */
+
+/* Cards */
+:is(.mrd, .gym, .st) .m-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+:is(.mrd, .gym) .m-card-h {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+:is(.mrd, .gym) .m-card-h h3 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--t1);
+}
+
+/* Type + numbers */
+:is(.mrd, .gym, .st) .m-h1 {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+:is(.mrd, .gym, .st) .m-sub {
+  color: var(--t3);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+:is(.mrd, .gym, .st) .m-crumb {
+  font-size: 12px;
+  color: var(--t3);
+}
+
+:is(.mrd, .gym, .st) .m-num {
+  font-variant-numeric: tabular-nums;
+}
+
+:is(.mrd, .gym, .st) .m-lbl {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--t3);
+  margin-bottom: 5px;
+}
+
+/* Chips */
+:is(.mrd, .gym) .m-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+:is(.mrd, .gym) .m-chip-ac {
+  background: var(--ac-soft);
+  color: var(--ac);
+}
+
+/* Buttons */
+:is(.mrd, .gym) .m-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-weight: 600;
+  font-size: 13px;
+  border-radius: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: 0.15s;
+}
+
+:is(.mrd, .gym) .m-btn-primary {
+  background: var(--ac);
+  color: var(--on-ac);
+}
+
+:is(.mrd, .gym) .m-btn-primary:hover {
+  background: var(--ach);
+}
+
+:is(.mrd, .gym) .m-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* Fields — the plain input/select treatment. The meal page keeps its own
+   .m-field rule (it wraps an icon + input in a flex row and colours the
+   value differently); being in <body>, that copy still wins there. */
+:is(.mrd, .gym) .m-field {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--t1);
+  background: var(--card);
+  transition: 0.15s;
+}
+
+:is(.mrd, .gym) .m-field:focus {
+  outline: none;
+  border-color: var(--ac);
+  box-shadow: 0 0 0 3px #4f46e51f;
+}
+
+/* Icons */
+:is(.mrd, .gym, .st) .m-ic {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+
+/* Entrance motion — one keyframe set, three copies before. */
+@keyframes meridian-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+:is(.mrd, .gym, .st) .m-in {
+  animation: meridian-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+:is(.mrd, .gym, .st) .m-in:nth-child(2) {
+  animation-delay: 0.06s;
+}
+
+:is(.mrd, .gym, .st) .m-in:nth-child(3) {
+  animation-delay: 0.12s;
+}
+
+.st .m-in:nth-child(4) {
+  animation-delay: 0.18s;
+}
+
+/* Toasts — the host element carries the .mrd class itself, so these stay
+   unscoped; the surface root is not an ancestor of a fixed-position host. */
+.mrd-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: var(--pop-z-toast, 80);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: calc(100% - 48px);
+  max-width: 380px;
+}
+
+.mrd-toast-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--card) 88%, transparent);
+  -webkit-backdrop-filter: var(--pop-blur, blur(16px) saturate(1.4));
+  backdrop-filter: var(--pop-blur, blur(16px) saturate(1.4));
+  box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.5);
+}
+
+.mrd-toast-item.err {
+  background: color-mix(in srgb, var(--red-soft) 88%, transparent);
+  border-color: var(--red-soft-b);
+}
+
+.mrd-toast-item p {
+  font-size: 13px;
+  color: var(--t1);
+  flex: 1;
+  line-height: 1.45;
+}
+
+.mrd-toast-item.err p {
+  color: #991b1b;
+}
+
+.mrd-toast-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ac);
+  flex-shrink: 0;
+}
+
+.mrd-toast-item.err .mrd-toast-dot {
+  background: var(--red);
+}
+
+.mrd-toast-act {
+  flex-shrink: 0;
+  background: var(--ac);
+  color: var(--on-ac);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: 0;
+  border-radius: 7px;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+
+.mrd-toast-act:hover {
+  background: var(--ach);
+}
+
+.mrd-toast-x {
+  flex-shrink: 0;
+  position: relative;
+  color: var(--t3);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.mrd-toast-x::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+}
+
+.mrd-toast-x:hover {
+  color: var(--t1);
+  background: var(--sunken);
+}
+
+/* --------------------------------------------------------------------------
+   Auth — one stylesheet for both /login and /register. The two pages used to
+   carry their own copies, and they had already drifted apart.
+   -------------------------------------------------------------------------- */
+
+.auth {
+  color: var(--t1);
+  background: var(--paper);
+  min-height: 100vh;
+  font-family: inherit;
+}
+
+.auth-split {
+  display: flex;
+  min-height: 100vh;
+}
+
+.auth-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  position: relative;
+  background: var(--paper);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-brandrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.auth-mark {
+  width: 34px;
+  height: 34px;
+  background: #4f46e5;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.auth-mark svg {
+  width: 18px;
+  height: 18px;
+}
+
+.auth-name {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--t1);
+}
+
+.auth-h1 {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin: 0 0 8px;
+}
+
+.auth-sub {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--t2);
+  margin: 0 0 26px;
+}
+
+.auth-err {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--red-soft);
+  border: 1px solid var(--red-soft-b);
+  color: var(--red);
+  padding: 11px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 18px;
+}
+
+.auth-err svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-lbl {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--t3);
+  margin-bottom: 7px;
+}
+
+.auth-in {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--t1);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.auth-in::placeholder {
+  color: var(--t3);
+  opacity: 0.7;
+}
+
+.auth-in:focus {
+  border-color: var(--ac);
+  box-shadow: 0 0 0 3px var(--ac-soft);
+}
+
+.auth-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.auth-forgot {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ac);
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+.auth-forgot:hover {
+  color: var(--ach);
+}
+
+.auth-hint {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--t3);
+  margin-top: 6px;
+}
+
+.auth-btn {
+  width: 100%;
+  height: 46px;
+  margin-top: 6px;
+  background: var(--ac);
+  color: var(--on-ac);
+  border: none;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.06s ease, opacity 0.15s ease;
+}
+
+.auth-btn:hover {
+  background: var(--ach);
+}
+
+.auth-btn:active {
+  transform: translateY(1px);
+}
+
+.auth-btn:disabled {
+  opacity: 0.55;
+  cursor: wait;
+  transform: none;
+}
+
+.auth-btn:focus-visible,
+.auth-forgot:focus-visible,
+.auth-link:focus-visible {
+  outline: 2px solid var(--ac);
+  outline-offset: 2px;
+}
+
+.auth-foot {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--t2);
+  text-align: center;
+  margin: 24px 0 0;
+}
+
+.auth-link {
+  color: var(--ac);
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+.auth-link:hover {
+  color: var(--ach);
+  text-decoration: underline;
+}
+
+.auth-toggle {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--t2);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.auth-toggle:hover {
+  background: var(--sunken);
+  color: var(--t1);
+}
+
+.auth-toggle:focus-visible {
+  outline: 2px solid var(--ac);
+  outline-offset: 2px;
+}
+
+/* Brand pane — constant dark world in both themes */
+.auth-brand {
+  display: none;
+  position: relative;
+  flex: 0 0 44%;
+  background: #111113;
+  border-right: 1px solid #26262b;
+  overflow: hidden;
+}
+
+.auth-bimg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(35%) contrast(1.08) brightness(0.55) saturate(0.85);
+}
+
+.auth-bshade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(17, 17, 19, 0.62) 0%, rgba(17, 17, 19, 0.18) 42%, rgba(17, 17, 19, 0.88) 100%);
+}
+
+.auth-brand-in {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 100vh;
+  padding: 44px 48px;
+}
+
+.auth-brand-top {
+  position: absolute;
+  top: 44px;
+  left: 48px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.auth-brand-top .auth-name {
+  color: #f0f0f2;
+}
+
+.auth-btitle {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  color: #f0f0f2;
+  margin: 0 0 14px;
+  max-width: 380px;
+}
+
+.auth-bsign {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.auth-bsign i {
+  width: 28px;
+  height: 2px;
+  background: #818cf8;
+  border-radius: 2px;
+}
+
+.auth-bsign span {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: #a1a1ac;
+  text-transform: uppercase;
+}
+
+@media (min-width: 1024px) {
+  .auth-brand {
+    display: block;
+  }
+  .auth-split {
+    flex-direction: row-reverse;
+  }
+  .auth-brandrow {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.adm, .auth, .st, .hub, .onb, .home) * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Admin — the console and the per-user drill-down share one root class, so
+   the handful of rules they agree on live here; everything else stays local
+   to the page that needs it.
+   -------------------------------------------------------------------------- */
+
+.adm .adm-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.adm .adm-sub {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--t2);
+  margin-top: 4px;
+}
+

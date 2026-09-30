@@ -6,6 +6,7 @@ import { format, isToday } from "date-fns";
 import AppShell from "@/components/AppShell";
 import Loader from "@/components/Loader";
 import { FALLBACK_MACRO_GOALS } from "@/lib/goals";
+import { calculateEntryMacros } from "@/lib/daily-log";
 
 /* ------------------------------------------------------------------ */
 /* Meridian design system — restrained SaaS.                          */
@@ -13,21 +14,11 @@ import { FALLBACK_MACRO_GOALS } from "@/lib/goals";
 /* ------------------------------------------------------------------ */
 
 const MERIDIAN_CSS = `
-.mrd{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--t3:#6b6b76;--ac:#4f46e5;--ach:#4338ca;--red:#dc2626;--paper:#fafaf9;--card:#fff;--sunken:#f1f1ee;--track:#efefec;--name:#3a3a42;--on-ac:#fff;--ac-soft:#eef2ff;--ac-soft-b:#c7d2fe;--green:#047857;--green-soft:#ecfdf5;--red-soft:#fef2f2;--red-soft-b:#fecaca;--pro:#7c3aed;--pro-soft:#f5f3ff;--car:#b45309;--car-soft:#fffbeb;color:var(--t1)}
-html[data-theme="dark"] .mrd{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b96;--ac:#818cf8;--ach:#a5b4fc;--red:#f87171;--paper:#111113;--card:#1c1c1f;--sunken:#26262b;--track:#2e2e34;--name:#d4d4da;--on-ac:#111113;--ac-soft:#232347;--ac-soft-b:#3730a3;--green:#34d399;--green-soft:#0d2a22;--red-soft:#2b1b1b;--red-soft-b:#5c2b2b;--pro:#a78bfa;--pro-soft:#2b2140;--car:#fbbf24;--car-soft:#3a2d10}
+.mrd{color:var(--t1)}
 .mrd{background:var(--paper)}
-.mrd .m-card{background:var(--card);border:1px solid var(--line);border-radius:12px}
-.mrd .m-card-h{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
-.mrd .m-card-h h3{font-size:13px;font-weight:700;color:var(--t1)}
-.mrd .m-h1{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
-.mrd .m-sub{color:var(--t3);font-size:13px;margin-top:4px}
-.mrd .m-crumb{font-size:12px;color:var(--t3)}
-.mrd .m-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px}
-.mrd .m-chip-ac{background:var(--ac-soft);color:var(--ac)}
 .mrd .m-chip-p{background:var(--pro-soft);color:var(--pro)}
 .mrd .m-chip-c{background:var(--car-soft);color:var(--car)}
 .mrd .m-chip-f{background:var(--green-soft);color:var(--green)}
-.mrd .m-num{font-variant-numeric:tabular-nums}
 .mrd .m-iconbtn{color:var(--t3);padding:9px;border-radius:7px;cursor:pointer;transition:.15s}
 .mrd .m-iconbtn:hover{background:var(--sunken);color:var(--red)}
 /* meters */
@@ -44,7 +35,12 @@ html[data-theme="dark"] .mrd{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b
 .mrd .b-cal{background:var(--ac)}.mrd .b-pro{background:var(--pro)}.mrd .b-car{background:var(--car)}.mrd .b-fat{background:var(--green)}
 .mrd .m-bar i.m-overbar{background:var(--red)!important}
 .mrd .m-over{color:var(--red)!important}
-/* banner */
+/* live preview — the picked-but-unsaved entry */
+.mrd .m-prev{color:var(--ac)}
+.mrd .m-prev-delta{font-size:11px;font-weight:700;color:var(--ac);background:var(--ac-soft);border-radius:5px;padding:1px 5px;margin-left:4px}
+.mrd .m-bar .m-ghost{position:absolute;inset:0;opacity:.45;transition:transform .7s cubic-bezier(.22,1,.36,1),opacity .3s ease}
+.mrd .m-bar .m-ghost.m-ghost-off{opacity:0}
+.mrd .m-rem-prev{color:var(--ac)!important}
 /* entries */
 .mrd .m-entry{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--line);font-size:13px;flex-wrap:wrap}
 .mrd .m-entry:last-child{border-bottom:0}
@@ -63,10 +59,6 @@ html[data-theme="dark"] .mrd{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b
 .mrd .m-field:focus-within{border-color:var(--ac);box-shadow:0 0 0 3px #4f46e51f}
 .mrd select.m-field,.mrd input.m-field{width:100%;outline:none;color:var(--t1);font-weight:500;appearance:none}
 .mrd input.m-field::placeholder{color:var(--t3)}
-.mrd .m-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:600;font-size:13px;border-radius:8px;padding:10px 16px;cursor:pointer;border:1px solid transparent;transition:.15s}
-.mrd .m-btn-primary{background:var(--ac);color:var(--on-ac)}
-.mrd .m-btn-primary:hover{background:var(--ach)}
-.mrd .m-btn-primary:disabled{opacity:.6;cursor:wait}
 /* dropdown */
 .mrd .m-dd{position:absolute;z-index:var(--pop-z-dropdown, 70);width:100%;margin-top:6px;background:color-mix(in srgb, var(--card) 88%, transparent);-webkit-backdrop-filter:var(--pop-blur, blur(16px) saturate(1.4));backdrop-filter:var(--pop-blur, blur(16px) saturate(1.4));border:1px solid var(--line);border-radius:10px;box-shadow:0 16px 40px -12px rgba(0,0,0,.45);max-height:240px;overflow:auto}
 .mrd .m-dd-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--line)}
@@ -78,20 +70,6 @@ html[data-theme="dark"] .mrd{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b
 .mrd .m-rem-row{display:flex;justify-content:space-between;font-size:13px;padding:5px 0}
 .mrd .m-rem-row span{color:var(--t2)}
 /* toasts */
-.mrd-toast{position:fixed;bottom:24px;right:24px;z-index:var(--pop-z-toast, 80);display:flex;flex-direction:column;gap:10px;width:calc(100% - 48px);max-width:380px}
-.mrd-toast-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:color-mix(in srgb, var(--card) 88%, transparent);-webkit-backdrop-filter:var(--pop-blur, blur(16px) saturate(1.4));backdrop-filter:var(--pop-blur, blur(16px) saturate(1.4));box-shadow:0 16px 40px -12px rgba(0,0,0,.5)}
-.mrd-toast-item.err{background:color-mix(in srgb, var(--red-soft) 88%, transparent);border-color:var(--red-soft-b)}
-.mrd-toast-item p{font-size:13px;color:var(--t1);flex:1;line-height:1.45}
-.mrd-toast-item.err p{color:#991b1b}
-.mrd-toast-dot{width:8px;height:8px;border-radius:50%;background:var(--ac);flex-shrink:0}
-.mrd-toast-item.err .mrd-toast-dot{background:var(--red)}
-.mrd-toast-act{flex-shrink:0;background:var(--ac);color:var(--on-ac);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border:0;border-radius:7px;padding:7px 12px;cursor:pointer}
-.mrd-toast-act:hover{background:var(--ach)}
-.mrd-toast-x{flex-shrink:0;position:relative;color:var(--t3);background:none;border:0;cursor:pointer;padding:4px;border-radius:6px}
-.mrd-toast-x::after{content:"";position:absolute;inset:-6px}
-.mrd-toast-x:hover{color:var(--t1);background:var(--sunken)}
-/* svg icon default */
-.mrd .m-ic{width:16px;height:16px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 /* date pill (nav slot) */
 .mrd .m-datepill{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:7px 11px;font-size:12px;font-weight:600;color:var(--t2);background:var(--card)}
 .mrd .m-datepill .m-live{display:flex;align-items:center;gap:6px;color:var(--ac);text-transform:uppercase;letter-spacing:.05em;font-size:11px;font-weight:700}
@@ -110,17 +88,14 @@ html[data-theme="dark"] .mrd{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b
 `;
 
 /* Shared drawn icons — one stroke weight, no emoji. */
-const Icon = ({ d, className = "m-ic", viewBox = "0 0 24 24" }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox={viewBox} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+const Icon = ({ d, className = "m-ic" }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     {d}
   </svg>
 );
 
 const ICONS = {
   flame: <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />,
-  layers: <path d="M12 2 3 7l9 5 9-5-9-5zM3 12l9 5 9-5M3 17l9 5 9-5" />,
-  gauge: <><circle cx="12" cy="12" r="9" /><path d="M12 3a9 9 0 0 1 9 9h-9z" /></>,
-  heart: <path d="M12 21C7 17 3 13 3 8.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 9 2.5c0 4.5-4 8.5-9 12.5z" />,
   /* Food-source macro glyphs, drawn to match the system stroke style */
   drumstick: <><circle cx="9.5" cy="9.5" r="5.5" /><path d="M13.6 13.6 17.2 17.2" /><circle cx="19.4" cy="16.5" r="1.7" /><circle cx="16.5" cy="19.4" r="1.7" /></>,
   wheat: <><path d="M12 22v-7" /><path d="M8 15l4-3 4 3" /><path d="M8 11l4-3 4 3" /><path d="M8 7l4-3 4 3" /></>,
@@ -128,9 +103,7 @@ const ICONS = {
   search: <><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></>,
   plus: <path d="M12 5v14M5 12h14" />,
   trash: <path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14" />,
-  minus: <path d="M5 12h14" />,
   calendar: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 10h18" /></>,
-  clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" /></>,
   info: <><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v4h1" /></>,
   x: <path d="M18 6 6 18M6 6l12 12" />,
   trend: <><path d="M3 3v18h18" /><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" /></>,
@@ -157,6 +130,12 @@ const MACRO_CHIP = {
 const toTitleCase = (str) => {
   if (!str) return "";
   return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
+/* Trim float noise (0.1 + 0.2) and drop a trailing ".0" for display. */
+const fmtMacro = (value) => {
+  const rounded = Math.round((Number(value) || 0) * 10) / 10;
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
 };
 
 /* ------------------------------------------------------------------ */
@@ -196,10 +175,23 @@ function ToastHost({ toasts, onDismiss }) {
 /* MacroMeter — Meridian row + bar.                                   */
 /* ------------------------------------------------------------------ */
 
-function MacroMeter({ label, value, max, macroKey }) {
+function MacroMeter({ label, value, max, macroKey, preview = 0 }) {
   const meta = MACRO_META[macroKey];
-  const percentage = Math.min((value / max) * 100, 100);
+  const unit = macroKey === "calories" ? "" : " g";
+
+  // A picked-but-unsaved entry previews on top of what's committed: the solid
+  // segment is fact, the translucent ghost segment is intent.
+  const hasPreview = preview > 0;
+  const projected = value + preview;
+  const committedPct = Math.min((value / max) * 100, 100);
+  const projectedPct = Math.min((projected / max) * 100, 100);
+  const ghostPct = Math.max(projectedPct - committedPct, 0);
   const isOverLimit = value > max;
+  const willExceed = hasPreview && projected > max;
+
+  let valCls = "";
+  if (hasPreview) valCls = willExceed ? "m-over" : "m-prev";
+  else if (isOverLimit) valCls = "m-over";
 
   return (
     <div className="m-meter">
@@ -208,12 +200,20 @@ function MacroMeter({ label, value, max, macroKey }) {
           <Icon d={meta.icon} className={`m-ic ${meta.iconCls}`} />
           {label}
         </span>
-        <span className={`m-meter-val m-num ${isOverLimit ? "m-over" : ""}`}>
-          {value} <span className="m-meter-goal m-num">/ {max}{macroKey === "calories" ? "" : " g"}</span>
+        <span className={`m-meter-val m-num ${valCls}`}>
+          {fmtMacro(hasPreview ? projected : value)}
+          {hasPreview && <span className="m-prev-delta m-num">+{fmtMacro(preview)}</span>}
+          {" "}
+          <span className="m-meter-goal m-num">/ {max}{unit}</span>
         </span>
       </div>
       <div className="m-bar">
-        <i className={`${meta.barCls}${isOverLimit ? " m-overbar" : ""}`} style={{ transform: `scaleX(${percentage / 100})` }}></i>
+        <i className={`${meta.barCls}${isOverLimit ? " m-overbar" : ""}`} style={{ transform: `scaleX(${committedPct / 100})` }}></i>
+        <i
+          aria-hidden="true"
+          className={`m-ghost ${meta.barCls}${hasPreview ? "" : " m-ghost-off"}${willExceed ? " m-overbar" : ""}`}
+          style={{ transform: `translateX(${committedPct}%) scaleX(${ghostPct / 100})` }}
+        ></i>
       </div>
     </div>
   );
@@ -326,7 +326,6 @@ export default function MealTrackingPage() {
   const [toasts, setToasts] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const searchInputRef = useRef(null);
-  const typeSelectRef = useRef(null);
   const qtyInputRef = useRef(null);
   const submitRef = useRef(null);
   const [currentDate, setCurrentDate] = useState(
@@ -345,7 +344,6 @@ export default function MealTrackingPage() {
   };
   const dismissToast = (id) =>
     setToasts((prev) => prev.filter((t) => t.id !== id));
-
 
   // Refresh user data when component mounts or becomes visible
   useEffect(() => {
@@ -620,6 +618,20 @@ export default function MealTrackingPage() {
     meal.name.toLowerCase().includes(mealSearch.toLowerCase()),
   );
 
+  // Live preview of the picked-but-unsaved entry. It only tints the Daily
+  // targets rail — the log below stays committed until "Add entry" succeeds.
+  const previewQty = parseFloat(quantity);
+  const previewMeal = selectedMeal
+    ? meals.find((meal) => meal._id === selectedMeal)
+    : null;
+  const previewMacros =
+    previewMeal?.macros && previewQty > 0
+      ? calculateEntryMacros(previewMeal, previewQty)
+      : null;
+  const previewing = Boolean(previewMacros);
+  const previewOf = (key) => previewMacros?.[key] || 0;
+  const displayedCalories = totalMacros.calories + previewOf("calories");
+
   return (
     <>
       <style>{MERIDIAN_CSS}</style>
@@ -627,7 +639,8 @@ export default function MealTrackingPage() {
       <AppShell>
         <div className="mrd ng-container" style={{ padding: "32px var(--layout-gutter) 56px" }}>
           {/* Page header — title left, functional date picker right
-              (moved out of the nav; this replaces the old static pill) */}          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
+              (moved out of the nav; this replaces the old static pill) */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
             <div>
               <div className="m-h1">{selectedIsToday ? "Today" : format(selDate, "EEEE, MMMM d")}</div>
               <div className="m-sub">{daySummary}</div>
@@ -659,15 +672,15 @@ export default function MealTrackingPage() {
                   <span style={{ color: "var(--ac)" }}><Icon d={ICONS.trend} /></span>
                   Daily targets
                 </h3>
-                <span className="m-chip m-chip-ac m-num">
-                  {Math.min(Math.round((totalMacros.calories / goals.calories) * 100), 999)}%
+                <span className="m-chip m-chip-ac m-num" title={previewing ? "Includes the meal you're previewing" : undefined}>
+                  {Math.min(Math.round((displayedCalories / goals.calories) * 100), 999)}%
                 </span>
               </div>
 
-              <MacroMeter label="Calories" macroKey="calories" value={totalMacros.calories} max={goals.calories} />
-              <MacroMeter label="Protein" macroKey="protein" value={totalMacros.protein} max={goals.protein} />
-              <MacroMeter label="Carbs" macroKey="carbs" value={totalMacros.carbs} max={goals.carbs} />
-              <MacroMeter label="Fats" macroKey="fats" value={totalMacros.fats} max={goals.fats} />
+              <MacroMeter label="Calories" macroKey="calories" value={totalMacros.calories} max={goals.calories} preview={previewOf("calories")} />
+              <MacroMeter label="Protein" macroKey="protein" value={totalMacros.protein} max={goals.protein} preview={previewOf("protein")} />
+              <MacroMeter label="Carbs" macroKey="carbs" value={totalMacros.carbs} max={goals.carbs} preview={previewOf("carbs")} />
+              <MacroMeter label="Fats" macroKey="fats" value={totalMacros.fats} max={goals.fats} preview={previewOf("fats")} />
 
               {/* Remaining */}
               <div style={{ padding: "16px 18px", borderTop: "1px solid var(--line)" }}>
@@ -675,17 +688,18 @@ export default function MealTrackingPage() {
                   REMAINING
                 </div>
                 {[
-                  { label: "Protein", val: (goals.protein - totalMacros.protein).toFixed(1), unit: "g" },
-                  { label: "Carbs", val: (goals.carbs - totalMacros.carbs).toFixed(1), unit: "g" },
-                  { label: "Fats", val: (goals.fats - totalMacros.fats).toFixed(1), unit: "g" },
+                  { label: "Protein", key: "protein", unit: "g" },
+                  { label: "Carbs", key: "carbs", unit: "g" },
+                  { label: "Fats", key: "fats", unit: "g" },
                 ].map((item) => {
-                  const valNum = parseFloat(item.val);
-                  const isExceeded = valNum < 0;
+                  const remaining =
+                    goals[item.key] - (totalMacros[item.key] + previewOf(item.key));
+                  const isExceeded = remaining < 0;
                   return (
                     <div key={item.label} className="m-rem-row">
                       <span>{item.label}</span>
-                      <b className={`m-num ${isExceeded ? "m-over" : ""}`}>
-                        {isExceeded ? `+${Math.abs(valNum).toFixed(1)} ${item.unit} over` : `${item.val} ${item.unit}`}
+                      <b className={`m-num ${isExceeded ? "m-over" : previewing ? "m-rem-prev" : ""}`}>
+                        {isExceeded ? `+${Math.abs(remaining).toFixed(1)} ${item.unit} over` : `${remaining.toFixed(1)} ${item.unit}`}
                       </b>
                     </div>
                   );
@@ -708,7 +722,6 @@ export default function MealTrackingPage() {
                       <div style={{ position: "relative" }}>
                         <select
                           id="m-type"
-                          ref={typeSelectRef}
                           value={selectedMealType}
                           onChange={(e) => setSelectedMealType(e.target.value)}
                           onKeyDown={(e) => {

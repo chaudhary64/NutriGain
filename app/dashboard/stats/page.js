@@ -17,23 +17,9 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, R
 /* ------------------------------------------------------------------ */
 
 const STATS_CSS = `
-.st *{box-sizing:border-box}
-.st{--line:#e7e7e3;--t1:#1a1a1e;--t2:#5f5f68;--t3:#6b6b76;--ac:#4f46e5;--ach:#4338ca;--red:#dc2626;--paper:#fafaf9;--card:#fff;--sunken:#f1f1ee;--on-ac:#fff;--ac-soft:#eef2ff;--ac-soft-b:#c7d2fe;--red-soft:#fef2f2;--red-soft-b:#fecaca;--pro:#7c3aed;--car:#b45309;--green:#047857;color:var(--t1)}
-html[data-theme="dark"] .st{--line:#2a2a30;--t1:#f0f0f2;--t2:#a1a1ac;--t3:#8b8b96;--ac:#818cf8;--ach:#a5b4fc;--red:#f87171;--paper:#111113;--card:#1c1c1f;--sunken:#26262b;--on-ac:#111113;--ac-soft:#232347;--ac-soft-b:#3730a3;--red-soft:#2b1b1b;--red-soft-b:#5c2b2b;--pro:#a78bfa;--car:#fbbf24;--green:#34d399}
-.st .m-card{background:var(--card);border:1px solid var(--line);border-radius:12px}
+.st{color:var(--t1)}
 .st .m-card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 18px;border-bottom:1px solid var(--line)}
 .st .m-card-h h3{font-size:13px;font-weight:700;color:var(--t1);margin:0}
-.st .m-h1{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
-.st .m-sub{color:var(--t3);font-size:13px;margin-top:4px}
-.st .m-crumb{font-size:12px;color:var(--t3)}
-.st .m-num{font-variant-numeric:tabular-nums}
-.st .m-ic{width:16px;height:16px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
-.st .m-lbl{display:block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:5px}
-@keyframes st-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.st .m-in{animation:st-in .45s cubic-bezier(.22,1,.36,1) both}
-.st .m-in:nth-child(2){animation-delay:.06s}
-.st .m-in:nth-child(3){animation-delay:.12s}
-.st .m-in:nth-child(4){animation-delay:.18s}
 /* Range segmented control */
 .st-seg{display:inline-flex;gap:4px;background:var(--sunken);border:1px solid var(--line);border-radius:10px;padding:4px}
 .st-seg button{border:0;background:transparent;font:inherit;font-size:12.5px;font-weight:700;color:var(--t2);padding:6px 14px;border-radius:7px;cursor:pointer;transition:background .15s,color .15s}
@@ -84,7 +70,6 @@ html[data-theme="dark"] .st .st-week .st-wk-bar{background:var(--track,#2e2e34)}
    instead of shrinking. */
 .st-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
 @media(min-width:1000px){.st-layout{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(prefers-reduced-motion:reduce){.st *{animation:none!important;transition:none!important}}
 `;
 
 const Icon = ({ d, className = "m-ic", style }) => (
