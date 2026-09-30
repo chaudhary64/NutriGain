@@ -18,7 +18,6 @@ const ADM_CSS = `
 .adm-head{margin-bottom:28px}
 .adm-crumb{font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--t3);text-transform:uppercase;margin-bottom:6px}
 .adm-h1{font-size:26px;font-weight:800;letter-spacing:-.02em;color:var(--t1);margin:0}
-.adm-sub{font-size:13px;font-weight:500;color:var(--t2);margin-top:4px}
 /* tab switcher */
 .adm-tabs{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:32px}
 @media(min-width:640px){.adm-tabs{grid-template-columns:repeat(3,1fr)}}
@@ -44,7 +43,6 @@ const ADM_CSS = `
 .adm-icon:hover{background:var(--sunken);color:var(--t1)}
 .adm-icon.danger:hover{background:var(--red-soft);border-color:var(--red-soft-b);color:var(--red)}
 /* cards & forms */
-.adm-card{background:var(--card);border:1px solid var(--line);border-radius:14px}
 .adm-form{padding:22px}
 .adm-form h3{font-size:16px;font-weight:800;letter-spacing:-.01em;color:var(--t1);margin:0}
 .adm-lbl{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:7px}

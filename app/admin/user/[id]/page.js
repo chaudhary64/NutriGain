@@ -22,7 +22,6 @@ import {
 const ADM_CSS = `
 .adm{color:var(--t1);font-family:inherit}
 .adm-h1{font-size:24px;font-weight:800;letter-spacing:-.02em;color:var(--t1);margin:0}
-.adm-sub{font-size:13px;font-weight:500;color:var(--t2);margin-top:4px}
 .adm-ava{width:56px;height:56px;border-radius:14px;background:var(--ac-soft);color:var(--ac);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;flex-shrink:0}
 .adm-grid{display:grid;grid-template-columns:1fr;gap:16px}
 @media(min-width:768px){.adm-grid{grid-template-columns:repeat(2,1fr)}}
@@ -32,7 +31,6 @@ const ADM_CSS = `
 .adm-stat-lbl svg{color:var(--t2)}
 .adm-stat b{display:block;font-size:26px;font-weight:800;letter-spacing:-.02em;color:var(--t1);margin-top:10px;font-variant-numeric:tabular-nums}
 .adm-stat small{display:block;font-size:11px;font-weight:600;color:var(--t3);margin-top:4px}
-.adm-card{background:var(--card);border:1px solid var(--line);border-radius:14px}
 .adm-sec{padding:20px}
 .adm-sec h3{font-size:16px;font-weight:800;letter-spacing:-.01em;color:var(--t1);margin:0 0 16px}
 .adm-m4{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
