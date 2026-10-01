@@ -35,7 +35,12 @@ const SPLIT_CSS = `
 .splitmgr .sm-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
 @media (max-width:640px){.splitmgr .sm-grid{grid-template-columns:repeat(4,1fr)}}
 .splitmgr .sm-day{display:flex;flex-direction:column;gap:3px;padding:9px 8px;border:1px solid var(--line);border-radius:9px;background:var(--card)}
-.splitmgr .sm-day b{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
+/* Editorial variant — de-boxed chrome; gym page consumes this instead of
+   overriding .splitmgr from page CSS. */
+.splitmgr-ed .sm-card{background:transparent;border:0;border-radius:0;box-shadow:none}
+.splitmgr-ed .sm-card-h{border-bottom:0;padding:0 0 10px}
+.splitmgr-ed .sm-card-h h3{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--t3)}
+.splitmgr .sm-day b{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
 .splitmgr .sm-day span{font-size:11px;font-weight:600;color:var(--t1);line-height:1.3}
 .splitmgr .sm-day.rest span{color:var(--t3)}
 .splitmgr .sm-day.today{border-color:var(--ac-soft-b);background:var(--ac-soft)}
@@ -63,7 +68,10 @@ const SmIcon = ({ d }) => (
 const DUMBBELL = <><path d="M6.5 6.5v11" /><path d="M17.5 6.5v11" /><path d="M3 9v6" /><path d="M21 9v6" /><path d="M6.5 12h11" /></>;
 const LAYOUT = <><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18" /><path d="M9 21V9" /></>;
 
-export default function SplitManager({ initialDays, initialSource, onChanged, pushToast }) {
+// variant="editorial": borderless label-header chrome, for pages that embed
+// the manager inside an editorial layout (currently the gym page). Default
+// keeps the boxed card look.
+export default function SplitManager({ initialDays, initialSource, onChanged, pushToast, variant }) {
   const [days, setDays] = useState(initialDays ?? null); // null = still loading
   const [source, setSource] = useState(initialSource ?? null);
   const [templates, setTemplates] = useState([]);
@@ -176,7 +184,7 @@ export default function SplitManager({ initialDays, initialSource, onChanged, pu
   const viewDays = days || {};
 
   return (
-    <div className="splitmgr">
+    <div className={`splitmgr${variant === "editorial" ? " splitmgr-ed" : ""}`}>
       <style>{SPLIT_CSS}</style>
       <div className="sm-card">
         <div className="sm-card-h">

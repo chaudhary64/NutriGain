@@ -78,6 +78,18 @@ const MERIDIAN_CSS = `
 .gym .gy-hero-cell.is-hero .gy-hero-lbl{color:color-mix(in srgb, var(--on-ac, #fff) 72%, transparent)}
 .gym .gy-hero-num{font-size:26px;font-weight:800;line-height:1;letter-spacing:-.02em;color:var(--t1)}
 .gym .gy-hero-lbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-top:6px}
+/* Consistency band, de-boxed: the map IS the section. */
+.gym .gy-ed-cons{background:transparent;border:0;border-radius:0}
+.gym .gy-ed-cons .m-card-h{border-bottom:0;padding:0 0 10px}
+.gym .gy-ed-cons .m-card-h h3{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--t3)}
+.gym .gy-ed-cons > div:last-child{padding:0!important}
+/* Entry spec rows: warm-up / PR as tight label-value lines, pencil inline. */
+.gym .gy-ed-spec{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.gym .gy-ed-spec:last-child{border-bottom:0}
+.gym .gy-ed-spec > span:first-child{flex:0 0 96px}
+.gym .gy-ed-spec .m-lbl{margin:0}
+.gym .gy-ed-spec > div{flex:1;min-width:0}
+.gym .gy-ed-spec > p{margin:0}
 .gym .gy-legend{display:inline-flex;align-items:center;gap:5px}
 .gym .gy-legend i{width:9px;height:9px;border-radius:2px;display:inline-block}
 .gym .gy-cell-hd{display:flex;align-items:baseline;gap:10px;padding-top:14px;padding-bottom:6px}
@@ -109,6 +121,52 @@ const STALE_NOTICE_CSS = `
 .gym .st-notice{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px;border:1px solid var(--red-soft-b);background:var(--red-soft);border-radius:8px;font-size:12px;font-weight:600;color:var(--red);margin-bottom:12px}
 .gym .st-notice button{flex-shrink:0;background:var(--red);color:#fff;border:0;border-radius:6px;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer}
 .gym .st-notice button:hover{filter:brightness(1.08)}
+/* V7 Editorial skin — magazine-style header, numbered hairline entries.
+   Signature moves from design/gym-redesigns.html V7: big tracked title over a
+   hairline rule, exercises as numbered borderless entries separated by
+   rules (no nested boxes), muscle tag chips, slim stat rows in the rail. */
+.gym .gy-ed-head{margin-bottom:8px}
+.gym .gy-ed-title{font-size:44px;font-weight:800;letter-spacing:-.02em;line-height:1.05;color:var(--t1);font-family:var(--font-playfair),Georgia,"Times New Roman",serif}
+.gym .gy-ed-mastrow{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.gym .gy-ed-big{text-align:right}
+.gym .gy-ed-big b{display:block;font-family:var(--font-playfair),Georgia,serif;font-size:72px;font-weight:800;line-height:.85;letter-spacing:-.03em;color:var(--t1);font-variant-numeric:tabular-nums}
+.gym .gy-ed-big span{display:block;margin-top:8px;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3)}
+.gym .gy-ed-n{color:var(--ac);margin-right:8px;font-variant-numeric:tabular-nums}
+/* Newspaper column rule between sidebar and the log (desktop). */
+@media(min-width:1025px){.gym .gym-layout{column-gap:36px}.gym .gym-rail{border-right:1px solid var(--line);padding-right:32px}}
+/* Ledger inputs: underline-only, print-style. */
+.gym .gy-ed-entry .m-field{background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0}
+.gym .gy-ed-entry .m-field:focus{border-bottom-color:var(--ac);box-shadow:none;border-radius:0}
+.gym .gy-ed-entry .m-field:focus-visible{outline:2px solid var(--ac);outline-offset:2px;border-radius:4px}
+/* Serif headlines for entries + plan; italic serif pull-quote for PRs. */
+.gym .gy-ed-name{font-family:var(--font-playfair),Georgia,"Times New Roman",serif;font-weight:700;letter-spacing:-.01em}
+.gym .gy-ed-quote{font-family:var(--font-playfair),Georgia,serif;font-style:italic;font-size:26px;font-weight:700}
+.gym .gy-ed-rule{height:1px;background:var(--line);margin-top:18px}
+.gym .gy-ed-entry{background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:18px 0}
+.gym .gy-ed-entry .m-card-h{border-bottom:0;padding:0 0 2px}
+.gym .gy-ed-no{font-size:11px;font-weight:800;color:var(--t3);letter-spacing:.1em;font-variant-numeric:tabular-nums}
+.gym .gy-ed-name{font-size:20px;font-weight:800;letter-spacing:-.02em;color:var(--t1)}
+.gym .gy-ed-tag{margin-left:auto;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ac);background:var(--ac-soft);padding:4px 9px;border-radius:6px}
+.gym .gy-ed-stat{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--t2)}
+.gym .gy-ed-stat b{font-size:16px;font-weight:800;letter-spacing:-.02em;color:var(--t1);font-variant-numeric:tabular-nums}
+.gym .gy-ed-quote{font-size:15px;font-weight:800;letter-spacing:-.01em;color:var(--ac);margin:4px 0 0;font-variant-numeric:tabular-nums}
+.gym .gy-ed-week{margin-top:20px}
+.gym .gy-ed-week .gy-ed-stat:last-child{border-bottom:0}
+.gym .gy-ed-quote{font-size:24px;font-weight:800;letter-spacing:-.02em;color:var(--ac);margin:6px 0 0;font-variant-numeric:tabular-nums}
+.gym .gy-ed-wblock{background:transparent;border:0;border-radius:0;padding:0}
+.gym .gy-ed-wblock .m-card-h{border-bottom:0;padding:0 0 10px}
+.gym .gy-ed-wblock .m-card-h h3{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--t3)}
+.gym .gy-ed-wblock > div:last-child{padding:0!important}
+/* Plan card, de-boxed the same way: transparent body, label-style header. */
+.gym .gy-ed-plan{background:transparent;border:0;border-radius:0;padding:0}
+.gym .gy-ed-plan .m-card-h{border-bottom:0;padding:0 0 10px}
+.gym .gy-ed-plan .m-card-h h3{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--t3)}
+.gym .gy-ed-plan > div:last-child{padding:0!important;border-top:1px solid var(--line)}
+.gym .gy-ed-plan > div:last-child > div:first-child p:first-child{margin:0}
+/* Rest-day card gets the same hairline treatment instead of a floating box. */
+.gym .gy-ed-rest{background:transparent;border:0;border-radius:0;border-top:1px solid var(--line);padding:32px 0!important}
+/* Split manager, de-boxed to match the editorial sidebar. */
+.gym .gy-ed-wblock{padding-bottom:8px}
 `;
 
 const Icon = ({ d, className = "m-ic" }) => (
@@ -159,7 +217,11 @@ const RT_GRID = "var(--track)";
 
 const toTitleCase = (str) => {
   if (!str) return "";
-  return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+  return str
+    .toLowerCase()
+    .replace(/\b\w/g, (char) => char.toUpperCase())
+    .replace(/\(\s+/g, "(") // "Fly( Lower Chest )" → "Fly(Lower Chest)"
+    .replace(/\s+\)/g, ")");
 };
 
 const STATUS_META = {
@@ -276,6 +338,24 @@ export default function GymTrackingPage() {
     return () =>
       document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [user]);
+
+  // Logging fast-path: once exercises render, drop focus into the first empty
+  // weight field so the session starts with typing, not hunting.
+  useEffect(() => {
+    if (loading || exercises.length === 0) return;
+    const rows = document.querySelectorAll('[data-ex-sets] > div');
+    for (const row of rows) {
+      const input = row.querySelector('input');
+      if (input && input.value === "") {
+        // preventScroll keeps the editorial masthead and heatmap in view on load;
+        // focus is a convenience, not a reason to jump 650px down the page.
+        input.focus({ preventScroll: true });
+        break;
+      }
+    }
+    // Runs when the day's exercises first render; drafts don't change the target.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, currentDate]);
 
   const fetchData = async () => {
     // Only set loading on initial mount
@@ -590,11 +670,31 @@ export default function GymTrackingPage() {
     });
   };
 
+  // New rows prefill weight from the previous set — between rest timers the
+  // next attempt is usually the same load, so the athlete edits (or skips)
+  // instead of retyping. Focus follows the new row one frame later, once React
+  // has committed it; a state flag here would only re-run an effect to undo it.
   const addSetRow = (exerciseId) => {
     setSetDrafts((prev) => {
       const base = prev[exerciseId] !== undefined ? prev[exerciseId] : getSetsFor(exerciseId);
-      return { ...prev, [exerciseId]: [...base, { weight: "", reps: "" }] };
+      // The most recent set that actually carries a load wins: an Enter pressed
+      // on an untouched row must not blank out the rest of the column.
+      const last = [...base].reverse().find((r) => r.weight !== "" && r.weight != null) || base[base.length - 1];
+      return { ...prev, [exerciseId]: [...base, { weight: last?.weight || "", reps: "" }] };
     });
+    requestAnimationFrame(() => {
+      const rows = document.querySelectorAll(`[data-ex-sets="${exerciseId}"] > div`);
+      const input = rows[rows.length - 1]?.querySelector("input");
+      if (input) input.focus();
+    });
+  };
+
+  // Enter in a reps field commits the row (same as clicking Add set) instead
+  // of submitting nothing — the keyboard path through the logging loop.
+  const handleSetRowKeyDown = (e, exerciseId) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    addSetRow(exerciseId);
   };
 
   const removeSetRow = (exerciseId, index) => {
@@ -737,7 +837,7 @@ export default function GymTrackingPage() {
         <div className="gy-year">
           <div className="gy-year-hd">
             <span className="m-crumb">
-              {yearSessionsCount} session{yearSessionsCount === 1 ? "" : "s"} · {yearVolume.toLocaleString()} kg
+              {yearSessionsCount} session{yearSessionsCount === 1 ? "" : "s"} · {yearVolume.toLocaleString()} kg in {heatmapYear}
             </span>
           </div>
           <div className="gy-year-map">
@@ -845,6 +945,26 @@ export default function GymTrackingPage() {
     return { currentStreak, longestStreak, trainedDays: inYear.length };
   })();
 
+  // V7 sidebar — this week at a glance: sessions logged (Mon–Sun window
+  // containing today) against the split's non-rest days, plus volume.
+  const weekStats = (() => {
+    const now = new Date();
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+    monday.setHours(0, 0, 0, 0);
+    const inWeek = mergeSessionsIntoHeatmap(gymHistory, yearSessions).filter((day) => {
+      const d = parseISO(day.date);
+      return d >= monday && d <= now;
+    });
+    return {
+      sessions: inWeek.filter(
+        (day) => day.hasSession || day.gymStatus === "completed" || day.gymStatus === "partially-completed",
+      ).length,
+      planned: Object.values(splitDays).filter((g) => Array.isArray(g) && !g.includes("Rest Day")).length,
+      volume: inWeek.reduce((sum, day) => sum + (day.volume || 0), 0),
+    };
+  })();
+
   // Heatmap year switcher: current year plus prior years the account
   // existed for, capped at 3 — derived client-side from the signup month
   // so a fresh account never sees an empty year chip.
@@ -896,43 +1016,58 @@ export default function GymTrackingPage() {
       <ToastHost toasts={toasts} onDismiss={dismissToast} />
       <AppShell>
         <div className="gym ng-container" style={{ padding: "32px var(--layout-gutter) 56px" }}>
-          {/* Page header — title left, today's status right */}
-          <div style={{ marginBottom: 24, display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
-            <div>
-              <div className="m-h1">Gym</div>
-              <div className="m-sub">
-                {isToday
-                  ? `${format(new Date(), "EEEE, d MMMM")} — ${muscleGroups.join(" & ")} day.`
-                  : `${format(parseISO(currentDate), "EEEE, d MMMM")} — ${muscleGroups.join(" & ")} day.`}
+          {/* Page header — editorial masthead: big title, hairline rule,
+              status switcher riding the baseline under it (V7). */}
+          <div className="gy-ed-head">
+            <div className="m-crumb" style={{ marginBottom: 6 }}>
+              Gym · {isToday ? format(new Date(), "EEEE, d MMMM") : format(parseISO(currentDate), "EEEE, d MMMM")}
+            </div>
+            <div className="gy-ed-mastrow">
+              <div>
+                <div className="gy-ed-title">
+                  {muscleGroups.includes("Rest Day") ? "Rest & recovery" : `${muscleGroups.join(" & ")} day`}
+                </div>
+                <div className="m-sub" style={{ marginTop: 8 }}>
+                  {isToday
+                    ? "Track every set as you work — the log saves per exercise."
+                    : "Viewing a past session — edits update that day's log."}
+                </div>
+              </div>
+              <div className="gy-ed-big">
+                <b className="m-num">{heroStats.currentStreak}</b>
+                <span>
+                  {heroStats.currentStreak === 0 && heroStats.trainedDays > 0
+                    ? `Back to day one — ${heroStats.trainedDays} trained in ${heatmapYear}`
+                    : `Day streak · longest ${heroStats.longestStreak} · ${heroStats.trainedDays} trained`}
+                </span>
               </div>
             </div>
-
-            {/* Today's status — segmented switcher, Whisper-styled */}
-            <div className="status-wrap" style={{ flex: "0 0 auto" }}>
-              <span className="m-lbl" style={{ display: "block", marginBottom: 6 }}>Today&apos;s status</span>
-              <div className="status-seg" role="group" aria-label="Today's gym status">
-                {Object.entries(STATUS_META).map(([val, meta]) => (
-                  <button
-                    key={val}
-                    onClick={() => handleGymStatusUpdate(val)}
-                    aria-pressed={todayGymStatus === val}
-                  >
-                    {meta.label}
-                  </button>
-                ))}
+            <div className="gy-ed-rule"></div>
+            <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap", paddingTop: 12 }}>
+              <div className="status-wrap">
+                <span className="m-lbl" style={{ display: "block", marginBottom: 6 }}>Today&apos;s status</span>
+                <div className="status-seg" role="group" aria-label="Today's gym status">
+                  {Object.entries(STATUS_META).map(([val, meta]) => (
+                    <button
+                      key={val}
+                      onClick={() => handleGymStatusUpdate(val)}
+                      aria-pressed={todayGymStatus === val}
+                    >
+                      {meta.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Consistency band — full width so the year map always fits.
-              An 800px calendar can never live in a 360px sidebar without
-              either bleeding over the workbench or shrinking to a sliver.
-              Layout: streak-led hero strip (the number is the point), the
-              year map as evidence below, legend riding one baseline. */}
-          <div className="m-card m-in" style={{ marginBottom: 24 }}>
+          {/* Consistency band — de-boxed: label header, map as the section.
+              Full width because an 800px calendar can never live in a
+              360px sidebar. Streak stats live once, in the masthead. */}
+          <div className="m-card m-in gy-ed-cons" style={{ marginBottom: 24 }}>
             <div className="m-card-h">
               <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ color: "var(--ac)" }}><Icon d={ICONS.flame} /></span>
+                <span style={{ color: "var(--ac)" }}><Icon d={ICONS.flame} className="w-3.5 h-3.5" /></span>
                 Consistency
               </h3>
               <div className="gy-year-tabs" role="tablist" aria-label="Heatmap year">
@@ -952,23 +1087,6 @@ export default function GymTrackingPage() {
             </div>
             <div style={{ padding: 18 }}>
               {renderStaleNotice("consistency", "Couldn't refresh your training history — showing the last loaded data.")}
-              <div className="gy-hero">
-                <div className="gy-hero-cell is-hero">
-                  <b className="m-num gy-hero-num">{heroStats.currentStreak}</b>
-                  <span className="gy-hero-lbl">Day streak</span>
-                </div>
-                <div className="gy-hero-row">
-                  <div className="gy-hero-cell">
-                    <b className="m-num gy-hero-num">{heroStats.longestStreak}</b>
-                    <span className="gy-hero-lbl">Longest</span>
-                  </div>
-                  <div className="gy-hero-cell">
-                    <b className="m-num gy-hero-num">{heroStats.trainedDays}</b>
-                    <span className="gy-hero-lbl">Trained days</span>
-                  </div>
-                </div>
-              </div>
-
               <div className="gy-cell-hd">
                 <span className="m-crumb">Every logged set feeds this map.</span>
                 <span className="m-crumb" style={{ marginLeft: "auto" }}>Less</span>
@@ -984,10 +1102,10 @@ export default function GymTrackingPage() {
           </div>
 
           <div className="gym-layout" style={{ display: "grid", gridTemplateColumns: "min(360px,100%) minmax(0,1fr)", gap: 24, alignItems: "start" }}>
-            {/* Left column: weight tracker */}
+            {/* Left column: weight tracker + slim stat sidebar (V7 editorial) */}
             <div className="gym-rail">
-              {/* Weight tracker card */}
-              <div className="m-card m-in">
+              {/* Weight tracker card — de-boxed sidebar block (V7) */}
+              <div className="m-card m-in gy-ed-wblock">
                 <div className="m-card-h">
                   <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <span style={{ color: "var(--ac)" }}><Icon d={ICONS.scale} /></span>
@@ -1118,7 +1236,7 @@ export default function GymTrackingPage() {
                     </button>
                   </form>
 
-                  {/* Recent entries */}
+                  {/* Recent entries — slim stat rows (V7) */}
                   <div className="gym-entries" style={{ marginTop: 12 }}>
                     {[...weightEntries]
                       .sort((a, b) => new Date(b.date) - new Date(a.date))
@@ -1126,12 +1244,12 @@ export default function GymTrackingPage() {
                       .map((entry) => (
                         <div
                           key={entry._id}
-                          className="rt-cell"
-                          style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: "8px 10px" }}
+                          className="rt-cell gy-ed-stat"
+                          style={{ flexDirection: "row", alignItems: "baseline", justifyContent: "space-between", padding: "8px 2px", background: "none" }}
                         >
                           <span className="m-crumb m-num">{format(new Date(entry.date), "d MMM yyyy")}</span>
-                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                            <span className="m-num" style={{ fontSize: 13, fontWeight: 700 }}>{entry.weight} kg</span>
+                          <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+                            <b className="m-num" style={{ fontSize: 15, fontWeight: 800, letterSpacing: "-.02em" }}>{entry.weight}<span style={{ fontSize: 11, fontWeight: 600, color: "var(--t3)" }}> kg</span></b>
                             <button
                               onClick={() => handleDeleteWeight(entry._id, entry.weight)}
                               aria-label={`Delete weight entry from ${format(new Date(entry.date), "d MMM yyyy")}`}
@@ -1145,11 +1263,21 @@ export default function GymTrackingPage() {
                         </div>
                       ))}
                   </div>
+
+                  {/* This week — slim stat rows (V7 sidebar) */}
+                  <div className="gy-ed-week">
+                    <span className="m-lbl">This week</span>
+                    <div style={{ marginTop: 6 }}>
+                      <div className="gy-ed-stat"><span>Sessions</span><b>{weekStats.sessions} / {weekStats.planned}</b></div>
+                      <div className="gy-ed-stat"><span>Volume</span><b>{weekStats.volume.toLocaleString()} kg</b></div>
+                      <div className="gy-ed-stat"><span>Day streak</span><b>{heroStats.currentStreak}</b></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Right column: plan + exercises */}
+            {/* Right column: plan + exercises (editorial entries) */}
             <div style={{ display: "grid", gap: 20 }}>
               {/* Training split — shared manager (gallery + custom editor) */}
               <SplitManager
@@ -1157,10 +1285,11 @@ export default function GymTrackingPage() {
                 initialSource={splitSource}
                 onChanged={handleSplitChanged}
                 pushToast={pushToast}
+                variant="editorial"
               />
 
-              {/* Today's plan card */}
-              <div className="m-card m-in">
+              {/* Today's plan card — de-boxed editorial section (V7) */}
+              <div className="m-card m-in gy-ed-plan">
                 <div className="m-card-h">
                   <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <span style={{ color: "var(--ac)" }}><Icon d={ICONS.calendar} /></span>
@@ -1190,7 +1319,7 @@ export default function GymTrackingPage() {
                 <div style={{ padding: "20px 18px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
                   {renderStaleNotice("plan", "Couldn't load today's plan or exercises.")}
                   <div style={{ flex: 1, minWidth: 220 }}>
-                    <p style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-.02em", lineHeight: 1.2 }}>
+                    <p className="gy-ed-name" style={{ fontSize: 20, lineHeight: 1.25 }}>
                       {muscleGroups.join(" & ")}
                     </p>
                     <p className="m-sub" style={{ marginTop: 4 }}>
@@ -1224,7 +1353,7 @@ export default function GymTrackingPage() {
                   todaySchedule.muscleGroups.includes("Rest Day")
                 ) {
                   return (
-                    <div className="m-card m-in" style={{ padding: "40px 24px", textAlign: "center" }}>
+                    <div className="m-card m-in gy-ed-rest" style={{ padding: "40px 24px", textAlign: "center" }}>
                       <div
                         style={{
                           width: 48, height: 48, borderRadius: "50%", background: "var(--ac-soft)", color: "var(--ac)",
@@ -1256,7 +1385,7 @@ export default function GymTrackingPage() {
                 const seenExerciseIds = new Set();
 
                 // Group exercises by muscle group
-                return expandMuscleGroups(todaySchedule.muscleGroups).map((group) => {
+                return expandMuscleGroups(todaySchedule.muscleGroups).map((group, sectionIdx) => {
                   const memberGroups = COMPOSITE_GROUPS[group] || [group];
                   const groupExercises = exercises.filter(
                     (ex) => memberGroups.includes(ex.muscleGroup) && !seenExerciseIds.has(ex._id),
@@ -1267,25 +1396,29 @@ export default function GymTrackingPage() {
 
                   return (
                     <div key={group} className="m-in">
-                      {/* Muscle group divider */}
-                      <div style={{ display: "flex", alignItems: "center", gap: 14, margin: "4px 0 2px" }}>
-                        <div className="m-sep" style={{ flex: 1 }}></div>
-                        <span className="m-lbl" style={{ margin: 0, color: "var(--t2)" }}>{group}</span>
+                      {/* Muscle group divider — numbered section header (V7) */}
+                      <div style={{ display: "flex", alignItems: "baseline", gap: 14, margin: "26px 0 2px" }}>
+                        <span className="m-lbl" style={{ margin: 0, color: "var(--ac)", fontSize: 12 }}>
+                          {group}
+                        </span>
                         <div className="m-sep" style={{ flex: 1 }}></div>
                       </div>
 
-                      <div style={{ display: "grid", gap: 14 }}>
-                        {groupExercises.map((ex) => (
-                          <div key={ex._id} className="m-card" style={{ overflow: "hidden" }}>
-                            <div className="m-card-h">
-                              <div>
-                                <h3 style={{ fontSize: 14, display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ display: "grid", gap: 2 }}>
+                        {groupExercises.map((ex, exIdx) => (
+                          <div key={ex._id} className="m-card gy-ed-entry" style={{ overflow: "hidden" }}>                              <div className="m-card-h">
+                              <div style={{ minWidth: 0 }}>
+                                <div className="gy-ed-no">{String(exIdx + 1).padStart(2, "0")}</div>
+                                <h3 className="gy-ed-name" style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                                   {toTitleCase(ex.name)}
                                   {savedExercises[ex._id] && (
                                     <span className="m-chip" style={{ background: "var(--green-soft)", color: "var(--green)" }}>
                                       <Icon d={ICONS.check} className="w-3 h-3" />
                                       Saved
                                     </span>
+                                  )}
+                                  {exIdx === 0 && (
+                                    <span className="gy-ed-tag">{toTitleCase(group)}</span>
                                   )}
                                   {newPRs[ex._id] && (
                                     <span className="m-chip" style={{ background: "var(--amber-soft)", color: "var(--amber)" }}>
@@ -1318,20 +1451,20 @@ export default function GymTrackingPage() {
 
                             <div style={{ padding: 16 }}>
                               {/* Warm-up + PR summary row — pencil affordances open inline editors */}
-                              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 12 }}>
-                                <div style={{ background: "var(--sunken)", borderRadius: 8, padding: "10px 12px" }}>
-                                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                              <div style={{ marginBottom: 12 }}>
+                                <div className="gy-ed-spec">
+                                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
                                     <span className="m-lbl">Warm up</span>
                                     <button
                                       onClick={() => openWarmUpEdit(ex)}
-                                      aria-label={`Edit warm-up for ${ex.name}`}
+                                      aria-label={`Edit warm-up for ${toTitleCase(ex.name)}`}
                                       style={{ color: "var(--t3)", background: "none", border: 0, cursor: "pointer", padding: 4, borderRadius: 6, flexShrink: 0 }}
                                       onMouseEnter={(e) => (e.currentTarget.style.color = "var(--ac)")}
                                       onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t3)")}
                                     >
                                       <Icon d={ICONS.pencil} className="w-3.5 h-3.5" />
                                     </button>
-                                  </div>
+                                  </span>
                                   {wuExerciseId === ex._id ? (
                                     <div style={{ display: "grid", gap: 6, marginTop: 6 }}>
                                       {wuDraft.map((set, idx) => (
@@ -1401,19 +1534,19 @@ export default function GymTrackingPage() {
                                     </p>
                                   )}
                                 </div>
-                                <div style={{ background: "var(--sunken)", borderRadius: 8, padding: "10px 12px" }}>
-                                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                                <div className="gy-ed-spec">
+                                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
                                     <span className="m-lbl" style={{ color: "var(--amber)" }}>Personal best</span>
                                     <button
                                       onClick={() => openPrEdit(ex)}
-                                      aria-label={`Edit personal best for ${ex.name}`}
+                                      aria-label={`Edit personal best for ${toTitleCase(ex.name)}`}
                                       style={{ color: "var(--t3)", background: "none", border: 0, cursor: "pointer", padding: 4, borderRadius: 6, flexShrink: 0 }}
                                       onMouseEnter={(e) => (e.currentTarget.style.color = "var(--ac)")}
                                       onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t3)")}
                                     >
                                       <Icon d={ICONS.pencil} className="w-3.5 h-3.5" />
                                     </button>
-                                  </div>
+                                  </span>
                                   {prEditExerciseId === ex._id ? (
                                     <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
                                       <input
@@ -1456,7 +1589,10 @@ export default function GymTrackingPage() {
                                       </button>
                                     </div>
                                   ) : (
-                                    <p className="m-num" style={{ fontSize: 13, fontWeight: 700, color: "var(--t1)", marginTop: 3 }}>
+                                    <p
+                                      className={ex.prWeight != null || ex.lastPR ? "gy-ed-quote" : "m-sub"}
+                                      style={{ marginTop: 6 }}
+                                    >
                                       {ex.prWeight != null ? `${ex.prWeight} kg` : ex.lastPR ? ex.lastPR : "None"}
                                       {ex.lastPRDate && (
                                         <span className="m-crumb" style={{ fontWeight: 500, marginLeft: 8 }}>
@@ -1471,7 +1607,7 @@ export default function GymTrackingPage() {
                               {/* Working sets — borderless editable rows */}
                               <div>
                                 <span className="m-lbl" style={{ marginBottom: 6 }}>Working sets</span>
-                                <div style={{ display: "grid", gap: 8 }}>
+                                <div style={{ display: "grid", gap: 8 }} data-ex-sets={ex._id}>
                                   {getSetsFor(ex._id).map((set, idx) => (
                                     <div key={idx} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                       <span className="m-crumb m-num" style={{ width: 22, textAlign: "right", flexShrink: 0 }}>{idx + 1}</span>
@@ -1494,6 +1630,7 @@ export default function GymTrackingPage() {
                                         aria-label={`Set ${idx + 1} repetitions`}
                                         value={set.reps}
                                         onChange={(e) => updateSet(ex._id, idx, "reps", e.target.value)}
+                                        onKeyDown={(e) => handleSetRowKeyDown(e, ex._id)}
                                         className="m-field m-num"
                                         style={{ width: 76, padding: "7px 10px" }}
                                       />
