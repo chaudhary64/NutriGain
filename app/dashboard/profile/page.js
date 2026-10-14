@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { useTheme } from "@/context/ThemeContext";
 import AppShell from "@/components/AppShell";
 import SplitManager from "@/components/SplitManager";
 import { suggestMacroGoals, ACTIVITY_LEVELS, GOALS } from "@/lib/tdee";
@@ -19,12 +19,6 @@ const MERIDIAN_CSS = `
 .mrd .m-row:last-child{border-bottom:0}
 .mrd .m-row:hover{background:var(--paper)}
 .mrd .m-rowicon{width:34px;height:34px;border-radius:9px;background:var(--sunken);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--t2);flex-shrink:0}
-/* Theme segmented control */
-.prf-seg{display:inline-flex;gap:4px;background:var(--sunken);border:1px solid var(--line);border-radius:10px;padding:4px}
-.prf-seg button{border:0;background:transparent;font:inherit;font-size:12.5px;font-weight:700;color:var(--t2);padding:7px 16px;border-radius:7px;cursor:pointer;transition:background .15s,color .15s}
-.prf-seg button:hover{color:var(--t1)}
-.prf-seg button.on{background:var(--card);color:var(--ac);box-shadow:0 1px 3px rgba(0,0,0,.1)}
-.prf-seg button:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
 /* TDEE suggestion strip (mirrors the onboarding result) */
 .prf-suggest{display:flex;flex-wrap:wrap;align-items:center;gap:10px 26px;background:var(--sunken);border:1px solid var(--line);border-radius:12px;padding:14px 18px}
 .prf-stat b{display:block;font-size:20px;font-weight:800;letter-spacing:-.02em;color:var(--t1);font-variant-numeric:tabular-nums}
@@ -43,23 +37,13 @@ const Icon = ({ d, className = "m-ic", style }) => (
 
 const ICONS = {
   target: <><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1" /></>,
-  user: <><circle cx="12" cy="8" r="3.75" /><path d="M4.5 20.1a7.5 7.5 0 0 1 15 0" /></>,
-  mail: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></>,
-  logout: <path d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />,
   check: <path d="M5 13l4 4L19 7" />,
   pencil: <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />,
   x: <path d="M18 6 6 18M6 6l12 12" />,
-  lock: <><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></>,
-  eye: <><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></>,
-  eyeOff: <><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><path d="m2 2 20 20" /></>,
-  moon: <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />,
-  scale: <><rect x="3" y="3" width="18" height="18" rx="3" /><path d="M8 8a4 4 0 0 1 8 0" /><path d="M12 8v.01" /></>,
+  /* Canonical balance scale (Lucide) — "scale" had two spellings across the
+     app; this is now the one the gym page and stats page share. */
+  scale: <><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" /><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" /><path d="M7 21h10" /><path d="M12 3v18" /><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2" /></>,
   activity: <path d="M22 12h-4l-3 9L9 3l-3 9H2" />,
-  /* Food-source macro glyphs (shared with the meal page meters) */
-  flame: <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />,
-  drumstick: <><circle cx="9.5" cy="9.5" r="5.5" /><path d="M13.6 13.6 17.2 17.2" /><circle cx="19.4" cy="16.5" r="1.7" /><circle cx="16.5" cy="19.4" r="1.7" /></>,
-  wheat: <><path d="M12 22v-7" /><path d="M8 15l4-3 4 3" /><path d="M8 11l4-3 4 3" /><path d="M8 7l4-3 4 3" /></>,
-  avocado: <><path d="M12 3c3.2 3.2 6.5 7 6.5 11.2a6.5 6.5 0 0 1-13 0C5.5 10 8.8 6.2 12 3z" /><circle cx="12" cy="14.2" r="2.8" /></>,
 };
 
 let toastSeq = 0;
@@ -85,12 +69,7 @@ const GOAL_LABEL = Object.fromEntries(GOALS.map((g) => [g.value, g.label]));
 const SEX_LABEL = { male: "Male", female: "Female", other: "Other / prefer not to say" };
 
 export default function ProfilePage() {
-  const { user, logout, checkAuth } = useAuth();
-  const { theme, setTheme } = useTheme();
-  const [goalForm, setGoalForm] = useState(null);
-  const [editingGoals, setEditingGoals] = useState(false);
-  const [savingGoals, setSavingGoals] = useState(false);
-  const [goalsMessage, setGoalsMessage] = useState("");
+  const { user, checkAuth } = useAuth();
   const [toasts, setToasts] = useState([]);
 
   // Body profile & targets (saved through POST /api/onboarding, which
@@ -103,12 +82,6 @@ export default function ProfilePage() {
   const [weightTick, setWeightTick] = useState(0);
   const [weightError, setWeightError] = useState("");
 
-  // Password change (revokes sessions on other devices via tokenVersion).
-  const [pwForm, setPwForm] = useState({ current: "", next: "", confirm: "" });
-  const [pwShow, setPwShow] = useState({ current: false, next: false, confirm: false });
-  const [savingPw, setSavingPw] = useState(false);
-  const [pwMessage, setPwMessage] = useState("");
-
   const pushToast = (message, tone = "success", ttl = 4000) => {
     const id = ++toastSeq;
     setToasts((prev) => [...prev, { id, message, tone }]);
@@ -117,48 +90,6 @@ export default function ProfilePage() {
     }
   };
   const dismissToast = (id) => setToasts((prev) => prev.filter((t) => t.id !== id));
-
-  // Live requirement checks for the new-password fields.
-  const pwChecks = [
-    { ok: pwForm.next.length >= 6, label: "At least 6 characters" },
-    { ok: pwForm.next.length > 0 && pwForm.next === pwForm.confirm, label: "Both new fields match" },
-  ];
-
-  const handlePasswordChange = async (e) => {
-    e.preventDefault();
-    setPwMessage("");
-    if (pwForm.next !== pwForm.confirm) {
-      setPwMessage("New passwords don't match.");
-      return;
-    }
-    if (pwForm.next.length < 6 || pwForm.next.length > 128) {
-      setPwMessage("New password must be between 6 and 128 characters.");
-      return;
-    }
-    if (pwForm.next === pwForm.current) {
-      setPwMessage("New password must be different from your current password.");
-      return;
-    }
-    setSavingPw(true);
-    try {
-      const res = await fetch("/api/auth/change-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ currentPassword: pwForm.current, newPassword: pwForm.next }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setPwMessage(data.error || "Couldn't change your password. Try again.");
-        return;
-      }
-      setPwForm({ current: "", next: "", confirm: "" });
-      pushToast("Password changed. Other devices have been signed out.");
-    } catch {
-      setPwMessage("Couldn't change your password. Check your connection and retry.");
-    } finally {
-      setSavingPw(false);
-    }
-  };
 
   // Weight entries + target weight (prefills the profile form and the
   // "current weight" display; refreshed after a profile save).
@@ -273,52 +204,6 @@ export default function ProfilePage() {
     }
   };
 
-  /* ---------------------------- Daily goals ----------------------------- */
-
-  const handleGoalChange = (field, value) => {
-    setGoalForm((prev) => ({ ...(prev || goals), [field]: value }));
-  };
-
-  const handleSaveGoals = async () => {
-    setSavingGoals(true);
-    setGoalsMessage("");
-    try {
-      const current = goalForm || goals;
-      const res = await fetch("/api/auth/me", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ macroGoals: current }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        await checkAuth();
-        setGoalForm(null);
-        setEditingGoals(false);
-        pushToast("Daily goals saved — your meal dashboard meters are updated.");
-      } else {
-        setGoalsMessage(data.error || "Failed to save goals");
-      }
-    } catch (error) {
-      console.error("Error saving macro goals:", error);
-      setGoalsMessage("Network error. Please try again.");
-    } finally {
-      setSavingGoals(false);
-    }
-  };
-
-  const startEditGoals = () => {
-    setGoalForm(goals);
-    setGoalsMessage("");
-    setEditingGoals(true);
-    requestAnimationFrame(() => document.getElementById("goal-calories")?.focus());
-  };
-
-  const cancelEditGoals = () => {
-    setGoalForm(null);
-    setGoalsMessage("");
-    setEditingGoals(false);
-  };
-
   const initials = user.name
     ? user.name
         .split(" ")
@@ -327,13 +212,6 @@ export default function ProfilePage() {
         .toUpperCase()
         .slice(0, 2)
     : "NG";
-
-  const goalFields = [
-    { field: "calories", label: "Calories", unit: "kcal", icon: "flame", dot: "var(--ac)" },
-    { field: "protein", label: "Protein", unit: "g", icon: "drumstick", dot: "var(--pro)" },
-    { field: "carbs", label: "Carbs", unit: "g", icon: "wheat", dot: "var(--car)" },
-    { field: "fats", label: "Fats", unit: "g", icon: "avocado", dot: "var(--green)" },
-  ];
 
   const profileTiles = [
     { label: "Sex", value: profile?.sex ? SEX_LABEL[profile.sex] : null },
@@ -349,15 +227,16 @@ export default function ProfilePage() {
       <ToastHost toasts={toasts} onDismiss={dismissToast} />
       <AppShell>
         <div className="mrd ng-container" style={{ padding: "32px var(--layout-gutter) 56px" }}>
-          {/* Page header */}
-          <div style={{ marginBottom: 24 }}>
+          {/* Page header — SaaS title block, matching meal/gym */}
+          <div className="m-in" style={{ marginBottom: 24 }}>
+            <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--ac)", margin: "0 0 8px" }}>Account · Profile</p>
             <div className="m-h1">Profile</div>
-            <div className="m-sub">Body profile, daily targets, appearance, and session.</div>
+            <div className="m-sub">Identity, body profile, targets, and your training split.</div>
           </div>
 
           <div className="prf-layout" style={{ display: "grid", gridTemplateColumns: "min(320px,100%) 1fr", gap: 24, alignItems: "start" }}>
             {/* Identity card */}
-            <div className="m-card m-in" style={{ position: "sticky", top: 88 }}>
+            <div className="m-card m-in" style={{ position: "sticky", top: 24 }}>
               <div style={{ padding: "28px 22px", display: "flex", flexDirection: "column", alignItems: "center", gap: 14, borderBottom: "1px solid var(--line)" }}>
                 <div
                   style={{
@@ -380,95 +259,24 @@ export default function ProfilePage() {
                 </span>
               </div>
               <div style={{ padding: "14px 18px" }}>
-                <div className="m-crumb" style={{ display: "flex", justifyContent: "space-between" }}>
+                <div className="m-crumb" style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
                   <span>Meal dashboard meters</span>
                   <span className="m-num" style={{ fontWeight: 600, color: "var(--t2)" }}>
-                    {(goalForm || goals).calories.toLocaleString()} kcal goal
+                    {goals.calories.toLocaleString()} kcal goal
                   </span>
                 </div>
+                <Link
+                  href="/dashboard/settings"
+                  className="m-crumb"
+                  style={{ display: "inline-block", marginTop: 8, color: "var(--ac)", fontWeight: 700 }}
+                >
+                  Change goals in Settings →
+                </Link>
               </div>
             </div>
 
             {/* Settings stack */}
             <div style={{ display: "grid", gap: 20 }}>
-              {/* Daily goals */}
-              <div className="m-card m-in">
-                <div className="m-card-h">
-                  <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <span style={{ color: "var(--ac)" }}><Icon d={ICONS.target} /></span>
-                    Daily goals
-                  </h3>
-                  {editingGoals ? (
-                    <span className="m-chip m-chip-ac">EDITING</span>
-                  ) : (
-                    <button
-                      onClick={startEditGoals}
-                      className="m-btn"
-                      style={{ padding: "6px 12px", fontSize: 12, border: "1px solid var(--line)", color: "var(--t1)", background: "var(--card)", gap: 6 }}
-                      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--sunken)")}
-                      onMouseLeave={(e) => (e.currentTarget.style.background = "var(--card)")}
-                    >
-                      <Icon d={ICONS.pencil} className="w-3.5 h-3.5" />
-                      Edit
-                    </button>
-                  )}
-                </div>
-                <div style={{ padding: 18 }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                    {goalFields.map((item) => (
-                      <div key={item.field} className="m-field" style={{ display: "block", padding: "12px 14px", background: editingGoals ? "var(--card)" : "var(--sunken)" }}>
-                        <label htmlFor={`goal-${item.field}`} className="m-lbl" style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                          <Icon d={ICONS[item.icon]} className="m-ic" style={{ color: item.dot }} />
-                          {item.label} ({item.unit})
-                        </label>
-                        {editingGoals ? (
-                          <input
-                            id={`goal-${item.field}`}
-                            type="number"
-                            min="1"
-                            max="10000"
-                            step="1"
-                            value={(goalForm || goals)[item.field] ?? ""}
-                            onChange={(e) => handleGoalChange(item.field, e.target.value)}
-                            className="m-num"
-                            style={{ width: "100%", border: 0, outline: "none", fontSize: 20, fontWeight: 700, color: "var(--t1)", background: "transparent", padding: 0 }}
-                          />
-                        ) : (
-                          <p className="m-num" style={{ fontSize: 20, fontWeight: 700, color: "var(--t1)" }} aria-live="off">
-                            {goals[item.field]}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  {goalsMessage && (
-                    <p style={{ marginTop: 12, fontSize: 13, fontWeight: 600, color: "var(--red)" }}>{goalsMessage}</p>
-                  )}
-
-                  <div style={{ marginTop: 16, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-                    <p className="m-crumb">
-                      {editingGoals ? "Unsaved changes" : "All changes sync to your account"}
-                    </p>
-                    {editingGoals && (
-                      <div style={{ display: "flex", gap: 8 }}>
-                        <button
-                          onClick={cancelEditGoals}
-                          disabled={savingGoals}
-                          className="m-btn"
-                          style={{ border: "1px solid var(--line)", color: "var(--t2)", background: "var(--card)" }}
-                        >
-                          Cancel
-                        </button>
-                        <button onClick={handleSaveGoals} disabled={savingGoals} className="m-btn m-btn-primary">
-                          <Icon d={ICONS.check} className="w-4 h-4" />
-                          {savingGoals ? "Saving…" : "Save goals"}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
 
               {/* Training split — shared manager (template gallery + custom editor) */}
               <SplitManager pushToast={pushToast} />
@@ -652,150 +460,6 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* Appearance */}
-              <div className="m-card m-in">
-                <div className="m-card-h">
-                  <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <span style={{ color: "var(--ac)" }}><Icon d={ICONS.moon} /></span>
-                    Appearance
-                  </h3>
-                </div>
-                <div style={{ padding: "16px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-                  <div>
-                    <p style={{ fontSize: 13, fontWeight: 600 }}>Theme</p>
-                    <p className="m-crumb" style={{ marginTop: 2 }}>Saved to your account and this device.</p>
-                  </div>
-                  <div className="prf-seg" role="radiogroup" aria-label="Color theme">
-                    <button type="button" role="radio" aria-checked={theme === "light"} className={theme === "light" ? "on" : ""} onClick={() => setTheme("light")}>
-                      Light
-                    </button>
-                    <button type="button" role="radio" aria-checked={theme === "dark"} className={theme === "dark" ? "on" : ""} onClick={() => setTheme("dark")}>
-                      Dark
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Account info */}
-              <div className="m-card m-in">
-                <div className="m-card-h">
-                  <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <span style={{ color: "var(--ac)" }}><Icon d={ICONS.user} /></span>
-                    Account info
-                  </h3>
-                </div>
-                <div className="m-row">
-                  <span className="m-rowicon"><Icon d={ICONS.user} /></span>
-                  <div style={{ flex: 1 }}>
-                    <span className="m-lbl" style={{ marginBottom: 2 }}>Name</span>
-                    <p style={{ fontWeight: 600 }}>{user.name}</p>
-                  </div>
-                </div>
-                <div className="m-row">
-                  <span className="m-rowicon"><Icon d={ICONS.mail} /></span>
-                  <div style={{ flex: 1 }}>
-                    <span className="m-lbl" style={{ marginBottom: 2 }}>Email</span>
-                    <p style={{ fontWeight: 600 }}>{user.email}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Password */}
-              <div className="m-card m-in">
-                <div className="m-card-h">
-                  <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <span style={{ color: "var(--ac)" }}><Icon d={ICONS.lock} /></span>
-                    Password
-                  </h3>
-                  <span className="m-crumb">changing it signs out other devices</span>
-                </div>
-                <form onSubmit={handlePasswordChange} style={{ padding: 16, display: "grid", gap: 10 }}>
-                  {[
-                    { key: "current", label: "Current password", autoComplete: "current-password" },
-                    { key: "next", label: "New password", autoComplete: "new-password" },
-                    { key: "confirm", label: "Confirm new password", autoComplete: "new-password" },
-                  ].map(({ key, label, autoComplete }) => (
-                    <div key={key} style={{ display: "grid", gap: 4 }}>
-                      <label htmlFor={`pw-${key}`} className="m-lbl">{label}</label>
-                      <div style={{ position: "relative" }}>
-                        <input
-                          id={`pw-${key}`}
-                          type={pwShow[key] ? "text" : "password"}
-                          autoComplete={autoComplete}
-                          value={pwForm[key]}
-                          onChange={(e) => setPwForm((prev) => ({ ...prev, [key]: e.target.value }))}
-                          className="m-field"
-                          style={{ width: "100%", paddingRight: 40 }}
-                          required
-                          minLength={key === "current" ? undefined : 6}
-                          maxLength={128}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setPwShow((prev) => ({ ...prev, [key]: !prev[key] }))}
-                          aria-label={pwShow[key] ? `Hide ${label.toLowerCase()}` : `Show ${label.toLowerCase()}`}
-                          aria-pressed={pwShow[key]}
-                          title={pwShow[key] ? "Hide password" : "Show password"}
-                          className="m-iconbtn"
-                          style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", height: 28, width: 28, display: "flex", alignItems: "center", justifyContent: "center", border: 0, background: "transparent", color: "var(--t3)", cursor: "pointer", padding: 0 }}
-                          onMouseEnter={(e) => (e.currentTarget.style.color = "var(--t1)")}
-                          onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t3)")}
-                        >
-                          <Icon d={pwShow[key] ? ICONS.eyeOff : ICONS.eye} />
-                        </button>
-                      </div>
-                      {key === "confirm" && pwMessage && (
-                        <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "var(--red)" }}>{pwMessage}</p>
-                      )}
-                      {key === "next" && (
-                        <ul style={{ margin: "4px 0 0", padding: 0, listStyle: "none", display: "grid", gap: 3 }}>
-                          {pwChecks.map(({ ok, label: checkLabel }) => (
-                            <li
-                              key={checkLabel}
-                              style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, color: ok ? "var(--green)" : "var(--t3)" }}
-                            >
-                              <span style={{ display: "inline-flex", color: ok ? "var(--green)" : "var(--t3)" }}>
-                                <Icon d={ok ? ICONS.check : ICONS.x} />
-                              </span>
-                              {checkLabel}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  ))}
-                  <button
-                    type="submit"
-                    disabled={savingPw}
-                    className="m-btn m-btn-primary"
-                    style={{ justifyContent: "center", marginTop: 4 }}
-                  >
-                    <Icon d={ICONS.check} className="w-4 h-4" />
-                    {savingPw ? "Updating…" : "Update password"}
-                  </button>
-                </form>
-              </div>
-
-              {/* Session */}
-              <div className="m-card m-in">
-                <div className="m-card-h">
-                  <h3>Session</h3>
-                  <span className="m-crumb">sign out of this device</span>
-                </div>
-                <div style={{ padding: 16 }}>
-                  <button
-                    id="profile-logout-btn"
-                    onClick={logout}
-                    className="m-btn"
-                    style={{ width: "100%", border: "1px solid var(--red-soft-b)", color: "var(--red)", background: "var(--card)" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(239,68,68,.08)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = "var(--card)")}
-                  >
-                    <Icon d={ICONS.logout} />
-                    Sign out
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
         </div>

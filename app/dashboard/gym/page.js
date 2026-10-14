@@ -53,7 +53,7 @@ const MERIDIAN_CSS = `
 /* Status — Whisper-styled segmented switcher: all options visible, active
    filled in ink. Full-width row on mobile, quiet right-aligned on desktop. */
 .gym .status-seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;background:var(--card);padding:3px;gap:2px}
-.gym .status-seg button{appearance:none;border:0;background:transparent;font-family:inherit;color:var(--t2);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:9px 14px;border-radius:6px;cursor:pointer;transition:.15s;white-space:nowrap}
+.gym .status-seg button{appearance:none;border:0;background:transparent;font-family:inherit;color:var(--t2);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:9px 14px;border-radius:6px;cursor:pointer;transition:.15s;white-space:nowrap}
 .gym .status-seg button:hover{color:var(--t1);background:var(--sunken)}
 .gym .status-seg button[aria-pressed="true"]{background:var(--t1);color:var(--card)}
 @media (max-width:640px){.gym .status-wrap{width:100%}.gym .status-seg{display:flex;width:100%}.gym .status-seg button{flex:1;padding:11px 4px;text-align:center}}
@@ -61,7 +61,7 @@ const MERIDIAN_CSS = `
 /* Sticky rail: pinned on desktop, capped to the viewport so the whole card
    stays visible; internal scroll if it ever grows taller. Static on mobile —
    a sticky card there just gets scrolled over by the plan column. */
-.gym .gym-rail{display:grid;gap:20px;position:sticky;top:88px;align-self:start;max-height:calc(100vh - 104px);overflow-y:auto}
+.gym .gym-rail{display:grid;gap:20px;position:sticky;top:24px;align-self:start;max-height:calc(100vh - 48px);overflow-y:auto}
 .gym .gym-entries{max-height:200px;overflow-y:auto}
 .gym .gym-rail::-webkit-scrollbar,.gym .gym-entries::-webkit-scrollbar{width:5px}
 .gym .gym-rail::-webkit-scrollbar-thumb,.gym .gym-entries::-webkit-scrollbar-thumb{background:var(--track);border-radius:99px}
@@ -77,11 +77,11 @@ const MERIDIAN_CSS = `
 .gym .gy-hero-cell.is-hero .gy-hero-num{color:var(--on-ac, #fff)}
 .gym .gy-hero-cell.is-hero .gy-hero-lbl{color:color-mix(in srgb, var(--on-ac, #fff) 72%, transparent)}
 .gym .gy-hero-num{font-size:26px;font-weight:800;line-height:1;letter-spacing:-.02em;color:var(--t1)}
-.gym .gy-hero-lbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-top:6px}
+.gym .gy-hero-lbl{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-top:6px}
 /* Consistency band, de-boxed: the map IS the section. */
 .gym .gy-ed-cons{background:transparent;border:0;border-radius:0}
 .gym .gy-ed-cons .m-card-h{border-bottom:0;padding:0 0 10px}
-.gym .gy-ed-cons .m-card-h h3{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--t3)}
+.gym .gy-ed-cons .m-card-h :is(h2,h3){font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--t3)}
 .gym .gy-ed-cons > div:last-child{padding:0!important}
 /* Entry spec rows: warm-up / PR as tight label-value lines, pencil inline. */
 .gym .gy-ed-spec{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
@@ -119,18 +119,24 @@ const MERIDIAN_CSS = `
 /* Inline dataset-failure notice — matches the stats-page error pattern. */
 const STALE_NOTICE_CSS = `
 .gym .st-notice{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px;border:1px solid var(--red-soft-b);background:var(--red-soft);border-radius:8px;font-size:12px;font-weight:600;color:var(--red);margin-bottom:12px}
-.gym .st-notice button{flex-shrink:0;background:var(--red);color:#fff;border:0;border-radius:6px;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer}
+.gym .st-notice button{flex-shrink:0;background:var(--red);color:#fff;border:0;border-radius:6px;font-size:12px;font-weight:700;padding:5px 10px;cursor:pointer}
 .gym .st-notice button:hover{filter:brightness(1.08)}
 /* V7 Editorial skin — magazine-style header, numbered hairline entries.
    Signature moves from design/gym-redesigns.html V7: big tracked title over a
    hairline rule, exercises as numbered borderless entries separated by
    rules (no nested boxes), muscle tag chips, slim stat rows in the rail. */
-.gym .gy-ed-head{margin-bottom:8px}
-.gym .gy-ed-title{font-size:44px;font-weight:800;letter-spacing:-.02em;line-height:1.05;color:var(--t1);font-family:var(--font-playfair),Georgia,"Times New Roman",serif}
-.gym .gy-ed-mastrow{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
-.gym .gy-ed-big{text-align:right}
-.gym .gy-ed-big b{display:block;font-family:var(--font-playfair),Georgia,serif;font-size:72px;font-weight:800;line-height:.85;letter-spacing:-.03em;color:var(--t1);font-variant-numeric:tabular-nums}
-.gym .gy-ed-big span{display:block;margin-top:8px;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3)}
+.gym .gy-ed-head{margin-bottom:20px}
+.gym .m-kicker{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ac);margin:0 0 8px}
+.gym .gy-ed-title{margin:0;font-size:28px;font-weight:800;letter-spacing:-.02em;line-height:1.1;color:var(--t1)}
+.gym .gy-ed-mastrow{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.gym .gy-ed-big{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.gym .gy-ed-big b{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--t2);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-variant-numeric:tabular-nums}
+.gym .gy-ed-big span{display:block;font-size:12px;font-weight:600;color:var(--t3)}
+.gym .m-daynav{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px}
+.gym .m-daynav button{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--t2);background:none;border:0;cursor:pointer;transition:.15s}
+.gym .m-daynav button:hover:not(:disabled){background:var(--sunken);color:var(--t1)}
+.gym .m-daynav button:disabled{opacity:.4;cursor:default}
+.gym .m-daynav button:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
 .gym .gy-ed-n{color:var(--ac);margin-right:8px;font-variant-numeric:tabular-nums}
 /* Newspaper column rule between sidebar and the log (desktop). */
 @media(min-width:1025px){.gym .gym-layout{column-gap:36px}.gym .gym-rail{border-right:1px solid var(--line);padding-right:32px}}
@@ -144,9 +150,9 @@ const STALE_NOTICE_CSS = `
 .gym .gy-ed-rule{height:1px;background:var(--line);margin-top:18px}
 .gym .gy-ed-entry{background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:18px 0}
 .gym .gy-ed-entry .m-card-h{border-bottom:0;padding:0 0 2px}
-.gym .gy-ed-no{font-size:11px;font-weight:800;color:var(--t3);letter-spacing:.1em;font-variant-numeric:tabular-nums}
+.gym .gy-ed-no{font-size:12px;font-weight:800;color:var(--t3);letter-spacing:.1em;font-variant-numeric:tabular-nums}
 .gym .gy-ed-name{font-size:20px;font-weight:800;letter-spacing:-.02em;color:var(--t1)}
-.gym .gy-ed-tag{margin-left:auto;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ac);background:var(--ac-soft);padding:4px 9px;border-radius:6px}
+.gym .gy-ed-tag{margin-left:auto;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ac);background:var(--ac-soft);padding:4px 9px;border-radius:6px}
 .gym .gy-ed-stat{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--t2)}
 .gym .gy-ed-stat b{font-size:16px;font-weight:800;letter-spacing:-.02em;color:var(--t1);font-variant-numeric:tabular-nums}
 .gym .gy-ed-quote{font-size:15px;font-weight:800;letter-spacing:-.01em;color:var(--ac);margin:4px 0 0;font-variant-numeric:tabular-nums}
@@ -155,12 +161,12 @@ const STALE_NOTICE_CSS = `
 .gym .gy-ed-quote{font-size:24px;font-weight:800;letter-spacing:-.02em;color:var(--ac);margin:6px 0 0;font-variant-numeric:tabular-nums}
 .gym .gy-ed-wblock{background:transparent;border:0;border-radius:0;padding:0}
 .gym .gy-ed-wblock .m-card-h{border-bottom:0;padding:0 0 10px}
-.gym .gy-ed-wblock .m-card-h h3{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--t3)}
+.gym .gy-ed-wblock .m-card-h :is(h2,h3){font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--t3)}
 .gym .gy-ed-wblock > div:last-child{padding:0!important}
 /* Plan card, de-boxed the same way: transparent body, label-style header. */
 .gym .gy-ed-plan{background:transparent;border:0;border-radius:0;padding:0}
 .gym .gy-ed-plan .m-card-h{border-bottom:0;padding:0 0 10px}
-.gym .gy-ed-plan .m-card-h h3{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--t3)}
+.gym .gy-ed-plan .m-card-h :is(h2,h3){font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--t3)}
 .gym .gy-ed-plan > div:last-child{padding:0!important;border-top:1px solid var(--line)}
 .gym .gy-ed-plan > div:last-child > div:first-child p:first-child{margin:0}
 /* Rest-day card gets the same hairline treatment instead of a floating box. */
@@ -176,9 +182,17 @@ const Icon = ({ d, className = "m-ic" }) => (
 );
 
 const ICONS = {
-  flame: <><path d="M12 3s-6 5.2-6 10a6 6 0 0 0 12 0c0-1.6-.6-3.1-1.4-4.4-.9 1-1.9 1.5-1.9 1.5.3-2.3-.9-5.4-2.7-7.1z" /><path d="M12 21a3 3 0 0 1-3-3c0-1.7 1.5-3.2 3-4 1.5.8 3 2.3 3 4a3 3 0 0 1-3 3z" /></>,
-  scale: <><path d="M12 3v3" /><path d="m7 6-4 8a4.5 4.5 0 0 0 8 0L7 6z" /><path d="m17 6-4 8a4.5 4.5 0 0 0 8 0l-4-8z" /><path d="M4 21h16" /><path d="M5 6h14" /></>,
-  trend: <><path d="M3 17l6-6 4 4 8-8" /><path d="M15 7h6v6" /></>,
+  /* Canonical flame (Lucide) — one geometry app-wide. The bespoke two-path
+     flame this replaced drew its inner flame to y21 while the outer bulb
+     stopped at y19, so at the 14px the header renders it the inner stroke
+     escaped the silhouette. */
+  flame: <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />,
+  /* Canonical balance scale (Lucide). The old copy drew a beam and a footline
+     but no column between them, so the pans floated over a detached base. */
+  scale: <><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" /><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" /><path d="M7 21h10" /><path d="M12 3v18" /><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2" /></>,
+  /* The shell nav's chart glyph — one "trend" app-wide. The old arrow stopped
+     its polyline 4 units short of the arrowhead corner. */
+  trend: <><path d="M3 3v18h18" /><path d="M6.5 15.5 10 11l3 2.7L18.7 8" /></>,
   check: <path d="M5 13l4 4L19 7" />,
   x: <path d="M18 6 6 18M6 6l12 12" />,
   chevron: <path d="m6 9 6 6 6-6" />,
@@ -186,9 +200,13 @@ const ICONS = {
   trash: <><path d="M3 6h18" /><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6M14 11v6" /></>,
   bolt: <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z" />,
   calendar: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 10h18" /></>,
-  trophy: <><path d="M8 21h8" /><path d="M12 17v4" /><path d="M7 4h10v5a5 5 0 0 1-10 0V4z" /><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4" /></>,
+  /* Stem starts at the cup's curved base (y14), not 3 units below it — the
+     floating stem read as a break at the 12px the PR chip renders it. */
+  trophy: <><path d="M8 21h8" /><path d="M12 14v7" /><path d="M7 4h10v5a5 5 0 0 1-10 0V4z" /><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4" /></>,
   dumbbell: <><path d="M6.5 6.5 17.5 17.5" /><path d="m21 21-1-1" /><path d="m3 3 1 1" /><path d="M18 22l4-4" /><path d="M2 6l4-4" /><path d="M3 9l6-6" /><path d="M21 15l-6 6" /></>,
-  pencil: <><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z" /></>,
+  /* Exact Feather edit-2 path the profile and settings pages use (the old
+     r=2.8 arc was under the 2.828 the 4-unit chord needs). */
+  pencil: <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />,
 };
 
 let toastSeq = 0;
@@ -212,7 +230,7 @@ function ToastHost({ toasts, onDismiss }) {
 }
 
 /* Recharts chrome in Meridian colors */
-const AXIS_TICK = { fill: "var(--t3)", fontSize: 11 };
+const AXIS_TICK = { fill: "var(--t3)", fontSize: 12 };
 const RT_GRID = "var(--track)";
 
 const toTitleCase = (str) => {
@@ -1016,29 +1034,26 @@ export default function GymTrackingPage() {
       <ToastHost toasts={toasts} onDismiss={dismissToast} />
       <AppShell>
         <div className="gym ng-container" style={{ padding: "32px var(--layout-gutter) 56px" }}>
-          {/* Page header — editorial masthead: big title, hairline rule,
-              status switcher riding the baseline under it (V7). */}
-          <div className="gy-ed-head">
-            <div className="m-crumb" style={{ marginBottom: 6 }}>
-              Gym · {isToday ? format(new Date(), "EEEE, d MMMM") : format(parseISO(currentDate), "EEEE, d MMMM")}
-            </div>
+          {/* Page header — SaaS title block, matching the meal page. */}
+          <div className="gy-ed-head m-in">
             <div className="gy-ed-mastrow">
-              <div>
-                <div className="gy-ed-title">
+              <div style={{ minWidth: 0 }}>
+                <p className="m-kicker">Training · Gym log</p>
+                <h1 className="gy-ed-title">
                   {muscleGroups.includes("Rest Day") ? "Rest & recovery" : `${muscleGroups.join(" & ")} day`}
-                </div>
+                </h1>
                 <div className="m-sub" style={{ marginTop: 8 }}>
                   {isToday
-                    ? "Track every set as you work — the log saves per exercise."
-                    : "Viewing a past session — edits update that day's log."}
+                    ? `${format(new Date(), "EEEE, d MMMM")} — track every set as you work.`
+                    : `${format(parseISO(currentDate), "EEEE, d MMMM")} — viewing a past session.`}
                 </div>
               </div>
               <div className="gy-ed-big">
-                <b className="m-num">{heroStats.currentStreak}</b>
+                <b className="m-num">{heroStats.currentStreak} day streak</b>
                 <span>
                   {heroStats.currentStreak === 0 && heroStats.trainedDays > 0
                     ? `Back to day one — ${heroStats.trainedDays} trained in ${heatmapYear}`
-                    : `Day streak · longest ${heroStats.longestStreak} · ${heroStats.trainedDays} trained`}
+                    : `Longest ${heroStats.longestStreak} · ${heroStats.trainedDays} trained in ${heatmapYear}`}
                 </span>
               </div>
             </div>
@@ -1066,10 +1081,10 @@ export default function GymTrackingPage() {
               360px sidebar. Streak stats live once, in the masthead. */}
           <div className="m-card m-in gy-ed-cons" style={{ marginBottom: 24 }}>
             <div className="m-card-h">
-              <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <h2 style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <span style={{ color: "var(--ac)" }}><Icon d={ICONS.flame} className="w-3.5 h-3.5" /></span>
                 Consistency
-              </h3>
+              </h2>
               <div className="gy-year-tabs" role="tablist" aria-label="Heatmap year">
                 {heatmapYears.map((year) => (
                   <button
@@ -1107,10 +1122,10 @@ export default function GymTrackingPage() {
               {/* Weight tracker card — de-boxed sidebar block (V7) */}
               <div className="m-card m-in gy-ed-wblock">
                 <div className="m-card-h">
-                  <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <h2 style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <span style={{ color: "var(--ac)" }}><Icon d={ICONS.scale} /></span>
                     Body weight
-                  </h3>
+                  </h2>
                   {editingTarget ? (
                     <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <input
@@ -1249,7 +1264,7 @@ export default function GymTrackingPage() {
                         >
                           <span className="m-crumb m-num">{format(new Date(entry.date), "d MMM yyyy")}</span>
                           <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-                            <b className="m-num" style={{ fontSize: 15, fontWeight: 800, letterSpacing: "-.02em" }}>{entry.weight}<span style={{ fontSize: 11, fontWeight: 600, color: "var(--t3)" }}> kg</span></b>
+                            <b className="m-num" style={{ fontSize: 15, fontWeight: 800, letterSpacing: "-.02em" }}>{entry.weight}<span style={{ fontSize: 12, fontWeight: 600, color: "var(--t3)" }}> kg</span></b>
                             <button
                               onClick={() => handleDeleteWeight(entry._id, entry.weight)}
                               aria-label={`Delete weight entry from ${format(new Date(entry.date), "d MMM yyyy")}`}
@@ -1286,20 +1301,21 @@ export default function GymTrackingPage() {
                 onChanged={handleSplitChanged}
                 pushToast={pushToast}
                 variant="editorial"
+                headingTag="h2"
               />
 
               {/* Today's plan card — de-boxed editorial section (V7) */}
               <div className="m-card m-in gy-ed-plan">
                 <div className="m-card-h">
-                  <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <h2 style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <span style={{ color: "var(--ac)" }}><Icon d={ICONS.calendar} /></span>
                     {isToday ? "Today's plan" : "Workout plan"}
-                  </h3>
+                  </h2>
                   <div style={{ display: "flex", alignItems: "center", gap: 4 }} role="group" aria-label="Change the plan date">
                     <button
                       onClick={() => shiftDate(-1)}
                       aria-label="View the previous day"
-                      style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 26, height: 26, borderRadius: 8, border: "1px solid var(--line)", background: "var(--card)", color: "var(--t2)", cursor: "pointer" }}
+                      style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, borderRadius: 8, border: "1px solid var(--line)", background: "var(--card)", color: "var(--t2)", cursor: "pointer" }}
                     >
                       <span style={{ display: "inline-flex", transform: "rotate(90deg)" }} aria-hidden="true"><Icon d={ICONS.chevron} className="w-3.5 h-3.5" /></span>
                     </button>
@@ -1310,7 +1326,7 @@ export default function GymTrackingPage() {
                       onClick={() => shiftDate(1)}
                       aria-label="View the next day"
                       disabled={isToday}
-                      style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 26, height: 26, borderRadius: 8, border: "1px solid var(--line)", background: "var(--card)", color: "var(--t2)", cursor: isToday ? "default" : "pointer", opacity: isToday ? 0.4 : 1 }}
+                      style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, borderRadius: 8, border: "1px solid var(--line)", background: "var(--card)", color: "var(--t2)", cursor: isToday ? "default" : "pointer", opacity: isToday ? 0.4 : 1 }}
                     >
                       <span style={{ display: "inline-flex", transform: "rotate(-90deg)" }} aria-hidden="true"><Icon d={ICONS.chevron} className="w-3.5 h-3.5" /></span>
                     </button>

@@ -81,7 +81,9 @@ const Icon = ({ d, className = "m-ic", style }) => (
 const ICONS = {
   flame: <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />,
   activity: <path d="M22 12h-4l-3 9L9 3l-3 9H2" />,
-  scale: <><rect x="3" y="3" width="18" height="18" rx="3" /><path d="M8 8a4 4 0 0 1 8 0" /><path d="M12 8v.01" /></>,
+  /* Canonical balance scale (Lucide) — "scale" had two spellings across the
+     app; this is now the one the gym page and profile page share. */
+  scale: <><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" /><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" /><path d="M7 21h10" /><path d="M12 3v18" /><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2" /></>,
   spark: <path d="M12 2l2.4 7.2H22l-6 4.6 2.3 7.2-6.3-4.5-6.3 4.5L8 13.8 2 9.2h7.6z" />,
 };
 
@@ -287,8 +289,9 @@ export default function StatsPage() {
         {/* Header + range selector */}
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginBottom: 24 }}>
           <div>
+            <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--ac)", margin: "0 0 8px" }}>Insights · Trends</p>
             <div className="m-h1">Progress</div>
-            <div className="m-sub">How your nutrition, training, and consistency trend over time.</div>
+            <div className="m-sub">Nutrition, training, and consistency — one window at a time.</div>
           </div>
           <div className="st-seg" role="radiogroup" aria-label="Stats window">
             {RANGES.map((r) => (
