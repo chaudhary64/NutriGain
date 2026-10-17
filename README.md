@@ -100,7 +100,8 @@ NutriGain/
 │   ├── dashboard/
 │   │   ├── gym/                # Gym tracking: numeric set logging, PRs, heatmap
 │   │   ├── meal/               # Meal logging: search, add, daily macros
-│   │   └── profile/            # Profile: preferences & settings
+│   │   ├── profile/            # Profile: identity, body profile, training split
+│   │   └── settings/           # Settings: goals, appearance, account, password
 │   ├── login/                  # Login page
 │   ├── register/               # Sign-up page
 │   ├── globals.css             # Global design tokens & base styles

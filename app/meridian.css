@@ -57,7 +57,7 @@ html[data-theme="dark"] :is(.mrd, .gym, .st, .adm, .auth, .onb, .hub, .splitmgr,
   --line: #2a2a30;
   --t1: #f0f0f2;
   --t2: #a1a1ac;
-  --t3: #8b8b96;
+  --t3: #8e8e9a;
   --ac: #818cf8;
   --ach: #a5b4fc;
   --red: #f87171;
@@ -128,7 +128,7 @@ html[data-theme="dark"] .gym {
   border-bottom: 1px solid var(--line);
 }
 
-:is(.mrd, .gym) .m-card-h h3 {
+:is(.mrd, .gym) .m-card-h :is(h2, h3) {
   font-size: 13px;
   font-weight: 700;
   color: var(--t1);

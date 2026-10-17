@@ -24,7 +24,7 @@ const SPLIT_CSS = `
 .splitmgr{color:var(--t1)}
 .splitmgr .sm-card{background:var(--card);border:1px solid var(--line);border-radius:12px}
 .splitmgr .sm-card-h{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line);gap:12px;flex-wrap:wrap}
-.splitmgr .sm-card-h h3{font-size:13px;font-weight:700;color:var(--t1);display:flex;align-items:center;gap:10px;margin:0}
+.splitmgr .sm-card-h :is(h2,h3){font-size:13px;font-weight:700;color:var(--t1);display:flex;align-items:center;gap:10px;margin:0}
 .splitmgr .sm-btn{appearance:none;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600;padding:6px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--t1);cursor:pointer;transition:.15s}
 .splitmgr .sm-btn:hover{background:var(--sunken)}
 .splitmgr .sm-btn:disabled{opacity:.55;cursor:default}
@@ -39,17 +39,17 @@ const SPLIT_CSS = `
    overriding .splitmgr from page CSS. */
 .splitmgr-ed .sm-card{background:transparent;border:0;border-radius:0;box-shadow:none}
 .splitmgr-ed .sm-card-h{border-bottom:0;padding:0 0 10px}
-.splitmgr-ed .sm-card-h h3{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--t3)}
-.splitmgr .sm-day b{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
-.splitmgr .sm-day span{font-size:11px;font-weight:600;color:var(--t1);line-height:1.3}
+.splitmgr-ed .sm-card-h :is(h2,h3){font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--t3)}
+.splitmgr .sm-day b{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
+.splitmgr .sm-day span{font-size:12px;font-weight:600;color:var(--t1);line-height:1.3}
 .splitmgr .sm-day.rest span{color:var(--t3)}
 .splitmgr .sm-day.today{border-color:var(--ac-soft-b);background:var(--ac-soft)}
 .splitmgr .sm-day.today b{color:var(--ac)}
 .splitmgr .sm-edit-grid{display:flex;flex-direction:column;gap:10px}
 .splitmgr .sm-edit-row{display:grid;grid-template-columns:64px minmax(0,1fr);gap:10px;align-items:center}
-.splitmgr .sm-edit-row>b{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
+.splitmgr .sm-edit-row>b{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
 .splitmgr .sm-chips{display:flex;flex-wrap:wrap;gap:6px}
-.splitmgr .sm-chip{appearance:none;font-family:inherit;font-size:11px;font-weight:600;padding:5px 10px;border-radius:7px;border:1px solid var(--line);background:var(--card);color:var(--t2);cursor:pointer;transition:.15s}
+.splitmgr .sm-chip{appearance:none;font-family:inherit;font-size:12px;font-weight:600;padding:5px 10px;border-radius:7px;border:1px solid var(--line);background:var(--card);color:var(--t2);cursor:pointer;transition:.15s}
 .splitmgr .sm-chip:hover{border-color:var(--ac-soft-b);color:var(--t1)}
 .splitmgr .sm-chip[aria-pressed="true"]{background:var(--ac);border-color:var(--ac);color:var(--on-ac)}
 .splitmgr .sm-gallery{margin-top:14px;display:grid;gap:10px;border-top:1px solid var(--line);padding-top:14px}
@@ -71,7 +71,10 @@ const LAYOUT = <><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9
 // variant="editorial": borderless label-header chrome, for pages that embed
 // the manager inside an editorial layout (currently the gym page). Default
 // keeps the boxed card look.
-export default function SplitManager({ initialDays, initialSource, onChanged, pushToast, variant }) {
+export default function SplitManager({ initialDays, initialSource, onChanged, pushToast, variant, headingTag }) {
+  /* Host pages own their outline: the gym page sits under an h1 and renders
+     this card as an h2; the profile page keeps the historic h3. */
+  const HeadingTag = headingTag || "h3";
   const [days, setDays] = useState(initialDays ?? null); // null = still loading
   const [source, setSource] = useState(initialSource ?? null);
   const [templates, setTemplates] = useState([]);
@@ -188,10 +191,10 @@ export default function SplitManager({ initialDays, initialSource, onChanged, pu
       <style>{SPLIT_CSS}</style>
       <div className="sm-card">
         <div className="sm-card-h">
-          <h3>
+          <HeadingTag>
             <span style={{ color: "var(--ac)" }}><SmIcon d={DUMBBELL} /></span>
             Training split
-          </h3>
+          </HeadingTag>
           {editing ? (
             <span style={{ display: "flex", gap: 8 }}>
               <button onClick={() => setEditing(false)} disabled={saving} className="sm-btn" type="button">
@@ -272,7 +275,7 @@ export default function SplitManager({ initialDays, initialSource, onChanged, pu
 
           {showGallery && !editing && (
             <div className="sm-gallery">
-              <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--t3)" }}>
+              <p style={{ margin: 0, fontSize: 12, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--t3)" }}>
                 Start from a template
               </p>
               {templates.length === 0 ? (

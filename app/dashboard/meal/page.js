@@ -118,6 +118,12 @@ const MERIDIAN_CSS = `
 .mrd .m-picked .m-picked-macros{display:flex;gap:6px;flex-wrap:wrap}
 .mrd .m-picked .m-picked-macros span{background:var(--card);border-radius:6px;padding:3px 8px;font-weight:700;font-variant-numeric:tabular-nums}
 /* remaining */
+.mrd .m-seg{display:inline-flex;gap:2px;background:var(--sunken);border:1px solid var(--line);border-radius:8px;padding:2px}
+.mrd .m-seg button{border:0;background:transparent;font:inherit;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--t3);padding:5px 11px;border-radius:6px;cursor:pointer;transition:.15s}
+.mrd .m-seg button:hover{color:var(--t1)}
+.mrd .m-seg button.on{background:var(--card);color:var(--ac);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.mrd .m-seg button:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.mrd .m-dd-recent{flex:none;font-size:9.5px;font-weight:800;letter-spacing:.07em;color:var(--ac);background:var(--ac-soft);border-radius:5px;padding:3px 7px}
 .mrd .m-rem{padding:16px 18px;border-top:1px solid var(--line)}
 .mrd .m-rem-h{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--t3);margin-bottom:8px}
 .mrd .m-rem-row{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;padding:5px 0}
@@ -399,6 +405,19 @@ export default function MealTrackingPage() {
   const [mealSearch, setMealSearch] = useState("");
   const [showMealDropdown, setShowMealDropdown] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
+  // Research-backed: MacroFactor-style Consumed ↔ Remaining toggle —
+  // remaining is the default because it helps plan the rest of the day.
+  const [macroView, setMacroView] = useState("remaining");
+  // Recently logged foods float to the top of search (persisted locally).
+  const [recentIds, setRecentIds] = useState(() => {
+    try {
+      if (typeof localStorage === "undefined") return [];
+      const raw = JSON.parse(localStorage.getItem("ng-recent-meals") || "[]");
+      return Array.isArray(raw) ? raw.filter((x) => typeof x === "string") : [];
+    } catch {
+      return [];
+    }
+  });
   const [toasts, setToasts] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const searchInputRef = useRef(null);
@@ -542,7 +561,17 @@ export default function MealTrackingPage() {
         const data = await res.json();
         setDailyLog(data.dailyLog);
         const addedName = meals.find((m) => m._id === selectedMeal)?.name;
+        const addedId = selectedMeal;
         setSelectedMeal("");
+        setRecentIds((prev) => {
+          const next = [addedId, ...prev.filter((id) => id !== addedId)].slice(0, 8);
+          try {
+            localStorage.setItem("ng-recent-meals", JSON.stringify(next));
+          } catch {
+            /* private mode — recency just won't persist */
+          }
+          return next;
+        });
         setQuantity(1);
         setMealSearch("");
         setShowMealDropdown(false);
@@ -699,9 +728,20 @@ export default function MealTrackingPage() {
     requestAnimationFrame(() => searchInputRef.current?.focus());
   };
 
-  const filteredMeals = meals.filter((meal) =>
-    meal.name.toLowerCase().includes(mealSearch.toLowerCase()),
-  );
+  const recentSet = new Set(recentIds);
+  // Personal history first (recent picks, in recency order), then A–Z —
+  // returning users can re-log a familiar food without full-db hunting.
+  const orderedMeals = (() => {
+    const q = mealSearch.toLowerCase();
+    const hit = meals.filter((meal) => meal.name.toLowerCase().includes(q));
+    const rank = new Map(recentIds.map((id, i) => [id, i]));
+    return [...hit].sort((a, b) => {
+      const ra = rank.has(a._id) ? rank.get(a._id) : Infinity;
+      const rb = rank.has(b._id) ? rank.get(b._id) : Infinity;
+      return ra - rb;
+    });
+  })();
+  const filteredMeals = orderedMeals;
 
   // Live preview of the picked-but-unsaved entry. It only tints the Daily
   // targets rail — the log below stays committed until "Add entry" succeeds.
@@ -814,10 +854,25 @@ export default function MealTrackingPage() {
               <MacroMeter label="Carbs" macroKey="carbs" value={totalMacros.carbs} max={goals.carbs} preview={previewOf("carbs")} />
               <MacroMeter label="Fats" macroKey="fats" value={totalMacros.fats} max={goals.fats} preview={previewOf("fats")} />
 
-              {/* Remaining */}
+              {/* Consumed ↔ Remaining — MacroFactor-style toggle, remaining by default */}
               <div className="m-rem">
-                <div className="m-rem-h">
-                  REMAINING
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 8 }}>
+                  <div className="m-rem-h" style={{ marginBottom: 0 }}>
+                    {macroView === "remaining" ? "REMAINING" : "CONSUMED"}
+                  </div>
+                  <div className="m-seg" role="group" aria-label="Macro breakdown view">
+                    {["consumed", "remaining"].map((v) => (
+                      <button
+                        key={v}
+                        type="button"
+                        aria-pressed={macroView === v}
+                        className={macroView === v ? "on" : ""}
+                        onClick={() => setMacroView(v)}
+                      >
+                        {v === "consumed" ? "Eaten" : "Left"}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 {[
                   { label: "Calories", key: "calories", unit: "kcal", digits: 0 },
@@ -825,8 +880,18 @@ export default function MealTrackingPage() {
                   { label: "Carbs", key: "carbs", unit: "g", digits: 1 },
                   { label: "Fats", key: "fats", unit: "g", digits: 1 },
                 ].map((item) => {
-                  const remaining =
-                    goals[item.key] - (totalMacros[item.key] + previewOf(item.key));
+                  const eaten = totalMacros[item.key] + previewOf(item.key);
+                  if (macroView === "consumed") {
+                    return (
+                      <div key={item.label} className="m-rem-row">
+                        <span>{item.label}</span>
+                        <b className={`m-num ${previewing ? "m-rem-prev" : ""}`}>
+                          {eaten.toFixed(item.digits)} <span style={{ color: "var(--t3)", fontWeight: 500 }}>/ {goals[item.key].toLocaleString()} {item.unit}</span>
+                        </b>
+                      </div>
+                    );
+                  }
+                  const remaining = goals[item.key] - eaten;
                   const isExceeded = remaining < 0;
                   const text = isExceeded
                     ? `+${Math.abs(remaining).toFixed(item.digits)} ${item.unit} over`
@@ -906,9 +971,7 @@ export default function MealTrackingPage() {
                               if (selectedMeal) e.target.select();
                             }}
                             onKeyDown={(e) => {
-                              const list = meals.filter((meal) =>
-                                meal.name.toLowerCase().includes(mealSearch.toLowerCase()),
-                              );
+                              const list = orderedMeals;
                               if (e.key === "ArrowDown") {
                                 e.preventDefault();
                                 if (!showMealDropdown) setShowMealDropdown(true);
@@ -963,7 +1026,10 @@ export default function MealTrackingPage() {
                                     <span className="m-dd-name">{toTitleCase(meal.name)}</span>
                                     <span className="m-dd-sub" style={{ display: "block" }}>{meal.servingSize} · {meal.macros?.protein || 0}P · {meal.macros?.carbs || 0}C · {meal.macros?.fats || 0}F</span>
                                   </span>
-                                  <span className="m-dd-kcal m-num">{meal.macros?.calories || 0} kcal</span>
+                                  <span style={{ display: "flex", alignItems: "center", gap: 6, flex: "none" }}>
+                                    {recentSet.has(meal._id) && <span className="m-dd-recent">Recent</span>}
+                                    <span className="m-dd-kcal m-num">{meal.macros?.calories || 0} kcal</span>
+                                  </span>
                                 </div>
                               ))}
                               {filteredMeals.length === 0 && (

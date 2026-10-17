@@ -243,3 +243,339 @@ a:focus-visible,
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ----------------------------------------------------------------------
+   Sidebar chrome — the app's primary navigation lives on the left.
+
+   A 248px fixed <aside> at >=1024px; the content column is offset by the
+   same width so the two scroll independently (the sidebar pins, the page
+   scrolls). Below 1024px the sidebar becomes a sticky top bar with a
+   full-screen menu, so the nav model never changes — only its shape.
+   ---------------------------------------------------------------------- */
+:root {
+  --sb-w: 248px;
+}
+
+.sb-wrap {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--sb-w);
+  z-index: 50;
+  display: none;
+}
+
+.sb {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--shell-chrome);
+  -webkit-backdrop-filter: blur(14px) saturate(1.02);
+  backdrop-filter: blur(14px) saturate(1.02);
+  border-right: 1px solid var(--shell-line);
+  padding: 18px 14px 14px;
+  gap: 16px;
+}
+
+.sb-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 8px 0;
+  min-height: 32px;
+}
+
+
+.sb-nav {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  margin: 0 -4px;
+  padding: 0 4px;
+}
+
+.sb-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sb-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 42px;
+  padding: 0 12px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--shell-ink-2);
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.sb-row:hover {
+  background: var(--shell-sunken);
+  color: var(--shell-ink);
+}
+
+.sb-row.on {
+  background: var(--shell-accent-soft);
+  color: var(--shell-accent);
+  font-weight: 700;
+}
+
+.sb-ico {
+  display: flex;
+  color: var(--shell-muted);
+}
+
+.sb-row.on .sb-ico,
+.sb-row:hover .sb-ico {
+  color: currentColor;
+}
+
+.sb-lbl {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sb-foot {
+  flex: none;
+  padding-top: 12px;
+  border-top: 1px solid var(--shell-line);
+}
+
+.sb-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sb-ava {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: var(--shell-sunken);
+  border: 1px solid var(--shell-line);
+  color: var(--shell-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  flex: none;
+}
+
+.sb-user-txt {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.sb-user-txt b {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--shell-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sb-user-txt i {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--shell-muted);
+  margin-top: 2px;
+}
+
+/* The identity row's controls — theme first, the destructive one last. */
+.sb-acts {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+}
+
+.sb-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* 10px + an 18px glyph = 38px target: clears the WCAG 2.2 minimum with room
+     to spare, so the footer and mobile-bar controls stay comfortable to hit. */
+  padding: 10px;
+  border-radius: 9px;
+  border: 0;
+  background: transparent;
+  color: var(--shell-muted);
+  cursor: pointer;
+  transition: 0.15s;
+}
+
+.sb-icon:hover {
+  background: var(--shell-sunken);
+  color: var(--shell-ink);
+}
+
+.sb-icon-danger:hover {
+  background: var(--shell-danger-soft);
+  color: var(--shell-danger);
+}
+
+/* Theme switch — both glyphs are drawn and cross-morph, so the icon reads as
+   the action (a sun in dark mode) instead of restating what the page already
+   shows. Spins and shrinks on the way out rather than snapping. */
+.sb-theme-glyph {
+  position: relative;
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+}
+
+.sb-theme-glyph .sb-theme-sun,
+.sb-theme-glyph .sb-theme-moon {
+  position: absolute;
+  inset: 0;
+  width: 18px;
+  height: 18px;
+  transition: opacity 0.25s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sb-theme-glyph .sb-theme-sun {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+.sb-theme-glyph .sb-theme-moon {
+  opacity: 0;
+  transform: rotate(-60deg) scale(0.55);
+}
+
+.sb-theme-glyph.is-moon .sb-theme-sun {
+  opacity: 0;
+  transform: rotate(60deg) scale(0.55);
+}
+
+.sb-theme-glyph.is-moon .sb-theme-moon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sb-theme-glyph .sb-theme-sun,
+  .sb-theme-glyph .sb-theme-moon {
+    transition: none;
+  }
+}
+
+.sb-main {
+  min-height: 100vh;
+}
+
+.sb-context {
+  border-bottom: 1px solid var(--shell-line);
+  background: var(--shell-bg);
+  padding: 10px 0;
+}
+
+.sb-mwrap {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--shell-chrome);
+  -webkit-backdrop-filter: blur(14px) saturate(1.02);
+  backdrop-filter: blur(14px) saturate(1.02);
+  border-bottom: 1px solid var(--shell-line);
+}
+
+.sb-mbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  height: 56px;
+  padding: 0 var(--layout-gutter);
+  width: 100%;
+}
+
+.sb-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: var(--shell-bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.sb-menu-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 56px;
+  flex: none;
+  border-bottom: 1px solid var(--shell-line);
+  background: var(--shell-chrome);
+}
+
+.sb-menu-slot {
+  padding-bottom: 16px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--shell-line);
+}
+
+.sb-menu-body {
+  flex: 1 1 auto;
+  padding: 18px 0;
+  overflow-y: auto;
+}
+
+.sb-menu .sb-list {
+  padding: 0 6px;
+}
+
+.sb-menu-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 0 22px;
+  border-top: 1px solid var(--shell-line);
+  flex: none;
+}
+
+.mk-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: var(--shell-chrome);
+  -webkit-backdrop-filter: blur(14px) saturate(1.02);
+  backdrop-filter: blur(14px) saturate(1.02);
+  border-bottom: 1px solid var(--shell-line);
+}
+
+@media (min-width: 1024px) {
+  .sb-wrap {
+    display: block;
+  }
+
+  .sb-main {
+    margin-left: var(--sb-w);
+  }
+
+  .sb-mwrap {
+    display: none;
+  }
+}
