@@ -98,6 +98,10 @@ const MERIDIAN_CSS = `
 .mrd .m-selwrap{position:relative}
 .mrd .m-selwrap .m-chev{position:absolute;right:11px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--t3);display:flex}
 /* dropdown */
+/* .m-in's entrance animation makes every card its own stacking context, so a
+   dropdown anchored inside one is painted beneath later sibling cards (the
+   meal sections). Lift the hosting card while its dropdown is open. */
+.mrd .m-card.m-dd-open{position:relative;z-index:var(--pop-z-dropdown, 70)}
 .mrd .m-dd{position:absolute;z-index:var(--pop-z-dropdown, 70);width:100%;min-width:280px;margin-top:6px;background:color-mix(in srgb, var(--card) 92%, transparent);-webkit-backdrop-filter:var(--pop-blur, blur(16px) saturate(1.4));backdrop-filter:var(--pop-blur, blur(16px) saturate(1.4));border:1px solid var(--line);border-radius:12px;box-shadow:0 20px 44px -12px rgba(0,0,0,.4);max-height:300px;overflow:auto;padding:6px}
 .mrd .m-dd-item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 11px;cursor:pointer;font-size:13px;border-radius:8px;border:0}
 .mrd .m-dd-item:hover,.mrd .m-dd-item.is-active{background:var(--ac-soft)}
@@ -842,7 +846,7 @@ export default function MealTrackingPage() {
             {/* Feed column */}
             <div>
               {/* Add meal card */}
-              <div className="m-card m-in">
+              <div className={`m-card m-in${showMealDropdown ? " m-dd-open" : ""}`}>
                 <div className="m-card-h">
                   <h3>Add a meal</h3>
                   <span className="m-crumb">Macros scale with quantity · <b style={{ color: "var(--ac)" }}>/</b> focuses search</span>
