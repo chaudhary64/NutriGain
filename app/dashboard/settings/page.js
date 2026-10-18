@@ -24,20 +24,20 @@ html:has(.stg-layout){scroll-behavior:smooth}
 /* Two-pane shell — same rail/column-rule convention as the gym page. */
 .stg-layout{display:grid;grid-template-columns:min(216px,100%) minmax(0,1fr);gap:24px;align-items:start}
 .stg-rail{position:sticky;top:24px;align-self:start}
-.stg-rail-lbl{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin:0 0 10px}
+.stg-rail-lbl{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin:0 0 10px}
 .stg-rail-list{list-style:none;margin:0;padding:0;display:grid;gap:2px}
-.stg-rail-link{display:block;font-size:13px;font-weight:600;color:var(--t3);text-decoration:none;padding:7px 10px 7px 12px;border-left:2px solid transparent;border-radius:0 7px 7px 0;transition:color .15s,background .15s,border-color .15s}
+.stg-rail-link{display:block;font-size:13px;font-weight:500;letter-spacing:-.01em;color:var(--t2);text-decoration:none;padding:7px 10px 7px 12px;border-left:2px solid transparent;border-radius:0 6px 6px 0;transition:color .15s,background .15s,border-color .15s}
 .stg-rail-link:hover{color:var(--t1);background:var(--sunken)}
-.stg-rail-link.on{color:var(--ac);font-weight:700;border-left-color:var(--ac);background:var(--ac-soft)}
-.stg-rail-link:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.stg-rail-link.on{color:var(--t1);font-weight:500;border-left-color:var(--t1);background:var(--sunken)}
+.stg-rail-link:focus-visible{outline:2px solid var(--link);outline-offset:2px}
 .stg-body{min-width:0;max-width:860px}
 /* Sections — hierarchy from type and spacing, not five borders. */
 .stg-sec{padding-bottom:34px;scroll-margin-top:88px}
 .stg-sec+.stg-sec{border-top:1px solid var(--line);padding-top:34px}
 .stg-sec:last-child{padding-bottom:8px}
 .stg-sec-h{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}
-.stg-sec-h h2{font-size:16px;font-weight:700;letter-spacing:-.01em;color:var(--t1);margin:0}
-.stg-sec-sub{font-size:12.5px;font-weight:500;color:var(--t3);margin:5px 0 0;max-width:56ch;line-height:1.5}
+.stg-sec-h h2{font-size:18px;font-weight:600;letter-spacing:-.02em;line-height:1.3;color:var(--t1);margin:0}
+.stg-sec-sub{font-size:12.5px;font-weight:400;color:var(--t2);margin:5px 0 0;max-width:56ch;line-height:1.5}
 .stg-sec-acts{display:flex;gap:8px;flex-shrink:0}
 .stg-btn{border:1px solid var(--line);background:var(--card);color:var(--t1)}
 .stg-btn:hover:not(:disabled){background:var(--sunken)}
@@ -45,44 +45,44 @@ html:has(.stg-layout){scroll-behavior:smooth}
 .stg-btn-danger:hover{background:var(--red-soft)}
 /* Goal tiles — sunken while reading, lift to a card + accent while editing. */
 .stg-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
-.stg-tile{background:var(--sunken);border:1px solid var(--line);border-radius:10px;padding:12px 14px;transition:border-color .15s,background .15s}
-.stg-tile.editing{background:var(--card);border-color:var(--ac)}
-.stg-tile-k{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin:0}
-.stg-tile-v{margin:6px 0 0;font-size:22px;font-weight:800;letter-spacing:-.02em;color:var(--t1);font-variant-numeric:tabular-nums;line-height:1.15}
-.stg-tile-v small{font-size:12px;font-weight:600;color:var(--t3);letter-spacing:0;margin-left:3px}
-.stg-tile-in{width:100%;margin-top:6px;padding:0;border:0;outline:none;background:transparent;font:inherit;font-size:22px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--t1)}
-.stg-tile-in:focus-visible{outline:2px solid var(--ac);outline-offset:3px;border-radius:4px}
-.stg-status{font-size:12.5px;font-weight:600;color:var(--t3);margin:14px 0 0}
+.stg-tile{background:var(--sunken);border:1px solid var(--line);border-radius:12px;padding:12px 14px;transition:border-color .15s,background .15s}
+.stg-tile.editing{background:var(--card);border-color:var(--t1)}
+.stg-tile-k{display:flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin:0}
+.stg-tile-v{margin:6px 0 0;font-size:22px;font-weight:600;letter-spacing:-.03em;color:var(--t1);font-variant-numeric:tabular-nums;line-height:1.15}
+.stg-tile-v small{font-size:12px;font-weight:400;color:var(--t3);letter-spacing:0;margin-left:3px}
+.stg-tile-in{width:100%;margin-top:6px;padding:0;border:0;outline:none;background:transparent;font:inherit;font-size:22px;font-weight:600;letter-spacing:-.03em;font-variant-numeric:tabular-nums;color:var(--t1)}
+.stg-tile-in:focus-visible{outline:2px solid var(--link);outline-offset:3px;border-radius:6px}
+.stg-status{font-size:12.5px;font-weight:400;color:var(--t3);margin:14px 0 0}
 .stg-status.err{color:var(--red)}
 /* Setting rows — label + description left, control or value right. */
 .stg-rows{display:grid}
 .stg-row{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:14px 0;border-top:1px solid var(--line)}
 .stg-row:first-child{border-top:0;padding-top:0}
 .stg-row-t{min-width:0}
-.stg-row-k{font-size:13px;font-weight:600;color:var(--t1)}
-.stg-row-d{font-size:12.5px;font-weight:500;color:var(--t3);margin:3px 0 0;max-width:52ch}
-.stg-row-v{font-size:13px;font-weight:600;color:var(--t1);text-align:right;word-break:break-all;font-variant-numeric:tabular-nums}
+.stg-row-k{font-size:13px;font-weight:500;letter-spacing:-.01em;color:var(--t1)}
+.stg-row-d{font-size:12.5px;font-weight:400;color:var(--t2);margin:3px 0 0;max-width:52ch}
+.stg-row-v{font-size:13px;font-weight:500;color:var(--t1);text-align:right;word-break:break-all;font-variant-numeric:tabular-nums}
 /* Theme segmented control */
-.stg-seg{display:inline-flex;gap:4px;background:var(--sunken);border:1px solid var(--line);border-radius:10px;padding:4px;flex-shrink:0}
-.stg-seg button{border:0;background:transparent;font:inherit;font-size:12.5px;font-weight:700;color:var(--t2);padding:7px 16px;border-radius:7px;cursor:pointer;transition:background .15s,color .15s}
+.stg-seg{display:inline-flex;gap:2px;background:var(--sunken);border:1px solid var(--line);border-radius:6px;padding:3px;flex-shrink:0}
+.stg-seg button{border:0;background:transparent;font:inherit;font-size:12.5px;font-weight:500;color:var(--t2);padding:6px 14px;border-radius:6px;cursor:pointer;transition:background .15s,color .15s}
 .stg-seg button:hover{color:var(--t1)}
-.stg-seg button.on{background:var(--card);color:var(--ac);box-shadow:0 1px 3px rgba(0,0,0,.1)}
-.stg-seg button:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.stg-seg button.on{background:var(--card);color:var(--t1);box-shadow:0 1px 1px rgba(0,0,0,.04)}
+.stg-seg button:focus-visible{outline:2px solid var(--link);outline-offset:2px}
 /* Password — one narrow column so inputs never stretch the full canvas. */
 .stg-form{display:grid;gap:12px;max-width:420px}
 .stg-form input.m-field{width:100%}
 .stg-reqs{list-style:none;margin:4px 0 0;padding:0;display:grid;gap:3px}
-.stg-reqs li{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600}
-.stg-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);height:28px;width:28px;display:flex;align-items:center;justify-content:center;border:0;background:transparent;color:var(--t3);cursor:pointer;padding:0;border-radius:7px}
-.stg-eye:hover{color:var(--t1)}
-.stg-err{margin:0;font-size:13px;font-weight:600;color:var(--red)}
+.stg-reqs li{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:400;color:var(--t2)}
+.stg-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);height:28px;width:28px;display:flex;align-items:center;justify-content:center;border:0;background:transparent;color:var(--t3);cursor:pointer;padding:0;border-radius:6px}
+.stg-eye:hover{color:var(--t1);background:var(--sunken)}
+.stg-err{margin:0;font-size:13px;font-weight:400;color:var(--red)}
 /* Mobile — the rail becomes a chip row above the body. */
 @media (max-width:1024px){
   .stg-layout{grid-template-columns:minmax(0,1fr)}
   .stg-rail{position:static;border-bottom:1px solid var(--line);padding-bottom:16px}
   .stg-rail-list{display:flex;flex-wrap:wrap;gap:8px}
   .stg-rail-link{border:1px solid var(--line);border-left:1px solid var(--line);border-radius:999px;padding:6px 12px;background:var(--card)}
-  .stg-rail-link.on{border-color:var(--ac)}
+  .stg-rail-link.on{border-color:var(--t1)}
   .stg-sec{scroll-margin-top:76px}
 }
 @media (min-width:1025px){
@@ -111,7 +111,7 @@ const SECTIONS = [
 ];
 
 const Icon = ({ d, className = "m-ic", style }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     {d}
   </svg>
 );
@@ -340,7 +340,7 @@ export default function SettingsPage() {
         <div className="mrd ng-container" style={{ padding: "32px var(--layout-gutter) 56px" }}>
           {/* Page header — SaaS title block, matching meal/gym */}
           <div className="m-in" style={{ marginBottom: 28 }}>
-            <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--ac)", margin: "0 0 8px" }}>Workspace · Settings</p>
+            <p className="g-eyebrow" style={{ margin: "0 0 8px" }}>Workspace · Settings</p>
             <h1 className="m-h1" style={{ margin: 0 }}>Settings</h1>
             <div className="m-sub">Daily goals, appearance, account, and session.</div>
           </div>

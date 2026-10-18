@@ -1,12 +1,21 @@
-import { Inter, Playfair_Display } from "next/font/google";
+import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 /* Meridian design system — shared tokens + components for every surface. */
 import "./meridian.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import LenisProvider from "@/components/LenisProvider";
-const inter = Inter({
-  variable: "--font-inter",
+/* Geist — the app's type system (Geist Sans for UI + prose, Geist Mono for
+   technical eyebrows, code, and tabular figures). Playfair stays scoped to
+   the marketing page's display headings. */
+const geist = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
   subsets: ["latin"],
   display: "swap",
 });
@@ -41,7 +50,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${playfair.variable} antialiased`}
+        className={`${geist.variable} ${geistMono.variable} ${playfair.variable} antialiased`}
         suppressHydrationWarning
       >
         <script

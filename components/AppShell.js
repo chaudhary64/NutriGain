@@ -95,16 +95,16 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
     >
       <span
         aria-hidden="true"
-        className="w-6 h-6 rounded-md bg-[var(--shell-ink)] text-[var(--shell-on-ink)] flex items-center justify-center text-[11px] font-extrabold leading-none select-none" style={{ flex: "none" }}
+        className="w-6 h-6 rounded-md bg-[var(--shell-ink)] text-[var(--shell-on-ink)] flex items-center justify-center text-[11px] font-semibold leading-none select-none" style={{ flex: "none" }}
       >
         N.
       </span>
-      <span className="text-[13px] font-extrabold uppercase tracking-[0.24em] leading-none whitespace-nowrap text-[var(--shell-ink)]">
+      <span className="text-[13px] font-semibold uppercase tracking-[0.22em] leading-none whitespace-nowrap text-[var(--shell-ink)]">
         NUTRIGAIN<span className="text-[var(--shell-accent)]">.</span>
       </span>
       {isAdmin && (
-        <span className="hidden xl:inline-flex items-center font-mono text-[8.5px] font-semibold uppercase tracking-[0.14em] text-[var(--shell-accent)] bg-[var(--shell-accent-soft)] border border-[var(--shell-line)] rounded px-1.5 py-[3px] whitespace-nowrap">
-          Master Control Terminal
+        <span className="hidden lg:inline-flex items-center font-mono text-[9px] font-medium uppercase tracking-[0.12em] text-[var(--shell-muted)] bg-[var(--shell-sunken)] border border-[var(--shell-line)] rounded-[4px] px-1.5 py-[2px] whitespace-nowrap">
+          Admin
         </span>
       )}
     </Link>
@@ -220,18 +220,18 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
             <>
               <Link
                 href="/dashboard"
-                className="hidden sm:inline text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--shell-ink)] hover:text-[var(--shell-accent)] transition-colors"
+                className="hidden sm:inline text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--shell-ink-2)] hover:text-[var(--shell-ink)] transition-colors"
               >
                 Dashboard
               </Link>
               <span className="hidden sm:flex items-center gap-2 min-w-0">
                 <span
                   aria-hidden="true"
-                  className="w-7 h-7 rounded-lg bg-[var(--shell-sunken)] border border-[var(--shell-line)] text-[var(--shell-ink)] flex items-center justify-center text-[10px] font-extrabold" style={{ flex: "none" }}
+                  className="w-7 h-7 rounded-md bg-[var(--shell-sunken)] border border-[var(--shell-line)] text-[var(--shell-ink)] flex items-center justify-center text-[10px] font-semibold" style={{ flex: "none" }}
                 >
                   {initials}
                 </span>
-                <span className="text-[12px] font-bold text-[var(--shell-ink)] max-w-[140px] truncate">
+                <span className="text-[12px] font-medium text-[var(--shell-ink)] max-w-[140px] truncate">
                   {user.name}
                 </span>
               </span>
@@ -241,13 +241,13 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
             <>
               <Link
                 href="/login"
-                className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--shell-muted)] hover:text-[var(--shell-ink)] transition-colors"
+                className="text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--shell-muted)] hover:text-[var(--shell-ink)] transition-colors"
               >
                 Login
               </Link>
               <Link
                 href="/register"
-                className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[var(--shell-on-accent)] bg-[var(--shell-accent)] hover:opacity-90 transition-opacity rounded-lg px-4 py-2"
+                className="text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--shell-on-accent)] bg-[var(--shell-accent)] hover:opacity-90 transition-opacity rounded-md px-4 py-2"
               >
                 Get started
               </Link>

@@ -18,39 +18,40 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, R
 
 const STATS_CSS = `
 .st{color:var(--t1)}
-.st .m-card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 18px;border-bottom:1px solid var(--line)}
-.st .m-card-h h3{font-size:13px;font-weight:700;color:var(--t1);margin:0}
-/* Range segmented control */
-.st-seg{display:inline-flex;gap:4px;background:var(--sunken);border:1px solid var(--line);border-radius:10px;padding:4px}
-.st-seg button{border:0;background:transparent;font:inherit;font-size:12.5px;font-weight:700;color:var(--t2);padding:6px 14px;border-radius:7px;cursor:pointer;transition:background .15s,color .15s}
+.st .m-card-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.st .m-card-h h3{font-size:13px;font-weight:600;letter-spacing:-.01em;color:var(--t1);margin:0}
+/* Page eyebrow — Geist Mono, spec-sheet voice */
+.st-kicker{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin:0 0 8px}
+/* Range segmented control — white rail, sunken active, ink label */
+.st-seg{display:inline-flex;gap:2px;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px}
+.st-seg button{border:0;background:transparent;font:inherit;font-size:12px;font-weight:500;color:var(--t2);padding:5px 12px;border-radius:6px;cursor:pointer;transition:background .15s,color .15s}
 .st-seg button:hover{color:var(--t1)}
-.st-seg button.on{background:var(--card);color:var(--ac);box-shadow:0 1px 3px rgba(0,0,0,.1)}
-.st-seg button:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.st-seg button.on{background:var(--sunken);color:var(--t1)}
+.st-seg button:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(0,112,243,.2)}
 /* Stat tiles */
 .st-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:10px}
-.st-tile{background:var(--sunken);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
-.st-tile b{display:block;font-size:19px;font-weight:800;letter-spacing:-.02em;color:var(--t1);font-variant-numeric:tabular-nums}
-.st-tile span{display:block;font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);margin-top:3px}
-.st-delta{font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
+.st-tile{background:var(--sunken);border:1px solid var(--line);border-radius:6px;padding:11px 13px}
+.st-tile b{display:block;font-size:20px;font-weight:600;letter-spacing:-.03em;color:var(--t1);font-variant-numeric:tabular-nums;line-height:1.15}
+.st-tile > span:not(.st-delta){display:block;font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin-top:4px}
+.st-delta{display:inline-block;font-size:11px;font-weight:500;font-variant-numeric:tabular-nums;margin-top:3px;color:var(--t3)}
 .st-delta.over{color:var(--car)}
 .st-delta.under{color:var(--t3)}
 .st-delta.on{color:var(--green)}
 /* Weekly rows */
 .st-week{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:12.5px}
 .st-week:last-child{border-bottom:0}
-.st-week .st-wk-date{width:96px;color:var(--t2);font-weight:600;flex-shrink:0}
-.st-week .st-wk-bar{flex:1;height:6px;border-radius:3px;background:var(--track,#efefec);overflow:hidden}
-html[data-theme="dark"] .st .st-week .st-wk-bar{background:var(--track,#2e2e34)}
-.st-week .st-wk-bar i{display:block;height:100%;border-radius:3px;background:var(--ac)}
-.st-week .st-wk-val{width:150px;text-align:right;color:var(--t1);font-weight:700;font-variant-numeric:tabular-nums;flex-shrink:0}
+.st-week .st-wk-date{width:96px;color:var(--t2);font-weight:400;flex-shrink:0}
+.st-week .st-wk-bar{flex:1;height:6px;border-radius:999px;background:var(--track);overflow:hidden}
+.st-week .st-wk-bar i{display:block;height:100%;border-radius:999px;background:var(--ac)}
+.st-week .st-wk-val{width:150px;text-align:right;color:var(--t1);font-weight:500;font-variant-numeric:tabular-nums;flex-shrink:0}
 /* Consistency legend */
-.st-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:11px;font-weight:600;color:var(--t3)}
-.st-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px;border:1px solid var(--line)}
-.st-empty{padding:18px;border:1px dashed var(--line);border-radius:10px;font-size:13px;color:var(--t3);text-align:center}
+.st-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:11px;font-weight:400;color:var(--t3)}
+.st-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px;border:1px solid var(--line)}
+.st-empty{padding:20px;border:1px dashed var(--line);border-radius:6px;font-size:13px;color:var(--t3);text-align:center;background:var(--card-2)}
 /* Year switcher — GitHub-profile model, shared with the gym card: one
    calendar on screen; the chip row in the card header selects the year. */
 .gy-year-tabs{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.gy-year-tab{appearance:none;border:1px solid var(--line);background:var(--sunken);color:var(--t2);font:inherit;font-size:12px;font-weight:800;letter-spacing:.06em;font-variant-numeric:tabular-nums;padding:4px 12px;border-radius:999px;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+.gy-year-tab{appearance:none;border:1px solid var(--line);background:var(--card);color:var(--t2);font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.06em;font-variant-numeric:tabular-nums;padding:4px 11px;border-radius:999px;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
 .gy-year-tab:hover{color:var(--t1);border-color:var(--t2)}
 .gy-year-tab.is-active{background:var(--ac);border-color:var(--ac);color:var(--on-ac)}
 .gy-year-map{overflow-x:auto;width:100%;max-width:100%}
@@ -58,13 +59,13 @@ html[data-theme="dark"] .st .st-week .st-wk-bar{background:var(--track,#2e2e34)}
 /* Inline loading + error states (same ring language as components/Loader) */
 .st-loading{display:flex;flex-direction:column;align-items:center;gap:16px;padding:64px 0;color:var(--t3)}
 .st-loading i{display:block;width:32px;height:32px;border-radius:9999px;border:3px solid var(--line);border-top-color:var(--ac);animation:st-spin .8s linear infinite}
-.st-loading p{font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin:0}
+.st-loading p{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;margin:0}
 @keyframes st-spin{to{transform:rotate(360deg)}}
-.st-error{display:flex;flex-direction:column;align-items:flex-start;gap:14px;padding:22px;border:1px solid var(--red-soft-b);background:var(--red-soft);border-radius:12px}
-.st-error p{font-size:13px;font-weight:600;color:var(--red);margin:0}
-.st-error button{font:inherit;font-size:13px;font-weight:700;color:var(--on-ac);background:var(--red);border:none;border-radius:8px;padding:9px 16px;cursor:pointer}
-.st-error button:hover{filter:brightness(.94)}
-.st-error button:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+.st-error{display:flex;flex-direction:column;align-items:flex-start;gap:14px;padding:20px;border:1px solid var(--red-soft-b);background:var(--red-soft);border-radius:6px}
+.st-error p{font-size:13px;font-weight:400;color:var(--red);margin:0}
+.st-error button{font:inherit;font-size:13px;font-weight:500;color:var(--on-ac);background:var(--red);border:none;border-radius:6px;padding:8px 14px;cursor:pointer;transition:background .15s}
+.st-error button:hover{background:var(--red-deep)}
+.st-error button:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(0,112,243,.2)}
 /* minmax(0,1fr): a plain 1fr track sizes to min-content, so wide
    children (charts, calendars) blow the column out on mid widths
    instead of shrinking. */
@@ -73,7 +74,7 @@ html[data-theme="dark"] .st .st-week .st-wk-bar{background:var(--track,#2e2e34)}
 `;
 
 const Icon = ({ d, className = "m-ic", style }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     {d}
   </svg>
 );
@@ -91,8 +92,9 @@ const RANGES = [7, 30, 90];
 
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-const LIGHT_RAMP = ["#ececea", "#c7d2fe", "#a5b4fc", "#818cf8", "#4f46e5"];
-const DARK_RAMP = ["#2e2e34", "#3730a3", "#4f46e5", "#818cf8", "#a5b4fc"];
+/* Ink scale — the calendar reads as a print density ramp, not a colour key. */
+const LIGHT_RAMP = ["#f2f2f2", "#d4d4d4", "#a1a1a1", "#6b6b6b", "#171717"];
+const DARK_RAMP = ["#1f1f1f", "#333333", "#666666", "#a1a1a1", "#ededed"];
 
 /**
  * Build the selected year's Jan 1 → Dec 31 day list from the sparse
@@ -230,9 +232,9 @@ export default function StatsPage() {
   // both themes — solid enough to read on the calendar's grid.
   const dark = theme === "dark";
   const yearFill = {
-    both: dark ? "#818cf8" : "#4f46e5",
-    meals: dark ? "#3730a3" : "#c7d2fe",
-    session: dark ? "#a78bfa" : "#7c3aed",
+    both: dark ? "#ededed" : "#171717",
+    meals: dark ? "#8f8f8f" : "#a1a1a1",
+    session: dark ? "#a78bfa" : "#7928ca",
   };
 
   const renderYearHeatmap = () => {
@@ -289,7 +291,7 @@ export default function StatsPage() {
         {/* Header + range selector */}
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginBottom: 24 }}>
           <div>
-            <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--ac)", margin: "0 0 8px" }}>Insights · Trends</p>
+            <p className="st-kicker">Insights · Trends</p>
             <div className="m-h1">Progress</div>
             <div className="m-sub">Nutrition, training, and consistency — one window at a time.</div>
           </div>
@@ -319,7 +321,7 @@ export default function StatsPage() {
         )}
 
         {stats && error && !loading && (
-          <p className="m-crumb" role="alert" style={{ color: "var(--red)", fontWeight: 600, margin: "-8px 0 12px" }}>
+          <p className="m-crumb" role="alert" style={{ color: "var(--red)", fontWeight: 400, margin: "-8px 0 12px" }}>
             Couldn&apos;t refresh — showing the last loaded data.
           </p>
         )}
@@ -344,7 +346,7 @@ export default function StatsPage() {
               </div>
               <div style={{ padding: 18 }}>
                 {weightError && weightRows.length > 0 && (
-                  <p className="m-crumb" role="alert" style={{ color: "var(--red)", fontWeight: 600, margin: "0 0 12px" }}>
+                  <p className="m-crumb" role="alert" style={{ color: "var(--red)", fontWeight: 400, margin: "0 0 12px" }}>
                     Couldn&apos;t refresh your weight — showing the last loaded entries.
                   </p>
                 )}
@@ -358,10 +360,9 @@ export default function StatsPage() {
                 ) : weightRows.length < 2 ? (
                   <div className="st-empty">
                     Need at least two weight entries to draw a trend.
-                    <div style={{ marginTop: 10 }}>
-                      <Link href="/dashboard/gym" className="m-crumb" style={{ color: "var(--ac)", fontWeight: 700 }}>
-                        Log your weight →
-                      </Link>
+                    <div style={{ marginTop: 10 }}>                        <Link href="/dashboard/gym" className="m-crumb" style={{ color: "var(--t1)", fontWeight: 500 }}>
+                          Log your weight →
+                        </Link>
                     </div>
                   </div>
                 ) : (
@@ -380,13 +381,13 @@ export default function StatsPage() {
                           />
                           <YAxis domain={["dataMin - 1", "dataMax + 1"]} tick={{ fontSize: 10, fill: "var(--t3)" }} axisLine={false} tickLine={false} width={34} />
                           <Tooltip
-                            contentStyle={{ backgroundColor: "var(--card)", border: "1px solid var(--line)", borderRadius: "8px", fontSize: 12 }}
-                            itemStyle={{ color: "var(--t1)", fontWeight: 600 }}
+                            contentStyle={{ backgroundColor: "var(--card)", border: "1px solid var(--line)", borderRadius: "6px", fontSize: 12, boxShadow: "var(--ng-shadow-2)" }}
+                            itemStyle={{ color: "var(--t1)", fontWeight: 500 }}
                             labelStyle={{ color: "var(--t3)" }}
                             labelFormatter={(label) => format(parseISO(`${label}T00:00:00`), "MMMM d, yyyy")}
                           />
                           <ReferenceLine y={weight.targetWeight} stroke="var(--ac)" strokeDasharray="4 4" />
-                          <Line type="monotone" dataKey="weight" stroke="#4f46e5" strokeWidth={2} dot={{ fill: "var(--card)", stroke: "#4f46e5", strokeWidth: 2, r: 3 }} activeDot={{ r: 4 }} />
+                          <Line type="monotone" dataKey="weight" stroke="var(--ac)" strokeWidth={2} dot={{ fill: "var(--card)", stroke: "var(--ac)", strokeWidth: 2, r: 3 }} activeDot={{ r: 4 }} />
                         </LineChart>
                       </ResponsiveContainer>
                     </div>
@@ -467,7 +468,7 @@ export default function StatsPage() {
                   <div className="st-empty">
                     No meals logged in this window yet.
                     <div style={{ marginTop: 10 }}>
-                      <Link href="/dashboard/meal" className="m-crumb" style={{ color: "var(--ac)", fontWeight: 700 }}>
+                      <Link href="/dashboard/meal" className="m-crumb" style={{ color: "var(--t1)", fontWeight: 500 }}>
                         Log your first meal →
                       </Link>
                     </div>
@@ -531,7 +532,7 @@ export default function StatsPage() {
                   <div className="st-empty">
                     No sessions logged in this window.
                     <div style={{ marginTop: 10 }}>
-                      <Link href="/dashboard/gym" className="m-crumb" style={{ color: "var(--ac)", fontWeight: 700 }}>
+                      <Link href="/dashboard/gym" className="m-crumb" style={{ color: "var(--t1)", fontWeight: 500 }}>
                         Log today&apos;s workout →
                       </Link>
                     </div>

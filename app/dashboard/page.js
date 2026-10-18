@@ -16,28 +16,33 @@ import { FALLBACK_MACRO_GOALS } from "@/lib/goals";
 /* Gym, and Progress, so a second copy of those links earned nothing.  */
 /* What a landing page owes the athlete is the state of TODAY — macros  */
 /* against targets, streak, weight, and the split — with logging one    */
-/* click away. Tokens are the shared Meridian set; every rule is       */
+/* click away. Tokens are the shared Geist set; every rule is          */
 /* scoped to .today so nothing leaks into sibling pages.                */
 /* ------------------------------------------------------------------ */
 
 const TODAY_CSS = `
 .today{color:var(--t1)}
 .today-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
-.today-kicker{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ac);margin:0 0 8px}
-.today-h1{font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1.1;margin:0;color:var(--t1)}
-.today-sub{font-size:13.5px;font-weight:500;color:var(--t2);margin:7px 0 0}
+/* The page's one flourish: the brand mesh, bled behind the masthead only
+   and faded out before it can touch the cards. */
+.today-hero{position:relative;overflow:hidden}
+.today-hero .g-mesh{inset:-48px -28px 0;opacity:.85;-webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.5) 62%,transparent 100%);mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.5) 62%,transparent 100%)}
+.today-hero>.today-head{position:relative;z-index:1}
+.today-kicker{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin:0 0 10px}
+.today-h1{font-size:28px;font-weight:600;letter-spacing:-.03em;line-height:1.1;margin:0;color:var(--t1)}
+.today-sub{font-size:13px;font-weight:400;color:var(--t2);margin:8px 0 0}
 .today-acts{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 /* Header stat — the one body metric that no card owns, carried inline */
 .today-head-end{display:flex;flex-direction:column;align-items:flex-end;gap:12px}
-.today-weigh{display:flex;align-items:baseline;gap:9px;margin:0;font-size:12px;font-weight:600;color:var(--t3)}
-.today-weigh-k{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
-.today-weigh b{font-size:14px;font-weight:800;color:var(--t1);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.today-weigh{display:flex;align-items:baseline;gap:9px;margin:0;font-size:12px;font-weight:400;color:var(--t3)}
+.today-weigh-k{font-family:var(--font-mono);font-size:10.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+.today-weigh b{font-size:14px;font-weight:600;color:var(--t1);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
 /* Stat tile — inset stats inside cards */
-.today-tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
-.today-tile-k{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);display:block}
-.today-tile-v{display:block;font-size:24px;font-weight:800;letter-spacing:-.02em;color:var(--t1);font-variant-numeric:tabular-nums;line-height:1.15;margin-top:6px}
-.today-tile-v small{font-size:13px;font-weight:600;color:var(--t3);letter-spacing:0}
-.today-tile-m{display:block;font-size:12px;font-weight:600;color:var(--t3);margin-top:4px}
+.today-tile{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:14px 16px}
+.today-tile-k{font-family:var(--font-mono);font-size:10.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);display:block}
+.today-tile-v{display:block;font-size:24px;font-weight:600;letter-spacing:-.03em;color:var(--t1);font-variant-numeric:tabular-nums;line-height:1.15;margin-top:6px}
+.today-tile-v small{font-size:13px;font-weight:400;color:var(--t3);letter-spacing:0}
+.today-tile-m{display:block;font-size:12px;font-weight:400;color:var(--t3);margin-top:4px}
 /* Two-column body: targets rail + today's training */
 .today-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;align-items:start}
 @media(min-width:1000px){.today-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
@@ -45,9 +50,9 @@ const TODAY_CSS = `
 .today-meter{padding:15px 18px;border-bottom:1px solid var(--line)}
 .today-meter:last-child{border-bottom:0}
 .today-meter-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:8px}
-.today-meter-name{font-size:13px;font-weight:600;color:var(--t1)}
-.today-meter-val{font-size:13px;font-weight:700;color:var(--t1);font-variant-numeric:tabular-nums}
-.today-meter-val u{text-decoration:none;color:var(--t3);font-weight:600}
+.today-meter-name{font-size:13px;font-weight:400;color:var(--t1)}
+.today-meter-val{font-size:13px;font-weight:500;color:var(--t1);font-variant-numeric:tabular-nums}
+.today-meter-val u{text-decoration:none;color:var(--t3);font-weight:400}
 .today-meter-val.over{color:var(--red)}
 .today-meter-val.near{color:var(--ac)}
 .today-track{height:7px;border-radius:999px;background:var(--track);overflow:hidden}
@@ -55,40 +60,40 @@ const TODAY_CSS = `
 .today-track i.over{background:var(--red)!important}
 /* Split row */
 .today-split{display:flex;flex-wrap:wrap;gap:7px;padding:16px 18px}
-.today-chip{font-size:12px;font-weight:700;padding:5px 11px;border-radius:7px;background:var(--ac-soft);color:var(--ac);border:1px solid transparent}
+.today-chip{font-size:12px;font-weight:500;padding:5px 11px;border-radius:6px;background:var(--sunken);color:var(--t2);border:1px solid transparent}
 .today-chip.rest{background:var(--sunken);color:var(--t3);border-color:var(--line)}
-.today-status{display:flex;align-items:center;gap:9px;padding:14px 18px;border-top:1px solid var(--line);font-size:12.5px;font-weight:600;color:var(--t2)}
+.today-status{display:flex;align-items:center;gap:9px;padding:14px 18px;border-top:1px solid var(--line);font-size:12.5px;font-weight:400;color:var(--t2)}
 .today-dot{width:8px;height:8px;border-radius:50%;background:var(--t3);flex:none}
 .today-dot.done{background:var(--green)}
 .today-dot.part{background:var(--car)}
-.today-empty{padding:24px 18px;text-align:center;font-size:13px;color:var(--t3);font-weight:600}
+.today-empty{padding:24px 18px;text-align:center;font-size:13px;color:var(--t3);font-weight:400}
 .today-empty .m-btn{margin-top:14px}
 /* Help — contextual, toggled from the header, never in the reading path by default */
-.today-help-btn{width:35px;height:35px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--t2);font-size:14px;font-weight:800;line-height:1;cursor:pointer;transition:.15s;padding:0}
+.today-help-btn{width:35px;height:35px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--t2);font-size:13px;font-weight:500;line-height:1;cursor:pointer;transition:.15s;padding:0}
 .today-help-btn:hover{background:var(--sunken);color:var(--t1)}
 .today-help{margin:0 0 20px;padding:15px 18px;background:var(--card);border:1px solid var(--line);border-radius:12px;font-size:13px;color:var(--t2);line-height:1.65}
 .today-help ul{margin:0;padding-left:18px}
 .today-help li{margin:3px 0}
-.today-help b{color:var(--t1);font-weight:700}
+.today-help b{color:var(--t1);font-weight:600}
 /* Pending + failed states — never assert a number we do not have */
-.today-pend{display:inline-block;width:88px;height:13px;border-radius:5px;background:var(--track)}
+.today-pend{display:inline-block;width:88px;height:13px;border-radius:3px;background:var(--track)}
 .today-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:16px 18px}
 .today-stats .today-tile{border:0;background:var(--sunken);padding:12px 13px}
-.today-stale{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:16px 18px;font-size:12.5px;font-weight:600;color:var(--t2)}
-.today-stale-btn{font:inherit;font-weight:700;font-size:12.5px;color:var(--ac);background:var(--card);border:1px solid var(--line);border-radius:7px;padding:6px 12px;cursor:pointer;transition:.15s}
+.today-stale{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:16px 18px;font-size:12.5px;font-weight:400;color:var(--t2)}
+.today-stale-btn{font:inherit;font-weight:500;font-size:12.5px;color:var(--t1);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer;transition:.15s}
 .today-stale-btn:hover:not(:disabled){background:var(--sunken)}
 .today-stale-btn:disabled{opacity:.6;cursor:wait}
-.today-weigh-retry{font:inherit;font-size:12px;font-weight:700;color:var(--ac);background:none;border:0;padding:0;cursor:pointer}
+.today-weigh-retry{font:inherit;font-size:12px;font-weight:500;color:var(--t1);background:none;border:0;padding:0;cursor:pointer}
 .today-weigh-retry:disabled{opacity:.6;cursor:wait}
 /* Column stack — both sides size to their content */
 .today-col{display:grid;gap:20px;align-content:start}
 /* Today's log — one row per meal entry */
 .today-entry{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line);font-size:13px}
 .today-entry:last-child{border-bottom:0}
-.today-entry-n{flex:1;min-width:0;font-weight:600;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.today-entry-t{display:block;font-size:12px;color:var(--t3);font-weight:500;margin-top:2px}
-.today-entry-k{flex:none;font-weight:700;color:var(--t1);font-variant-numeric:tabular-nums}
-.today-entry-k u{text-decoration:none;color:var(--t3);font-weight:600;font-size:11px}
+.today-entry-n{flex:1;min-width:0;font-weight:500;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.today-entry-t{display:block;font-size:12px;color:var(--t3);font-weight:400;margin-top:2px}
+.today-entry-k{flex:none;font-weight:500;color:var(--t1);font-variant-numeric:tabular-nums}
+.today-entry-k u{text-decoration:none;color:var(--t3);font-weight:400;font-size:11px}
 `;
 
 const MACROS = [
@@ -315,7 +320,9 @@ export default function TodayPage() {
         aria-busy={loading || undefined}
       >
         {/* ---------- Header ---------- */}
-        <header className="today-head">
+        <div className="today-hero">
+          <div className="g-mesh" aria-hidden="true" />
+          <header className="today-head">
           <div>
             <p className="today-kicker">
               {format(new Date(), "EEEE, MMMM d")}
@@ -365,7 +372,8 @@ export default function TodayPage() {
               </button>
             </div>
           </div>
-        </header>
+          </header>
+        </div>
 
         {/* Contextual help — one toggle, task-focused, out of the reading path. */}
         {helpOpen && (
@@ -411,7 +419,7 @@ export default function TodayPage() {
           <section className="m-card" aria-label="Today's log">
             <div className="m-card-h">
               <h2>Today&apos;s log</h2>
-              <Link href="/dashboard/meal" className="m-crumb" style={{ color: "var(--ac)", fontWeight: 700 }}>
+              <Link href="/dashboard/meal" className="m-crumb" style={{ color: "var(--t1)", fontWeight: 500 }}>
                 Add a meal →
               </Link>
             </div>
@@ -455,7 +463,7 @@ export default function TodayPage() {
             <section className="m-card" aria-label="Today's split">
               <div className="m-card-h">
                 <h2>Today&apos;s split</h2>
-                <Link href="/dashboard/gym" className="m-crumb" style={{ color: "var(--ac)", fontWeight: 700 }}>
+                <Link href="/dashboard/gym" className="m-crumb" style={{ color: "var(--t1)", fontWeight: 500 }}>
                   Open gym →
                 </Link>
               </div>
@@ -493,7 +501,7 @@ export default function TodayPage() {
             <section className="m-card" aria-label="Recent consistency">
               <div className="m-card-h">
                 <h2>Consistency</h2>
-                <Link href="/dashboard/stats" className="m-crumb" style={{ color: "var(--ac)", fontWeight: 700 }}>
+                <Link href="/dashboard/stats" className="m-crumb" style={{ color: "var(--t1)", fontWeight: 500 }}>
                   All progress →
                 </Link>
               </div>

@@ -23,44 +23,44 @@ const SPLIT_GROUPS = [
 const SPLIT_CSS = `
 .splitmgr{color:var(--t1)}
 .splitmgr .sm-card{background:var(--card);border:1px solid var(--line);border-radius:12px}
-.splitmgr .sm-card-h{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line);gap:12px;flex-wrap:wrap}
-.splitmgr .sm-card-h :is(h2,h3){font-size:13px;font-weight:700;color:var(--t1);display:flex;align-items:center;gap:10px;margin:0}
-.splitmgr .sm-btn{appearance:none;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600;padding:6px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--t1);cursor:pointer;transition:.15s}
+.splitmgr .sm-card-h{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line);gap:12px;flex-wrap:wrap}
+.splitmgr .sm-card-h :is(h2,h3){font-size:13px;font-weight:600;letter-spacing:-.01em;color:var(--t1);display:flex;align-items:center;gap:10px;margin:0}
+.splitmgr .sm-btn{appearance:none;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:500;letter-spacing:-.01em;line-height:20px;padding:6px 12px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--t1);cursor:pointer;transition:background .15s ease,color .15s ease,border-color .15s ease}
 .splitmgr .sm-btn:hover{background:var(--sunken)}
-.splitmgr .sm-btn:disabled{opacity:.55;cursor:default}
+.splitmgr .sm-btn:disabled{opacity:.5;cursor:default}
 .splitmgr .sm-btn-primary{background:var(--ac);border-color:var(--ac);color:var(--on-ac)}
-.splitmgr .sm-btn-primary:hover{background:var(--ac);filter:brightness(1.06)}
+.splitmgr .sm-btn-primary:hover{background:var(--ach);border-color:var(--ach)}
 .splitmgr .sm-body{padding:18px}
 .splitmgr .sm-provenance{margin:0 0 10px;font-size:12px;color:var(--t2)}
 .splitmgr .sm-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
 @media (max-width:640px){.splitmgr .sm-grid{grid-template-columns:repeat(4,1fr)}}
-.splitmgr .sm-day{display:flex;flex-direction:column;gap:3px;padding:9px 8px;border:1px solid var(--line);border-radius:9px;background:var(--card)}
+.splitmgr .sm-day{display:flex;flex-direction:column;gap:3px;padding:9px 8px;border:1px solid var(--line);border-radius:6px;background:var(--card)}
 /* Editorial variant — de-boxed chrome; gym page consumes this instead of
    overriding .splitmgr from page CSS. */
 .splitmgr-ed .sm-card{background:transparent;border:0;border-radius:0;box-shadow:none}
 .splitmgr-ed .sm-card-h{border-bottom:0;padding:0 0 10px}
-.splitmgr-ed .sm-card-h :is(h2,h3){font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--t3)}
-.splitmgr .sm-day b{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
-.splitmgr .sm-day span{font-size:12px;font-weight:600;color:var(--t1);line-height:1.3}
+.splitmgr-ed .sm-card-h :is(h2,h3){font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+.splitmgr .sm-day b{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+.splitmgr .sm-day span{font-size:12px;font-weight:500;color:var(--t1);line-height:1.35}
 .splitmgr .sm-day.rest span{color:var(--t3)}
-.splitmgr .sm-day.today{border-color:var(--ac-soft-b);background:var(--ac-soft)}
-.splitmgr .sm-day.today b{color:var(--ac)}
+.splitmgr .sm-day.today{border-color:var(--t1);background:var(--sunken)}
+.splitmgr .sm-day.today b{color:var(--t1)}
 .splitmgr .sm-edit-grid{display:flex;flex-direction:column;gap:10px}
 .splitmgr .sm-edit-row{display:grid;grid-template-columns:64px minmax(0,1fr);gap:10px;align-items:center}
-.splitmgr .sm-edit-row>b{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
+.splitmgr .sm-edit-row>b{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
 .splitmgr .sm-chips{display:flex;flex-wrap:wrap;gap:6px}
-.splitmgr .sm-chip{appearance:none;font-family:inherit;font-size:12px;font-weight:600;padding:5px 10px;border-radius:7px;border:1px solid var(--line);background:var(--card);color:var(--t2);cursor:pointer;transition:.15s}
-.splitmgr .sm-chip:hover{border-color:var(--ac-soft-b);color:var(--t1)}
+.splitmgr .sm-chip{appearance:none;font-family:inherit;font-size:12px;font-weight:500;padding:5px 10px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--t2);cursor:pointer;transition:background .15s ease,color .15s ease,border-color .15s ease}
+.splitmgr .sm-chip:hover{border-color:var(--t1);color:var(--t1)}
 .splitmgr .sm-chip[aria-pressed="true"]{background:var(--ac);border-color:var(--ac);color:var(--on-ac)}
 .splitmgr .sm-gallery{margin-top:14px;display:grid;gap:10px;border-top:1px solid var(--line);padding-top:14px}
-.splitmgr .sm-tpl{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
-.splitmgr .sm-tpl b{display:block;font-size:13px;font-weight:700;color:var(--t1)}
-.splitmgr .sm-tpl p{font-size:12px;color:var(--t3);margin:2px 0 0}
+.splitmgr .sm-tpl{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+.splitmgr .sm-tpl b{display:block;font-size:13px;font-weight:600;letter-spacing:-.01em;color:var(--t1)}
+.splitmgr .sm-tpl p{font-size:12px;font-weight:400;color:var(--t2);margin:2px 0 0}
 .splitmgr .sm-ic{width:16px;height:16px;flex-shrink:0}
 `;
 
 const SmIcon = ({ d }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="sm-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" className="sm-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     {d}
   </svg>
 );
@@ -219,7 +219,7 @@ export default function SplitManager({ initialDays, initialSource, onChanged, pu
         <div className="sm-body">
           {source && !editing && (
             <p className="sm-provenance">
-              Based on <b style={{ color: "var(--t2)", fontWeight: 700 }}>{source}</b> — edit freely, it&apos;s yours now.
+              Based on <b style={{ color: "var(--t2)", fontWeight: 500 }}>{source}</b> — edit freely, it&apos;s yours now.
             </p>
           )}
           {!editing ? (
@@ -275,11 +275,11 @@ export default function SplitManager({ initialDays, initialSource, onChanged, pu
 
           {showGallery && !editing && (
             <div className="sm-gallery">
-              <p style={{ margin: 0, fontSize: 12, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--t3)" }}>
+              <p style={{ margin: 0, fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 500, letterSpacing: ".06em", textTransform: "uppercase", color: "var(--t3)" }}>
                 Start from a template
               </p>
               {templates.length === 0 ? (
-                <p style={{ margin: 0, fontSize: 12, color: "var(--t3)" }}>No templates published yet.</p>
+                <p style={{ margin: 0, fontSize: 12, color: "var(--t2)" }}>No templates published yet.</p>
               ) : (
                 templates.map((tpl) => (
                   <div key={tpl._id} className="sm-tpl">

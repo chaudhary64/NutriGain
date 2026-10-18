@@ -18,72 +18,65 @@ import {
   Legend,
 } from "recharts";
 
-/* ============ Meridian Admin — theme tokens (mirror of the dashboard systems) ============ */
+/* ============ Geist Admin — ink, hairline, mono eyebrows ============ */
 const ADM_CSS = `
 .adm{color:var(--t1);font-family:inherit}
-.adm-h1{font-size:24px;font-weight:800;letter-spacing:-.02em;color:var(--t1);margin:0}
-.adm-ava{width:56px;height:56px;border-radius:14px;background:var(--ac-soft);color:var(--ac);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;flex-shrink:0}
+.adm-h1{font-size:24px;font-weight:600;letter-spacing:-.03em;color:var(--t1);margin:0}
+.adm-ava{width:56px;height:56px;border-radius:var(--ng-r-md,12px);background:var(--sunken);border:1px solid var(--line);color:var(--t1);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:600;flex-shrink:0}
 .adm-grid{display:grid;grid-template-columns:1fr;gap:16px}
 @media(min-width:768px){.adm-grid{grid-template-columns:repeat(2,1fr)}}
 @media(min-width:1024px){.adm-grid{grid-template-columns:repeat(4,1fr)}}
-.adm-stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
-.adm-stat-lbl{display:flex;align-items:center;gap:8px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
-.adm-stat-lbl svg{color:var(--t2)}
-.adm-stat b{display:block;font-size:26px;font-weight:800;letter-spacing:-.02em;color:var(--t1);margin-top:10px;font-variant-numeric:tabular-nums}
-.adm-stat small{display:block;font-size:11px;font-weight:600;color:var(--t3);margin-top:4px}
+.adm-stat{background:var(--card);border:1px solid var(--line);border-radius:var(--ng-r-md,12px);padding:18px}
+.adm-stat-lbl{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+.adm-stat-lbl svg{color:var(--t3);stroke-width:1.5}
+.adm-stat b{display:block;font-size:26px;font-weight:600;letter-spacing:-.03em;color:var(--t1);margin-top:10px;font-variant-numeric:tabular-nums}
+.adm-stat small{display:block;font-size:12px;font-weight:400;color:var(--t3);margin-top:4px}
 .adm-sec{padding:20px}
-.adm-sec h3{font-size:16px;font-weight:800;letter-spacing:-.01em;color:var(--t1);margin:0 0 16px}
+.adm-sec h3{font-size:15px;font-weight:600;letter-spacing:-.02em;color:var(--t1);margin:0 0 16px}
 .adm-m4{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 @media(min-width:768px){.adm-m4{grid-template-columns:repeat(4,1fr)}}
-.adm-metric{text-align:center;padding:16px 12px;background:var(--sunken);border-radius:11px}
-.adm-metric span{display:block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
-.adm-metric b{display:block;font-size:22px;font-weight:800;color:var(--t1);margin-top:5px;font-variant-numeric:tabular-nums}
-.adm-metric b.cal{color:var(--car)}
-.adm-metric b.pro{color:var(--pro)}
-.adm-metric b.car{color:var(--car)}
-.adm-metric b.fat{color:var(--green)}
+.adm-metric{text-align:center;padding:16px 12px;background:var(--sunken);border-radius:var(--ng-r-sm,6px)}
+.adm-metric span{display:block;font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+.adm-metric b{display:block;font-size:22px;font-weight:600;letter-spacing:-.02em;color:var(--t1);margin-top:5px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+/* Macro colour lives in the charts, not the numbers — keep the metric ink. */
+.adm-metric b.cal,.adm-metric b.pro,.adm-metric b.car,.adm-metric b.fat{color:var(--t1)}
 .adm-logs{display:flex;flex-direction:column;gap:12px}
-.adm-log{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;cursor:pointer;transition:border-color .15s ease}
-.adm-log:hover{border-color:var(--ac-soft-b)}
-.adm-log-date{font-size:14px;font-weight:700;color:var(--t1);margin:0}
-.adm-log-sub{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--t3);margin-top:3px}
+.adm-log{background:var(--card);border:1px solid var(--line);border-radius:var(--ng-r-md,12px);padding:16px;cursor:pointer;transition:border-color .15s ease}
+.adm-log:hover{border-color:var(--faint)}
+.adm-log-date{font-size:14px;font-weight:500;letter-spacing:-.01em;color:var(--t1);margin:0}
+.adm-log-sub{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin-top:3px}
 .adm-log-grid{display:grid;grid-template-columns:repeat(4,auto);gap:22px}
-.adm-log-grid span{display:block;font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--t3)}
-.adm-log-grid b{display:block;font-size:15px;font-weight:800;color:var(--t1);font-variant-numeric:tabular-nums;margin-top:2px}
-.adm-log-grid b.cal{color:var(--car)}
-.adm-log-grid b.pro{color:var(--pro)}
-.adm-log-grid b.car{color:var(--car)}
-.adm-log-grid b.fat{color:var(--green)}
-.adm-meal{display:flex;justify-content:space-between;align-items:center;gap:14px;background:var(--sunken);padding:13px 15px;border-radius:11px;margin-bottom:8px}
-.adm-meal b{font-size:13px;font-weight:700;color:var(--t1)}
-.adm-meal p{font-size:12px;font-weight:500;color:var(--t3);margin:2px 0 0}
-.adm-meal-v{display:flex;gap:14px;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
-.adm-meal-v .cal{color:var(--car)}
-.adm-meal-v .pro{color:var(--pro)}
-.adm-meal-v .car{color:var(--car)}
-.adm-meal-v .fat{color:var(--green)}
-.adm-empty{padding:34px 16px;text-align:center;font-size:13px;font-weight:500;color:var(--t3);background:var(--sunken);border-radius:12px}
+.adm-log-grid span{display:block;font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+.adm-log-grid b{display:block;font-size:15px;font-weight:600;color:var(--t1);font-variant-numeric:tabular-nums;margin-top:2px}
+.adm-log-grid b.cal,.adm-log-grid b.pro,.adm-log-grid b.car,.adm-log-grid b.fat{color:var(--t1)}
+.adm-meal{display:flex;justify-content:space-between;align-items:center;gap:14px;background:var(--sunken);padding:13px 15px;border-radius:var(--ng-r-sm,6px);margin-bottom:8px}
+.adm-meal b{font-size:13px;font-weight:500;color:var(--t1)}
+.adm-meal p{font-size:12px;font-weight:400;color:var(--t3);margin:2px 0 0}
+.adm-meal-v{display:flex;gap:14px;font-size:11px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--t2)}
+.adm-meal-v .cal,.adm-meal-v .pro,.adm-meal-v .car,.adm-meal-v .fat{color:var(--t2)}
+.adm-empty{padding:34px 16px;text-align:center;font-size:13px;font-weight:400;color:var(--t3);background:var(--sunken);border-radius:var(--ng-r-md,12px)}
+.adm .adm-sub{font-size:13px;font-weight:400;color:var(--t2);margin-top:2px}
 `;
 
 /* Meridian stroke icons */
 const I = {
   calendar: (
-    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M8 2v4" /><path d="M16 2v4" /><rect width="18" height="18" x="3" y="4" rx="2" /><path d="M3 10h18" /></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M8 2v4" /><path d="M16 2v4" /><rect width="18" height="18" x="3" y="4" rx="2" /><path d="M3 10h18" /></svg>
   ),
   flame: (
-    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></svg>
   ),
   bolt: (
-    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" /></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" /></svg>
   ),
   dumbbell: (
-    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
   ),
   arrow: (
-    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
   ),
   note: (
-    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /></svg>
   ),
 };
 
@@ -98,16 +91,17 @@ const useChartChrome = () => {
     return () => mo.disconnect();
   }, []);
   return {
-    grid: dark ? "#26262b" : "#e7e7e3",
-    axis: dark ? "#3a3a42" : "#c5c5c0",
-    tick: dark ? "#8b8b96" : "#6b6b76",
-    tooltipBg: dark ? "#1c1c1f" : "#ffffff",
-    tooltipBorder: dark ? "#2a2a30" : "#e7e7e3",
-    tooltipText: dark ? "#f0f0f2" : "#1a1a1e",
-    cal: dark ? "#fbbf24" : "#b45309",
-    pro: dark ? "#a78bfa" : "#7c3aed",
-    car: dark ? "#fbbf24" : "#b45309",
-    fat: dark ? "#34d399" : "#047857",
+    grid: dark ? "#262626" : "#ebebeb",
+    axis: dark ? "#333333" : "#d4d4d4",
+    tick: dark ? "#8f8f8f" : "#8f8f8f",
+    tooltipBg: dark ? "#111111" : "#ffffff",
+    tooltipBorder: dark ? "#262626" : "#ebebeb",
+    tooltipText: dark ? "#ededed" : "#171717",
+    /* Data illustration only: ink primary line, then the accent family. */
+    cal: dark ? "#ededed" : "#171717",
+    pro: dark ? "#a78bfa" : "#7928ca",
+    car: dark ? "#f5a623" : "#f5a623",
+    fat: dark ? "#3291ff" : "#0070f3",
   };
 };
 
@@ -182,11 +176,7 @@ export default function UserDetailPage() {
     <AppShell
       variant="admin"
       navSlot={
-        <button
-          onClick={() => router.push("/admin")}
-          className="adm-ghost"
-          style={{ height: 36, padding: "0 14px" }}
-        >
+        <button onClick={() => router.push("/admin")} className="adm-ghost">
           {I.arrow} Dashboard
         </button>
       }
@@ -279,12 +269,12 @@ export default function UserDetailPage() {
                       backgroundColor: chrome.tooltipBg,
                       borderColor: chrome.tooltipBorder,
                       color: chrome.tooltipText,
-                      borderRadius: 10,
+                      borderRadius: 6,
                       fontSize: 12,
-                      fontWeight: 500,
+                      fontWeight: 400,
                     }}
                   />
-                  <Line type="monotone" dataKey="calories" stroke={chrome.cal} strokeWidth={2.5} dot={{ fill: chrome.cal, strokeWidth: 0, r: 3 }} activeDot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="calories" stroke={chrome.cal} strokeWidth={2} dot={{ fill: chrome.cal, strokeWidth: 0, r: 3 }} activeDot={{ r: 4 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -302,15 +292,15 @@ export default function UserDetailPage() {
                       backgroundColor: chrome.tooltipBg,
                       borderColor: chrome.tooltipBorder,
                       color: chrome.tooltipText,
-                      borderRadius: 10,
+                      borderRadius: 6,
                       fontSize: 12,
-                      fontWeight: 500,
+                      fontWeight: 400,
                     }}
                   />
                   <Legend wrapperStyle={{ paddingTop: 14, fontSize: 12 }} />
-                  <Bar dataKey="protein" fill={chrome.pro} radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="carbs" fill={chrome.car} radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="fats" fill={chrome.fat} radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="protein" fill={chrome.pro} radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="carbs" fill={chrome.car} radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="fats" fill={chrome.fat} radius={[2, 2, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -367,7 +357,7 @@ export default function UserDetailPage() {
                   {/* Expanded meal details */}
                   {selectedLog?._id === log._id && (
                     <div className="mt-5 pt-5" style={{ borderTop: "1px solid var(--line)" }}>
-                      <h4 style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--t3)", margin: "0 0 12px" }}>
+                      <h4 style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 500, letterSpacing: ".06em", textTransform: "uppercase", color: "var(--t3)", margin: "0 0 12px" }}>
                         Meals breakdown
                       </h4>
                       <div>

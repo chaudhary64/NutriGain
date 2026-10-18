@@ -28,73 +28,89 @@
    used a particular token simply never read it.
    -------------------------------------------------------------------------- */
 
+/* Geist tokens. One ink ladder, one hairline, an ink primary, and a small
+   accent family reserved for links, focus, status and data illustration.
+   Page CSS reads these only — never a literal hex. */
 :is(.mrd, .gym, .st, .adm, .auth, .onb, .hub, .splitmgr, .er, .nf) {
-  --line: #e7e7e3;
-  --t1: #1a1a1e;
-  --t2: #5f5f68;
-  --t3: #6b6b76;
-  --ac: #4f46e5;
-  --ach: #4338ca;
-  --red: #dc2626;
-  --paper: #fafaf9;
-  --card: #fff;
-  --sunken: #f1f1ee;
-  --track: #efefec;
-  --on-ac: #fff;
-  --ac-soft: #eef2ff;
-  --ac-soft-b: #c7d2fe;
-  --green: #047857;
-  --green-soft: #ecfdf5;
-  --red-soft: #fef2f2;
-  --red-soft-b: #fecaca;
-  --pro: #7c3aed;
-  --pro-soft: #f5f3ff;
-  --car: #b45309;
-  --car-soft: #fffbeb;
+  --line: #ebebeb;
+  --hairline-soft: #f2f2f2;
+  --t1: #171717;
+  --t2: #4d4d4d;
+  --t3: #8f8f8f;
+  --faint: #a1a1a1;
+  --ac: #171717;
+  --ach: #383838;
+  --link: #0070f3;
+  --link-deep: #0761d1;
+  --red: #ee0000;
+  --red-deep: #c50000;
+  --paper: #fafafa;
+  --card: #ffffff;
+  --card-2: #fafafa;
+  --sunken: #f2f2f2;
+  --track: #f2f2f2;
+  --on-ac: #ffffff;
+  --ac-soft: #f2f2f2;
+  --ac-soft-b: #ebebeb;
+  --green: #0070f3;
+  --green-soft: #f0f7ff;
+  --red-soft: #fff5f5;
+  --red-soft-b: #ffd9d9;
+  --pro: #7928ca;
+  --pro-soft: #f8f2ff;
+  --car: #f5a623;
+  --car-soft: #fff8ec;
+  --font-mono: var(--font-geist-mono), ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
 html[data-theme="dark"] :is(.mrd, .gym, .st, .adm, .auth, .onb, .hub, .splitmgr, .er, .nf) {
-  --line: #2a2a30;
-  --t1: #f0f0f2;
-  --t2: #a1a1ac;
-  --t3: #8e8e9a;
-  --ac: #818cf8;
-  --ach: #a5b4fc;
-  --red: #f87171;
-  --paper: #111113;
-  --card: #1c1c1f;
-  --sunken: #26262b;
-  --track: #2e2e34;
-  --on-ac: #111113;
-  --ac-soft: #232347;
-  --ac-soft-b: #3730a3;
-  --green: #34d399;
-  --green-soft: #0d2a22;
-  --red-soft: #2b1b1b;
-  --red-soft-b: #5c2b2b;
+  --line: #262626;
+  --hairline-soft: #1a1a1a;
+  --t1: #ededed;
+  --t2: #a1a1a1;
+  --t3: #8f8f8f;
+  --faint: #6b6b6b;
+  --ac: #ededed;
+  --ach: #ffffff;
+  --link: #3291ff;
+  --link-deep: #0070f3;
+  --red: #ff4d4d;
+  --red-deep: #ff1a1a;
+  --paper: #0a0a0a;
+  --card: #111111;
+  --card-2: #161616;
+  --sunken: #1a1a1a;
+  --track: #1f1f1f;
+  --on-ac: #0a0a0a;
+  --ac-soft: #1f1f1f;
+  --ac-soft-b: #2e2e2e;
+  --green: #3291ff;
+  --green-soft: #0d1f33;
+  --red-soft: #2a1212;
+  --red-soft-b: #4d1a1a;
   --pro: #a78bfa;
-  --pro-soft: #2b2140;
-  --car: #fbbf24;
-  --car-soft: #3a2d10;
+  --pro-soft: #1f1633;
+  --car: #f5a623;
+  --car-soft: #2a2008;
 }
 
 /* Scope-only extras: tokens exactly one surface reads. */
 .mrd {
-  --name: #3a3a42;
+  --name: #171717;
 }
 
 html[data-theme="dark"] .mrd {
-  --name: #d4d4da;
+  --name: #ededed;
 }
 
 .gym {
-  --amber: #b45309;
-  --amber-soft: #fef3c7;
+  --amber: #f5a623;
+  --amber-soft: #fff8ec;
 }
 
 html[data-theme="dark"] .gym {
-  --amber: #fbbf24;
-  --amber-soft: #3a2d10;
+  --amber: #f5a623;
+  --amber-soft: #2a2008;
 }
 
 /* --------------------------------------------------------------------------
@@ -113,89 +129,113 @@ html[data-theme="dark"] .gym {
    scoped copies they replace.
    -------------------------------------------------------------------------- */
 
-/* Cards */
+/* Cards — hairline first; no shadow unless the surface truly floats. */
 :is(.mrd, .gym, .st) .m-card {
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--ng-r-md, 12px);
 }
 
 :is(.mrd, .gym) .m-card-h {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 18px;
+  gap: 12px;
+  padding: 14px 18px;
   border-bottom: 1px solid var(--line);
 }
 
 :is(.mrd, .gym) .m-card-h :is(h2, h3) {
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--t1);
 }
 
 /* Type + numbers */
 :is(.mrd, .gym, .st) .m-h1 {
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
   line-height: 1.15;
+  color: var(--t1);
 }
 
 :is(.mrd, .gym, .st) .m-sub {
-  color: var(--t3);
+  color: var(--t2);
   font-size: 13px;
+  font-weight: 400;
   margin-top: 4px;
 }
 
 :is(.mrd, .gym, .st) .m-crumb {
   font-size: 12px;
   color: var(--t3);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+:is(.mrd, .gym, .st) a.m-crumb:hover {
+  color: var(--t1);
+}
+
+/* Breadcrumb separators are punctuation, not emphasis. */
+:is(.mrd, .gym, .st) .m-crumb b {
+  font-weight: 400;
+  color: var(--faint);
 }
 
 :is(.mrd, .gym, .st) .m-num {
   font-variant-numeric: tabular-nums;
 }
 
+/* Section eyebrow — Geist Mono, uppercase, spec-sheet voice. */
 :is(.mrd, .gym, .st) .m-lbl {
   display: block;
+  font-family: var(--font-mono);
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-weight: 500;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--t3);
   margin-bottom: 5px;
 }
 
-/* Chips */
+/* Chips — hairline + ink; colour never fills chrome. */
 :is(.mrd, .gym) .m-chip {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
   padding: 3px 8px;
-  border-radius: 6px;
+  border-radius: var(--ng-r-sm, 6px);
+  background: var(--sunken);
+  color: var(--t2);
 }
 
 :is(.mrd, .gym) .m-chip-ac {
-  background: var(--ac-soft);
-  color: var(--ac);
+  background: var(--hairline-soft);
+  color: var(--t1);
 }
 
-/* Buttons */
+/* Buttons — the app square: 6px radius, 14px/500 label, ink fill.
+   Marketing pills are a separate shape and a separate surface. */
 :is(.mrd, .gym) .m-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 13px;
-  border-radius: 8px;
-  padding: 10px 16px;
+  letter-spacing: -0.01em;
+  line-height: 20px;
+  border-radius: var(--ng-r-sm, 6px);
+  padding: 7px 14px;
   cursor: pointer;
   border: 1px solid transparent;
-  transition: 0.15s;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 :is(.mrd, .gym) .m-btn-primary {
@@ -208,8 +248,35 @@ html[data-theme="dark"] .gym {
 }
 
 :is(.mrd, .gym) .m-btn-primary:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: wait;
+}
+
+:is(.mrd, .gym) .m-btn-ghost {
+  background: var(--card);
+  color: var(--t1);
+  border-color: var(--line);
+}
+
+:is(.mrd, .gym) .m-btn-ghost:hover {
+  background: var(--sunken);
+}
+
+:is(.mrd, .gym) .m-btn-danger {
+  background: transparent;
+  color: var(--red);
+  border-color: var(--line);
+}
+
+:is(.mrd, .gym) .m-btn-danger:hover {
+  background: var(--red-soft);
+  border-color: var(--red-soft-b);
+}
+
+/* Marketing pill — 100px, reserved for the public surfaces. */
+:is(.mrd, .gym) .m-btn-pill {
+  border-radius: var(--ng-r-pill, 100px);
+  padding: 9px 18px;
 }
 
 /* Fields — the plain input/select treatment. The meal page keeps its own
@@ -217,18 +284,23 @@ html[data-theme="dark"] .gym {
    value differently); being in <body>, that copy still wins there. */
 :is(.mrd, .gym) .m-field {
   border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 10px 12px;
+  border-radius: var(--ng-r-sm, 6px);
+  padding: 8px 12px;
+  font: inherit;
   font-size: 13px;
   color: var(--t1);
   background: var(--card);
-  transition: 0.15s;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+:is(.mrd, .gym) .m-field::placeholder {
+  color: var(--faint);
 }
 
 :is(.mrd, .gym) .m-field:focus {
   outline: none;
-  border-color: var(--ac);
-  box-shadow: 0 0 0 3px #4f46e51f;
+  border-color: var(--t1);
+  box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.16);
 }
 
 /* Icons */
@@ -236,7 +308,7 @@ html[data-theme="dark"] .gym {
   width: 16px;
   height: 16px;
   stroke: currentColor;
-  stroke-width: 1.8;
+  stroke-width: 1.5;
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -290,12 +362,12 @@ html[data-theme="dark"] .gym {
   align-items: center;
   gap: 12px;
   padding: 14px 16px;
-  border-radius: 12px;
+  border-radius: var(--ng-r-md, 12px);
   border: 1px solid var(--line);
   background: color-mix(in srgb, var(--card) 88%, transparent);
   -webkit-backdrop-filter: var(--pop-blur, blur(16px) saturate(1.4));
   backdrop-filter: var(--pop-blur, blur(16px) saturate(1.4));
-  box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--ng-shadow-2, 0 2px 2px rgba(0, 0, 0, 0.04), 0 8px 16px -4px rgba(0, 0, 0, 0.08));
 }
 
 .mrd-toast-item.err {
@@ -409,8 +481,8 @@ html[data-theme="dark"] .gym {
 .auth-mark {
   width: 34px;
   height: 34px;
-  background: #4f46e5;
-  border-radius: 9px;
+  background: var(--t1);
+  border-radius: var(--ng-r-sm, 6px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -420,6 +492,7 @@ html[data-theme="dark"] .gym {
 .auth-mark svg {
   width: 18px;
   height: 18px;
+  color: var(--paper);
 }
 
 .auth-name {
@@ -431,8 +504,8 @@ html[data-theme="dark"] .gym {
 
 .auth-h1 {
   font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-weight: 600;
+  letter-spacing: -0.03em;
   line-height: 1.15;
   margin: 0 0 8px;
 }
@@ -485,7 +558,7 @@ html[data-theme="dark"] .gym {
   padding: 0 14px;
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--ng-r-sm, 6px);
   font: inherit;
   font-size: 14px;
   font-weight: 500;
@@ -500,8 +573,8 @@ html[data-theme="dark"] .gym {
 }
 
 .auth-in:focus {
-  border-color: var(--ac);
-  box-shadow: 0 0 0 3px var(--ac-soft);
+  border-color: var(--t1);
+  box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.16);
 }
 
 .auth-row {
@@ -536,10 +609,10 @@ html[data-theme="dark"] .gym {
   background: var(--ac);
   color: var(--on-ac);
   border: none;
-  border-radius: 10px;
+  border-radius: var(--ng-r-sm, 6px);
   font: inherit;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.01em;
   cursor: pointer;
   transition: background 0.15s ease, transform 0.06s ease, opacity 0.15s ease;
@@ -680,7 +753,7 @@ html[data-theme="dark"] .gym {
 .auth-bsign i {
   width: 28px;
   height: 2px;
-  background: #818cf8;
+  background: #ededed;
   border-radius: 2px;
 }
 
@@ -720,7 +793,7 @@ html[data-theme="dark"] .gym {
 .adm .adm-card {
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: var(--ng-r-md, 12px);
 }
 
 .adm .adm-sub {
@@ -728,5 +801,41 @@ html[data-theme="dark"] .gym {
   font-weight: 500;
   color: var(--t2);
   margin-top: 4px;
+}
+
+/* Secondary action — the app square (6px, 13px/500), shared because the
+   drill-down renders it in the shell's context strip, outside `.adm`, where
+   only the --shell-* tokens are in scope. */
+.adm-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px;
+  background: var(--shell-raised, #fff);
+  color: var(--shell-ink, #171717);
+  border: 1px solid var(--shell-line, #ebebeb);
+  border-radius: var(--ng-r-sm, 6px);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.adm-ghost:hover {
+  background: var(--shell-sunken, #f2f2f2);
+}
+
+.adm-ghost:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 2px;
+}
+
+/* Cards that hold a form or an identity block carry their own padding. */
+.adm .adm-form {
+  padding: 22px;
 }
 

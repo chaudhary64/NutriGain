@@ -18,13 +18,13 @@ const MERIDIAN_CSS = `
 .mrd .m-row{display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid var(--line);font-size:13px}
 .mrd .m-row:last-child{border-bottom:0}
 .mrd .m-row:hover{background:var(--paper)}
-.mrd .m-rowicon{width:34px;height:34px;border-radius:9px;background:var(--sunken);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--t2);flex-shrink:0}
+.mrd .m-rowicon{width:34px;height:34px;border-radius:6px;background:var(--sunken);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--t3);flex-shrink:0}
 /* TDEE suggestion strip (mirrors the onboarding result) */
 .prf-suggest{display:flex;flex-wrap:wrap;align-items:center;gap:10px 26px;background:var(--sunken);border:1px solid var(--line);border-radius:12px;padding:14px 18px}
-.prf-stat b{display:block;font-size:20px;font-weight:800;letter-spacing:-.02em;color:var(--t1);font-variant-numeric:tabular-nums}
-.prf-stat span{display:block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-top:2px}
-.prf-note{width:100%;font-size:12px;font-weight:500;color:var(--t3);margin:2px 0 0}
-.prf-check{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--t2);cursor:pointer}
+.prf-stat b{display:block;font-size:20px;font-weight:600;letter-spacing:-.02em;color:var(--t1);font-variant-numeric:tabular-nums}
+.prf-stat span{display:block;font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin-top:2px}
+.prf-note{width:100%;font-size:12px;font-weight:400;color:var(--t3);margin:2px 0 0;line-height:1.5}
+.prf-check{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--t2);cursor:pointer}
 .prf-check input{accent-color:var(--ac);width:15px;height:15px;cursor:pointer}
 @media (max-width:900px){.mrd .prf-layout{grid-template-columns:1fr !important}}
 `;
@@ -229,7 +229,7 @@ export default function ProfilePage() {
         <div className="mrd ng-container" style={{ padding: "32px var(--layout-gutter) 56px" }}>
           {/* Page header — SaaS title block, matching meal/gym */}
           <div className="m-in" style={{ marginBottom: 24 }}>
-            <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--ac)", margin: "0 0 8px" }}>Account · Profile</p>
+            <p className="g-eyebrow" style={{ margin: "0 0 8px" }}>Account · Profile</p>
             <div className="m-h1">Profile</div>
             <div className="m-sub">Identity, body profile, targets, and your training split.</div>
           </div>
@@ -240,22 +240,22 @@ export default function ProfilePage() {
               <div style={{ padding: "28px 22px", display: "flex", flexDirection: "column", alignItems: "center", gap: 14, borderBottom: "1px solid var(--line)" }}>
                 <div
                   style={{
-                    width: 96, height: 96, borderRadius: "50%", background: "var(--ac-soft)", color: "var(--ac)",
+                    width: 96, height: 96, borderRadius: "50%", background: "var(--sunken)", color: "var(--t1)",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 30, fontWeight: 700, letterSpacing: "-.02em",
-                    border: "1px solid var(--ac-soft-b)",
+                    fontSize: 30, fontWeight: 600, letterSpacing: "-.03em",
+                    border: "1px solid var(--line)",
                   }}
                   aria-hidden="true"
                 >
                   {initials}
                 </div>
                 <div style={{ textAlign: "center" }}>
-                  <p style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-.01em" }}>{user.name}</p>
+                  <p style={{ fontSize: 18, fontWeight: 600, letterSpacing: "-.02em" }}>{user.name}</p>
                   <p className="m-crumb" style={{ marginTop: 3, wordBreak: "break-all" }}>{user.email}</p>
                 </div>
-                <span className="m-chip m-chip-ac">
-                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--ac)" }}></span>
-                  MEMBER
+                <span className="m-chip">
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--t1)" }}></span>
+                  Member
                 </span>
               </div>
               <div style={{ padding: "14px 18px" }}>
@@ -268,7 +268,7 @@ export default function ProfilePage() {
                 <Link
                   href="/dashboard/settings"
                   className="m-crumb"
-                  style={{ display: "inline-block", marginTop: 8, color: "var(--ac)", fontWeight: 700 }}
+                  style={{ display: "inline-block", marginTop: 8, color: "var(--link)", fontWeight: 500 }}
                 >
                   Change goals in Settings →
                 </Link>
@@ -285,18 +285,16 @@ export default function ProfilePage() {
               <div className="m-card m-in">
                 <div className="m-card-h">
                   <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <span style={{ color: "var(--ac)" }}><Icon d={ICONS.scale} /></span>
+                    <span style={{ color: "var(--t3)" }}><Icon d={ICONS.scale} /></span>
                     Body profile &amp; targets
                   </h3>
                   {profileForm ? (
-                    <span className="m-chip m-chip-ac">EDITING</span>
+                    <span className="m-chip">Editing</span>
                   ) : (
                     <button
                       onClick={startEditProfile}
-                      className="m-btn"
-                      style={{ padding: "6px 12px", fontSize: 12, border: "1px solid var(--line)", color: "var(--t1)", background: "var(--card)", gap: 6 }}
-                      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--sunken)")}
-                      onMouseLeave={(e) => (e.currentTarget.style.background = "var(--card)")}
+                      className="m-btn m-btn-ghost"
+                      style={{ padding: "5px 10px", fontSize: 12, gap: 6 }}
                     >
                       <Icon d={ICONS.pencil} className="w-3.5 h-3.5" />
                       Edit
@@ -367,7 +365,7 @@ export default function ProfilePage() {
                       )}
 
                       {profileMessage && (
-                        <p style={{ marginTop: 12, fontSize: 13, fontWeight: 600, color: "var(--red)" }}>{profileMessage}</p>
+                        <p style={{ marginTop: 12, fontSize: 13, fontWeight: 500, color: "var(--red)" }}>{profileMessage}</p>
                       )}
 
                       <div style={{ marginTop: 16, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
@@ -376,7 +374,7 @@ export default function ProfilePage() {
                           Apply suggested goals on save
                         </label>
                         <div style={{ display: "flex", gap: 8 }}>
-                          <button onClick={cancelEditProfile} disabled={savingProfile} className="m-btn" style={{ border: "1px solid var(--line)", color: "var(--t2)", background: "var(--card)" }}>
+                          <button onClick={cancelEditProfile} disabled={savingProfile} className="m-btn m-btn-ghost">
                             Cancel
                           </button>
                           <button onClick={handleSaveProfile} disabled={savingProfile || !profileReady} className="m-btn m-btn-primary" title={!profileReady ? "Fill in all fields (weight included) to save" : undefined}>
@@ -398,7 +396,7 @@ export default function ProfilePage() {
                         {profileTiles.map((tile) => (
                           <div key={tile.label} className="m-field" style={{ display: "block", padding: "12px 14px", background: "var(--sunken)" }}>
                             <span className="m-lbl">{tile.label}</span>
-                            <p style={{ fontSize: 14, fontWeight: 700, color: tile.value ? "var(--t1)" : "var(--t3)" }}>
+                            <p style={{ fontSize: 14, fontWeight: 600, color: tile.value ? "var(--t1)" : "var(--t3)" }}>
                               {tile.value || "Not set"}
                             </p>
                           </div>
@@ -418,7 +416,7 @@ export default function ProfilePage() {
                                     {" "}· logged {new Date(latestEntry.date).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
                                   </span>
                                   {weightError && (
-                                    <span className="m-crumb" role="alert" style={{ color: "var(--red)", fontWeight: 600 }}>
+                                    <span className="m-crumb" role="alert" style={{ color: "var(--red)", fontWeight: 500 }}>
                                       {" "}· refresh failed
                                     </span>
                                   )}
@@ -429,7 +427,7 @@ export default function ProfilePage() {
                                   <button
                                     type="button"
                                     onClick={() => setWeightTick((n) => n + 1)}
-                                    style={{ background: "none", border: "none", padding: 0, color: "var(--red)", fontWeight: 700, textDecoration: "underline", cursor: "pointer", font: "inherit" }}
+                                    style={{ background: "none", border: "none", padding: 0, color: "var(--red)", fontWeight: 500, textDecoration: "underline", cursor: "pointer", font: "inherit", fontSize: "inherit" }}
                                   >
                                     Try again
                                   </button>

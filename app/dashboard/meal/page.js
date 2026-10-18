@@ -9,92 +9,92 @@ import { FALLBACK_MACRO_GOALS } from "@/lib/goals";
 import { calculateEntryMacros } from "@/lib/daily-log";
 
 /* ------------------------------------------------------------------ */
-/* Meridian design system — restrained SaaS.                          */
-/* Paper #fafaf9 · cards #fff · hairline #e7e7e3 · accent #4f46e5     */
+/* Geist design system — ink on canvas, hairline chrome, mono eyebrows. */
+/* Canvas #fafafa · cards #fff · hairline #ebebeb · ink #171717          */
 /* ------------------------------------------------------------------ */
 
 const MERIDIAN_CSS = `
 .mrd{color:var(--t1)}
 .mrd{background:var(--paper)}
-.mrd .m-chip-p{background:var(--pro-soft);color:var(--pro)}
-.mrd .m-chip-c{background:var(--car-soft);color:var(--car)}
-.mrd .m-chip-f{background:var(--green-soft);color:var(--green)}
-.mrd .m-iconbtn{color:var(--t3);padding:9px;border-radius:7px;cursor:pointer;transition:.15s;border:1px solid transparent;background:none}
+/* Macro colour lives on data marks only — never on chips or chrome. */
+.mrd .m-chip-p,.mrd .m-chip-c,.mrd .m-chip-f{background:var(--sunken);color:var(--t1);border-radius:6px}
+.mrd .m-iconbtn{color:var(--t3);padding:9px;border-radius:6px;cursor:pointer;transition:.15s;border:1px solid transparent;background:none}
 .mrd .m-iconbtn:hover{background:var(--sunken);color:var(--red);border-color:var(--line)}
-.mrd .m-iconbtn:focus-visible,.mrd .m-step button:focus-visible,.mrd .m-daynav button:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.mrd .m-iconbtn:focus-visible,.mrd .m-step button:focus-visible,.mrd .m-daynav button:focus-visible{outline:2px solid var(--t1);outline-offset:2px}
 /* page header */
-.mrd .m-kicker{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ac);margin:0 0 8px}
-.mrd .m-title{font-size:28px;font-weight:800;letter-spacing:-.02em;line-height:1.1;margin:0}
+.mrd .m-kicker{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin:0 0 8px}
+.mrd .m-title{font-size:28px;font-weight:600;letter-spacing:-.03em;line-height:1.15;margin:0}
 .mrd .m-totals{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.mrd .m-total-pill{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--t2);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px}
-.mrd .m-total-pill b{color:var(--t1);font-variant-numeric:tabular-nums}
+.mrd .m-total-pill{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:500;color:var(--t2);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px}
+.mrd .m-total-pill b{color:var(--t1);font-weight:500;font-variant-numeric:tabular-nums}
 .mrd .m-total-pill .m-ic{width:14px;height:14px}
 /* day navigator */
 .mrd .m-daynav{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px}
-.mrd .m-daynav button{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--t2);background:none;border:0;cursor:pointer;transition:.15s}
+.mrd .m-daynav button{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--t2);background:none;border:0;cursor:pointer;transition:.15s}
 .mrd .m-daynav button:hover{background:var(--sunken);color:var(--t1)}
-.mrd .m-datepill{display:flex;align-items:center;gap:8px;border:0;border-radius:8px;padding:6px 8px;font-size:12px;font-weight:600;color:var(--t2);background:transparent;min-width:172px;justify-content:center}
-.mrd .m-datepill .m-live{display:flex;align-items:center;gap:6px;color:var(--ac);text-transform:uppercase;letter-spacing:.05em;font-size:11px;font-weight:800}
-.mrd .m-datepill .m-live .m-dot{width:6px;height:6px;border-radius:50%;background:var(--ac)}
-.mrd .m-datepill .m-viewing{display:flex;align-items:center;gap:6px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;font-size:11px;font-weight:800}
+.mrd .m-datepill{display:flex;align-items:center;gap:8px;border:0;border-radius:6px;padding:6px 8px;font-size:12px;font-weight:500;color:var(--t2);background:transparent;min-width:172px;justify-content:center}
+.mrd .m-datepill .m-live{display:flex;align-items:center;gap:6px;font-family:var(--font-mono);color:var(--t2);text-transform:uppercase;letter-spacing:.06em;font-size:10.5px;font-weight:500}
+.mrd .m-datepill .m-live .m-dot{width:6px;height:6px;border-radius:50%;background:var(--link)}
+.mrd .m-datepill .m-viewing{display:flex;align-items:center;gap:6px;font-family:var(--font-mono);color:var(--t3);text-transform:uppercase;letter-spacing:.06em;font-size:10.5px;font-weight:500}
 .mrd .m-datepill .m-viewing .m-dot{width:6px;height:6px;border-radius:50%;background:var(--t3)}
-.mrd .m-datepill .m-datestr{color:var(--t1);font-weight:700;text-transform:none;letter-spacing:0}
+.mrd .m-datepill .m-datestr{color:var(--t1);font-weight:500;text-transform:none;letter-spacing:0}
 .mrd .m-datewrap{position:relative;display:flex;align-items:center;color:var(--t3)}
 .mrd .m-datewrap input[type="date"]{position:absolute;inset:-6px;opacity:0;cursor:pointer;width:calc(100% + 12px)}
-.mrd .m-todaybtn{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ac);background:var(--ac-soft);border:0;border-radius:7px;padding:8px 10px;cursor:pointer}
+.mrd .m-todaybtn{font-size:12px;font-weight:500;letter-spacing:-.01em;color:var(--t1);background:var(--sunken);border:0;border-radius:6px;padding:8px 12px;cursor:pointer}
 .mrd .m-todaybtn:hover{background:var(--ac-soft-b)}
 /* calorie hero */
 .mrd .m-hero{padding:18px;border-bottom:1px solid var(--line)}
 .mrd .m-hero-top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:12px}
-.mrd .m-hero-num{font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
-.mrd .m-hero-num small{font-size:13px;font-weight:600;color:var(--t3);letter-spacing:0}
-.mrd .m-hero-sub{font-size:12px;color:var(--t3);font-weight:600;margin-top:5px}
-.mrd .m-hero-track{height:10px;border-radius:999px;background:var(--track);overflow:hidden;position:relative}
+.mrd .m-hero-num{font-size:32px;font-weight:600;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+.mrd .m-hero-num small{font-size:13px;font-weight:400;color:var(--t3);letter-spacing:0}
+.mrd .m-hero-sub{font-size:12px;color:var(--t3);font-weight:400;margin-top:6px}
+.mrd .m-hero-track{height:8px;border-radius:999px;background:var(--track);overflow:hidden;position:relative}
 .mrd .m-hero-track i{display:block;height:100%;border-radius:999px;background:var(--ac);transform-origin:left center;transition:transform .7s cubic-bezier(.22,1,.36,1)}
 .mrd .m-hero-track i.m-overbar{background:var(--red)!important}
 .mrd .m-hero-track .m-ghost{position:absolute;inset:0;opacity:.45}
-.mrd .m-hero-foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:12px;font-weight:600;color:var(--t2)}
+.mrd .m-hero-foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:12px;font-weight:500;color:var(--t2)}
 /* meters */
 .mrd .m-meter{padding:14px 18px;border-bottom:1px solid var(--line)}
 .mrd .m-meter:last-child{border-bottom:0}
 .mrd .m-meter-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px}
-.mrd .m-meter-name{font-weight:600;display:flex;gap:8px;align-items:center;color:var(--name)}
-.mrd .m-meter-val{font-weight:700;font-variant-numeric:tabular-nums}
-.mrd .m-meter-goal{color:var(--t3);font-weight:500}
+.mrd .m-meter-name{font-weight:500;display:flex;gap:8px;align-items:center;color:var(--t1)}
+.mrd .m-meter-val{font-weight:500;font-variant-numeric:tabular-nums}
+.mrd .m-meter-goal{color:var(--t3);font-weight:400}
 .mrd .m-bar{height:6px;border-radius:999px;overflow:hidden;position:relative;background:var(--track)}
 .mrd .m-bar i{display:block;height:100%;width:100%;transform-origin:left center;border-radius:999px;transition:transform .7s cubic-bezier(.22,1,.36,1)}
+/* Data illustration: ink for calories, the gradient trio for the rest. */
 .mrd .i-cal{color:var(--ac)}.mrd .i-pro{color:var(--pro)}.mrd .i-car{color:var(--car)}.mrd .i-fat{color:var(--green)}
 .mrd .b-cal{background:var(--ac)}.mrd .b-pro{background:var(--pro)}.mrd .b-car{background:var(--car)}.mrd .b-fat{background:var(--green)}
 .mrd .m-bar i.m-overbar{background:var(--red)!important}
 .mrd .m-over{color:var(--red)!important}
-.mrd .m-prev{color:var(--ac)}
-.mrd .m-prev-delta{font-size:11px;font-weight:700;color:var(--ac);background:var(--ac-soft);border-radius:5px;padding:1px 5px;margin-left:4px}
+.mrd .m-prev{color:var(--t1)}
+.mrd .m-prev-delta{font-family:var(--font-mono);font-size:10px;font-weight:500;color:var(--t3);background:var(--sunken);border-radius:4px;padding:2px 5px;margin-left:5px}
 .mrd .m-bar .m-ghost{position:absolute;inset:0;opacity:.45;transition:transform .7s cubic-bezier(.22,1,.36,1),opacity .3s ease}
 .mrd .m-bar .m-ghost.m-ghost-off{opacity:0}
 .mrd .m-rem-prev{color:var(--ac)!important}
 /* entries */
-.mrd .m-sec-badge{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex:none;background:var(--ac-soft);color:var(--ac)}
-.mrd .m-sec-count{font-size:11px;font-weight:700;color:var(--t3);background:var(--sunken);border-radius:999px;padding:3px 9px}
-.mrd .m-sec-kcal{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.mrd .m-sec-badge{width:34px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex:none;background:var(--sunken);color:var(--t1)}
+.mrd .m-sec-count{font-size:11px;font-weight:500;color:var(--t3);background:var(--sunken);border-radius:999px;padding:3px 9px}
+.mrd .m-sec-kcal{font-size:13px;font-weight:500;font-variant-numeric:tabular-nums}
 .mrd .m-entry{display:flex;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid var(--line);font-size:13px;flex-wrap:wrap}
 .mrd .m-entry:last-child{border-bottom:0}
-.mrd .m-entry:hover{background:var(--paper)}
-.mrd .m-entry .m-name{font-weight:650;flex:1;min-width:170px;line-height:1.35}
-.mrd .m-entry .m-serving{display:block;font-size:11.5px;color:var(--t3);font-weight:500;margin-top:3px}
+.mrd .m-entry:hover{background:var(--sunken)}
+.mrd .m-entry .m-name{font-weight:500;flex:1;min-width:170px;line-height:1.35}
+.mrd .m-entry .m-serving{display:block;font-size:11.5px;color:var(--t3);font-weight:400;margin-top:3px}
 .mrd .m-chiprow{display:flex;gap:6px;flex-wrap:wrap}
-.mrd .m-kc{min-width:76px;text-align:right;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2}
-.mrd .m-kc small{display:block;font-size:10.5px;font-weight:500;color:var(--t3)}
+.mrd .m-kc{min-width:76px;text-align:right;font-weight:500;font-variant-numeric:tabular-nums;line-height:1.2}
+.mrd .m-kc small{display:block;font-size:10.5px;font-weight:400;color:var(--t3)}
 /* steppers */
-.mrd .m-step{display:flex;align-items:center;gap:2px;border:1px solid var(--line);border-radius:9px;padding:2px;background:var(--card)}
-.mrd .m-step button{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--t2);cursor:pointer;transition:.15s;background:none;border:0;font-size:14px}
+.mrd .m-step{display:flex;align-items:center;gap:2px;border:1px solid var(--line);border-radius:6px;padding:2px;background:var(--card)}
+.mrd .m-step button{width:30px;height:30px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-weight:500;color:var(--t2);cursor:pointer;transition:.15s;background:none;border:0;font-size:14px}
 .mrd .m-step button:hover{background:var(--sunken);color:var(--t1)}
-.mrd .m-step input{width:40px;text-align:center;font-size:13px;font-weight:700;color:var(--t1);background:none;border:0;outline:none;font-variant-numeric:tabular-nums}
-.mrd .m-step input:focus-visible{outline:2px solid var(--ac);outline-offset:1px;border-radius:4px}
+.mrd .m-step input{width:40px;text-align:center;font-size:13px;font-weight:500;color:var(--t1);background:none;border:0;outline:none;font-variant-numeric:tabular-nums}
+.mrd .m-step input:focus-visible{outline:2px solid var(--t1);outline-offset:1px;border-radius:4px}
 /* fields */
-.mrd .m-field{border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:13px;color:var(--t2);background:var(--card);display:flex;align-items:center;gap:8px;transition:.15s}
-.mrd .m-field:focus-within{border-color:var(--ac);box-shadow:0 0 0 3px #4f46e51f}
-.mrd select.m-field,.mrd input.m-field{width:100%;outline:none;color:var(--t1);font-weight:500;appearance:none;height:42px}
-.mrd input.m-field::placeholder{color:var(--t3)}
+.mrd .m-field{border:1px solid var(--line);border-radius:6px;padding:9px 12px;font-size:13px;color:var(--t2);background:var(--card);display:flex;align-items:center;gap:8px;transition:border-color .15s ease,box-shadow .15s ease}
+.mrd .m-field:focus-within{border-color:var(--t1);box-shadow:0 0 0 3px rgba(0,112,243,.16)}
+.mrd select.m-field,.mrd input.m-field{width:100%;outline:none;color:var(--t1);font-weight:400;appearance:none;height:42px}
+.mrd input.m-field::placeholder{color:var(--faint)}
 .mrd .m-selwrap{position:relative}
 .mrd .m-selwrap .m-chev{position:absolute;right:11px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--t3);display:flex}
 /* dropdown */
@@ -102,36 +102,36 @@ const MERIDIAN_CSS = `
    dropdown anchored inside one is painted beneath later sibling cards (the
    meal sections). Lift the hosting card while its dropdown is open. */
 .mrd .m-card.m-dd-open{position:relative;z-index:var(--pop-z-dropdown, 70)}
-.mrd .m-dd{position:absolute;z-index:var(--pop-z-dropdown, 70);width:100%;min-width:280px;margin-top:6px;background:color-mix(in srgb, var(--card) 92%, transparent);-webkit-backdrop-filter:var(--pop-blur, blur(16px) saturate(1.4));backdrop-filter:var(--pop-blur, blur(16px) saturate(1.4));border:1px solid var(--line);border-radius:12px;box-shadow:0 20px 44px -12px rgba(0,0,0,.4);max-height:300px;overflow:auto;padding:6px}
-.mrd .m-dd-item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 11px;cursor:pointer;font-size:13px;border-radius:8px;border:0}
-.mrd .m-dd-item:hover,.mrd .m-dd-item.is-active{background:var(--ac-soft)}
-.mrd .m-dd-item.is-picked{background:var(--sunken)}
+.mrd .m-dd{position:absolute;z-index:var(--pop-z-dropdown, 70);width:100%;min-width:280px;margin-top:6px;background:color-mix(in srgb, var(--card) 96%, transparent);-webkit-backdrop-filter:var(--pop-blur, blur(16px) saturate(1.4));backdrop-filter:var(--pop-blur, blur(16px) saturate(1.4));border:1px solid var(--line);border-radius:12px;box-shadow:var(--ng-shadow-2);max-height:300px;overflow:auto;padding:6px}
+.mrd .m-dd-item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 11px;cursor:pointer;font-size:13px;border-radius:6px;border:0}
+.mrd .m-dd-item:hover,.mrd .m-dd-item.is-active{background:var(--sunken)}
+.mrd .m-dd-item.is-picked{background:var(--ac-soft)}
 .mrd .m-dd-main{min-width:0}
-.mrd .m-dd-item .m-dd-name{font-weight:650;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mrd .m-dd-item .m-dd-sub{font-size:11px;color:var(--t3);font-weight:500;margin-top:2px;font-variant-numeric:tabular-nums}
-.mrd .m-dd-kcal{flex:none;font-size:12px;font-weight:800;color:var(--t1);background:var(--sunken);border-radius:7px;padding:5px 9px;font-variant-numeric:tabular-nums}
+.mrd .m-dd-item .m-dd-name{font-weight:500;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mrd .m-dd-item .m-dd-sub{font-size:11px;color:var(--t3);font-weight:400;margin-top:2px;font-variant-numeric:tabular-nums}
+.mrd .m-dd-kcal{flex:none;font-size:12px;font-weight:500;color:var(--t1);background:var(--sunken);border-radius:6px;padding:5px 9px;font-variant-numeric:tabular-nums}
 .mrd .m-dd-item:hover .m-dd-kcal,.mrd .m-dd-item.is-active .m-dd-kcal{background:var(--card)}
 .mrd .m-dd-empty{padding:26px;text-align:center;color:var(--t3);font-size:13px}
 /* selected-meal strip */
-.mrd .m-picked{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;background:var(--ac-soft);border:1px solid var(--ac-soft-b);border-radius:10px;padding:10px 12px;font-size:12px}
-.mrd .m-picked b{color:var(--ac)}
+.mrd .m-picked{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;background:var(--sunken);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-size:12px}
+.mrd .m-picked b{color:var(--t1);font-weight:500}
 .mrd .m-picked .m-picked-macros{display:flex;gap:6px;flex-wrap:wrap}
-.mrd .m-picked .m-picked-macros span{background:var(--card);border-radius:6px;padding:3px 8px;font-weight:700;font-variant-numeric:tabular-nums}
+.mrd .m-picked .m-picked-macros span{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:3px 8px;font-weight:500;font-variant-numeric:tabular-nums}
 /* remaining */
-.mrd .m-seg{display:inline-flex;gap:2px;background:var(--sunken);border:1px solid var(--line);border-radius:8px;padding:2px}
-.mrd .m-seg button{border:0;background:transparent;font:inherit;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--t3);padding:5px 11px;border-radius:6px;cursor:pointer;transition:.15s}
+.mrd .m-seg{display:inline-flex;gap:2px;background:var(--sunken);border:1px solid var(--line);border-radius:6px;padding:2px}
+.mrd .m-seg button{border:0;background:transparent;font:inherit;font-size:11px;font-weight:500;letter-spacing:-.01em;color:var(--t3);padding:5px 11px;border-radius:4px;cursor:pointer;transition:.15s}
 .mrd .m-seg button:hover{color:var(--t1)}
-.mrd .m-seg button.on{background:var(--card);color:var(--ac);box-shadow:0 1px 3px rgba(0,0,0,.12)}
-.mrd .m-seg button:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
-.mrd .m-dd-recent{flex:none;font-size:9.5px;font-weight:800;letter-spacing:.07em;color:var(--ac);background:var(--ac-soft);border-radius:5px;padding:3px 7px}
+.mrd .m-seg button.on{background:var(--card);color:var(--t1)}
+.mrd .m-seg button:focus-visible{outline:2px solid var(--t1);outline-offset:2px}
+.mrd .m-dd-recent{flex:none;font-family:var(--font-mono);font-size:9.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);background:var(--card);border:1px solid var(--line);border-radius:4px;padding:3px 7px}
 .mrd .m-rem{padding:16px 18px;border-top:1px solid var(--line)}
-.mrd .m-rem-h{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--t3);margin-bottom:8px}
+.mrd .m-rem-h{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.06em;color:var(--t3);margin-bottom:8px}
 .mrd .m-rem-row{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;padding:5px 0}
 .mrd .m-rem-row span{color:var(--t2)}
-.mrd .m-rem-row b{font-variant-numeric:tabular-nums}
+.mrd .m-rem-row b{font-weight:500;font-variant-numeric:tabular-nums}
 /* date pill (legacy hook kept) */
 /* empty state */
-.mrd .m-empty{text-align:center;padding:28px 18px;border-radius:10px;background:var(--sunken);color:var(--t3);font-weight:600;font-size:13px;line-height:1.5}
+.mrd .m-empty{text-align:center;padding:28px 18px;border-radius:6px;background:var(--sunken);color:var(--t3);font-weight:400;font-size:13px;line-height:1.5}
 .mrd .m-empty .m-btn{margin-top:12px}
 /* responsive */
 @media (max-width:1023px){.mrd .mrd-layout{grid-template-columns:1fr !important}.mrd .mrd-layout>div:first-child{position:static !important}}
@@ -1092,7 +1092,7 @@ export default function MealTrackingPage() {
                   {previewMeal && previewMacros && (
                     <div className="m-picked">
                       <b>{toTitleCase(previewMeal.name)}</b>
-                      <span style={{ color: "var(--t2)", fontWeight: 600 }}>× {previewQty} → {Math.round(previewMacros.calories).toLocaleString()} kcal</span>
+                      <span style={{ color: "var(--t2)", fontWeight: 400 }}>× {previewQty} → {Math.round(previewMacros.calories).toLocaleString()} kcal</span>
                       <span className="m-picked-macros">
                         <span className="m-chip-p">{fmtMacro(previewMacros.protein)}g P</span>
                         <span className="m-chip-c">{fmtMacro(previewMacros.carbs)}g C</span>
@@ -1105,7 +1105,7 @@ export default function MealTrackingPage() {
                   {showMealStats && selectedMeal && (
                     <div className="m-card" style={{ marginTop: 14, padding: "14px 16px" }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                        <h3 style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase", color: "var(--t2)" }}>
+                        <h3 className="m-lbl" style={{ margin: 0 }}>
                           Nutritional data · per serving
                         </h3>
                         <button onClick={() => setShowMealStats(false)} className="m-iconbtn" aria-label="Close nutrition info">
@@ -1123,9 +1123,9 @@ export default function MealTrackingPage() {
                               { k: "Carbs", v: meal.macros.carbs, cls: "m-chip-c" },
                               { k: "Fats", v: meal.macros.fats, cls: "m-chip-f" },
                             ].map((s) => (
-                              <div key={s.k} style={{ background: "var(--sunken)", borderRadius: 9, padding: "10px 12px", textAlign: "center" }}>
-                                <span className="m-crumb" style={{ display: "block", fontSize: 10, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 3 }}>{s.k}</span>
-                                <b className="m-num" style={{ fontSize: 16 }}>{s.v}</b>
+                              <div key={s.k} style={{ background: "var(--sunken)", borderRadius: 6, padding: "10px 12px", textAlign: "center" }}>
+                                <span className="m-lbl" style={{ fontSize: 10, marginBottom: 3 }}>{s.k}</span>
+                                <b className="m-num" style={{ fontSize: 16, fontWeight: 500 }}>{s.v}</b>
                               </div>
                             ))}
                           </div>

@@ -16,59 +16,59 @@ const toTitleCase = (str) => {
 const ADM_CSS = `
 .adm{color:var(--t1);font-family:inherit}
 .adm-head{margin-bottom:28px}
-.adm-crumb{font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--t3);text-transform:uppercase;margin-bottom:6px}
-.adm-h1{font-size:26px;font-weight:800;letter-spacing:-.02em;color:var(--t1);margin:0}
+.adm-crumb{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.06em;color:var(--t3);text-transform:uppercase;margin-bottom:6px}
+.adm-h1{font-size:28px;font-weight:600;letter-spacing:-.03em;line-height:1.15;color:var(--t1);margin:0}
 /* tab switcher */
 .adm-tabs{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:32px}
 @media(min-width:640px){.adm-tabs{grid-template-columns:repeat(3,1fr)}}
 .adm-tab{position:relative;display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--card);border:1px solid var(--line);border-radius:12px;text-align:left;cursor:pointer;transition:border-color .15s ease,background .15s ease;font:inherit}
 .adm-tab:hover{background:var(--sunken)}
-.adm-tab:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
-.adm-tab.on{border-color:var(--ac);background:var(--card)}
-.adm-tab.on::before{content:"";position:absolute;left:-1px;top:12px;bottom:12px;width:3px;border-radius:3px;background:var(--ac)}
-.adm-tab-ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--sunken);color:var(--t2);flex-shrink:0;transition:background .15s ease,color .15s ease}
-.adm-tab.on .adm-tab-ico{background:var(--ac-soft);color:var(--ac)}
-.adm-tab-name{font-size:13px;font-weight:700;color:var(--t1)}
-.adm-tab.on .adm-tab-name{color:var(--ac)}
-.adm-tab-sub{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-top:2px}
+.adm-tab:focus-visible{outline:2px solid var(--link);outline-offset:2px}
+.adm-tab.on{border-color:var(--t1);background:var(--card)}
+.adm-tab.on::before{content:"";position:absolute;left:-1px;top:12px;bottom:12px;width:3px;border-radius:3px;background:var(--t1)}
+.adm-tab-ico{width:40px;height:40px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:var(--sunken);color:var(--t2);flex-shrink:0;transition:background .15s ease,color .15s ease}
+.adm-tab.on .adm-tab-ico{background:var(--sunken);color:var(--t1)}
+.adm-tab-name{font-size:13px;font-weight:600;letter-spacing:-.01em;color:var(--t1)}
+.adm-tab.on .adm-tab-name{color:var(--t1)}
+.adm-tab-sub{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin-top:2px}
 /* buttons */
-.adm-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:42px;padding:0 20px;background:var(--ac);color:var(--on-ac);border:none;border-radius:10px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:background .15s ease,transform .06s ease}
+.adm-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:38px;padding:0 16px;background:var(--ac);color:var(--on-ac);border:none;border-radius:6px;font:inherit;font-size:13px;font-weight:500;letter-spacing:-.01em;cursor:pointer;transition:background .15s ease}
 .adm-btn:hover{background:var(--ach)}
-.adm-btn:active{transform:translateY(1px)}
-.adm-btn:disabled{opacity:.55;cursor:wait}
-.adm-btn:focus-visible,.adm-ghost:focus-visible,.adm-icon:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
-.adm-ghost{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:42px;padding:0 20px;background:transparent;color:var(--t2);border:1px solid var(--line);border-radius:10px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:background .15s ease,color .15s ease}
+.adm-btn:active{background:var(--ach)}
+.adm-btn:disabled{opacity:.5;cursor:wait}
+.adm-btn:focus-visible,.adm-ghost:focus-visible,.adm-icon:focus-visible{outline:2px solid var(--link);outline-offset:2px}
+.adm-ghost{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:38px;padding:0 16px;background:var(--card);color:var(--t1);border:1px solid var(--line);border-radius:6px;font:inherit;font-size:13px;font-weight:500;letter-spacing:-.01em;cursor:pointer;transition:background .15s ease,color .15s ease}
 .adm-ghost:hover{background:var(--sunken);color:var(--t1)}
-.adm-icon{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--t2);cursor:pointer;transition:background .15s ease,color .15s ease,border-color .15s ease}
+.adm-icon{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--t2);cursor:pointer;transition:background .15s ease,color .15s ease,border-color .15s ease}
 .adm-icon:hover{background:var(--sunken);color:var(--t1)}
 .adm-icon.danger:hover{background:var(--red-soft);border-color:var(--red-soft-b);color:var(--red)}
 /* cards & forms */
 .adm-form{padding:22px}
-.adm-form h3{font-size:16px;font-weight:800;letter-spacing:-.01em;color:var(--t1);margin:0}
-.adm-lbl{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:7px}
-.adm-in{width:100%;height:44px;padding:0 13px;background:var(--card);border:1px solid var(--line);border-radius:10px;font:inherit;font-size:14px;font-weight:500;color:var(--t1);outline:none;transition:border-color .15s ease,box-shadow .15s ease}
-.adm-in::placeholder{color:var(--t3);opacity:.7}
-.adm-in:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--ac-soft)}
+.adm-form h3{font-size:16px;font-weight:600;letter-spacing:-.02em;color:var(--t1);margin:0}
+.adm-lbl{display:block;font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin-bottom:7px}
+.adm-in{width:100%;height:40px;padding:0 12px;background:var(--card);border:1px solid var(--line);border-radius:6px;font:inherit;font-size:14px;font-weight:400;color:var(--t1);outline:none;transition:border-color .15s ease,box-shadow .15s ease}
+.adm-in::placeholder{color:var(--faint)}
+.adm-in:focus{border-color:var(--t1);box-shadow:0 0 0 3px rgba(0,112,243,.16)}
 select.adm-in{appearance:none;cursor:pointer}
-.adm-dd{position:absolute;z-index:40;width:100%;margin-top:6px;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.14);max-height:240px;overflow:auto}
-.adm-dd button{display:block;width:100%;text-align:left;padding:11px 15px;background:transparent;border:none;border-bottom:1px solid var(--line);font:inherit;font-size:13px;font-weight:600;color:var(--t1);cursor:pointer}
+.adm-dd{position:absolute;z-index:var(--pop-z-dropdown,70);width:100%;margin-top:6px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--ng-shadow-2);max-height:240px;overflow:auto}
+.adm-dd button{display:block;width:100%;text-align:left;padding:10px 14px;background:transparent;border:none;border-bottom:1px solid var(--line);font:inherit;font-size:13px;font-weight:500;color:var(--t1);cursor:pointer}
 .adm-dd button:last-child{border-bottom:none}
 .adm-dd button:hover{background:var(--sunken)}
 /* table */
 .adm-tblwrap{overflow-x:auto}
 .adm table{width:100%;border-collapse:collapse;font-size:13px}
-.adm th{padding:13px 16px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);background:var(--sunken);border-bottom:1px solid var(--line);white-space:nowrap}
-.adm td{padding:13px 16px;border-top:1px solid var(--line);color:var(--t2);vertical-align:middle}
+.adm th{padding:12px 16px;text-align:left;font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);background:var(--sunken);border-bottom:1px solid var(--line);white-space:nowrap}
+.adm td{padding:12px 16px;border-top:1px solid var(--line);color:var(--t2);font-weight:400;vertical-align:middle}
 .adm tbody tr{transition:background .12s ease}
 .adm tbody tr:hover{background:var(--sunken)}
 .adm .tname{font-weight:600;color:var(--t1)}
 .adm .tnum{font-variant-numeric:tabular-nums;font-weight:600;color:var(--t1)}
-.adm .tunit{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin-left:4px}
-.adm-chip{display:inline-flex;align-items:center;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
-.adm-chip.pro{background:var(--pro-soft);color:var(--pro)}
-.adm-chip.car{background:var(--car-soft);color:var(--car)}
-.adm-chip.fat{background:var(--green-soft);color:var(--green)}
-.adm-cat{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;background:var(--sunken);color:var(--t2);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.adm .tunit{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin-left:4px}
+.adm-chip{display:inline-flex;align-items:center;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:500;font-variant-numeric:tabular-nums;background:var(--sunken);color:var(--t2)}
+.adm-chip.pro{background:var(--sunken);color:var(--t2)}
+.adm-chip.car{background:var(--sunken);color:var(--t2)}
+.adm-chip.fat{background:var(--sunken);color:var(--t2)}
+.adm-cat{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;background:var(--sunken);color:var(--t2);font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase}
 .adm-cat i{width:6px;height:6px;border-radius:50%;background:var(--t3)}
 .adm-cat.breakfast i{background:var(--car)}
 .adm-cat.lunch i{background:var(--green)}
@@ -76,71 +76,71 @@ select.adm-in{appearance:none;cursor:pointer}
 .adm-cat.general i{background:var(--ac)}
 /* section headers */
 .adm-sec{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:34px 0 18px}
-.adm-sec h2{font-size:17px;font-weight:800;letter-spacing:-.01em;color:var(--t1);margin:0}
-.adm-sec p{font-size:12px;font-weight:500;color:var(--t2);margin:2px 0 0}
+.adm-sec h2{font-size:16px;font-weight:600;letter-spacing:-.02em;color:var(--t1);margin:0}
+.adm-sec p{font-size:12px;font-weight:400;color:var(--t2);margin:2px 0 0}
 /* schedule grid */
 .adm-days{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 @media(min-width:640px){.adm-days{grid-template-columns:repeat(4,1fr)}}
 @media(min-width:1024px){.adm-days{grid-template-columns:repeat(7,1fr)}}
 .adm-day{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
 .adm-day-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.adm-day-h span{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
+.adm-day-h span{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
 .adm-day-h button{display:inline-flex;border:none;background:transparent;color:var(--t3);cursor:pointer;padding:4px;border-radius:6px}
-.adm-day-h button:hover{color:var(--ac);background:var(--ac-soft)}
-.adm-day-chip{display:block;padding:6px 9px;border-radius:7px;background:var(--sunken);color:var(--t2);font-size:11px;font-weight:600;margin-bottom:5px}
-.adm-day-rest{padding:10px 0;text-align:center;font-size:11px;font-weight:600;color:var(--t3)}
+.adm-day-h button:hover{color:var(--t1);background:var(--sunken)}
+.adm-day-chip{display:block;padding:6px 9px;border-radius:6px;background:var(--sunken);color:var(--t2);font-size:11px;font-weight:500;margin-bottom:5px}
+.adm-day-rest{padding:10px 0;text-align:center;font-size:11px;font-weight:400;color:var(--t3)}
 /* checkbox cards */
-.adm-check{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--card);border:1px solid var(--line);border-radius:10px;cursor:pointer;transition:border-color .15s ease,background .15s ease;font-size:13px;font-weight:600;color:var(--t2)}
+.adm-check{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--card);border:1px solid var(--line);border-radius:6px;cursor:pointer;transition:border-color .15s ease,background .15s ease;font-size:13px;font-weight:500;color:var(--t2)}
 .adm-check:hover{background:var(--sunken)}
-.adm-check.on{border-color:var(--ac);background:var(--ac-soft);color:var(--ac)}
-.adm-check input{accent-color:var(--ac);width:15px;height:15px}
+.adm-check.on{border-color:var(--t1);background:var(--sunken);color:var(--t1)}
+.adm-check input{accent-color:var(--t1);width:15px;height:15px}
 /* exercise group cards */
-.adm-eg{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.adm-eg{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .adm-eg-h{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line);background:var(--sunken)}
-.adm-eg-h h4{font-size:14px;font-weight:800;letter-spacing:-.01em;color:var(--t1);margin:0}
-.adm-eg-h .count{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ac);background:var(--ac-soft);border-radius:999px;padding:3px 9px}
+.adm-eg-h h4{font-size:14px;font-weight:600;letter-spacing:-.02em;color:var(--t1);margin:0}
+.adm-eg-h .count{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t2);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px 9px}
 .adm-eg table td:first-child{color:var(--t1);font-weight:600}
-.adm-type{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--sunken);color:var(--t2)}
+.adm-type{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;background:var(--sunken);color:var(--t2)}
 .adm-type i{width:6px;height:6px;border-radius:50%;background:var(--t3)}
-.adm-type.compound{background:var(--ac-soft);color:var(--ac)}
-.adm-type.compound i{background:var(--ac)}
+.adm-type.compound{background:var(--card);color:var(--t1);border:1px solid var(--line)}
+.adm-type.compound i{background:var(--t1)}
 .adm-empty{padding:34px 16px;text-align:center;font-size:13px;font-weight:500;color:var(--t3);background:var(--sunken)}
 /* users */
-.adm-pill{display:inline-flex;align-items:center;gap:8px;padding:6px 13px;border-radius:999px;background:var(--ac-soft);color:var(--ac);font-size:12px;font-weight:700}
-.adm-user{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;cursor:pointer;transition:border-color .15s ease,transform .15s ease,box-shadow .15s ease}
-.adm-user:hover{border-color:var(--ac-soft-b);transform:translateY(-2px);box-shadow:0 10px 26px rgba(0,0,0,.08)}
-.adm-ava{width:50px;height:50px;border-radius:12px;background:var(--sunken);color:var(--ac);display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:800;flex-shrink:0}
-.adm-mini{background:var(--sunken);border-radius:10px;padding:11px;text-align:center}
-.adm-mini span{display:block;font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--t3)}
-.adm-mini b{display:block;font-size:17px;font-weight:800;color:var(--t1);margin-top:3px;font-variant-numeric:tabular-nums}
+.adm-pill{display:inline-flex;align-items:center;gap:8px;padding:6px 13px;border-radius:999px;background:var(--sunken);color:var(--t1);font-size:12px;font-weight:500}
+.adm-user{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;cursor:pointer;transition:border-color .15s ease}
+.adm-user:hover{border-color:var(--t2)}
+.adm-ava{width:50px;height:50px;border-radius:6px;background:var(--sunken);color:var(--t1);display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:600;flex-shrink:0}
+.adm-mini{background:var(--sunken);border-radius:6px;padding:11px;text-align:center}
+.adm-mini span{display:block;font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+.adm-mini b{display:block;font-size:17px;font-weight:600;letter-spacing:-.02em;color:var(--t1);margin-top:3px;font-variant-numeric:tabular-nums}
 .adm-mbar{display:flex;height:7px;border-radius:999px;overflow:hidden;background:var(--track);margin:9px 0}
 .adm-mbar i{height:100%}
-.adm-mrow{display:flex;justify-content:space-between;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.adm-mrow{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t2)}
 /* (modal/overlay CSS removed with the meal-days modal — no modals remain) */
 `;
 
 /* Meridian stroke icons */
 const I = {
   utensils: (
-    <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" /><path d="M7 2v20" /><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" /></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" /><path d="M7 2v20" /><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" /></svg>
   ),
   dumbbell: (
-    <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
   ),
   users: (
-    <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
   ),
   pencil: (
-    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" /></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" /></svg>
   ),
   trash: (
-    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
   ),
   x: (
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 18L18 6M6 6l12 12" /></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 18L18 6M6 6l12 12" /></svg>
   ),
   calendar: (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M8 2v4" /><path d="M16 2v4" /><rect width="18" height="18" x="3" y="4" rx="2" /><path d="M3 10h18" /></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M8 2v4" /><path d="M16 2v4" /><rect width="18" height="18" x="3" y="4" rx="2" /><path d="M3 10h18" /></svg>
   ),
 };
 
@@ -776,15 +776,15 @@ export default function AdminPage() {
                     <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
                       <div style={{ minWidth: 0 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                          <h3 style={{ fontSize: 15, fontWeight: 800, letterSpacing: "-.01em", color: "var(--t1)", margin: 0 }}>{tpl.name}</h3>
+                          <h3 style={{ fontSize: 15, fontWeight: 600, letterSpacing: "-.02em", color: "var(--t1)", margin: 0 }}>{tpl.name}</h3>
                           {tpl.isDefault && (
-                            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--ac)", background: "var(--ac-soft)", padding: "3px 8px", borderRadius: 6 }}>
+                            <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 500, letterSpacing: ".06em", textTransform: "uppercase", color: "var(--t2)", background: "var(--sunken)", border: "1px solid var(--line)", padding: "3px 8px", borderRadius: 6 }}>
                               Default
                             </span>
                           )}
                         </div>
                         {tpl.description && (
-                          <p style={{ fontSize: 12, fontWeight: 500, color: "var(--t2)", margin: "3px 0 0" }}>{tpl.description}</p>
+                          <p style={{ fontSize: 12, fontWeight: 400, color: "var(--t2)", margin: "3px 0 0" }}>{tpl.description}</p>
                         )}
                       </div>
                       <div style={{ display: "flex", gap: 8 }}>
@@ -1095,7 +1095,7 @@ export default function AdminPage() {
                         {groupExercises.map((exercise) => (
                           <div key={exercise.id} className="p-4 flex justify-between gap-3" style={{ borderBottom: "1px solid var(--line)" }}>
                             <div>
-                              <h5 style={{ fontSize: 13, fontWeight: 700, color: "var(--t1)", margin: 0 }}>{exercise.name}</h5>
+                              <h5 style={{ fontSize: 13, fontWeight: 600, color: "var(--t1)", margin: 0 }}>{exercise.name}</h5>
                               <span className={`adm-type ${exercise.type === "COMPOUND" ? "compound" : ""}`} style={{ marginTop: 8, display: "inline-flex" }}>
                                 {exercise.type === "COMPOUND" && <i />}
                                 {exercise.type}
@@ -1159,10 +1159,10 @@ export default function AdminPage() {
                     <div className="flex items-center gap-4 mb-5">
                       <div className="adm-ava">{userData.name.charAt(0).toUpperCase()}</div>
                       <div className="min-w-0">
-                        <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--t1)", margin: 0 }} className="truncate">
+                        <h3 style={{ fontSize: 15, fontWeight: 600, letterSpacing: "-.02em", color: "var(--t1)", margin: 0 }} className="truncate">
                           {toTitleCase(userData.name)}
                         </h3>
-                        <p style={{ fontSize: 12, fontWeight: 500, color: "var(--t3)", margin: 0 }} className="truncate">
+                        <p style={{ fontSize: 12, fontWeight: 400, color: "var(--t3)", margin: 0 }} className="truncate">
                           {userData.email}
                         </p>
                       </div>
@@ -1176,7 +1176,7 @@ export default function AdminPage() {
                       </div>
                       <div className="adm-mini">
                         <span>Last activity</span>
-                        <b style={{ fontSize: 12, fontWeight: 700 }}>{stats.latestLogDate || "Inactive"}</b>
+                        <b style={{ fontSize: 12, fontWeight: 500 }}>{stats.latestLogDate || "Inactive"}</b>
                       </div>
                     </div>
 
@@ -1184,7 +1184,7 @@ export default function AdminPage() {
                     {stats.daysLogged > 0 ? (
                       <div className="mb-4">
                         <div className="flex items-end justify-between">
-                          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--t3)" }}>
+                          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 500, letterSpacing: ".06em", textTransform: "uppercase", color: "var(--t3)" }}>
                             Avg intake
                           </span>
                           <span className="tnum" style={{ fontSize: 13 }}>
@@ -1212,11 +1212,11 @@ export default function AdminPage() {
 
                     {/* Member since */}
                     <div className="flex items-center justify-between pt-4" style={{ borderTop: "1px solid var(--line)" }}>
-                      <div className="flex items-center gap-1.5" style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".07em", textTransform: "uppercase", color: "var(--t3)" }}>
+                      <div className="flex items-center gap-1.5" style={{ fontSize: 12, fontWeight: 400, color: "var(--t3)" }}>
                         {I.calendar}
                         {new Date(userData.createdAt).toLocaleDateString()}
                       </div>
-                      <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".07em", textTransform: "uppercase", color: "var(--ac)" }}>
+                      <span style={{ fontSize: 13, fontWeight: 500, letterSpacing: "-.01em", color: "var(--t1)" }}>
                         View profile →
                       </span>
                     </div>
@@ -1226,7 +1226,7 @@ export default function AdminPage() {
             </div>
 
             {users.length === 0 && (
-              <div className="adm-empty" style={{ borderRadius: 14 }}>
+              <div className="adm-empty" style={{ borderRadius: 12 }}>
                 No users found — wait for users to register.
               </div>
             )}

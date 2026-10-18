@@ -1,21 +1,130 @@
 @import "tailwindcss";
 
+/* ----------------------------------------------------------------------
+   Geist — the app's design tokens.
+
+   One near-white canvas, one near-black ink, one hairline, and a single
+   accent family (link blue + the gradient trio) used for links, focus and
+   illustration only. Every dashboard surface reads these tokens; page CSS
+   never hardcodes a hex. Values mirror Vercel's Geist system.
+   ---------------------------------------------------------------------- */
 :root {
-  --background: #ffffff;
+  --background: #fafafa;
   --foreground: #171717;
+
+  /* Canvas + elevated surfaces */
+  --ng-canvas: #fafafa;
+  --ng-elevated: #ffffff;
+  --ng-soft: #f2f2f2;
+
+  /* Ink ladder: ink → body → mute → faint */
+  --ng-ink: #171717;
+  --ng-body: #4d4d4d;
+  --ng-mute: #8f8f8f;
+  --ng-faint: #a1a1a1;
+  --ng-hairline: #ebebeb;
+
+  /* Accents — links, focus, illustration. Never chrome fills. */
+  --ng-link: #0070f3;
+  --ng-link-deep: #0761d1;
+  --ng-link-soft: #d3e5ff;
+  --ng-error: #ee0000;
+  --ng-error-deep: #c50000;
+  --ng-warning: #f5a623;
+  --ng-violet: #7928ca;
+  --ng-cyan: #50e3c2;
+  --ng-pink: #ff0080;
+  --ng-magenta: #eb367f;
+
+  /* Gradient trio + the hero mesh built from them */
+  --ng-gradient-develop: linear-gradient(90deg, #007cf0, #00dfd8);
+  --ng-gradient-preview: linear-gradient(90deg, #7928ca, #ff0080);
+  --ng-gradient-ship: linear-gradient(90deg, #ff4d4d, #f9cb28);
+  /* Five soft stops — blue, violet, cyan, magenta, amber — blooming across
+     the band. Restraint comes from the alphas and the mask, not from making
+     the gradient invisible. */
+  --ng-mesh:
+    radial-gradient(44% 78% at 10% 72%, rgba(0, 124, 240, 0.22), transparent 70%),
+    radial-gradient(38% 66% at 32% 24%, rgba(121, 40, 202, 0.2), transparent 72%),
+    radial-gradient(46% 84% at 55% 68%, rgba(0, 223, 216, 0.2), transparent 70%),
+    radial-gradient(40% 70% at 76% 22%, rgba(255, 0, 128, 0.16), transparent 72%),
+    radial-gradient(36% 66% at 98% 64%, rgba(249, 203, 40, 0.22), transparent 70%);
+
+  /* Radius scale — 6px app chrome, 12/16px cards, 100px marketing pills */
+  --ng-r-sm: 6px;
+  --ng-r-md: 12px;
+  --ng-r-lg: 16px;
+  --ng-r-pill: 100px;
+
+  /* Elevation — hairline first; shadows are whispers, never weight */
+  --ng-shadow-1: 0 1px 1px rgba(0, 0, 0, 0.04);
+  --ng-shadow-2: 0 2px 2px rgba(0, 0, 0, 0.04), 0 8px 16px -4px rgba(0, 0, 0, 0.08);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
   --font-serif: var(--font-playfair);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-geist-sans), Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+html[data-theme="dark"] {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --ng-canvas: #0a0a0a;
+  --ng-elevated: #111111;
+  --ng-soft: #1a1a1a;
+  --ng-ink: #ededed;
+  --ng-body: #a1a1a1;
+  --ng-mute: #8f8f8f;
+  --ng-faint: #6b6b6b;
+  --ng-hairline: #262626;
+  --ng-link: #3291ff;
+  --ng-link-deep: #0070f3;
+  --ng-link-soft: #0d2a4d;
+  --ng-error: #ff4d4d;
+  --ng-error-deep: #ff1a1a;
+  /* The mesh reads as a glow on near-black, so the stops carry more alpha. */
+  --ng-mesh:
+    radial-gradient(44% 78% at 10% 72%, rgba(0, 124, 240, 0.3), transparent 70%),
+    radial-gradient(38% 66% at 32% 24%, rgba(121, 40, 202, 0.3), transparent 72%),
+    radial-gradient(46% 84% at 55% 68%, rgba(0, 223, 216, 0.24), transparent 70%),
+    radial-gradient(40% 70% at 76% 22%, rgba(255, 0, 128, 0.24), transparent 72%),
+    radial-gradient(34% 60% at 96% 58%, rgba(249, 203, 40, 0.14), transparent 70%);
+  --ng-shadow-1: 0 1px 1px rgba(0, 0, 0, 0.3);
+  --ng-shadow-2: 0 2px 2px rgba(0, 0, 0, 0.3), 0 8px 16px -4px rgba(0, 0, 0, 0.5);
+}
+
+/* Mono is reserved for code, tabular figures, and uppercase eyebrows. */
+.g-eyebrow {
+  display: block;
+  font-family: var(--font-geist-mono), ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  color: var(--ng-mute);
+}
+
+/* The mesh — the system's only decorative flourish. Paint it on an
+   absolutely positioned layer inside a positioned, overflow-hidden band. */
+.g-mesh {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--ng-mesh);
+  filter: blur(26px) saturate(1.05);
+  opacity: 0.9;
 }
 
 /* Apply Playfair Display to headings — outside the app shell only.
@@ -37,9 +146,9 @@ h6 {
 /* Custom Global Scrollbar — Meridian neutrals, theme-driven via tokens.
    Scoped rules (e.g. .m-in's thin scrollbar) win by specificity, no !important wars. */
 html {
-  --sb-thumb: #c5c5c0;
-  --sb-thumb-hover: #a1a1aa;
-  --sb-track: #ececea;
+  --sb-thumb: #d4d4d4;
+  --sb-thumb-hover: #a1a1a1;
+  --sb-track: #f2f2f2;
   scrollbar-width: thin;
   scrollbar-color: var(--sb-thumb) var(--sb-track);
 }
@@ -114,41 +223,43 @@ html {
   z-index: var(--pop-z-toast);
 }
 
-/* App shell chrome tokens (theme-aware) */
+/* App shell chrome tokens (theme-aware). The shell is Geist too: near-white
+   canvas, ink text, hairline dividers, and an ink primary — the only colour
+   in the chrome is the link blue on focus. */
 .app-shell {
-  --shell-bg: #fafaf9;
+  --shell-bg: #fafafa;
   --shell-chrome: rgba(255, 255, 255, 0.92);
-  --shell-line: #e7e7e3;
-  --shell-sunken: #f1f1ee;
+  --shell-line: #ebebeb;
+  --shell-sunken: #f2f2f2;
   --shell-raised: #ffffff;
-  --shell-ink: #1a1a1e;
-  --shell-ink-2: #5f5f68;
-  --shell-muted: #737373;
-  --shell-accent: #4f46e5;
-  --shell-accent-soft: #eef2ff;
+  --shell-ink: #171717;
+  --shell-ink-2: #4d4d4d;
+  --shell-muted: #8f8f8f;
+  --shell-accent: #171717;
+  --shell-accent-soft: #f2f2f2;
   --shell-on-accent: #ffffff;
-  --shell-danger: #dc2626;
-  --shell-danger-soft: #fef2f2;
-  /* Whisper: ink monogram */
-  --shell-on-ink: #fafaf9;
+  --shell-danger: #ee0000;
+  --shell-danger-soft: #fff5f5;
+  /* Ink monogram */
+  --shell-on-ink: #ffffff;
 }
 
 html[data-theme="dark"] .app-shell {
-  --shell-bg: #111113;
-  --shell-chrome: rgba(22, 22, 25, 0.92);
-  --shell-line: #2a2a30;
-  --shell-sunken: #26262b;
-  --shell-raised: #2e2e34;
-  --shell-ink: #f0f0f2;
-  --shell-ink-2: #c0c0c9;
-  --shell-muted: #a1a1ac;
-  --shell-accent: #818cf8;
-  --shell-accent-soft: #232347;
-  --shell-on-accent: #111113;
-  --shell-danger: #f87171;
-  --shell-danger-soft: #2b1b1b;
-  /* Whisper: ink monogram (near-black stays ink in dark mode) */
-  --shell-on-ink: #111113;
+  --shell-bg: #0a0a0a;
+  --shell-chrome: rgba(10, 10, 10, 0.88);
+  --shell-line: #262626;
+  --shell-sunken: #1a1a1a;
+  --shell-raised: #171717;
+  --shell-ink: #ededed;
+  --shell-ink-2: #a1a1a1;
+  --shell-muted: #8f8f8f;
+  --shell-accent: #ededed;
+  --shell-accent-soft: #1f1f1f;
+  --shell-on-accent: #0a0a0a;
+  --shell-danger: #ff4d4d;
+  --shell-danger-soft: #2a1212;
+  /* Ink monogram (near-white in dark mode) */
+  --shell-on-ink: #0a0a0a;
 }
 
 /* Whisper mobile menu — staggered editorial rows */
@@ -169,10 +280,10 @@ html[data-theme="dark"] .app-shell {
 /* Loader — theme-aware so the pre-hydration flash matches the user's theme.
    The no-flash script sets data-theme before first paint. */
 .m-loader {
-  --ld-bg: #fafaf9;
-  --ld-ring: #e7e7e3;
-  --ld-spin: #4f46e5;
-  --ld-text: #6b6b76;
+  --ld-bg: #fafafa;
+  --ld-ring: #ebebeb;
+  --ld-spin: #171717;
+  --ld-text: #8f8f8f;
   background: var(--ld-bg);
   color: var(--ld-text);
 }
@@ -198,10 +309,10 @@ html[data-theme="dark"] .app-shell {
   }
 }
 html[data-theme="dark"] .m-loader {
-  --ld-bg: #111113;
-  --ld-ring: #2a2a30;
-  --ld-spin: #818cf8;
-  --ld-text: #8b8b96;
+  --ld-bg: #0a0a0a;
+  --ld-ring: #262626;
+  --ld-spin: #ededed;
+  --ld-text: #8f8f8f;
 }
 @media (prefers-reduced-motion: reduce) {
   .m-loader i {
@@ -213,12 +324,10 @@ html[data-theme="dark"] .m-loader {
 html[data-theme="light"] { color-scheme: light; }
 html[data-theme="dark"] {
   color-scheme: dark;
-  --background: #111113;
-  --foreground: #f0f0f2;
-  --sb-thumb: #3a3a42;
-  --sb-thumb-hover: #4a4a54;
-  --sb-track: #161619;
-  background: #111113;
+  --sb-thumb: #333333;
+  --sb-thumb-hover: #4d4d4d;
+  --sb-track: #0a0a0a;
+  background: #0a0a0a;
 }
 
 /* Visible keyboard focus — WCAG 2.4.7 (global: shell + all pages) */
@@ -230,8 +339,8 @@ a:focus-visible,
 [tabindex]:focus-visible {
   outline: none;
   box-shadow:
-    0 0 0 2px #ffffff,
-    0 0 0 4.5px rgba(79, 70, 229, 0.55);
+    0 0 0 2px var(--background, #ffffff),
+    0 0 0 4.5px rgba(0, 112, 243, 0.55);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -278,6 +387,19 @@ a:focus-visible,
   gap: 16px;
 }
 
+/* Nav group label — a Geist Mono spec-sheet eyebrow. */
+.sb-eyebrow {
+  display: block;
+  padding: 0 12px;
+  margin: 4px 0 6px;
+  font-family: var(--font-geist-mono), ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--shell-muted);
+}
+
 .sb-head {
   display: flex;
   align-items: center;
@@ -307,12 +429,13 @@ a:focus-visible,
 .sb-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  height: 42px;
-  padding: 0 12px;
-  border-radius: 9px;
-  font-size: 14px;
-  font-weight: 600;
+  gap: 10px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: var(--ng-r-sm);
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
   color: var(--shell-ink-2);
   text-decoration: none;
   transition: background 0.15s ease, color 0.15s ease;
@@ -325,8 +448,8 @@ a:focus-visible,
 
 .sb-row.on {
   background: var(--shell-accent-soft);
-  color: var(--shell-accent);
-  font-weight: 700;
+  color: var(--shell-ink);
+  font-weight: 500;
 }
 
 .sb-ico {
@@ -362,7 +485,7 @@ a:focus-visible,
 .sb-ava {
   width: 30px;
   height: 30px;
-  border-radius: 9px;
+  border-radius: var(--ng-r-sm);
   background: var(--shell-sunken);
   border: 1px solid var(--shell-line);
   color: var(--shell-ink);
@@ -370,7 +493,8 @@ a:focus-visible,
   align-items: center;
   justify-content: center;
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   flex: none;
 }
 
@@ -383,7 +507,8 @@ a:focus-visible,
 
 .sb-user-txt b {
   font-size: 12.5px;
-  font-weight: 700;
+  font-weight: 500;
+  letter-spacing: -0.01em;
   color: var(--shell-ink);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -391,10 +516,11 @@ a:focus-visible,
 }
 
 .sb-user-txt i {
+  font-family: var(--font-geist-mono), ui-monospace, 'SF Mono', Menlo, monospace;
   font-style: normal;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.16em;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--shell-muted);
   margin-top: 2px;
@@ -415,7 +541,7 @@ a:focus-visible,
   /* 10px + an 18px glyph = 38px target: clears the WCAG 2.2 minimum with room
      to spare, so the footer and mobile-bar controls stay comfortable to hit. */
   padding: 10px;
-  border-radius: 9px;
+  border-radius: var(--ng-r-sm);
   border: 0;
   background: transparent;
   color: var(--shell-muted);
