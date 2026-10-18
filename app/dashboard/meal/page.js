@@ -14,130 +14,201 @@ import { calculateEntryMacros } from "@/lib/daily-log";
 /* ------------------------------------------------------------------ */
 
 const MERIDIAN_CSS = `
-.mrd{color:var(--t1)}
-.mrd{background:var(--paper)}
-/* Macro colour lives on data marks only — never on chips or chrome. */
-.mrd .m-chip-p,.mrd .m-chip-c,.mrd .m-chip-f{background:var(--sunken);color:var(--t1);border-radius:6px}
-.mrd .m-iconbtn{color:var(--t3);padding:9px;border-radius:6px;cursor:pointer;transition:.15s;border:1px solid transparent;background:none}
-.mrd .m-iconbtn:hover{background:var(--sunken);color:var(--red);border-color:var(--line)}
-.mrd .m-iconbtn:focus-visible,.mrd .m-step button:focus-visible,.mrd .m-daynav button:focus-visible{outline:2px solid var(--t1);outline-offset:2px}
-/* page header */
-.mrd .m-kicker{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin:0 0 8px}
-.mrd .m-title{font-size:28px;font-weight:600;letter-spacing:-.03em;line-height:1.15;margin:0}
-.mrd .m-totals{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.mrd .m-total-pill{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:500;color:var(--t2);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px}
-.mrd .m-total-pill b{color:var(--t1);font-weight:500;font-variant-numeric:tabular-nums}
-.mrd .m-total-pill .m-ic{width:14px;height:14px}
-/* day navigator */
-.mrd .m-daynav{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px}
-.mrd .m-daynav button{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--t2);background:none;border:0;cursor:pointer;transition:.15s}
-.mrd .m-daynav button:hover{background:var(--sunken);color:var(--t1)}
-.mrd .m-datepill{display:flex;align-items:center;gap:8px;border:0;border-radius:6px;padding:6px 8px;font-size:12px;font-weight:500;color:var(--t2);background:transparent;min-width:172px;justify-content:center}
-.mrd .m-datepill .m-live{display:flex;align-items:center;gap:6px;font-family:var(--font-mono);color:var(--t2);text-transform:uppercase;letter-spacing:.06em;font-size:10.5px;font-weight:500}
-.mrd .m-datepill .m-live .m-dot{width:6px;height:6px;border-radius:50%;background:var(--link)}
-.mrd .m-datepill .m-viewing{display:flex;align-items:center;gap:6px;font-family:var(--font-mono);color:var(--t3);text-transform:uppercase;letter-spacing:.06em;font-size:10.5px;font-weight:500}
-.mrd .m-datepill .m-viewing .m-dot{width:6px;height:6px;border-radius:50%;background:var(--t3)}
-.mrd .m-datepill .m-datestr{color:var(--t1);font-weight:500;text-transform:none;letter-spacing:0}
-.mrd .m-datewrap{position:relative;display:flex;align-items:center;color:var(--t3)}
-.mrd .m-datewrap input[type="date"]{position:absolute;inset:-6px;opacity:0;cursor:pointer;width:calc(100% + 12px)}
-.mrd .m-todaybtn{font-size:12px;font-weight:500;letter-spacing:-.01em;color:var(--t1);background:var(--sunken);border:0;border-radius:6px;padding:8px 12px;cursor:pointer}
-.mrd .m-todaybtn:hover{background:var(--ac-soft-b)}
-/* calorie hero */
-.mrd .m-hero{padding:18px;border-bottom:1px solid var(--line)}
-.mrd .m-hero-top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:12px}
-.mrd .m-hero-num{font-size:32px;font-weight:600;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
-.mrd .m-hero-num small{font-size:13px;font-weight:400;color:var(--t3);letter-spacing:0}
-.mrd .m-hero-sub{font-size:12px;color:var(--t3);font-weight:400;margin-top:6px}
-.mrd .m-hero-track{height:8px;border-radius:999px;background:var(--track);overflow:hidden;position:relative}
-.mrd .m-hero-track i{display:block;height:100%;border-radius:999px;background:var(--ac);transform-origin:left center;transition:transform .7s cubic-bezier(.22,1,.36,1)}
-.mrd .m-hero-track i.m-overbar{background:var(--red)!important}
-.mrd .m-hero-track .m-ghost{position:absolute;inset:0;opacity:.45}
-.mrd .m-hero-foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:12px;font-weight:500;color:var(--t2)}
-/* meters */
-.mrd .m-meter{padding:14px 18px;border-bottom:1px solid var(--line)}
-.mrd .m-meter:last-child{border-bottom:0}
-.mrd .m-meter-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px}
-.mrd .m-meter-name{font-weight:500;display:flex;gap:8px;align-items:center;color:var(--t1)}
-.mrd .m-meter-val{font-weight:500;font-variant-numeric:tabular-nums}
-.mrd .m-meter-goal{color:var(--t3);font-weight:400}
-.mrd .m-bar{height:6px;border-radius:999px;overflow:hidden;position:relative;background:var(--track)}
-.mrd .m-bar i{display:block;height:100%;width:100%;transform-origin:left center;border-radius:999px;transition:transform .7s cubic-bezier(.22,1,.36,1)}
-/* Data illustration: ink for calories, the gradient trio for the rest. */
-.mrd .i-cal{color:var(--ac)}.mrd .i-pro{color:var(--pro)}.mrd .i-car{color:var(--car)}.mrd .i-fat{color:var(--green)}
-.mrd .b-cal{background:var(--ac)}.mrd .b-pro{background:var(--pro)}.mrd .b-car{background:var(--car)}.mrd .b-fat{background:var(--green)}
-.mrd .m-bar i.m-overbar{background:var(--red)!important}
-.mrd .m-over{color:var(--red)!important}
-.mrd .m-prev{color:var(--t1)}
-.mrd .m-prev-delta{font-family:var(--font-mono);font-size:10px;font-weight:500;color:var(--t3);background:var(--sunken);border-radius:4px;padding:2px 5px;margin-left:5px}
-.mrd .m-bar .m-ghost{position:absolute;inset:0;opacity:.45;transition:transform .7s cubic-bezier(.22,1,.36,1),opacity .3s ease}
-.mrd .m-bar .m-ghost.m-ghost-off{opacity:0}
-.mrd .m-rem-prev{color:var(--ac)!important}
-/* entries */
-.mrd .m-sec-badge{width:34px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex:none;background:var(--sunken);color:var(--t1)}
-.mrd .m-sec-count{font-size:11px;font-weight:500;color:var(--t3);background:var(--sunken);border-radius:999px;padding:3px 9px}
-.mrd .m-sec-kcal{font-size:13px;font-weight:500;font-variant-numeric:tabular-nums}
-.mrd .m-entry{display:flex;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid var(--line);font-size:13px;flex-wrap:wrap}
-.mrd .m-entry:last-child{border-bottom:0}
-.mrd .m-entry:hover{background:var(--sunken)}
-.mrd .m-entry .m-name{font-weight:500;flex:1;min-width:170px;line-height:1.35}
-.mrd .m-entry .m-serving{display:block;font-size:11.5px;color:var(--t3);font-weight:400;margin-top:3px}
-.mrd .m-chiprow{display:flex;gap:6px;flex-wrap:wrap}
-.mrd .m-kc{min-width:76px;text-align:right;font-weight:500;font-variant-numeric:tabular-nums;line-height:1.2}
-.mrd .m-kc small{display:block;font-size:10.5px;font-weight:400;color:var(--t3)}
-/* steppers */
-.mrd .m-step{display:flex;align-items:center;gap:2px;border:1px solid var(--line);border-radius:6px;padding:2px;background:var(--card)}
-.mrd .m-step button{width:30px;height:30px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-weight:500;color:var(--t2);cursor:pointer;transition:.15s;background:none;border:0;font-size:14px}
-.mrd .m-step button:hover{background:var(--sunken);color:var(--t1)}
-.mrd .m-step input{width:40px;text-align:center;font-size:13px;font-weight:500;color:var(--t1);background:none;border:0;outline:none;font-variant-numeric:tabular-nums}
-.mrd .m-step input:focus-visible{outline:2px solid var(--t1);outline-offset:1px;border-radius:4px}
-/* fields */
-.mrd .m-field{border:1px solid var(--line);border-radius:6px;padding:9px 12px;font-size:13px;color:var(--t2);background:var(--card);display:flex;align-items:center;gap:8px;transition:border-color .15s ease,box-shadow .15s ease}
-.mrd .m-field:focus-within{border-color:var(--t1);box-shadow:0 0 0 3px rgba(0,112,243,.16)}
-.mrd select.m-field,.mrd input.m-field{width:100%;outline:none;color:var(--t1);font-weight:400;appearance:none;height:42px}
-.mrd input.m-field::placeholder{color:var(--faint)}
-.mrd .m-selwrap{position:relative}
-.mrd .m-selwrap .m-chev{position:absolute;right:11px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--t3);display:flex}
-/* dropdown */
-/* .m-in's entrance animation makes every card its own stacking context, so a
-   dropdown anchored inside one is painted beneath later sibling cards (the
-   meal sections). Lift the hosting card while its dropdown is open. */
-.mrd .m-card.m-dd-open{position:relative;z-index:var(--pop-z-dropdown, 70)}
-.mrd .m-dd{position:absolute;z-index:var(--pop-z-dropdown, 70);width:100%;min-width:280px;margin-top:6px;background:color-mix(in srgb, var(--card) 96%, transparent);-webkit-backdrop-filter:var(--pop-blur, blur(16px) saturate(1.4));backdrop-filter:var(--pop-blur, blur(16px) saturate(1.4));border:1px solid var(--line);border-radius:12px;box-shadow:var(--ng-shadow-2);max-height:300px;overflow:auto;padding:6px}
-.mrd .m-dd-item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 11px;cursor:pointer;font-size:13px;border-radius:6px;border:0}
+.mrd{color:var(--t1);background:var(--paper)}
+/* ---- page head ---- */
+.ml-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap}
+.ml-kicker{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin:0 0 10px}
+.ml-title{font-size:28px;font-weight:600;letter-spacing:-.03em;line-height:1.1;margin:0;color:var(--t1)}
+.ml-sub{font-size:13px;font-weight:400;color:var(--t3);margin:8px 0 0}
+.ml-sub b{font-weight:500;color:var(--t2);font-variant-numeric:tabular-nums}
+/* ---- day navigator ---- */
+.ml-nav{display:flex;align-items:center;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:5px}
+.ml-nav-btn{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--t2);background:none;border:0;cursor:pointer;transition:.15s}
+.ml-nav-btn:hover{background:var(--sunken);color:var(--t1)}
+.ml-nav-btn:focus-visible,.ml-nav-today:focus-visible{outline:2px solid var(--t1);outline-offset:2px}
+.ml-date{display:flex;align-items:center;gap:8px;padding:0 10px;min-width:166px;justify-content:center}
+.ml-status{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:10.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+.ml-status i{width:6px;height:6px;border-radius:50%;background:var(--t3)}
+.ml-status.is-today{color:var(--t2)}
+.ml-status.is-today i{background:var(--link)}
+.ml-datestr{font-size:12.5px;font-weight:500;color:var(--t1);white-space:nowrap}
+.ml-datewrap{position:relative;display:flex;align-items:center;color:var(--t3);cursor:pointer}
+.ml-datewrap input[type="date"]{position:absolute;inset:-8px;opacity:0;cursor:pointer;width:calc(100% + 16px)}
+.ml-nav-today{font-size:12px;font-weight:500;color:var(--t1);background:var(--sunken);border:0;border-radius:6px;padding:8px 11px;cursor:pointer}
+.ml-nav-today:hover{background:var(--ac-soft-b)}
+/* ---- daily targets ---- */
+.ml-targets{margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.ml-targets-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line)}
+.ml-eyebrow{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+.ml-seg{display:inline-flex;gap:2px;background:var(--sunken);border:1px solid var(--line);border-radius:6px;padding:2px}
+.ml-seg button{border:0;background:transparent;font:inherit;font-size:11px;font-weight:500;color:var(--t3);padding:4px 11px;border-radius:4px;cursor:pointer;transition:.15s}
+.ml-seg button:hover{color:var(--t1)}
+.ml-seg button.on{background:var(--card);color:var(--t1)}
+.ml-seg button:focus-visible{outline:2px solid var(--t1);outline-offset:2px}
+.ml-cols{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr}
+.ml-col{padding:16px 18px 18px;border-right:1px solid var(--line);min-width:0}
+.ml-col:last-child{border-right:0}
+.ml-col-lbl{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500;color:var(--t2)}
+.ml-col-lbl svg{width:14px;height:14px;flex:none}
+.ml-val{font-size:24px;font-weight:600;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1.1;margin-top:10px;color:var(--t1)}
+.ml-col.is-cal .ml-val{font-size:30px;letter-spacing:-.04em}
+.ml-val small{font-size:12px;font-weight:400;letter-spacing:0;color:var(--t3);margin-left:5px}
+.ml-bar{height:4px;border-radius:999px;background:var(--track);margin-top:12px;overflow:hidden;position:relative}
+.ml-bar i{display:block;height:100%;border-radius:999px;background:var(--ac);transform-origin:left center;transition:transform .6s cubic-bezier(.22,1,.36,1)}
+.ml-bar i.is-ghost{position:absolute;inset:0;border-radius:999px}
+.ml-bar i.b-cal{background:var(--ac)}
+.ml-bar i.b-pro{background:var(--pro)}
+.ml-bar i.b-car{background:var(--car)}
+.ml-bar i.b-fat{background:var(--green)}
+.ml-bar i.is-over{background:var(--red)!important}
+.ml-note{font-size:11.5px;font-weight:400;color:var(--t3);margin-top:9px;font-variant-numeric:tabular-nums}
+.ml-note.is-over{color:var(--red)}
+/* Macro colour lives on icons and bars only — never on chrome. */
+.mrd .i-cal{color:var(--ac)}
+.mrd .i-pro{color:var(--pro)}
+.mrd .i-car{color:var(--car)}
+.mrd .i-fat{color:var(--green)}
+/* ---- log bar ---- */
+.ml-log{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px 18px}
+.ml-log.m-dd-open{position:relative;z-index:var(--pop-z-dropdown,70)}
+.ml-log-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.ml-hint{font-family:var(--font-mono);font-size:10.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+.ml-form{display:grid;grid-template-columns:minmax(0,1fr) 108px 126px auto;gap:8px;align-items:center}
+.ml-search{position:relative;min-width:0}
+.ml-search-ico{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--t3);display:flex;pointer-events:none}
+.ml-search-ico svg{width:15px;height:15px}
+.ml-search input{width:100%;height:42px;border:1px solid var(--line);border-radius:6px;background:var(--card);padding:0 40px 0 34px;font-size:13px;color:var(--t1);outline:none;transition:border-color .15s,box-shadow .15s}
+.ml-search input::placeholder{color:var(--faint)}
+.ml-search input:focus{border-color:var(--t1);box-shadow:0 0 0 3px rgba(0,112,243,.16)}
+.ml-kbd{position:absolute;right:9px;top:50%;transform:translateY(-50%);font-family:var(--font-mono);font-size:10px;font-weight:500;color:var(--t3);background:var(--sunken);border:1px solid var(--line);border-radius:4px;padding:1px 5px;pointer-events:none}
+.ml-qty{display:flex;align-items:center;justify-content:space-between;height:42px;border:1px solid var(--line);border-radius:6px;background:var(--card);padding:0 1px}
+.ml-qty button{width:28px;height:34px;border:0;background:none;border-radius:4px;color:var(--t2);font-size:15px;line-height:1;cursor:pointer}
+.ml-qty button:hover{background:var(--sunken);color:var(--t1)}
+.ml-qty button:focus-visible{outline:2px solid var(--t1);outline-offset:-2px}
+.ml-qty input{width:40px;border:0;background:none;text-align:center;font-size:13px;font-weight:500;color:var(--t1);outline:none;font-variant-numeric:tabular-nums;-moz-appearance:textfield}
+.ml-qty input::-webkit-outer-spin-button,.ml-qty input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.ml-slotwrap{position:relative}
+.ml-slotwrap select{width:100%;height:42px;border:1px solid var(--line);border-radius:6px;background:var(--card);padding:0 30px 0 11px;font-size:12.5px;font-weight:500;color:var(--t1);appearance:none;outline:none;cursor:pointer}
+.ml-slotwrap select:focus{border-color:var(--t1);box-shadow:0 0 0 3px rgba(0,112,243,.16)}
+.ml-selchev{position:absolute;right:9px;top:50%;transform:translateY(-50%);color:var(--t3);pointer-events:none;display:flex}
+.ml-addwrap{display:flex}
+.ml-addwrap .m-btn{height:42px;padding:0 18px;white-space:nowrap}
+.ml-picked{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;background:var(--sunken);border-radius:6px;padding:9px 12px;font-size:12px}
+.ml-picked b{font-weight:500;color:var(--t1)}
+.ml-picked-x{color:var(--t3);font-variant-numeric:tabular-nums}
+.ml-chips{display:flex;gap:4px;flex-wrap:wrap}
+.ml-chips span{font-family:var(--font-mono);font-size:10.5px;font-weight:500;color:var(--t2);background:var(--card);border:1px solid var(--line);border-radius:4px;padding:2px 6px;font-variant-numeric:tabular-nums}
+.ml-per{margin-left:auto;border:0;background:none;font:inherit;font-size:11.5px;font-weight:500;color:var(--t3);cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line);padding:2px}
+.ml-per:hover{color:var(--t1)}
+.ml-stats{margin-top:10px;border:1px solid var(--line);border-radius:6px;padding:12px 14px}
+.ml-stats-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.ml-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.ml-stats-cell{background:var(--sunken);border-radius:6px;padding:9px 10px}
+.ml-stats-cell span{display:block;font-family:var(--font-mono);font-size:9.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+.ml-stats-cell b{display:block;font-size:15px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums;color:var(--t1)}
+.ml-iconbtn{width:30px;height:30px;border-radius:6px;border:1px solid transparent;background:none;color:var(--t3);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;flex:none}
+.ml-iconbtn:hover{background:var(--sunken);color:var(--red);border-color:var(--line)}
+.ml-iconbtn:focus-visible{outline:2px solid var(--t1);outline-offset:2px}
+/* ---- food dropdown ---- */
+.mrd .m-dd{position:absolute;z-index:var(--pop-z-dropdown,70);width:100%;min-width:300px;margin-top:6px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--ng-shadow-2);max-height:320px;overflow:auto;padding:6px}
+.mrd .m-dd-item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 10px;cursor:pointer;font-size:13px;border-radius:6px;border:0}
 .mrd .m-dd-item:hover,.mrd .m-dd-item.is-active{background:var(--sunken)}
-.mrd .m-dd-item.is-picked{background:var(--ac-soft)}
+.mrd .m-dd-item.is-picked{background:var(--sunken)}
 .mrd .m-dd-main{min-width:0}
-.mrd .m-dd-item .m-dd-name{font-weight:500;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mrd .m-dd-item .m-dd-sub{font-size:11px;color:var(--t3);font-weight:400;margin-top:2px;font-variant-numeric:tabular-nums}
-.mrd .m-dd-kcal{flex:none;font-size:12px;font-weight:500;color:var(--t1);background:var(--sunken);border-radius:6px;padding:5px 9px;font-variant-numeric:tabular-nums}
+.mrd .m-dd-name{display:block;font-weight:500;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mrd .m-dd-sub{display:block;font-size:11px;color:var(--t3);font-weight:400;margin-top:2px;font-variant-numeric:tabular-nums}
+.mrd .m-dd-kcal{flex:none;font-size:12px;font-weight:500;color:var(--t1);background:var(--sunken);border-radius:6px;padding:4px 8px;font-variant-numeric:tabular-nums}
 .mrd .m-dd-item:hover .m-dd-kcal,.mrd .m-dd-item.is-active .m-dd-kcal{background:var(--card)}
-.mrd .m-dd-empty{padding:26px;text-align:center;color:var(--t3);font-size:13px}
-/* selected-meal strip */
-.mrd .m-picked{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;background:var(--sunken);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-size:12px}
-.mrd .m-picked b{color:var(--t1);font-weight:500}
-.mrd .m-picked .m-picked-macros{display:flex;gap:6px;flex-wrap:wrap}
-.mrd .m-picked .m-picked-macros span{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:3px 8px;font-weight:500;font-variant-numeric:tabular-nums}
-/* remaining */
-.mrd .m-seg{display:inline-flex;gap:2px;background:var(--sunken);border:1px solid var(--line);border-radius:6px;padding:2px}
-.mrd .m-seg button{border:0;background:transparent;font:inherit;font-size:11px;font-weight:500;letter-spacing:-.01em;color:var(--t3);padding:5px 11px;border-radius:4px;cursor:pointer;transition:.15s}
-.mrd .m-seg button:hover{color:var(--t1)}
-.mrd .m-seg button.on{background:var(--card);color:var(--t1)}
-.mrd .m-seg button:focus-visible{outline:2px solid var(--t1);outline-offset:2px}
-.mrd .m-dd-recent{flex:none;font-family:var(--font-mono);font-size:9.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);background:var(--card);border:1px solid var(--line);border-radius:4px;padding:3px 7px}
-.mrd .m-rem{padding:16px 18px;border-top:1px solid var(--line)}
-.mrd .m-rem-h{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.06em;color:var(--t3);margin-bottom:8px}
-.mrd .m-rem-row{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;padding:5px 0}
-.mrd .m-rem-row span{color:var(--t2)}
-.mrd .m-rem-row b{font-weight:500;font-variant-numeric:tabular-nums}
-/* date pill (legacy hook kept) */
-/* empty state */
-.mrd .m-empty{text-align:center;padding:28px 18px;border-radius:6px;background:var(--sunken);color:var(--t3);font-weight:400;font-size:13px;line-height:1.5}
-.mrd .m-empty .m-btn{margin-top:12px}
-/* responsive */
-@media (max-width:1023px){.mrd .mrd-layout{grid-template-columns:1fr !important}.mrd .mrd-layout>div:first-child{position:static !important}}
-@media (max-width:860px){.mrd .m-addgrid{grid-template-columns:1fr 1fr !important}.mrd .m-addgrid>div:nth-child(2){grid-column:1 / -1;order:-1}.mrd .m-addgrid>div:nth-child(4){grid-column:1 / -1;order:4}}
-@media (max-width:560px){.mrd .m-addgrid{grid-template-columns:1fr !important}.mrd .m-entry{gap:10px}.mrd .m-chiprow{order:5;width:100%}.mrd .m-daynav{width:100%;justify-content:space-between}}
-@media (prefers-reduced-motion:reduce){.mrd *{animation:none!important;transition:none!important}}
+.mrd .m-dd-recent{flex:none;font-family:var(--font-mono);font-size:9.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);background:var(--card);border:1px solid var(--line);border-radius:4px;padding:2px 6px}
+.mrd .m-dd-empty{padding:22px;text-align:center;color:var(--t3);font-size:12.5px}
+/* ---- day ledger ---- */
+.ml-ledger{margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.ml-ledger-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line)}
+.ml-ledger-meta{font-size:12px;color:var(--t3);font-variant-numeric:tabular-nums}
+.ml-slot{border-bottom:1px solid var(--line)}
+.ml-slot:last-child{border-bottom:0}
+.ml-slot-head{display:flex;align-items:center;gap:6px;padding:0 12px 0 10px;transition:background .15s}
+.ml-slot-head:hover{background:var(--paper)}
+.ml-slot-toggle{flex:1;display:grid;grid-template-columns:16px 26px auto auto minmax(0,1fr) auto auto;align-items:center;gap:10px;padding:11px 2px;background:none;border:0;cursor:pointer;text-align:left;font:inherit;min-width:0}
+.ml-slot-toggle:focus-visible,.ml-slot-add:focus-visible{outline:2px solid var(--t1);outline-offset:-1px;border-radius:6px}
+.ml-chev{display:flex;color:var(--t3);transition:transform .18s ease}
+.ml-slot.is-open .ml-chev{transform:rotate(90deg)}
+.ml-slot.is-empty .ml-chev{opacity:0}
+.ml-slot-ico{width:26px;height:26px;border-radius:6px;background:var(--sunken);display:flex;align-items:center;justify-content:center;color:var(--t2)}
+.ml-slot-ico svg{width:14px;height:14px}
+.ml-slot-name{font-size:13.5px;font-weight:500;color:var(--t1);white-space:nowrap}
+.ml-slot-count{font-size:11.5px;color:var(--t3);white-space:nowrap}
+.ml-slot-macros{font-family:var(--font-mono);font-size:10.5px;font-weight:500;color:var(--t3);white-space:nowrap;text-align:right}
+.ml-slot-kcal{font-size:13px;font-weight:500;color:var(--t1);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.ml-slot.is-empty .ml-slot-name{color:var(--t2)}
+.ml-slot.is-empty .ml-slot-kcal{font-size:12px;font-weight:400;color:var(--t3)}
+.ml-slot-add{width:28px;height:28px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--t2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;flex:none}
+.ml-slot-add svg{width:14px;height:14px}
+.ml-slot-add:hover{background:var(--t1);border-color:var(--t1);color:var(--on-ac)}
+.ml-entries{border-top:1px solid var(--line)}
+.ml-entry{display:grid;grid-template-columns:minmax(0,1fr) auto auto 84px 30px;align-items:center;gap:14px;padding:10px 18px 10px 46px;border-top:1px solid var(--line);font-size:13px;transition:background .12s}
+.ml-entry:first-child{border-top:0}
+.ml-entry:hover{background:var(--paper)}
+.ml-entry-name{min-width:0;font-weight:500;color:var(--t1);line-height:1.3;overflow-wrap:anywhere}
+.ml-serving{display:block;font-size:11.5px;font-weight:400;color:var(--t3);margin-top:2px}
+.ml-step{display:flex;align-items:center;border:1px solid var(--line);border-radius:6px;padding:1px;background:var(--card)}
+.ml-step button{width:26px;height:26px;border:0;background:none;color:var(--t2);border-radius:4px;cursor:pointer;font-size:13px;line-height:1}
+.ml-step button:hover{background:var(--sunken);color:var(--t1)}
+.ml-step button:focus-visible{outline:2px solid var(--t1);outline-offset:-2px}
+.ml-step input{width:34px;border:0;background:none;text-align:center;font-size:12.5px;font-weight:500;color:var(--t1);outline:none;font-variant-numeric:tabular-nums;-moz-appearance:textfield}
+.ml-step input::-webkit-outer-spin-button,.ml-step input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.ml-kcal{text-align:right;font-weight:500;color:var(--t1);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ml-kcal small{font-size:10.5px;font-weight:400;color:var(--t3);margin-left:3px}
+/* ---- responsive ---- */
+@media(max-width:900px){
+  .ml-cols{grid-template-columns:1fr 1fr}
+  .ml-col{border-right:0;border-top:1px solid var(--line)}
+  .ml-col:nth-child(1),.ml-col:nth-child(2){border-top:0}
+  .ml-col:nth-child(odd){border-right:1px solid var(--line)}
+  .ml-form{grid-template-columns:108px minmax(0,1fr) auto}
+  .ml-search{grid-column:1/-1;grid-row:1}
+  .ml-slot-macros{display:none}
+}
+@media(max-width:640px){
+  /* Two rows in the log bar: search, then quantity + slot, then a full-width
+     Add so the slot name never truncates. */
+  /* 100px keeps the stepper intact at 320px and leaves the slot name its
+     full width plus the chevron gutter. */
+  .ml-form{grid-template-columns:100px minmax(0,1fr);gap:8px}
+  .ml-search{grid-column:1/-1}
+  .ml-addwrap{grid-column:1/-1}
+  .ml-addwrap .m-btn{width:100%}
+  .ml-val small{display:block;margin:4px 0 0;font-size:11.5px}
+  .ml-col.is-cal .ml-val{font-size:26px}
+  /* The shortcut hint needs the full row; the board stays legible without it. */
+  .ml-hint{display:none}
+  /* Slot rows: chevron, glyph, name, kcal. The spacer and the macros are
+     hidden so nothing can push the row wider than the card. */
+  .ml-slot-toggle{grid-template-columns:16px 24px minmax(0,1fr) auto;gap:8px}
+  .ml-slot-count,.ml-slot-macros,.ml-slot-spacer{display:none}
+  .ml-slotwrap select{padding-right:26px}
+  .ml-slot-name{grid-column:3;min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .ml-slot-kcal{grid-column:4}
+  .ml-entry{grid-template-columns:minmax(0,1fr) auto 30px;grid-template-areas:"name kcal del" "chips chips chips" "step step step";row-gap:8px;padding-left:18px}
+  .ml-entry-name{grid-area:name}
+  .ml-chips{grid-area:chips}
+  .ml-step{grid-area:step;justify-self:start}
+  .ml-kcal{grid-area:kcal}
+  .ml-del{grid-area:del}
+  .ml-stats-grid{grid-template-columns:1fr 1fr}
+  .ml-title{font-size:24px}
+  .ml-date{min-width:0}
+  .ml-nav{width:100%;justify-content:space-between}
+  .ml-nav-today{margin-left:2px}
+}
+/* Below ~380px the empty-state label has no room beside the add button; the
+   button's label already says what it does. */
+@media(max-width:380px){
+  .ml-slot.is-empty .ml-slot-kcal{display:none}
+  .ml-slot-toggle{grid-template-columns:16px 24px minmax(0,1fr)}
+  .ml-slot-head{padding:0 10px 0 8px}
+}
+@media(prefers-reduced-motion:reduce){.mrd *{animation:none!important;transition:none!important}}
 `;
 
 /* Shared drawn icons — one stroke weight, no emoji. */
@@ -235,157 +306,222 @@ function ToastHost({ toasts, onDismiss }) {
 /* ------------------------------------------------------------------ */
 /* MacroMeter — Meridian row + bar.                                   */
 /* ------------------------------------------------------------------ */
+/* TargetCol — one column of the day's target strip.                  */
+/* ------------------------------------------------------------------ */
 
-function MacroMeter({ label, value, max, macroKey, preview = 0 }) {
+function TargetCol({ label, macroKey, value, goal, preview = 0, mode }) {
   const meta = MACRO_META[macroKey];
-  const unit = macroKey === "calories" ? "" : " g";
+  const unit = macroKey === "calories" ? "kcal" : "g";
 
-  // A picked-but-unsaved entry previews on top of what's committed: the solid
-  // segment is fact, the translucent ghost segment is intent.
-  const hasPreview = preview > 0;
-  const projected = value + preview;
-  const committedPct = Math.min((value / max) * 100, 100);
-  const projectedPct = Math.min((projected / max) * 100, 100);
+  // Solid segment is food already logged; the ghost segment is the
+  // picked-but-unsaved entry, so the strip previews without lying.
+  const eaten = value + preview;
+  const isOver = value > goal;
+  const remaining = goal - eaten;
+  const committedPct = Math.min((value / goal) * 100, 100);
+  const projectedPct = Math.min((eaten / goal) * 100, 100);
   const ghostPct = Math.max(projectedPct - committedPct, 0);
-  const isOverLimit = value > max;
-  const willExceed = hasPreview && projected > max;
 
-  let valCls = "";
-  if (hasPreview) valCls = willExceed ? "m-over" : "m-prev";
-  else if (isOverLimit) valCls = "m-over";
+  const shown = mode === "remaining" ? Math.max(remaining, 0) : eaten;
+  const shownText = macroKey === "calories" ? Math.round(shown).toLocaleString() : fmtMacro(shown);
+  // The note always carries the complementary fact, never a repeat of the
+  // headline: "Left" reports progress, "Eaten" reports the remainder.
+  const note =
+    mode === "remaining"
+      ? `${Math.round((eaten / goal) * 100)}% eaten`
+      : remaining < 0
+        ? `${Math.abs(Math.round(remaining)).toLocaleString()} ${unit} over`
+        : `${Math.round(remaining).toLocaleString()} ${unit} left`;
 
   return (
-    <div className="m-meter">
-      <div className="m-meter-row">
-        <span className="m-meter-name">
-          <Icon d={meta.icon} className={`m-ic ${meta.iconCls}`} />
-          {label}
-        </span>
-        <span className={`m-meter-val m-num ${valCls}`}>
-          {fmtMacro(hasPreview ? projected : value)}
-          {hasPreview && <span className="m-prev-delta m-num">+{fmtMacro(preview)}</span>}
-          {" "}
-          <span className="m-meter-goal m-num">/ {max}{unit}</span>
-        </span>
+    <div className={`ml-col${macroKey === "calories" ? " is-cal" : ""}`}>
+      <div className="ml-col-lbl">
+        <Icon d={meta.icon} className={`m-ic ${meta.iconCls}`} />
+        {label}
       </div>
-      <div className="m-bar">
-        <i className={`${meta.barCls}${isOverLimit ? " m-overbar" : ""}`} style={{ transform: `scaleX(${committedPct / 100})` }}></i>
+      <div className="ml-val m-num">
+        {shownText}
+        <small>of {goal.toLocaleString()} {unit}</small>
+      </div>
+      <div className="ml-bar">
         <i
-          aria-hidden="true"
-          className={`m-ghost ${meta.barCls}${hasPreview ? "" : " m-ghost-off"}${willExceed ? " m-overbar" : ""}`}
-          style={{ transform: `translateX(${committedPct}%) scaleX(${ghostPct / 100})` }}
-        ></i>
+          className={`${meta.barCls}${isOver ? " is-over" : ""}`}
+          style={{ transform: `scaleX(${committedPct / 100})` }}
+        />
+        {ghostPct > 0 && (
+          <i
+            aria-hidden="true"
+            className={`${meta.barCls} is-ghost`}
+            style={{ opacity: 0.4, transform: `translateX(${committedPct}%) scaleX(${ghostPct / 100})` }}
+          />
+        )}
       </div>
+      <div className={`ml-note${mode === "consumed" && remaining < 0 ? " is-over" : ""}`}>{note}</div>
     </div>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/* MealSection — breakfast / lunch / dinner card.                     */
+/* EntryRow — one logged food inside a slot.                          */
 /* ------------------------------------------------------------------ */
 
-function MealSection({ title, meals, onUpdateQuantity, onDelete, onQuickAdd }) {
-  const mealIcon = title.toLowerCase() === "breakfast" ? <><circle cx="12" cy="12" r="4" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1" /></>
-    : title.toLowerCase() === "lunch" ? <><circle cx="12" cy="12" r="4" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></>
-    : <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z" />;
-
-  const qtyOf = (e) => parseFloat(e.quantity) || 0;
-  const subtotal = meals.reduce(
-    (sum, e) => sum + (e.meal?.macros?.calories || 0) * qtyOf(e),
-    0,
-  );
-  const subP = meals.reduce((s, e) => s + (e.meal?.macros?.protein || 0) * qtyOf(e), 0);
-  const subC = meals.reduce((s, e) => s + (e.meal?.macros?.carbs || 0) * qtyOf(e), 0);
-  const subF = meals.reduce((s, e) => s + (e.meal?.macros?.fats || 0) * qtyOf(e), 0);
+function EntryRow({ entry, onUpdateQuantity, onDelete }) {
+  const q = parseFloat(entry.quantity) || 0;
+  const m = entry.meal?.macros || {};
+  const tP = (m.protein || 0) * q;
+  const tC = (m.carbs || 0) * q;
+  const tF = (m.fats || 0) * q;
+  const tK = Math.round((m.calories || 0) * q);
 
   return (
-    <div className="m-card m-in" style={{ marginTop: 20 }}>
-      <div className="m-card-h">
-        <h3 style={{ display: "flex", alignItems: "center", gap: 11 }}>
-          <span className="m-sec-badge"><Icon d={mealIcon} /></span>
-          {title}
-          <span className="m-sec-count">{meals.length} {meals.length === 1 ? "item" : "items"}</span>
-        </h3>
-        {meals.length > 0 ? (
-          <span className="m-sec-kcal m-num" title={`${fmtMacro(subP)}g protein · ${fmtMacro(subC)}g carbs · ${fmtMacro(subF)}g fats`}>
-            {Math.round(subtotal).toLocaleString()} kcal
-          </span>
-        ) : (
-          <span className="m-crumb">Nothing logged yet</span>
-        )}
+    <div className="ml-entry">
+      <span className="ml-entry-name">
+        {toTitleCase(entry.mealName)}
+        <span className="ml-serving">
+          {q} × {entry.meal?.servingSize || "1 serving"} · {m.calories || 0} kcal each
+        </span>
+      </span>
+
+      <span className="ml-chips" title={`Total for ×${q}`}>
+        <span>{fmtMacro(tP)}P</span>
+        <span>{fmtMacro(tC)}C</span>
+        <span>{fmtMacro(tF)}F</span>
+      </span>
+
+      <div className="ml-step">
+        <button
+          type="button"
+          onClick={() => onUpdateQuantity(entry._id, Math.max(0.5, q - 0.5))}
+          aria-label={`Decrease quantity of ${toTitleCase(entry.mealName)}`}
+        >
+          −
+        </button>
+        <input
+          type="number"
+          step="0.5"
+          min="0.5"
+          value={entry.quantity}
+          onChange={(e) => onUpdateQuantity(entry._id, parseFloat(e.target.value))}
+          aria-label={`Quantity of ${toTitleCase(entry.mealName)}`}
+        />
+        <button
+          type="button"
+          onClick={() => onUpdateQuantity(entry._id, q + 0.5)}
+          aria-label={`Increase quantity of ${toTitleCase(entry.mealName)}`}
+        >
+          +
+        </button>
       </div>
 
-      {meals.length === 0 ? (
-        <div style={{ padding: "16px 18px" }}>
-          <div className="m-empty">
-            No {title.toLowerCase()} logged for this day.
-            <br />
-            <button type="button" className="m-btn m-btn-primary" onClick={onQuickAdd} style={{ padding: "9px 14px" }}>
-              <Icon d={ICONS.plus} /> Log {title.toLowerCase()} item
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div>
-          {meals.map((entry) => {
-            const q = qtyOf(entry);
-            const tP = (entry.meal?.macros?.protein || 0) * q;
-            const tC = (entry.meal?.macros?.carbs || 0) * q;
-            const tF = (entry.meal?.macros?.fats || 0) * q;
-            const tK = Math.round((entry.meal?.macros?.calories || 0) * q);
-            return (
-            <div key={entry._id} className="m-entry">
-              <span className="m-name">
-                {toTitleCase(entry.mealName)}
-                <span className="m-serving">
-                  {q} × {entry.meal?.servingSize || "1 serving"} · {entry.meal?.macros?.calories || 0} kcal each
-                </span>
-              </span>
-              <span className="m-chiprow" title={`Total for ×${q}` }>
-                <span className={`m-chip ${MACRO_CHIP.protein}`}>{fmtMacro(tP)}g P</span>
-                <span className={`m-chip ${MACRO_CHIP.carbs}`}>{fmtMacro(tC)}g C</span>
-                <span className={`m-chip ${MACRO_CHIP.fats}`}>{fmtMacro(tF)}g F</span>
-              </span>
-              <div className="m-step">
-                <button
-                  onClick={() => onUpdateQuantity(entry._id, Math.max(0.5, q - 0.5))}
-                  aria-label={`Decrease quantity of ${toTitleCase(entry.mealName)}`}
-                >
-                  −
-                </button>
-                <input
-                  type="number"
-                  step="0.5"
-                  min="0.5"
-                  value={entry.quantity}
-                  onChange={(e) => onUpdateQuantity(entry._id, parseFloat(e.target.value))}
-                  aria-label={`Quantity of ${toTitleCase(entry.mealName)}`}
-                />
-                <button
-                  onClick={() => onUpdateQuantity(entry._id, q + 0.5)}
-                  aria-label={`Increase quantity of ${toTitleCase(entry.mealName)}`}
-                >
-                  +
-                </button>
-              </div>
-              <span className="m-kc m-num">
-                {tK.toLocaleString()}
-                <small>kcal total</small>
-              </span>
-              <button
-                onClick={() => onDelete(entry._id)}
-                aria-label={`Delete ${toTitleCase(entry.mealName)}`}
-                className="m-iconbtn"
-                title="Delete entry"
-              >
-                <Icon d={ICONS.trash} />
-              </button>
-            </div>
-            );
-          })}
+      <span className="ml-kcal">
+        {tK.toLocaleString()}
+        <small>kcal</small>
+      </span>
+
+      <button
+        type="button"
+        onClick={() => onDelete(entry._id)}
+        aria-label={`Delete ${toTitleCase(entry.mealName)}`}
+        className="ml-iconbtn ml-del"
+        title="Delete entry"
+      >
+        <Icon d={ICONS.trash} />
+      </button>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* LedgerSection — one collapsible meal slot of the day log.          */
+/* ------------------------------------------------------------------ */
+
+const SLOT_ICONS = {
+  breakfast: (
+    <>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1" />
+    </>
+  ),
+  lunch: (
+    <>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+    </>
+  ),
+  dinner: <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z" />,
+};
+
+function LedgerSection({ slot, label, entries, open, onToggle, onAdd, onUpdateQuantity, onDelete }) {
+  const qtyOf = (e) => parseFloat(e.quantity) || 0;
+  const totals = entries.reduce(
+    (acc, e) => {
+      const m = e.meal?.macros || {};
+      const q = qtyOf(e);
+      acc.kcal += (m.calories || 0) * q;
+      acc.p += (m.protein || 0) * q;
+      acc.c += (m.carbs || 0) * q;
+      acc.f += (m.fats || 0) * q;
+      return acc;
+    },
+    { kcal: 0, p: 0, c: 0, f: 0 },
+  );
+  const has = entries.length > 0;
+  const expanded = has && open;
+
+  return (
+    <section className={`ml-slot${has ? "" : " is-empty"}${expanded ? " is-open" : ""}`}>
+      <div className="ml-slot-head">
+        <button
+          type="button"
+          className="ml-slot-toggle"
+          aria-expanded={has ? expanded : undefined}
+          aria-controls={has ? `slot-${slot}` : undefined}
+          onClick={has ? onToggle : onAdd}
+        >
+          <span className="ml-chev" aria-hidden="true">
+            <Icon d={ICONS.chevR} />
+          </span>
+          <span className="ml-slot-ico" aria-hidden="true">
+            <Icon d={SLOT_ICONS[slot]} />
+          </span>
+          <span className="ml-slot-name">{label}</span>
+          <span className="ml-slot-count">
+            {has ? `${entries.length} ${entries.length === 1 ? "item" : "items"}` : ""}
+          </span>
+          <span className="ml-slot-spacer" />
+          {has && (
+            <span className="ml-slot-macros">
+              P {fmtMacro(totals.p)} · C {fmtMacro(totals.c)} · F {fmtMacro(totals.f)}
+            </span>
+          )}
+          <span className="ml-slot-kcal">
+            {has ? `${Math.round(totals.kcal).toLocaleString()} kcal` : "Nothing logged"}
+          </span>
+        </button>
+        <button
+          type="button"
+          className="ml-slot-add"
+          onClick={onAdd}
+          aria-label={`Add food to ${label}`}
+          title={`Add to ${label}`}
+        >
+          <Icon d={ICONS.plus} />
+        </button>
+      </div>
+
+      {expanded && (
+        <div className="ml-entries" id={`slot-${slot}`}>
+          {entries.map((entry) => (
+            <EntryRow
+              key={entry._id}
+              entry={entry}
+              onUpdateQuantity={onUpdateQuantity}
+              onDelete={onDelete}
+            />
+          ))}
         </div>
       )}
-    </div>
+    </section>
   );
 }
 
@@ -398,10 +534,16 @@ export default function MealTrackingPage() {
   const [dailyLog, setDailyLog] = useState(null);
   const [meals, setMeals] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedMealType, setSelectedMealType] = useState("breakfast");
+  // Search-first logging: the slot is a default, not a prerequisite. It is
+  // suggested from the clock and stays editable in the log bar.
+  const [selectedMealType, setSelectedMealType] = useState(() => {
+    const hour = new Date().getHours();
+    return hour < 11 ? "breakfast" : hour < 16 ? "lunch" : "dinner";
+  });
   const [selectedMeal, setSelectedMeal] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [showMealStats, setShowMealStats] = useState(false);
+  const [openSlots, setOpenSlots] = useState({ breakfast: true, lunch: true, dinner: true });
   const [mealSearch, setMealSearch] = useState("");
   const [showMealDropdown, setShowMealDropdown] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
@@ -722,6 +864,8 @@ export default function MealTrackingPage() {
     base.setDate(base.getDate() + delta);
     setCurrentDate(format(base, "yyyy-MM-dd"));
   };
+  const toggleSlot = (slot) =>
+    setOpenSlots((prev) => ({ ...prev, [slot]: !prev[slot] }));
   const quickAdd = (type) => {
     setSelectedMealType(type);
     setShowMealDropdown(true);
@@ -762,30 +906,44 @@ export default function MealTrackingPage() {
       <style>{MERIDIAN_CSS}</style>
       <ToastHost toasts={toasts} onDismiss={dismissToast} />
       <AppShell>
-        <div className="mrd ng-container" style={{ padding: "32px var(--layout-gutter) 56px" }}>
-          {/* Page header — SaaS title block left, day navigator right */}
-          <div className="m-in" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
+        <div
+          className="mrd ng-container"
+          style={{ maxWidth: 1080, padding: "32px var(--layout-gutter) 64px" }}
+        >
+          {/* Page head — title block left, day navigator right */}
+          <div className="ml-head m-in">
             <div style={{ minWidth: 0 }}>
-              <p className="m-kicker">Nutrition · Meal log</p>
-              <h1 className="m-title">{selectedIsToday ? "Today" : format(selDate, "EEEE, MMMM d")}</h1>
-              <div className="m-totals">
-                <span className="m-total-pill"><Icon d={ICONS.flame} className="m-ic i-cal" /><b>{Math.round(displayedCalories).toLocaleString()}</b> kcal{previewing ? " incl. preview" : ""}</span>
-                <span className="m-total-pill"><Icon d={ICONS.drumstick} className="m-ic i-pro" /><b>{fmtMacro(totalMacros.protein + previewOf("protein"))}g</b> protein</span>
-                <span className="m-total-pill">{daySummary}</span>
-              </div>
+              <p className="ml-kicker">Nutrition · Meal log</p>
+              <h1 className="ml-title">Meals</h1>
+              <p className="ml-sub">
+                {selectedIsToday ? "Today" : format(selDate, "EEEE, MMMM d")} ·{" "}
+                <b>{daySummary}</b>
+                {previewing && (
+                  <>
+                    {" "}· <b>{Math.round(previewOf("calories")).toLocaleString()} kcal preview</b>
+                  </>
+                )}
+              </p>
             </div>
-            <div className="m-daynav" role="group" aria-label="Change day">
-              <button type="button" onClick={() => shiftDay(-1)} aria-label="Previous day" title="Previous day">
+
+            <div className="ml-nav" role="group" aria-label="Change day">
+              <button
+                type="button"
+                className="ml-nav-btn"
+                onClick={() => shiftDay(-1)}
+                aria-label="Previous day"
+                title="Previous day"
+              >
                 <Icon d={ICONS.chevL} />
               </button>
-              <div className="m-datepill">
-                {selectedIsToday ? (
-                  <span className="m-live"><span className="m-dot"></span>Today</span>
-                ) : (
-                  <span className="m-viewing"><span className="m-dot"></span>Viewing</span>
-                )}
-                <span className="m-datestr">{format(selDate, "EEE, MMM d")}</span>
-                <div className="m-datewrap">
+
+              <div className="ml-date">
+                <span className={`ml-status${selectedIsToday ? " is-today" : ""}`}>
+                  <i aria-hidden="true" />
+                  {selectedIsToday ? "Today" : "Viewing"}
+                </span>
+                <span className="ml-datestr">{format(selDate, "EEE, MMM d")}</span>
+                <span className="ml-datewrap">
                   <Icon d={ICONS.calendar} className="m-ic" />
                   <input
                     type="date"
@@ -793,357 +951,350 @@ export default function MealTrackingPage() {
                     onChange={(e) => e.target.value && setCurrentDate(e.target.value)}
                     aria-label="Select date"
                   />
-                </div>
+                </span>
               </div>
-              <button type="button" onClick={() => shiftDay(1)} aria-label="Next day" title="Next day">
+
+              <button
+                type="button"
+                className="ml-nav-btn"
+                onClick={() => shiftDay(1)}
+                aria-label="Next day"
+                title="Next day"
+              >
                 <Icon d={ICONS.chevR} />
               </button>
+
               {!selectedIsToday && (
-                <button type="button" className="m-todaybtn" onClick={() => setCurrentDate(format(new Date(), "yyyy-MM-dd"))}>
+                <button
+                  type="button"
+                  className="ml-nav-today"
+                  onClick={() => setCurrentDate(format(new Date(), "yyyy-MM-dd"))}
+                >
                   Today
                 </button>
               )}
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "min(340px,100%) 1fr", gap: 24, marginTop: 24 }} className="mrd-layout">
-            {/* Targets rail */}
-            <div className="m-card m-in" style={{ alignSelf: "start", position: "sticky", top: 24 }}>
-              <div className="m-card-h">
-                <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ color: "var(--ac)" }}><Icon d={ICONS.trend} /></span>
-                  Daily targets
-                </h3>
-                <span className="m-chip m-chip-ac m-num" title={previewing ? "Includes the meal you're previewing" : "Share of calorie goal"}>
-                  {Math.min(Math.round((displayedCalories / goals.calories) * 100), 999)}%
-                </span>
+          {/* Targets — one strip, four columns. The only place the numbers live. */}
+          <section className="ml-targets m-in" aria-label="Daily targets">
+            <div className="ml-targets-h">
+              <span className="ml-eyebrow">Daily targets</span>
+              <div className="ml-seg" role="group" aria-label="Macro breakdown view">
+                {["consumed", "remaining"].map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    aria-pressed={macroView === v}
+                    className={macroView === v ? "on" : ""}
+                    onClick={() => setMacroView(v)}
+                  >
+                    {v === "consumed" ? "Eaten" : "Left"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="ml-cols">
+              <TargetCol
+                label="Calories"
+                macroKey="calories"
+                value={totalMacros.calories}
+                goal={goals.calories}
+                preview={previewOf("calories")}
+                mode={macroView}
+              />
+              <TargetCol
+                label="Protein"
+                macroKey="protein"
+                value={totalMacros.protein}
+                goal={goals.protein}
+                preview={previewOf("protein")}
+                mode={macroView}
+              />
+              <TargetCol
+                label="Carbs"
+                macroKey="carbs"
+                value={totalMacros.carbs}
+                goal={goals.carbs}
+                preview={previewOf("carbs")}
+                mode={macroView}
+              />
+              <TargetCol
+                label="Fats"
+                macroKey="fats"
+                value={totalMacros.fats}
+                goal={goals.fats}
+                preview={previewOf("fats")}
+                mode={macroView}
+              />
+            </div>
+          </section>
+
+          {/* Log bar — search first, slot assigned before it is logged. */}
+          <section className={`ml-log m-in${showMealDropdown ? " m-dd-open" : ""}`} aria-label="Log food">
+            <div className="ml-log-h">
+              <span className="ml-eyebrow">Log food</span>
+              <span className="ml-hint">↑↓ to browse · Enter to add</span>
+            </div>
+
+            <form onSubmit={handleAddMeal}>
+              <div className="ml-form">
+                <div className="ml-dd-anchor ml-search">
+                  <span className="ml-search-ico" aria-hidden="true">
+                    <Icon d={ICONS.search} />
+                  </span>
+                  <input
+                    id="m-search"
+                    type="text"
+                    ref={searchInputRef}
+                    autoComplete="off"
+                    value={mealSearch}
+                    onChange={(e) => {
+                      // Editing the text means searching again — drop any
+                      // picked meal so the input is a single source of truth.
+                      setSelectedMeal("");
+                      setMealSearch(e.target.value);
+                      setShowMealDropdown(true);
+                      setActiveIdx(0);
+                    }}
+                    onFocus={(e) => {
+                      setShowMealDropdown(true);
+                      // Revisiting a picked meal: select-all so typing or one
+                      // backspace replaces it cleanly.
+                      if (selectedMeal) e.target.select();
+                    }}
+                    onKeyDown={(e) => {
+                      const list = orderedMeals;
+                      if (e.key === "ArrowDown") {
+                        e.preventDefault();
+                        if (!showMealDropdown) setShowMealDropdown(true);
+                        else setActiveIdx((i) => Math.min(i + 1, Math.max(list.length - 1, 0)));
+                        return;
+                      }
+                      if (e.key === "ArrowUp") {
+                        e.preventDefault();
+                        setActiveIdx((i) => Math.max(i - 1, 0));
+                        return;
+                      }
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        const pick = list[activeIdx] || list[0];
+                        if (list.length === 1 || pick) {
+                          const target = list.length === 1 ? list[0] : pick;
+                          if (target) {
+                            setSelectedMeal(target._id);
+                            setMealSearch(toTitleCase(target.name));
+                            setShowMealDropdown(false);
+                            qtyInputRef.current?.focus();
+                          }
+                        } else if (list.length > 1) {
+                          setShowMealDropdown(true);
+                        }
+                      }
+                    }}
+                    placeholder="Search foods…"
+                    aria-label="Search foods"
+                    required={!selectedMeal}
+                  />
+                  <span className="ml-kbd" aria-hidden="true">/</span>
+
+                  {showMealDropdown && (
+                    <div className="m-dd" data-lenis-prevent="true" role="listbox" aria-label="Matching foods">
+                      {filteredMeals.slice(0, 30).map((meal, idx) => (
+                        <div
+                          key={meal._id}
+                          role="option"
+                          aria-selected={selectedMeal === meal._id || activeIdx === idx}
+                          tabIndex={-1}
+                          onMouseEnter={() => setActiveIdx(idx)}
+                          onClick={() => {
+                            setSelectedMeal(meal._id);
+                            setMealSearch(toTitleCase(meal.name));
+                            setShowMealDropdown(false);
+                            setShowMealStats(false);
+                            qtyInputRef.current?.focus();
+                          }}
+                          className={`m-dd-item${activeIdx === idx ? " is-active" : ""}${selectedMeal === meal._id ? " is-picked" : ""}`}
+                        >
+                          <span className="m-dd-main">
+                            <span className="m-dd-name">{toTitleCase(meal.name)}</span>
+                            <span className="m-dd-sub">
+                              {meal.servingSize} · {meal.macros?.protein || 0}P · {meal.macros?.carbs || 0}C · {meal.macros?.fats || 0}F
+                            </span>
+                          </span>
+                          <span style={{ display: "flex", alignItems: "center", gap: 6, flex: "none" }}>
+                            {recentSet.has(meal._id) && <span className="m-dd-recent">Recent</span>}
+                            <span className="m-dd-kcal m-num">{meal.macros?.calories || 0} kcal</span>
+                          </span>
+                        </div>
+                      ))}
+                      {filteredMeals.length === 0 && (
+                        <div className="m-dd-empty">No matching foods — try a shorter search.</div>
+                      )}
+                      {filteredMeals.length > 30 && (
+                        <div className="m-dd-empty" style={{ padding: "10px" }}>
+                          Showing 30 of {filteredMeals.length} — keep typing to narrow.
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div className="ml-qty">
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((q) => Math.max(0.5, (parseFloat(q) || 0) - 0.5))}
+                    aria-label="Decrease quantity"
+                  >
+                    −
+                  </button>
+                  <input
+                    id="m-qty"
+                    type="number"
+                    ref={qtyInputRef}
+                    step="0.5"
+                    min="0.5"
+                    value={quantity}
+                    onChange={(e) => setQuantity(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        submitRef.current?.click();
+                      }
+                    }}
+                    aria-label="Quantity"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((q) => (parseFloat(q) || 0) + 0.5)}
+                    aria-label="Increase quantity"
+                  >
+                    +
+                  </button>
+                </div>
+
+                <div className="ml-slotwrap">
+                  <select
+                    id="m-type"
+                    value={selectedMealType}
+                    onChange={(e) => setSelectedMealType(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        searchInputRef.current?.focus();
+                      }
+                    }}
+                    aria-label="Meal slot"
+                    title="Meal slot"
+                  >
+                    <option value="breakfast">Breakfast</option>
+                    <option value="lunch">Lunch</option>
+                    <option value="dinner">Dinner</option>
+                  </select>
+                  <span className="ml-selchev" aria-hidden="true">
+                    <Icon d={ICONS.chevD} />
+                  </span>
+                </div>
+
+                <div className="ml-addwrap">
+                  <button type="submit" ref={submitRef} disabled={submitting} className="m-btn m-btn-primary">
+                    <Icon d={ICONS.plus} />
+                    {submitting ? "Adding…" : "Add entry"}
+                  </button>
+                </div>
               </div>
 
-              {(() => {
-                const calPct = Math.min((displayedCalories / goals.calories) * 100, 100);
-                const committedPct = Math.min((totalMacros.calories / goals.calories) * 100, 100);
-                const ghostPct = Math.max(calPct - committedPct, 0);
-                const calRem = goals.calories - displayedCalories;
-                const over = calRem < 0;
+              {/* Live pick summary — always visible once a food is chosen */}
+              {previewMeal && previewMacros && (
+                <div className="ml-picked">
+                  <b>{toTitleCase(previewMeal.name)}</b>
+                  <span className="ml-picked-x">
+                    × {previewQty} → {Math.round(previewMacros.calories).toLocaleString()} kcal
+                  </span>
+                  <span className="ml-chips">
+                    <span>{fmtMacro(previewMacros.protein)}P</span>
+                    <span>{fmtMacro(previewMacros.carbs)}C</span>
+                    <span>{fmtMacro(previewMacros.fats)}F</span>
+                  </span>
+                  <button
+                    type="button"
+                    className="ml-per"
+                    onClick={() => setShowMealStats((v) => !v)}
+                    aria-expanded={showMealStats}
+                  >
+                    {showMealStats ? "Hide per serving" : "Per serving"}
+                  </button>
+                </div>
+              )}
+
+              {/* Per-serving stats panel */}
+              {showMealStats && selectedMeal && (() => {
+                const meal = meals.find((m) => m._id === selectedMeal);
+                if (!meal) return null;
                 return (
-                  <div className="m-hero">
-                    <div className="m-hero-top">
-                      <div>
-                        <div className="m-hero-num m-num">
-                          {Math.round(displayedCalories).toLocaleString()} <small>/ {goals.calories.toLocaleString()} kcal</small>
+                  <div className="ml-stats">
+                    <div className="ml-stats-h">
+                      <span className="ml-eyebrow">Per serving · {meal.servingSize || "1 serving"}</span>
+                      <button
+                        type="button"
+                        onClick={() => setShowMealStats(false)}
+                        className="ml-iconbtn"
+                        aria-label="Close nutrition info"
+                      >
+                        <Icon d={ICONS.x} />
+                      </button>
+                    </div>
+                    <div className="ml-stats-grid">
+                      {[
+                        { k: "Calories", v: meal.macros?.calories || 0 },
+                        { k: "Protein", v: `${meal.macros?.protein || 0} g` },
+                        { k: "Carbs", v: `${meal.macros?.carbs || 0} g` },
+                        { k: "Fats", v: `${meal.macros?.fats || 0} g` },
+                      ].map((s) => (
+                        <div key={s.k} className="ml-stats-cell">
+                          <span>{s.k}</span>
+                          <b>{s.v}</b>
                         </div>
-                        <div className="m-hero-sub">{previewing ? "Live preview includes your unsaved pick" : daySummary + " · on this day"}</div>
-                      </div>
-                    </div>
-                    <div className="m-hero-track">
-                      <i style={{ transform: `scaleX(${committedPct / 100})` }} className={totalMacros.calories > goals.calories ? "m-overbar" : ""} />
-                      <i aria-hidden="true" className={`m-ghost${previewing ? "" : " m-ghost-off"}${over ? " m-overbar" : ""}`} style={{ transform: `translateX(${committedPct}%) scaleX(${ghostPct / 100})` }} />
-                    </div>
-                    <div className="m-hero-foot">
-                      <span className={over ? "m-over" : previewing ? "m-rem-prev" : ""}>
-                        {over ? `${Math.abs(Math.round(calRem)).toLocaleString()} kcal over` : `${Math.round(calRem).toLocaleString()} kcal left`}
-                      </span>
-                      <span>{Math.round(calPct)}% of goal</span>
+                      ))}
                     </div>
                   </div>
                 );
               })()}
+            </form>
+          </section>
 
-              <MacroMeter label="Calories" macroKey="calories" value={totalMacros.calories} max={goals.calories} preview={previewOf("calories")} />
-              <MacroMeter label="Protein" macroKey="protein" value={totalMacros.protein} max={goals.protein} preview={previewOf("protein")} />
-              <MacroMeter label="Carbs" macroKey="carbs" value={totalMacros.carbs} max={goals.carbs} preview={previewOf("carbs")} />
-              <MacroMeter label="Fats" macroKey="fats" value={totalMacros.fats} max={goals.fats} preview={previewOf("fats")} />
-
-              {/* Consumed ↔ Remaining — MacroFactor-style toggle, remaining by default */}
-              <div className="m-rem">
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 8 }}>
-                  <div className="m-rem-h" style={{ marginBottom: 0 }}>
-                    {macroView === "remaining" ? "REMAINING" : "CONSUMED"}
-                  </div>
-                  <div className="m-seg" role="group" aria-label="Macro breakdown view">
-                    {["consumed", "remaining"].map((v) => (
-                      <button
-                        key={v}
-                        type="button"
-                        aria-pressed={macroView === v}
-                        className={macroView === v ? "on" : ""}
-                        onClick={() => setMacroView(v)}
-                      >
-                        {v === "consumed" ? "Eaten" : "Left"}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                {[
-                  { label: "Calories", key: "calories", unit: "kcal", digits: 0 },
-                  { label: "Protein", key: "protein", unit: "g", digits: 1 },
-                  { label: "Carbs", key: "carbs", unit: "g", digits: 1 },
-                  { label: "Fats", key: "fats", unit: "g", digits: 1 },
-                ].map((item) => {
-                  const eaten = totalMacros[item.key] + previewOf(item.key);
-                  if (macroView === "consumed") {
-                    return (
-                      <div key={item.label} className="m-rem-row">
-                        <span>{item.label}</span>
-                        <b className={`m-num ${previewing ? "m-rem-prev" : ""}`}>
-                          {eaten.toFixed(item.digits)} <span style={{ color: "var(--t3)", fontWeight: 500 }}>/ {goals[item.key].toLocaleString()} {item.unit}</span>
-                        </b>
-                      </div>
-                    );
-                  }
-                  const remaining = goals[item.key] - eaten;
-                  const isExceeded = remaining < 0;
-                  const text = isExceeded
-                    ? `+${Math.abs(remaining).toFixed(item.digits)} ${item.unit} over`
-                    : `${remaining.toFixed(item.digits)} ${item.unit} left`;
-                  return (
-                    <div key={item.label} className="m-rem-row">
-                      <span>{item.label}</span>
-                      <b className={`m-num ${isExceeded ? "m-over" : previewing ? "m-rem-prev" : ""}`}>
-                        {text}
-                      </b>
-                    </div>
-                  );
-                })}
-              </div>
+          {/* Day log — one slot per meal, collapsible rows */}
+          <section className="ml-ledger m-in" aria-label="Food logged for this day">
+            <div className="ml-ledger-h">
+              <span className="ml-eyebrow">Day log</span>
+              <span className="ml-ledger-meta">
+                {mealCount} {mealCount === 1 ? "entry" : "entries"} ·{" "}
+                {Math.round(totalMacros.calories).toLocaleString()} kcal
+              </span>
             </div>
 
-            {/* Feed column */}
-            <div>
-              {/* Add meal card */}
-              <div className={`m-card m-in${showMealDropdown ? " m-dd-open" : ""}`}>
-                <div className="m-card-h">
-                  <h3>Add a meal</h3>
-                  <span className="m-crumb">Macros scale with quantity · <b style={{ color: "var(--ac)" }}>/</b> focuses search</span>
-                </div>
-                <form onSubmit={handleAddMeal} style={{ padding: 18 }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "150px 1fr 92px auto", gap: 10, alignItems: "end" }} className="m-addgrid">
-                    <div>
-                      <label htmlFor="m-type" className="m-lbl">Meal type</label>
-                      <div className="m-selwrap">
-                        <select
-                          id="m-type"
-                          value={selectedMealType}
-                          onChange={(e) => setSelectedMealType(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              searchInputRef.current?.focus();
-                            }
-                          }}
-                          className="m-field"
-                        >
-                          <option value="breakfast">Breakfast</option>
-                          <option value="lunch">Lunch</option>
-                          <option value="dinner">Dinner</option>
-                        </select>
-                        <span className="m-chev"><Icon d={ICONS.chevD} /></span>
-                      </div>
-                    </div>
-
-                    <div className="m-dd-anchor" style={{ position: "relative" }}>
-                      <label htmlFor="m-search" className="m-lbl">
-                        Search foods <span style={{ textTransform: "none", letterSpacing: 0, fontWeight: 500, color: "var(--t3)" }}>· ↑↓ + ⏎</span>
-                      </label>
-                      <div style={{ display: "flex", gap: 8 }}>
-                        <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
-                          <span style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "var(--t3)", pointerEvents: "none" }}>
-                            <Icon d={ICONS.search} />
-                          </span>
-                          <input
-                            id="m-search"
-                            type="text"
-                            ref={searchInputRef}
-                            autoComplete="off"
-                            value={mealSearch}
-                            onChange={(e) => {
-                              // Editing the text means searching again — drop any
-                              // picked meal so the input is a single source of truth.
-                              setSelectedMeal("");
-                              setMealSearch(e.target.value);
-                              setShowMealDropdown(true);
-                              setActiveIdx(0);
-                            }}
-                            onFocus={(e) => {
-                              setShowMealDropdown(true);
-                              // Revisiting a picked meal: select-all so typing or one
-                              // backspace replaces it cleanly.
-                              if (selectedMeal) e.target.select();
-                            }}
-                            onKeyDown={(e) => {
-                              const list = orderedMeals;
-                              if (e.key === "ArrowDown") {
-                                e.preventDefault();
-                                if (!showMealDropdown) setShowMealDropdown(true);
-                                else setActiveIdx((i) => Math.min(i + 1, Math.max(list.length - 1, 0)));
-                                return;
-                              }
-                              if (e.key === "ArrowUp") {
-                                e.preventDefault();
-                                setActiveIdx((i) => Math.max(i - 1, 0));
-                                return;
-                              }
-                              if (e.key === "Enter") {
-                                e.preventDefault();
-                                const pick = list[activeIdx] || list[0];
-                                if (list.length === 1 || pick) {
-                                  const target = list.length === 1 ? list[0] : pick;
-                                  if (target) {
-                                    setSelectedMeal(target._id);
-                                    setMealSearch(toTitleCase(target.name));
-                                    setShowMealDropdown(false);
-                                    qtyInputRef.current?.focus();
-                                  }
-                                } else if (list.length > 1) {
-                                  setShowMealDropdown(true);
-                                }
-                              }
-                            }}
-                            className="m-field"
-                            style={{ paddingLeft: 34 }}
-                            placeholder="Search the database…"
-                            required={!selectedMeal}
-                          />
-                          {showMealDropdown && (
-                            <div className="m-dd" data-lenis-prevent="true" role="listbox" aria-label="Matching foods">
-                              {filteredMeals.slice(0, 30).map((meal, idx) => (
-                                <div
-                                  key={meal._id}
-                                  role="option"
-                                  aria-selected={selectedMeal === meal._id || activeIdx === idx}
-                                  tabIndex={-1}
-                                  onMouseEnter={() => setActiveIdx(idx)}
-                                  onClick={() => {
-                                    setSelectedMeal(meal._id);
-                                    setMealSearch(toTitleCase(meal.name));
-                                    setShowMealDropdown(false);
-                                    setShowMealStats(false);
-                                    qtyInputRef.current?.focus();
-                                  }}
-                                  className={`m-dd-item${activeIdx === idx ? " is-active" : ""}${selectedMeal === meal._id ? " is-picked" : ""}`}
-                                >
-                                  <span className="m-dd-main">
-                                    <span className="m-dd-name">{toTitleCase(meal.name)}</span>
-                                    <span className="m-dd-sub" style={{ display: "block" }}>{meal.servingSize} · {meal.macros?.protein || 0}P · {meal.macros?.carbs || 0}C · {meal.macros?.fats || 0}F</span>
-                                  </span>
-                                  <span style={{ display: "flex", alignItems: "center", gap: 6, flex: "none" }}>
-                                    {recentSet.has(meal._id) && <span className="m-dd-recent">Recent</span>}
-                                    <span className="m-dd-kcal m-num">{meal.macros?.calories || 0} kcal</span>
-                                  </span>
-                                </div>
-                              ))}
-                              {filteredMeals.length === 0 && (
-                                <div className="m-dd-empty">No matching foods — try a shorter search.</div>
-                              )}
-                              {filteredMeals.length > 30 && (
-                                <div className="m-dd-empty" style={{ padding: "10px" }}>Showing 30 of {filteredMeals.length} — keep typing to narrow.</div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setShowMealStats(!showMealStats)}
-                          disabled={!selectedMeal}
-                          title="Show per-serving info"
-                          aria-label="Show per-serving info"
-                          className="m-iconbtn"
-                          style={{ border: "1px solid var(--line)", height: 41, width: 41, display: "flex", alignItems: "center", justifyContent: "center", opacity: selectedMeal ? 1 : 0.35 }}
-                        >
-                          <Icon d={ICONS.info} />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label htmlFor="m-qty" className="m-lbl">
-                        Qty <span style={{ textTransform: "none", letterSpacing: 0, fontWeight: 500, color: "var(--t3)" }}>· ⏎ adds</span>
-                      </label>
-                      <input
-                        id="m-qty"
-                        type="number"
-                        ref={qtyInputRef}
-                        step="0.5"
-                        min="0.5"
-                        value={quantity}
-                        onChange={(e) => setQuantity(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            submitRef.current?.click();
-                          }
-                        }}
-                        aria-label="Quantity"
-                        className="m-field m-num"
-                        style={{ textAlign: "center" }}
-                        required
-                      />
-                    </div>
-
-                    <div style={{ display: "flex", alignItems: "flex-end" }}>
-                      <button ref={submitRef} type="submit" disabled={submitting} className="m-btn m-btn-primary" style={{ width: "100%" }}>
-                        <Icon d={ICONS.plus} />
-                        {submitting ? "Adding…" : "Add entry"}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Live pick summary — always visible once a food is chosen */}
-                  {previewMeal && previewMacros && (
-                    <div className="m-picked">
-                      <b>{toTitleCase(previewMeal.name)}</b>
-                      <span style={{ color: "var(--t2)", fontWeight: 400 }}>× {previewQty} → {Math.round(previewMacros.calories).toLocaleString()} kcal</span>
-                      <span className="m-picked-macros">
-                        <span className="m-chip-p">{fmtMacro(previewMacros.protein)}g P</span>
-                        <span className="m-chip-c">{fmtMacro(previewMacros.carbs)}g C</span>
-                        <span className="m-chip-f">{fmtMacro(previewMacros.fats)}g F</span>
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Per-serving stats panel */}
-                  {showMealStats && selectedMeal && (
-                    <div className="m-card" style={{ marginTop: 14, padding: "14px 16px" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                        <h3 className="m-lbl" style={{ margin: 0 }}>
-                          Nutritional data · per serving
-                        </h3>
-                        <button onClick={() => setShowMealStats(false)} className="m-iconbtn" aria-label="Close nutrition info">
-                          <Icon d={ICONS.x} className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                      {(() => {
-                        const meal = meals.find((m) => m._id === selectedMeal);
-                        if (!meal) return null;
-                        return (
-                          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10 }}>
-                            {[
-                              { k: "Cal", v: meal.macros.calories, cls: "" },
-                              { k: "Protein", v: meal.macros.protein, cls: "m-chip-p" },
-                              { k: "Carbs", v: meal.macros.carbs, cls: "m-chip-c" },
-                              { k: "Fats", v: meal.macros.fats, cls: "m-chip-f" },
-                            ].map((s) => (
-                              <div key={s.k} style={{ background: "var(--sunken)", borderRadius: 6, padding: "10px 12px", textAlign: "center" }}>
-                                <span className="m-lbl" style={{ fontSize: 10, marginBottom: 3 }}>{s.k}</span>
-                                <b className="m-num" style={{ fontSize: 16, fontWeight: 500 }}>{s.v}</b>
-                              </div>
-                            ))}
-                          </div>
-                        );
-                      })()}
-                    </div>
-                  )}
-                </form>
-              </div>
-
-              {/* Meal sections */}
-              <MealSection title="Breakfast" meals={getMealsByType("breakfast")} onUpdateQuantity={handleUpdateQuantity} onDelete={handleDeleteEntry} onQuickAdd={() => quickAdd("breakfast")} />
-              <MealSection title="Lunch" meals={getMealsByType("lunch")} onUpdateQuantity={handleUpdateQuantity} onDelete={handleDeleteEntry} onQuickAdd={() => quickAdd("lunch")} />
-              <MealSection title="Dinner" meals={getMealsByType("dinner")} onUpdateQuantity={handleUpdateQuantity} onDelete={handleDeleteEntry} onQuickAdd={() => quickAdd("dinner")} />
-            </div>
-          </div>
+            {[
+              { key: "breakfast", label: "Breakfast" },
+              { key: "lunch", label: "Lunch" },
+              { key: "dinner", label: "Dinner" },
+            ].map((s) => (
+              <LedgerSection
+                key={s.key}
+                slot={s.key}
+                label={s.label}
+                entries={getMealsByType(s.key)}
+                open={openSlots[s.key]}
+                onToggle={() => toggleSlot(s.key)}
+                onAdd={() => quickAdd(s.key)}
+                onUpdateQuantity={handleUpdateQuantity}
+                onDelete={handleDeleteEntry}
+              />
+            ))}
+          </section>
         </div>
       </AppShell>
     </>
   );
 }
+
