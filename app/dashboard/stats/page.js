@@ -71,6 +71,37 @@ const STATS_CSS = `
    instead of shrinking. */
 .st-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
 @media(min-width:1000px){.st-layout{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* Weight logging — sits under the chart it feeds. */
+.st-input{height:34px;padding:0 10px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--t1);font:inherit;font-size:13px;font-variant-numeric:tabular-nums;min-width:0}
+.st-input::placeholder{color:var(--t3)}
+.st-input:focus{outline:none;border-color:var(--t1)}
+.st-input:focus-visible{outline:2px solid var(--t1);outline-offset:2px}
+.st-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:34px;padding:0 14px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--t1);font:inherit;font-size:13px;font-weight:500;letter-spacing:-.01em;cursor:pointer;transition:background .15s,color .15s}
+.st-btn:hover{background:var(--sunken)}
+.st-btn.primary{background:var(--ac);border-color:var(--ac);color:var(--on-ac)}
+.st-btn.primary:hover{background:var(--ach)}
+.st-btn:disabled{opacity:.5;cursor:wait}
+.st-btn:focus-visible{outline:2px solid var(--t1);outline-offset:2px}
+.st-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border:0;border-radius:5px;background:none;color:var(--t3);cursor:pointer}
+.st-icon-btn:hover{background:var(--sunken);color:var(--t1)}
+.st-icon-btn:focus-visible{outline:2px solid var(--t1);outline-offset:1px}
+.st-weight-form{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.st-weight-form .st-input{width:124px}
+.st-weight-unit{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+.st-weight-target{margin-left:auto;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.st-target{display:inline-flex;align-items:baseline;gap:6px;border:0;border-bottom:1px dashed var(--t3);background:none;padding:0 0 2px;color:var(--t2);font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
+.st-target b{color:var(--t1);font-family:inherit;font-size:11px}
+.st-target:hover{color:var(--t1);border-color:var(--t1)}
+.st-target-edit{display:flex;align-items:center;gap:4px}
+.st-target-edit .st-input{width:66px;height:30px;padding:0 8px}
+.st-weight-note{margin:10px 0 0;font-size:12px;color:var(--t3)}
+.st-weight-note.err{color:var(--red)}
+.st-entries{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 28px;margin-top:12px}
+.st-entry{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--t2)}
+.st-entry b{font-size:14px;font-weight:600;letter-spacing:-.01em;color:var(--t1);font-variant-numeric:tabular-nums}
+.st-entry b span{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.04em;color:var(--t3);margin-left:3px}
+.st-entry-r{display:flex;align-items:center;gap:2px}
+@media(max-width:640px){.st-entries{grid-template-columns:1fr}.st-weight-target{margin-left:0}}
 `;
 
 const Icon = ({ d, className = "m-ic", style }) => (
@@ -86,6 +117,10 @@ const ICONS = {
      app; this is now the one the gym page and profile page share. */
   scale: <><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" /><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" /><path d="M7 21h10" /><path d="M12 3v18" /><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2" /></>,
   spark: <path d="M12 2l2.4 7.2H22l-6 4.6 2.3 7.2-6.3-4.5-6.3 4.5L8 13.8 2 9.2h7.6z" />,
+  pencil: <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />,
+  check: <path d="M5 13l4 4L19 7" />,
+  x: <path d="M18 6 6 18M6 6l12 12" />,
+  trash: <><path d="M3 6h18" /><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6M14 11v6" /></>,
 };
 
 const RANGES = [7, 30, 90];
@@ -147,6 +182,13 @@ export default function StatsPage() {
   const [heatmapYear, setHeatmapYear] = useState(new Date().getFullYear()); // selected calendar year (chip switcher)
   const [weight, setWeight] = useState({ entries: [], targetWeight: 75 });
   const [weightError, setWeightError] = useState("");
+  // Weight editing lives here now that the gym page is session-only.
+  const [newWeight, setNewWeight] = useState("");
+  const [savingWeight, setSavingWeight] = useState(false);
+  const [editingTarget, setEditingTarget] = useState(false);
+  const [targetDraft, setTargetDraft] = useState("");
+  const [savingTarget, setSavingTarget] = useState(false);
+  const [weightNote, setWeightNote] = useState(null); // { text, tone }
 
   useEffect(() => {
     if (!user) return;
@@ -197,6 +239,84 @@ export default function StatsPage() {
   const latestWeight = weightRows.length > 0 ? weightRows[weightRows.length - 1].weight : null;
   const firstWeight = weightRows.length > 0 ? weightRows[0].weight : null;
   const weightChange = latestWeight != null && firstWeight != null ? Math.round((latestWeight - firstWeight) * 10) / 10 : null;
+
+  const handleAddWeight = async (e) => {
+    e.preventDefault();
+    const parsed = parseFloat(newWeight);
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      setWeightNote({ text: "Enter a weight in kilograms first (e.g. 74.5).", tone: "err" });
+      return;
+    }
+
+    setSavingWeight(true);
+    try {
+      const res = await fetch("/api/weight", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ weight: parsed, date: format(new Date(), "yyyy-MM-dd") }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setWeightNote({ text: data.error || "Couldn't log that weight. Check the value and retry.", tone: "err" });
+        return;
+      }
+      setWeight((prev) => ({ ...prev, entries: data.weightEntries || prev.entries }));
+      setNewWeight("");
+      setWeightError("");
+      setWeightNote({ text: `Logged ${parsed} kg for ${format(new Date(), "d MMM")}.`, tone: "ok" });
+    } catch (err) {
+      setWeightNote({ text: `Network error — your weight wasn't logged. ${err?.message || "Try again."}`, tone: "err" });
+    } finally {
+      setSavingWeight(false);
+    }
+  };
+
+  const handleDeleteWeight = async (entryId, weightKg) => {
+    try {
+      const res = await fetch(`/api/weight/${entryId}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setWeightNote({ text: data.error || "Couldn't remove that entry. Try again.", tone: "err" });
+        return;
+      }
+      setWeight((prev) => ({
+        ...prev,
+        entries: data.weightEntries || prev.entries.filter((entry) => entry._id !== entryId),
+      }));
+      setWeightNote({ text: `Removed the ${weightKg} kg entry.`, tone: "ok" });
+    } catch (err) {
+      setWeightNote({ text: `Network error — the entry is still there. ${err?.message || "Try again."}`, tone: "err" });
+    }
+  };
+
+  const handleSaveTarget = async () => {
+    const parsed = parseFloat(targetDraft);
+    if (!Number.isFinite(parsed) || parsed < 20 || parsed > 400) {
+      setWeightNote({ text: "Target weight must be between 20 and 400 kg.", tone: "err" });
+      return;
+    }
+
+    setSavingTarget(true);
+    try {
+      const res = await fetch("/api/weight", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetWeight: parsed }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setWeightNote({ text: data.error || "Couldn't update the target weight. Try again.", tone: "err" });
+        return;
+      }
+      setWeight((prev) => ({ ...prev, targetWeight: data.targetWeight ?? parsed }));
+      setEditingTarget(false);
+      setWeightNote({ text: `Target weight set to ${parsed} kg.`, tone: "ok" });
+    } catch (err) {
+      setWeightNote({ text: `Network error — target weight wasn't saved. ${err?.message || "Try again."}`, tone: "err" });
+    } finally {
+      setSavingTarget(false);
+    }
+  };
 
   if (!user) {
     return null;
@@ -328,21 +448,25 @@ export default function StatsPage() {
 
         {stats && (
           <>
-            {/* ---------------------- Weight trend ---------------------- */}
+            {/* ---------------------- Weight trend + logging ---------------------- */}
             <div className="m-card m-in" style={{ marginBottom: 20 }}>
               <div className="m-card-h">
                 <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <span style={{ color: "var(--ac)" }}><Icon d={ICONS.scale} /></span>
                   Weight trend
                 </h3>
-                {latestWeight != null && (
-                  <span className="m-crumb m-num">
-                    {latestWeight} kg
-                    {weightChange != null && weightChange !== 0 && (
-                      <> · {weightChange > 0 ? "+" : "−"}{Math.abs(weightChange)} kg over {weightRows.length} entries</>
-                    )}
-                  </span>
-                )}
+                <span className="m-crumb m-num">
+                  {latestWeight != null ? (
+                    <>
+                      {latestWeight} kg
+                      {weightChange != null && weightChange !== 0 && (
+                        <> · {weightChange > 0 ? "+" : "−"}{Math.abs(weightChange)} kg over {weightRows.length} entries</>
+                      )}
+                    </>
+                  ) : (
+                    "No entries yet"
+                  )}
+                </span>
               </div>
               <div style={{ padding: 18 }}>
                 {weightError && weightRows.length > 0 && (
@@ -359,42 +483,151 @@ export default function StatsPage() {
                   </div>
                 ) : weightRows.length < 2 ? (
                   <div className="st-empty">
-                    Need at least two weight entries to draw a trend.
-                    <div style={{ marginTop: 10 }}>                        <Link href="/dashboard/gym" className="m-crumb" style={{ color: "var(--t1)", fontWeight: 500 }}>
-                          Log your weight →
-                        </Link>
-                    </div>
+                    {weightRows.length === 0
+                      ? "No weigh-ins yet — log today's weight below to start the trend."
+                      : "One entry so far — log another day to draw the trend."}
                   </div>
                 ) : (
-                  <>
-                    <div style={{ height: 200 }}>
-                      <ResponsiveContainer width="100%" height={200}>
-                        <LineChart data={weightRows}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="var(--line)" vertical={false} />
-                          <XAxis
-                            dataKey="date"
-                            tick={{ fontSize: 10, fill: "var(--t3)" }}
-                            axisLine={{ stroke: "var(--line)" }}
-                            tickLine={false}
-                            tickFormatter={(str) => fmtDate(str)}
-                            minTickGap={28}
-                          />
-                          <YAxis domain={["dataMin - 1", "dataMax + 1"]} tick={{ fontSize: 10, fill: "var(--t3)" }} axisLine={false} tickLine={false} width={34} />
-                          <Tooltip
-                            contentStyle={{ backgroundColor: "var(--card)", border: "1px solid var(--line)", borderRadius: "6px", fontSize: 12, boxShadow: "var(--ng-shadow-2)" }}
-                            itemStyle={{ color: "var(--t1)", fontWeight: 500 }}
-                            labelStyle={{ color: "var(--t3)" }}
-                            labelFormatter={(label) => format(parseISO(`${label}T00:00:00`), "MMMM d, yyyy")}
-                          />
-                          <ReferenceLine y={weight.targetWeight} stroke="var(--ac)" strokeDasharray="4 4" />
-                          <Line type="monotone" dataKey="weight" stroke="var(--ac)" strokeWidth={2} dot={{ fill: "var(--card)", stroke: "var(--ac)", strokeWidth: 2, r: 3 }} activeDot={{ r: 4 }} />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
-                    <p className="m-crumb" style={{ marginTop: 10 }}>
-                      Dashed line: target {weight.targetWeight} kg (editable on the gym page).
-                    </p>
-                  </>
+                  <div style={{ height: 200 }}>
+                    <ResponsiveContainer width="100%" height={200}>
+                      <LineChart data={weightRows}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--line)" vertical={false} />
+                        <XAxis
+                          dataKey="date"
+                          tick={{ fontSize: 10, fill: "var(--t3)" }}
+                          axisLine={{ stroke: "var(--line)" }}
+                          tickLine={false}
+                          tickFormatter={(str) => fmtDate(str)}
+                          minTickGap={28}
+                        />
+                        <YAxis
+                          /* Keep the target line on-chart even when it sits
+                             outside the logged range (a 79 kg goal over a
+                             72–75 kg stretch would otherwise vanish). */
+                          domain={[(min) => Math.min(min - 1, weight.targetWeight - 1), (max) => Math.max(max + 1, weight.targetWeight + 1)]}
+                          tick={{ fontSize: 10, fill: "var(--t3)" }}
+                          axisLine={false}
+                          tickLine={false}
+                          width={34}
+                        />
+                        <Tooltip
+                          contentStyle={{ backgroundColor: "var(--card)", border: "1px solid var(--line)", borderRadius: "6px", fontSize: 12, boxShadow: "var(--ng-shadow-2)" }}
+                          itemStyle={{ color: "var(--t1)", fontWeight: 500 }}
+                          labelStyle={{ color: "var(--t3)" }}
+                          labelFormatter={(label) => format(parseISO(`${label}T00:00:00`), "MMMM d, yyyy")}
+                        />
+                        <ReferenceLine y={weight.targetWeight} stroke="var(--ac)" strokeDasharray="4 4" />
+                        <Line type="monotone" dataKey="weight" stroke="var(--ac)" strokeWidth={2} dot={{ fill: "var(--card)", stroke: "var(--ac)", strokeWidth: 2, r: 3 }} activeDot={{ r: 4 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+
+                <form className="st-weight-form" onSubmit={handleAddWeight}>
+                  <label htmlFor="st-weight" className="m-lbl" style={{ margin: 0 }}>
+                    Weigh-in
+                  </label>
+                  <input
+                    id="st-weight"
+                    type="number"
+                    inputMode="decimal"
+                    step="0.1"
+                    min="0"
+                    max="400"
+                    placeholder={latestWeight != null ? String(latestWeight) : "72.5"}
+                    aria-label="Today's weight in kilograms"
+                    className="st-input"
+                    value={newWeight}
+                    onChange={(e) => setNewWeight(e.target.value)}
+                  />
+                  <span className="st-weight-unit">kg</span>
+                  <button type="submit" className="st-btn primary" disabled={savingWeight}>
+                    {savingWeight ? "Saving…" : "Log weight"}
+                  </button>
+
+                  <span className="st-weight-target">
+                    {editingTarget ? (
+                      <span className="st-target-edit">
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          step="0.1"
+                          min="20"
+                          max="400"
+                          aria-label="Target weight in kilograms"
+                          className="st-input"
+                          value={targetDraft}
+                          autoFocus
+                          onChange={(e) => setTargetDraft(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Escape") setEditingTarget(false);
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleSaveTarget();
+                            }
+                          }}
+                        />
+                        <button type="button" className="st-icon-btn" aria-label="Save target weight" onClick={handleSaveTarget} disabled={savingTarget}>
+                          <Icon d={ICONS.check} className="w-3.5 h-3.5" />
+                        </button>
+                        <button type="button" className="st-icon-btn" aria-label="Cancel target editing" onClick={() => setEditingTarget(false)} disabled={savingTarget}>
+                          <Icon d={ICONS.x} className="w-3.5 h-3.5" />
+                        </button>
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        className="st-target"
+                        title="Edit target weight"
+                        onClick={() => {
+                          setTargetDraft(String(weight.targetWeight));
+                          setEditingTarget(true);
+                        }}
+                      >
+                        Target <b>{weight.targetWeight} kg</b>
+                        <Icon d={ICONS.pencil} className="w-3 h-3" />
+                      </button>
+                    )}
+                  </span>
+                </form>
+
+                {weightNote && (
+                  <p className={`st-weight-note${weightNote.tone === "err" ? " err" : ""}`} role={weightNote.tone === "err" ? "alert" : "status"}>
+                    {weightNote.text}
+                  </p>
+                )}
+
+                {weight.entries.length > 0 && (
+                  <div className="st-entries">
+                    {[...weight.entries]
+                      .sort((a, b) => new Date(b.date) - new Date(a.date))
+                      .slice(0, 6)
+                      .map((entry) => (
+                        <div className="st-entry" key={entry._id}>
+                          <span className="m-num">{format(new Date(entry.date), "d MMM yyyy")}</span>
+                          <span className="st-entry-r">
+                            <b className="m-num">
+                              {entry.weight}
+                              <span>kg</span>
+                            </b>
+                            <button
+                              type="button"
+                              className="st-icon-btn"
+                              aria-label={`Delete weight entry from ${format(new Date(entry.date), "d MMM yyyy")}`}
+                              onClick={() => handleDeleteWeight(entry._id, entry.weight)}
+                            >
+                              <Icon d={ICONS.trash} className="w-3.5 h-3.5" />
+                            </button>
+                          </span>
+                        </div>
+                      ))}
+                  </div>
+                )}
+
+                {weightRows.length >= 2 && (
+                  <p className="m-crumb" style={{ marginTop: 12 }}>
+                    Dashed line marks the target weight.
+                  </p>
                 )}
               </div>
             </div>

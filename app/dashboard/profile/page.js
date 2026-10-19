@@ -386,7 +386,7 @@ export default function ProfilePage() {
                       {!profileReady && (
                         <p className="m-crumb" style={{ marginTop: 10 }}>
                           Complete every field — including current weight — to save. Weight also seeds today&apos;s
-                          entry on the gym weight chart.
+                          entry on the Progress weight chart.
                         </p>
                       )}
                     </>
@@ -444,7 +444,7 @@ export default function ProfilePage() {
                             <span className="m-lbl" style={{ marginBottom: 2 }}>Target weight</span>
                             <p style={{ fontWeight: 600 }} className="m-num">{weightInfo.targetWeight} kg</p>
                           </div>
-                          <span className="m-crumb">drawn on the gym weight chart</span>
+                          <span className="m-crumb">drawn on the Progress weight chart</span>
                         </div>
                       </div>
 
