@@ -288,9 +288,9 @@ export default function GymTrackingPage() {
   // Forms
   const [prExerciseId, setPrExerciseId] = useState(null); // exerciseId whose PR chart is open
   const [prSeries, setPrSeries] = useState([]);
-  // Session board: one exercise expanded at a time. undefined = the first
-  // exercise of the day opens by default; null = the board is fully collapsed.
-  const [openExerciseId, setOpenExerciseId] = useState(undefined);
+  // Session board: one exercise expanded at a time, and none of them on load.
+  // null = the board is fully collapsed; a row opens only when picked.
+  const [openExerciseId, setOpenExerciseId] = useState(null);
 
   // Warm-up editor — per-exercise, persisted via PUT /api/exercises/[id]
   const [wuExerciseId, setWuExerciseId] = useState(null);
@@ -315,24 +315,6 @@ export default function GymTrackingPage() {
   useEffect(() => {
     checkAuth();
   }, []);
-
-  // Logging fast-path: once the open exercise renders, drop focus into its
-  // first empty weight field so the session starts with typing, not hunting.
-  useEffect(() => {
-    if (loading || exercises.length === 0) return;
-    const rows = document.querySelectorAll('[data-ex-sets] > div');
-    for (const row of rows) {
-      const input = row.querySelector('input');
-      if (input && input.value === "") {
-        // preventScroll keeps the masthead and the session board in view on
-        // load; focus is a convenience, not a reason to jump down the page.
-        input.focus({ preventScroll: true });
-        break;
-      }
-    }
-    // Runs when the day's exercises first render; drafts don't change the target.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, currentDate]);
 
   // `loading` starts true, so refreshes run in place instead of toggling it
   // synchronously from the effect below.
@@ -707,7 +689,7 @@ export default function GymTrackingPage() {
     setCurrentDate(nextStr);
     setSetDrafts({}); // stale drafts from another date would mislead
     setPrExerciseId(null);
-    setOpenExerciseId(undefined);
+    setOpenExerciseId(null);
   };
 
   const goToday = () => {
@@ -715,7 +697,7 @@ export default function GymTrackingPage() {
     setCurrentDate(TODAY);
     setSetDrafts({});
     setPrExerciseId(null);
-    setOpenExerciseId(undefined);
+    setOpenExerciseId(null);
   };
 
   const todaySchedule = workoutSchedule.find((d) => d.day === selectedDayName);
@@ -764,9 +746,7 @@ export default function GymTrackingPage() {
   const loggedSummaries = flatExercises.map((ex) => summarizeSets(ex._id)).filter(Boolean);
   const loggedCount = loggedSummaries.length;
   const dayVolume = loggedSummaries.reduce((sum, s) => sum + s.volume, 0);
-  const defaultOpenId = flatExercises[0]?._id;
-  const isRowOpen = (id) =>
-    openExerciseId === undefined ? id === defaultOpenId : openExerciseId === id;
+  const isRowOpen = (id) => openExerciseId === id;
 
   return (
     <>
