@@ -798,8 +798,8 @@ export default function GymTrackingPage() {
               </p>
             </div>
             <div className="gy-head-tools">
-              <Link href="/dashboard/profile" className="gy-split-link">
-                Change your training split in Profile →
+              <Link href="/dashboard/account#acc-training" className="gy-split-link">
+                Change your training split in Account →
               </Link>
               <div className="gy-daynav" role="group" aria-label="Change the session date">
                 <button

@@ -64,8 +64,7 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
       { label: "Meal", href: "/dashboard/meal", icon: "meal" },
       { label: "Gym", href: "/dashboard/gym", icon: "gym" },
       { label: "Progress", href: "/dashboard/stats", icon: "progress" },
-      { label: "Profile", href: "/dashboard/profile", icon: "profile" },
-      { label: "Settings", href: "/dashboard/settings", icon: "settings" },
+      { label: "Account", href: "/dashboard/account", icon: "profile" },
     ];
     // Admins are users too — the console is one extra row, never a second app.
     if (user?.isAdmin) items.push({ label: "Console", href: "/admin", icon: "console" });

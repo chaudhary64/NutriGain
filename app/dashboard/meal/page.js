@@ -963,7 +963,7 @@ export default function MealTrackingPage() {
       <AppShell>
         <div
           className="mrd ng-container"
-          style={{ maxWidth: 1080, padding: "32px var(--layout-gutter) 64px" }}
+          style={{ padding: "32px var(--layout-gutter) 56px" }}
         >
           {/* Page head — title block left, day navigator right */}
           <div className="ml-head m-in">
