@@ -129,19 +129,36 @@ const MERIDIAN_CSS = `
 .ml-slot:last-child{border-bottom:0}
 .ml-slot-head{display:flex;align-items:center;gap:6px;padding:0 12px 0 10px;transition:background .15s}
 .ml-slot-head:hover{background:var(--paper)}
-.ml-slot-toggle{flex:1;display:grid;grid-template-columns:16px 26px auto auto minmax(0,1fr) auto auto;align-items:center;gap:10px;padding:11px 2px;background:none;border:0;cursor:pointer;text-align:left;font:inherit;min-width:0}
+.ml-slot-toggle{flex:1;display:grid;grid-template-columns:16px 26px minmax(0,1fr) auto;align-items:center;gap:10px;padding:8px 2px;background:none;border:0;cursor:pointer;text-align:left;font:inherit;min-width:0}
 .ml-slot-toggle:focus-visible,.ml-slot-add:focus-visible{outline:2px solid var(--t1);outline-offset:-1px;border-radius:6px}
 .ml-chev{display:flex;color:var(--t3);transition:transform .18s ease}
 .ml-slot.is-open .ml-chev{transform:rotate(90deg)}
 .ml-slot.is-empty .ml-chev{opacity:0}
 .ml-slot-ico{width:26px;height:26px;border-radius:6px;background:var(--sunken);display:flex;align-items:center;justify-content:center;color:var(--t2)}
 .ml-slot-ico svg{width:14px;height:14px}
-.ml-slot-name{font-size:13.5px;font-weight:500;color:var(--t1);white-space:nowrap}
-.ml-slot-count{font-size:11.5px;color:var(--t3);white-space:nowrap}
-.ml-slot-macros{font-family:var(--font-mono);font-size:10.5px;font-weight:500;color:var(--t3);white-space:nowrap;text-align:right}
-.ml-slot-kcal{font-size:13px;font-weight:500;color:var(--t1);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.ml-slot-id{display:flex;align-items:baseline;gap:9px;min-width:0}
+.ml-slot-name{font-size:13.5px;font-weight:500;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ml-slot-count{flex:none;font-size:11.5px;color:var(--t3);white-space:nowrap}
+/* Right side of the header: macro values, their calorie split, then kcal. */
+.ml-slot-nums{display:flex;align-items:center;gap:16px;min-width:0}
+.ml-slot-macros{display:flex;align-items:baseline;gap:12px;white-space:nowrap}
+.ml-macro{display:inline-flex;align-items:baseline;gap:4px;font-family:var(--font-mono);font-size:10.5px;font-weight:500}
+.ml-macro i{font-style:normal;font-weight:600;letter-spacing:.02em}
+.ml-macro.is-p i{color:var(--pro)}
+.ml-macro.is-c i{color:var(--car)}
+.ml-macro.is-f i{color:var(--green)}
+.ml-macro b{font-weight:500;color:var(--t1);font-variant-numeric:tabular-nums}
+.ml-slot-split{display:flex;gap:2px;width:64px;height:6px;flex:none;border-radius:3px;overflow:hidden;background:var(--line)}
+.ml-slot-split i{flex-basis:0;height:100%}
+.ml-slot-split .seg-p{background:var(--pro)}
+.ml-slot-split .seg-c{background:var(--car)}
+.ml-slot-split .seg-f{background:var(--green)}
+.ml-slot-split .seg-o{background:var(--t3);opacity:.35}
+.ml-slot-kcal{display:inline-flex;align-items:baseline;gap:4px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ml-slot-kcal b{font-size:13.5px;font-weight:600;letter-spacing:-.01em;color:var(--t1)}
+.ml-slot-kcal small{font-family:var(--font-mono);font-size:9px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--t3)}
 .ml-slot.is-empty .ml-slot-name{color:var(--t2)}
-.ml-slot.is-empty .ml-slot-kcal{font-size:12px;font-weight:400;color:var(--t3)}
+.ml-slot.is-empty .ml-slot-kcal b{font-weight:400;color:var(--t3)}
 .ml-slot-add{width:28px;height:28px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--t2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;flex:none}
 .ml-slot-add svg{width:14px;height:14px}
 .ml-slot-add:hover{background:var(--t1);border-color:var(--t1);color:var(--on-ac)}
@@ -167,7 +184,7 @@ const MERIDIAN_CSS = `
   .ml-col:nth-child(odd){border-right:1px solid var(--line)}
   .ml-form{grid-template-columns:108px minmax(0,1fr) auto}
   .ml-search{grid-column:1/-1;grid-row:1}
-  .ml-slot-macros{display:none}
+  .ml-slot-split{display:none}
 }
 @media(max-width:640px){
   /* Two rows in the log bar: search, then quantity + slot, then a full-width
@@ -185,9 +202,12 @@ const MERIDIAN_CSS = `
   /* Slot rows: chevron, glyph, name, kcal. The spacer and the macros are
      hidden so nothing can push the row wider than the card. */
   .ml-slot-toggle{grid-template-columns:16px 24px minmax(0,1fr) auto;gap:8px}
-  .ml-slot-count,.ml-slot-macros,.ml-slot-spacer{display:none}
+  .ml-slot-count,.ml-slot-spacer{display:none}
   .ml-slotwrap select{padding-right:26px}
-  .ml-slot-name{grid-column:3;min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .ml-slot-id{grid-column:3;min-width:0}
+  .ml-slot-nums{gap:9px}
+  .ml-slot-macros{gap:7px}
+  .ml-macro{font-size:10px;gap:3px}
   .ml-slot-kcal{grid-column:4}
   .ml-entry{grid-template-columns:minmax(0,1fr) auto 30px;grid-template-areas:"name kcal del" "chips chips chips" "step step step";row-gap:8px;padding-left:18px}
   .ml-entry-name{grid-area:name}
@@ -204,8 +224,7 @@ const MERIDIAN_CSS = `
 /* Below ~380px the empty-state label has no room beside the add button; the
    button's label already says what it does. */
 @media(max-width:380px){
-  .ml-slot.is-empty .ml-slot-kcal{display:none}
-  .ml-slot-toggle{grid-template-columns:16px 24px minmax(0,1fr)}
+  .ml-slot-toggle{grid-template-columns:16px 24px minmax(0,1fr) auto}
   .ml-slot-head{padding:0 10px 0 8px}
 }
 @media(prefers-reduced-motion:reduce){.mrd *{animation:none!important;transition:none!important}}
@@ -467,6 +486,22 @@ function LedgerSection({ slot, label, entries, open, onToggle, onAdd, onUpdateQu
   );
   const has = entries.length > 0;
   const expanded = has && open;
+  // Share of the meal's calories from each macro: 4/4/9 kcal per gram.
+  // Stored food calories don't always equal that sum, so anything left over
+  // gets a neutral "other" slice instead of being folded into the macros.
+  const macroCals = totals.p * 4 + totals.c * 4 + totals.f * 9;
+  const otherKcal = Math.max(0, totals.kcal - macroCals);
+  const splitTitle = [
+    `P ${Math.round(totals.p * 4)} kcal`,
+    `C ${Math.round(totals.c * 4)} kcal`,
+    `F ${Math.round(totals.f * 9)} kcal`,
+    otherKcal >= 1 ? `Unaccounted ${Math.round(otherKcal)} kcal` : null,
+    macroCals > totals.kcal + 1
+      ? `Macros imply ${Math.round(macroCals)} kcal vs ${Math.round(totals.kcal)} stored`
+      : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <section className={`ml-slot${has ? "" : " is-empty"}${expanded ? " is-open" : ""}`}>
@@ -484,18 +519,38 @@ function LedgerSection({ slot, label, entries, open, onToggle, onAdd, onUpdateQu
           <span className="ml-slot-ico" aria-hidden="true">
             <Icon d={SLOT_ICONS[slot]} />
           </span>
-          <span className="ml-slot-name">{label}</span>
-          <span className="ml-slot-count">
-            {has ? `${entries.length} ${entries.length === 1 ? "item" : "items"}` : ""}
+          <span className="ml-slot-id">
+            <span className="ml-slot-name">{label}</span>
+            {has && (
+              <span className="ml-slot-count">
+                {entries.length} {entries.length === 1 ? "item" : "items"}
+              </span>
+            )}
           </span>
-          <span className="ml-slot-spacer" />
-          {has && (
-            <span className="ml-slot-macros">
-              P {fmtMacro(totals.p)} · C {fmtMacro(totals.c)} · F {fmtMacro(totals.f)}
+          <span className="ml-slot-nums">
+            {has && (
+              <span
+                className="ml-slot-macros"
+                title="Protein · carbohydrates · fats, in grams"
+                aria-label={`Protein ${fmtMacro(totals.p)} grams, carbohydrates ${fmtMacro(totals.c)} grams, fats ${fmtMacro(totals.f)} grams${otherKcal >= 1 ? `, ${Math.round(otherKcal)} calories unaccounted` : ""}`}
+              >
+                <span className="ml-macro is-p"><i>P</i><b>{fmtMacro(totals.p)}</b></span>
+                <span className="ml-macro is-c"><i>C</i><b>{fmtMacro(totals.c)}</b></span>
+                <span className="ml-macro is-f"><i>F</i><b>{fmtMacro(totals.f)}</b></span>
+              </span>
+            )}
+            {has && (macroCals > 0 || totals.kcal > 0) && (
+              <span className="ml-slot-split" aria-hidden="true" title={splitTitle}>
+                {totals.p > 0 && <i className="seg-p" style={{ flexGrow: totals.p * 4 }} />}
+                {totals.c > 0 && <i className="seg-c" style={{ flexGrow: totals.c * 4 }} />}
+                {totals.f > 0 && <i className="seg-f" style={{ flexGrow: totals.f * 9 }} />}
+                {otherKcal >= 1 && <i className="seg-o" style={{ flexGrow: otherKcal }} />}
+              </span>
+            )}
+            <span className="ml-slot-kcal">
+              <b>{has ? Math.round(totals.kcal).toLocaleString() : "—"}</b>
+              <small>kcal</small>
             </span>
-          )}
-          <span className="ml-slot-kcal">
-            {has ? `${Math.round(totals.kcal).toLocaleString()} kcal` : "Nothing logged"}
           </span>
         </button>
         <button

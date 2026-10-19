@@ -107,11 +107,19 @@ const GYM_CSS = `
 .gym .gy-row-state.is-pr{color:var(--t1);border-bottom:1px solid var(--t1)}
 .gym .gy-caret{flex:none;display:inline-flex;color:var(--t3);transition:transform .2s ease}
 .gym .gy-row.is-open .gy-caret{transform:rotate(180deg);color:var(--t1)}
-.gym .gy-panel{padding:6px 18px 24px 44px;border-top:1px solid var(--line);animation:gy-in .22s ease}
+.gym .gy-panel{padding:14px 18px 16px 44px;border-top:1px solid var(--line);animation:gy-in .22s ease}
 @keyframes gy-in{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
-.gym .gy-specgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 32px;max-width:820px;border-bottom:1px solid var(--line)}
-.gym .gy-specgrid .gy-ed-spec{align-items:flex-start;gap:16px;padding:12px 0;border-bottom:0}
-.gym .gy-specgrid .gy-ed-spec > span:first-child{flex:0 0 104px}
+/* Workbench: reference facts in a narrow rail, logging in the main column. */
+.gym .gy-workbench{display:grid;grid-template-columns:236px minmax(0,1fr);gap:0 24px;max-width:820px}
+.gym .gy-aside{display:flex;flex-direction:column;gap:16px;min-width:0;padding:2px 22px 2px 0;border-right:1px solid var(--line)}
+.gym .gy-aside-block{display:flex;flex-direction:column;gap:3px;min-width:0}
+.gym .gy-aside .gy-input{width:76px}
+.gym .gy-aside .gy-input[type="date"]{width:118px}
+.gym .gy-meta-sub{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.04em;color:var(--t3)}
+.gym .gy-prlink{margin-top:auto;display:inline-flex;align-items:center;gap:7px;width:fit-content;padding:8px 0 0;border:0;background:none;color:var(--t2);font:inherit;font-size:12.5px;font-weight:500;cursor:pointer}
+.gym .gy-prlink:hover{color:var(--t1)}
+.gym .gy-prlink:focus-visible{outline:2px solid var(--link);outline-offset:2px;border-radius:2px}
+.gym .gy-main{display:flex;flex-direction:column;min-width:0}
 .gym .gy-spec-lbl{display:inline-flex;align-items:center;gap:6px}
 .gym .gy-spec-val{margin:0;font-size:14px;font-weight:600;letter-spacing:-.01em;line-height:1.5;color:var(--t1);font-variant-numeric:tabular-nums}
 .gym .gy-spec-sub{margin-left:8px;font-family:var(--font-mono);font-size:10.5px;font-weight:500;color:var(--t3)}
@@ -120,18 +128,29 @@ const GYM_CSS = `
 .gym .gy-edit:focus-visible{outline:2px solid var(--link);outline-offset:1px}
 .gym .gy-wu-edit,.gym .gy-pr-edit{display:grid;gap:6px;min-width:0}
 .gym .gy-pr-edit{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.gym .gy-wu-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .gym .gy-edit-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:2px}
-.gym .gy-setblock{margin-top:18px;max-width:820px}
+.gym .gy-setblock{max-width:none}
 .gym .gy-setblock-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding-bottom:8px}
 .gym .gy-hint{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
-.gym .gy-sets{display:grid;gap:2px}
-.gym .gy-setrow{display:flex;align-items:center;gap:10px;padding:2px 0;min-width:0}
-.gym .gy-setno{flex:0 0 22px;font-family:var(--font-mono);font-size:10.5px;color:var(--t3);font-variant-numeric:tabular-nums}
-.gym .gy-input{width:84px;min-width:0;padding:7px 8px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;color:var(--t1);font:inherit;font-size:13.5px;font-variant-numeric:tabular-nums}
+/* Sets are a small aligned table: set no. / load / reps / computed volume. */
+.gym .gy-sets{display:grid}
+.gym .gy-setrow{display:grid;grid-template-columns:30px minmax(0,1fr) minmax(0,1fr) 84px 28px;align-items:center;gap:10px;padding:4px 0;min-width:0}
+.gym .gy-setrow-head{padding:0 0 7px;border-bottom:1px solid var(--line)}
+.gym .gy-setrow-head span{font-family:var(--font-mono);font-size:9.5px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--t3)}
+.gym .gy-setrow-head span:nth-child(4){text-align:right}
+.gym .gy-setno{font-family:var(--font-mono);font-size:10.5px;color:var(--t3);font-variant-numeric:tabular-nums}
+.gym .gy-setrow .gy-input{width:100%}
+.gym .gy-setvol{text-align:right;font-family:var(--font-mono);font-size:10.5px;font-weight:500;letter-spacing:.03em;color:var(--faint);font-variant-numeric:tabular-nums;white-space:nowrap}
+.gym .gy-setvol.has-value{color:var(--t2)}
+.gym .gy-addrow{display:inline-flex;align-items:center;gap:7px;width:fit-content;margin-top:9px;padding:6px 0;border:0;background:none;color:var(--t3);font:inherit;font-size:12.5px;font-weight:500;cursor:pointer}
+.gym .gy-addrow:hover{color:var(--t1)}
+.gym .gy-addrow:focus-visible{outline:2px solid var(--link);outline-offset:2px;border-radius:2px}
+.gym .gy-input{width:84px;min-width:0;height:32px;padding:0 9px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--t1);font:inherit;font-size:13px;font-variant-numeric:tabular-nums}
 .gym .gy-input::placeholder{color:var(--faint)}
-.gym .gy-input:focus{outline:none;border-bottom-color:var(--t1)}
-.gym .gy-input:focus-visible{outline:2px solid var(--link);outline-offset:2px;border-radius:2px}
-.gym .gy-input[type="date"]{width:128px;font-size:12px}
+.gym .gy-input:focus{outline:none;border-color:var(--t1)}
+.gym .gy-input:focus-visible{outline:2px solid var(--link);outline-offset:2px}
+.gym .gy-input[type="date"]{width:138px;font-size:12px}
 .gym .gy-x{flex:none;color:var(--t3);font-size:11px}
 .gym .gy-icon-btn{flex:none;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border:0;background:none;border-radius:6px;color:var(--t3);cursor:pointer}
 .gym .gy-icon-btn:hover{background:var(--card);color:var(--t1)}
@@ -139,13 +158,13 @@ const GYM_CSS = `
 .gym .gy-text-btn{display:inline-flex;align-items:center;gap:7px;width:fit-content;padding:6px 0;border:0;background:none;color:var(--t2);font:inherit;font-size:12.5px;font-weight:500;cursor:pointer}
 .gym .gy-text-btn:hover{color:var(--t1)}
 .gym .gy-text-btn:focus-visible{outline:2px solid var(--link);outline-offset:2px;border-radius:2px}
-.gym .gy-addset{margin-top:4px;color:var(--t3)}
-.gym .gy-addset:hover{color:var(--t1)}
 .gym .gy-save-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 14px;border:0;border-radius:var(--ng-r-sm,6px);background:var(--t1);color:var(--card);font:inherit;font-size:12px;font-weight:600;cursor:pointer}
 .gym .gy-save-btn:hover{opacity:.88}
 .gym .gy-save-btn:focus-visible{outline:2px solid var(--link);outline-offset:2px}
-.gym .gy-panel-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;max-width:820px;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
-.gym .gy-log-btn{display:inline-flex;align-items:center;gap:10px;height:38px;padding:0 18px;border:0;border-radius:var(--ng-r-sm,6px);background:var(--t1);color:var(--card);font:inherit;font-size:13px;font-weight:600;letter-spacing:-.005em;cursor:pointer;transition:opacity .15s ease}
+.gym .gy-main-foot{display:flex;align-items:center;gap:14px;margin-top:12px}
+.gym .gy-main-foot .gy-log-btn{margin-left:auto}
+.gym .gy-foot-sum{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--t3);white-space:nowrap}
+.gym .gy-log-btn{display:inline-flex;align-items:center;gap:10px;height:36px;padding:0 16px;border:0;border-radius:var(--ng-r-sm,6px);background:var(--t1);color:var(--card);font:inherit;font-size:12.5px;font-weight:600;letter-spacing:-.005em;cursor:pointer;transition:opacity .15s ease}
 .gym .gy-log-btn::after{content:"→";font-weight:500}
 .gym .gy-log-btn:hover{opacity:.88}
 .gym .gy-log-btn:disabled{opacity:.5;cursor:default}
@@ -155,15 +174,23 @@ const GYM_CSS = `
 .gym .gy-rest-t{margin:0 0 6px;font-size:18px;font-weight:600;letter-spacing:-.02em;color:var(--t1)}
 .gym .gy-rest-d{margin:0 auto;max-width:460px;font-size:13px;line-height:1.6;color:var(--t2)}
 @media (prefers-reduced-motion:reduce){.gym .gy-panel{animation:none}.gym .gy-caret{transition:none}}
-@media (max-width:760px){.gym .gy-specgrid{grid-template-columns:1fr;gap:0}.gym .gy-specgrid .gy-ed-spec{padding:10px 0}.gym .gy-group-h{padding-top:18px}}
+@media (max-width:760px){
+  .gym .gy-workbench{grid-template-columns:1fr;gap:14px}
+  .gym .gy-aside{flex-direction:row;flex-wrap:wrap;align-items:flex-start;gap:10px 26px;padding:0 0 12px;border-right:0;border-bottom:1px solid var(--line)}
+  .gym .gy-aside-block{flex-direction:row;align-items:baseline;gap:8px}
+  .gym .gy-prlink{margin-top:0;margin-left:auto;padding-top:0}
+  .gym .gy-group-h{padding-top:18px}
+}
 @media (max-width:640px){
   .gym .gy-head-tools{width:100%;align-items:flex-end;gap:12px}
   .gym .gy-row-name{font-size:16px}
   .gym .gy-row-state{display:none}
 }
 @media (max-width:600px){
-  .gym .gy-panel{padding:4px 4px 20px;border-top:0}
+  .gym .gy-panel{padding:14px 10px 16px;border-top:0}
   .gym .gy-title{font-size:27px}
+  .gym .gy-setrow{grid-template-columns:26px minmax(0,1fr) minmax(0,1fr) 28px;gap:7px}
+  .gym .gy-setrow-head span:nth-child(4),.gym .gy-setvol{display:none}
 }
 @media (max-width:380px){
   .gym .gy-input{width:72px}
@@ -912,8 +939,9 @@ export default function GymTrackingPage() {
 
                             {open && (
                               <div className="gy-panel" id={`gy-panel-${ex._id}`}>
-                                <div className="gy-specgrid">
-                                  <div className="gy-ed-spec">
+                                <div className="gy-workbench">
+                                  <aside className="gy-aside">
+                                  <div className="gy-aside-block">
                                     <span className="gy-spec-lbl">
                                       <span className="gy-label">Warm up</span>
                                       <button
@@ -928,7 +956,7 @@ export default function GymTrackingPage() {
                                     {wuExerciseId === ex._id ? (
                                       <div className="gy-wu-edit">
                                         {wuDraft.map((set, idx) => (
-                                          <div className="gy-setrow" key={idx}>
+                                          <div className="gy-wu-row" key={idx}>
                                             <input
                                               type="number"
                                               step="0.5"
@@ -991,7 +1019,7 @@ export default function GymTrackingPage() {
                                     )}
                                   </div>
 
-                                  <div className="gy-ed-spec">
+                                  <div className="gy-aside-block">
                                     <span className="gy-spec-lbl">
                                       <span className="gy-label">Best</span>
                                       <button
@@ -1060,12 +1088,29 @@ export default function GymTrackingPage() {
                                       </p>
                                     )}
                                   </div>
-                                </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenPRChart(ex._id)}
+                                    aria-expanded={prExerciseId === ex._id}
+                                    className="gy-prlink"
+                                  >
+                                    <Icon d={ICONS.trend} className="w-4 h-4" />
+                                    {prExerciseId === ex._id ? "Hide PR trend" : "PR trend"}
+                                  </button>
+                                  </aside>
 
+                                  <div className="gy-main">
                                 <div className="gy-setblock">
                                   <div className="gy-setblock-h">
                                     <span className="gy-label">Working sets</span>
-                                    <span className="gy-hint">kg × reps</span>
+                                    <span className="gy-hint">{getSetsFor(ex._id).length} set{getSetsFor(ex._id).length === 1 ? "" : "s"}</span>
+                                  </div>
+                                  <div className="gy-setrow gy-setrow-head" aria-hidden="true">
+                                    <span>Set</span>
+                                    <span>Kg</span>
+                                    <span>Reps</span>
+                                    <span>Volume</span>
+                                    <span></span>
                                   </div>
                                   <div className="gy-sets" data-ex-sets={ex._id}>
                                     {getSetsFor(ex._id).map((set, idx) => (
@@ -1083,7 +1128,6 @@ export default function GymTrackingPage() {
                                           onChange={(e) => updateSet(ex._id, idx, "weight", e.target.value)}
                                           className="gy-input"
                                         />
-                                        <span className="gy-x" aria-hidden="true">×</span>
                                         <input
                                           type="number"
                                           min="0"
@@ -1094,6 +1138,15 @@ export default function GymTrackingPage() {
                                           onKeyDown={(e) => handleSetRowKeyDown(e, ex._id)}
                                           className="gy-input"
                                         />
+                                        <span
+                                          className={`gy-setvol${
+                                            Number(set.weight) > 0 && Number(set.reps) > 0 ? " has-value" : ""
+                                          }`}
+                                        >
+                                          {Number(set.weight) > 0 && Number(set.reps) > 0
+                                            ? `${(Number(set.weight) * Number(set.reps)).toLocaleString()} kg`
+                                            : "—"}
+                                        </span>
                                         <button
                                           type="button"
                                           onClick={() => removeSetRow(ex._id, idx)}
@@ -1108,77 +1161,29 @@ export default function GymTrackingPage() {
                                   <button
                                     type="button"
                                     onClick={() => addSetRow(ex._id)}
-                                    className="gy-text-btn gy-addset"
+                                    className="gy-addrow"
                                   >
                                     <Icon d={ICONS.plus} className="w-3.5 h-3.5" />
                                     Add set
                                   </button>
                                 </div>
 
-                                {prExerciseId === ex._id && (
-                                  <div className="gy-prchart">
-                                    <p className="gy-label">Top set weight — last 6 months</p>
-                                    {renderStaleNotice("pr", "Couldn't load your PR history.")}
-                                    {prSeries.length === 0 ? (
-                                      <p className="gy-spec-val" style={{ margin: "8px 0 0" }}>
-                                        No sets logged yet — save your working sets to build history.
-                                      </p>
-                                    ) : (
-                                      <div style={{ height: 180, marginTop: 10 }}>
-                                        <ResponsiveContainer width="100%" height={180}>
-                                          <LineChart data={prSeries}>
-                                            <CartesianGrid stroke={RT_GRID} strokeDasharray="3 3" vertical={false} />
-                                            <XAxis
-                                              dataKey="date"
-                                              tick={AXIS_TICK}
-                                              axisLine={{ stroke: RT_GRID }}
-                                              tickLine={false}
-                                              tickFormatter={(d) => format(new Date(d), "MMM d")}
-                                            />
-                                            <YAxis
-                                              tick={AXIS_TICK}
-                                              axisLine={false}
-                                              tickLine={false}
-                                              width={34}
-                                              domain={[0, "dataMax + 5"]}
-                                            />
-                                            <Tooltip
-                                              contentStyle={{
-                                                backgroundColor: "var(--card)",
-                                                border: "1px solid var(--line)",
-                                                borderRadius: "var(--ng-r-sm, 6px)",
-                                                boxShadow: "var(--ng-shadow-2)",
-                                                fontSize: 12,
-                                              }}
-                                              formatter={(value, name) => [
-                                                name === "weight" ? `${value} kg` : value,
-                                                name === "weight" ? "Top set" : name,
-                                              ]}
-                                            />
-                                            <Line
-                                              type="monotone"
-                                              dataKey="weight"
-                                              stroke="var(--ac)"
-                                              strokeWidth={2}
-                                              dot={{ r: 3, fill: "var(--ac)" }}
-                                            />
-                                          </LineChart>
-                                        </ResponsiveContainer>
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-
-                                <div className="gy-panel-foot">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleOpenPRChart(ex._id)}
-                                    aria-expanded={prExerciseId === ex._id}
-                                    className="gy-text-btn"
-                                  >
-                                    <Icon d={ICONS.trend} className="w-4 h-4" />
-                                    {prExerciseId === ex._id ? "Hide PR trend" : "PR trend"}
-                                  </button>
+                                <div className="gy-main-foot">
+                                  {(() => {
+                                    const valid = getSetsFor(ex._id).filter(
+                                      (s) => Number(s.weight) > 0 && Number(s.reps) > 0,
+                                    );
+                                    if (valid.length === 0) return null;
+                                    const volume = valid.reduce(
+                                      (sum, s) => sum + Number(s.weight) * Number(s.reps),
+                                      0,
+                                    );
+                                    return (
+                                      <span className="gy-foot-sum">
+                                        {valid.length} set{valid.length === 1 ? "" : "s"} · {volume.toLocaleString()} kg
+                                      </span>
+                                    );
+                                  })()}
                                   <button
                                     type="button"
                                     onClick={() => handleSaveSessionSets(ex._id)}
@@ -1188,6 +1193,62 @@ export default function GymTrackingPage() {
                                     {savingExercise === ex._id ? "Saving…" : "Log sets"}
                                   </button>
                                 </div>
+                              </div>
+                            </div>
+
+                            {prExerciseId === ex._id && (
+                              <div className="gy-prchart">
+                                <p className="gy-label">Top set weight — last 6 months</p>
+                                {renderStaleNotice("pr", "Couldn't load your PR history.")}
+                                {prSeries.length === 0 ? (
+                                  <p className="gy-spec-val" style={{ margin: "8px 0 0" }}>
+                                    No sets logged yet — save your working sets to build history.
+                                  </p>
+                                ) : (
+                                  <div style={{ height: 180, marginTop: 10 }}>
+                                    <ResponsiveContainer width="100%" height={180}>
+                                      <LineChart data={prSeries}>
+                                        <CartesianGrid stroke={RT_GRID} strokeDasharray="3 3" vertical={false} />
+                                        <XAxis
+                                          dataKey="date"
+                                          tick={AXIS_TICK}
+                                          axisLine={{ stroke: RT_GRID }}
+                                          tickLine={false}
+                                          tickFormatter={(d) => format(new Date(d), "MMM d")}
+                                        />
+                                        <YAxis
+                                          tick={AXIS_TICK}
+                                          axisLine={false}
+                                          tickLine={false}
+                                          width={34}
+                                          domain={[0, "dataMax + 5"]}
+                                        />
+                                        <Tooltip
+                                          contentStyle={{
+                                            backgroundColor: "var(--card)",
+                                            border: "1px solid var(--line)",
+                                            borderRadius: "var(--ng-r-sm, 6px)",
+                                            boxShadow: "var(--ng-shadow-2)",
+                                            fontSize: 12,
+                                          }}
+                                          formatter={(value, name) => [
+                                            name === "weight" ? `${value} kg` : value,
+                                            name === "weight" ? "Top set" : name,
+                                          ]}
+                                        />
+                                        <Line
+                                          type="monotone"
+                                          dataKey="weight"
+                                          stroke="var(--ac)"
+                                          strokeWidth={2}
+                                          dot={{ r: 3, fill: "var(--ac)" }}
+                                        />
+                                      </LineChart>
+                                    </ResponsiveContainer>
+                                  </div>
+                                )}
+                              </div>
+                            )}
                               </div>
                             )}
                           </li>
