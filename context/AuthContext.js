@@ -42,7 +42,7 @@ export function AuthProvider({ children }) {
     checkAuth();
   }, []);
 
-  const login = async (email, password) => {
+  const login = async (email, password, next) => {
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
@@ -54,12 +54,16 @@ export function AuthProvider({ children }) {
 
       if (res.ok) {
         setUser(data.user);
-        // Use window.location for a hard redirect to ensure cookie is set
-        const redirectUrl = data.user.isAdmin
-          ? '/admin'
-          : data.user.onboardedAt
-            ? '/dashboard'
-            : '/onboarding';
+        // Use window.location for a hard redirect to ensure cookie is set.
+        // `next` (a validated internal path) wins so a guarded deep link
+        // still lands where the athlete was headed.
+        const redirectUrl = next || (
+          data.user.isAdmin
+            ? '/admin'
+            : data.user.onboardedAt
+              ? '/dashboard'
+              : '/onboarding'
+        );
         window.location.href = redirectUrl;
         return { success: true };
       } else {

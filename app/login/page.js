@@ -1,189 +1,139 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import Link from "next/link";
-import { useTheme } from "@/context/ThemeContext";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-
-gsap.registerPlugin(useGSAP);
-
-const LogoMark = () => (
-  <div className="auth-mark" aria-hidden="true">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="#fff">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-    </svg>
-  </div>
-);
+import AuthShell, { AuthAlert, AuthSubmit, EyeToggler } from "@/components/AuthShell";
+import { useAuth } from "@/context/AuthContext";
+import { readSafeNext, validateLogin } from "@/lib/authForm";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [touched, setTouched] = useState({});
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+  const [banner, setBanner] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login, user, loading: authLoading } = useAuth();
-  const { theme, toggleTheme } = useTheme();
-  const router = useRouter();
-  const root = useRef(null);
+  const { login } = useAuth();
 
-  // Entrance sequence: photo fades/scales in → brand copy rises → form rises.
-  useGSAP(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const tl = gsap.timeline({ defaults: { ease: "power2.out" } });
-    tl.fromTo(".auth-bimg", { opacity: 0, scale: 1.04 }, { opacity: 1, scale: 1, duration: 0.9 })
-      .fromTo(".auth-bshade", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0)
-      .fromTo(
-        ".auth-brand-top, .auth-btitle, .auth-bsign",
-        { opacity: 0, y: 14 },
-        { opacity: 1, y: 0, duration: 0.5, stagger: 0.08 },
-        "-=0.4"
-      )
-      .fromTo(".auth-card", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.55 }, "-=0.45");
-  }, { scope: root, dependencies: [] });
+  // The route guard bounces deep links here with ?next=. Read it once, guarded
+  // for SSR: the value only feeds navigation, never markup, so a client/server
+  // difference cannot cause a hydration mismatch.
+  const [next] = useState(() =>
+    typeof window === "undefined" ? "" : readSafeNext(window.location.search)
+  );
 
-  // Redirect if already logged in
-  useEffect(() => {
-    if (!authLoading && user) {
-      if (user.isAdmin) {
-        router.push("/admin");
-      } else {
-        router.push("/dashboard");
-      }
-    }
-  }, [user, authLoading, router]);
+  const errors = validateLogin({ email, password });
+  // Quiet while typing, loud once a field has been left or submit was pressed.
+  const shown = (field) => (touched[field] || submitAttempted ? errors[field] : "");
+
+  const markTouched = (field) => setTouched((prev) => ({ ...prev, [field]: true }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    setSubmitAttempted(true);
+    setBanner("");
+
+    const firstInvalid = ["email", "password"].find((field) => errors[field]);
+    if (firstInvalid) {
+      document.getElementById(firstInvalid)?.focus();
+      return;
+    }
+
     setLoading(true);
-
     try {
-      const result = await login(email, password);
-
+      const result = await login(email.trim(), password, next || undefined);
       if (!result.success) {
-        setError(result.error || "Login failed");
+        setBanner(result.error || "Couldn’t sign you in. Try again.");
         setLoading(false);
       }
-    } catch (err) {
-      console.error("Login error:", err);
-      setError("An error occurred during login");
+    } catch {
+      setBanner("Couldn’t reach the server. Check your connection and try again.");
       setLoading(false);
     }
   };
 
   return (
-    <div className="auth" ref={root}>
-      <div className="auth-split">
-        {/* Form pane — follows the user's theme */}
-        <main className="auth-pane">
-          <button
-            onClick={toggleTheme}
-            className="auth-toggle"
-            role="switch"
-            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-            aria-checked={theme === "dark"}
-            title={theme === "dark" ? "Light mode" : "Dark mode"}
-          >
-            {theme === "dark" ? (
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" width="20" height="20" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
-              </svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" width="20" height="20" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
-              </svg>
-            )}
-          </button>
+    <AuthShell
+      photo="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=1600&auto=format&fit=crop"
+      photoPosition="50% 44%"
+      next={next}
+    >
+      <h1 className="auth-h1">Welcome back</h1>
+      <p className="auth-sub">Sign in to log today’s meals and training.</p>
 
-          <div className="auth-card">
-            <div className="auth-brandrow">
-              <LogoMark />
-              <span className="auth-name">NutriGain</span>
-            </div>
+      {banner && <AuthAlert>{banner}</AuthAlert>}
 
-            <h1 className="auth-h1">Welcome back</h1>
-            <p className="auth-sub">Sign in to log today&apos;s meals and training.</p>
-
-            {error && (
-              <div className="auth-err" role="alert">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="17" height="17" aria-hidden="true">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-                {error}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="auth-form">
-              <div>
-                <label htmlFor="email" className="auth-lbl">Email</label>
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  autoComplete="email"
-                  className="auth-in"
-                  placeholder="you@example.com"
-                />
-              </div>
-
-              <div>
-                <div className="auth-row" style={{ display: "block" }}>
-                  <label htmlFor="password" className="auth-lbl">Password</label>
-                </div>
-                <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  autoComplete="current-password"
-                  className="auth-in"
-                  placeholder="••••••••"
-                />
-                <div className="auth-row" style={{ justifyContent: "flex-end", marginTop: 8 }}>
-                  <a href="#" className="auth-forgot">Forgot password?</a>
-                </div>
-              </div>
-
-              <button type="submit" disabled={loading} className="auth-btn">
-                {loading ? "Signing in…" : "Sign in"}
-              </button>
-            </form>
-
-            <p className="auth-foot">
-              New to NutriGain?{" "}
-              <Link href="/register" className="auth-link">Create an account</Link>
+      <form className="auth-form" onSubmit={handleSubmit} noValidate>
+        <div className={`auth-field${shown("email") ? " is-err" : ""}`}>
+          <label className="auth-lbl" htmlFor="email">
+            Email
+          </label>
+          <div className="auth-wrap">
+            <input
+              id="email"
+              className="auth-in"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onBlur={() => markTouched("email")}
+              autoComplete="email"
+              inputMode="email"
+              autoCapitalize="none"
+              spellCheck={false}
+              placeholder="you@example.com"
+              required
+              aria-invalid={shown("email") ? "true" : undefined}
+              aria-describedby={shown("email") ? "email-err" : undefined}
+            />
+          </div>
+          {shown("email") && (
+            <p className="auth-fmsg" id="email-err">
+              {shown("email")}
             </p>
-          </div>
-        </main>
+          )}
+        </div>
 
-        {/* Brand pane — athlete imagery, constant dark world in both themes */}
-        <aside className="auth-brand" aria-hidden="true">
-          <img
-            className="auth-bimg"
-            src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=1600&auto=format&fit=crop"
-            alt=""
-            draggable={false}
-          />
-          <div className="auth-bshade" />
-          <div className="auth-brand-in">
-            <div className="auth-brand-top">
-              <LogoMark />
-              <span className="auth-name">NutriGain</span>
-            </div>
-
-            <h2 className="auth-btitle">Track your macros. Dominate your goals.</h2>
-            <div className="auth-bsign">
-              <i />
-              <span>Built for athletes</span>
-            </div>
+        <div className={`auth-field${shown("password") ? " is-err" : ""}`}>
+          <label className="auth-lbl" htmlFor="password">
+            Password
+          </label>
+          <div className="auth-wrap">
+            <input
+              id="password"
+              className="auth-in has-eye"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onBlur={() => markTouched("password")}
+              autoComplete="current-password"
+              placeholder="••••••••"
+              required
+              aria-invalid={shown("password") ? "true" : undefined}
+              aria-describedby={shown("password") ? "password-err" : undefined}
+            />
+            <EyeToggler
+              shown={showPassword}
+              onToggle={() => setShowPassword((v) => !v)}
+              controls="password"
+            />
           </div>
-        </aside>
-      </div>
-    </div>
+          {shown("password") && (
+            <p className="auth-fmsg" id="password-err">
+              {shown("password")}
+            </p>
+          )}
+        </div>
+
+        <AuthSubmit loading={loading} label="Sign in" loadingLabel="Signing in…" />
+      </form>
+
+      <p className="auth-alt">
+        New to NutriGain?
+        <Link href="/register" className="auth-link">
+          Create an account →
+        </Link>
+      </p>
+    </AuthShell>
   );
 }

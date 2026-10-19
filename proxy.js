@@ -54,6 +54,11 @@ export default async function proxy(request) {
   if (!payload) {
     if (isPage) {
       const loginUrl = new URL('/login', request.url);
+      // Remember the page the athlete was trying to reach. /onboarding is
+      // excluded: login already routes a fresh account there by its state.
+      if (!pathname.startsWith('/onboarding')) {
+        loginUrl.searchParams.set('next', `${pathname}${request.nextUrl.search}`);
+      }
       const res = NextResponse.redirect(loginUrl);
       res.headers.set('x-auth-checked', '1');
       return res;
