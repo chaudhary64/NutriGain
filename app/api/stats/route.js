@@ -95,8 +95,11 @@ export const GET = withAuth(async (request, user) => {
 
   /* ------------------------------ Nutrition ------------------------------ */
 
-  const nutritionLogs = logs.filter((l) => (l.totalMacros?.calories || 0) > 0);
-  const daily = nutritionLogs.map((l) => ({
+  // The query reaches back a full year so the heatmap can render any of its
+  // year chips, but every window number must be sliced to the requested
+  // range — otherwise `days=7` would still report a year of averages.
+  const yearNutritionLogs = logs.filter((l) => (l.totalMacros?.calories || 0) > 0);
+  const daily = yearNutritionLogs.filter((l) => l.date >= from).map((l) => ({
     date: l.date,
     calories: round(l.totalMacros?.calories),
     protein: round(l.totalMacros?.protein),
@@ -148,12 +151,13 @@ export const GET = withAuth(async (request, user) => {
 
   const sessionsLast7 = volumeRows.filter((r) => r.date >= last7From);
   const volumeLast7 = round(sessionsLast7.reduce((s, r) => s + r.volume, 0));
-  const sessionsInRange = volumeRows.length;
-  const volumeInRange = round(volumeRows.reduce((s, r) => s + r.volume, 0));
+  const windowVolume = volumeRows.filter((r) => r.date >= from);
+  const sessionsInRange = windowVolume.length;
+  const volumeInRange = round(windowVolume.reduce((s, r) => s + r.volume, 0));
   const activeDaysLast30 = volumeRows.filter((r) => r.date >= last30From).length;
 
   const trainingWeeks = new Map();
-  for (const row of volumeRows) {
+  for (const row of windowVolume) {
     const wk = weekStart(row.date);
     if (!trainingWeeks.has(wk)) {
       trainingWeeks.set(wk, { weekStart: wk, sessions: 0, volume: 0 });
@@ -168,8 +172,11 @@ export const GET = withAuth(async (request, user) => {
 
   /* ----------------------------- Consistency ----------------------------- */
 
-  const mealDays = new Set(nutritionLogs.map((l) => l.date));
+  // Year-wide sets feed the heatmap and the streak; the window slice feeds
+  // the logged-days reading the cards label as "of N-day window".
+  const mealDays = new Set(yearNutritionLogs.map((l) => l.date));
   const sessionDays = new Set(volumeRows.map((r) => r.date));
+  const activeInWindow = [...new Set([...mealDays, ...sessionDays])].filter((d) => d >= from).length;
 
   let anchor = today;
   if (!mealDays.has(anchor) && !sessionDays.has(anchor)) anchor = addDays(anchor, -1);
@@ -213,9 +220,9 @@ export const GET = withAuth(async (request, user) => {
     },
     consistency: {
       currentStreak,
-      loggedDays: mealDays.size + [...sessionDays].filter((d) => !mealDays.has(d)).length,
+      loggedDays: activeInWindow,
       totalDays: days,
-      loggedPct: Math.round(((mealDays.size + [...sessionDays].filter((d) => !mealDays.has(d)).length) / days) * 100),
+      loggedPct: Math.round((activeInWindow / days) * 100),
       yearMap,
     },
   });

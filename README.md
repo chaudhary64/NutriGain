@@ -168,10 +168,12 @@ NutriGain/
    └── Mark workout as completed → updates gymStatus in DailyLog
 
 7. Progress Page (/dashboard/stats)
-   ├── Weekly macro averages vs. goals, training volume and frequency (GET /api/stats)
-   ├── Weight trend chart against target (GET /api/weight)
-   ├── Consistency: streak, logged-days %, 28-day meals/sessions strip
-   └── 7/30/90-day window selector; 7d/30d/90d range
+   ├── Lead plate — weight, daily intake vs. goal, streak + 30-day activity strip
+   ├── Weight trend against target with an inline weigh-in ledger (GET /api/weight)
+   ├── Macro meters vs. goals and per-week averages (GET /api/stats)
+   ├── Training frequency and weekly volume rows
+   ├── Consistency: streak, logged days, and a year heatmap with year chips
+   └── 7/30/90-day window selector — every reading is scoped to it
 
 8. Admin Panel (/admin)
    ├── Manage the global meal database (add, edit, delete meals)
