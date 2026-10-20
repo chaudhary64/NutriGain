@@ -355,7 +355,7 @@ export default function SplitManager({ pushToast }) {
 
             {!editing && source && (
               <p className="sm-source">
-                Based on <b>{source}</b> — edit freely, it&apos;s yours now.
+                Based on <b>{source}</b>.
               </p>
             )}
           </>

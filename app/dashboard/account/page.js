@@ -93,7 +93,9 @@ html:has(.acc-layout){scroll-behavior:smooth}
 .acc-fact-v small{margin-left:4px;font-family:var(--font-mono);font-size:var(--acc-micro);font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--t3)}
 .acc-fact-v.quiet{font-weight:500;color:var(--t2)}
 .acc-fact-v.none{color:var(--t3);font-weight:500}
-.acc-fact-act{display:flex;align-items:center;justify-content:flex-end}
+/* The action cell holds a control, not a reading, so it has no key row to sit
+   under: the button is centred in both axes and needs no label spacer. */
+.acc-fact.acc-fact-act{display:flex;align-items:center;justify-content:center;padding:11px 12px}
 .acc-fact-act .m-btn{padding:4px 10px;font-size:var(--acc-small);gap:6px}
 .acc-dossier-fine{margin:0;padding:0 20px 11px;font-size:var(--acc-small);font-weight:400;color:var(--t2);line-height:1.5}
 /* TDEE preview inside the body editor — four figures and the maths behind
@@ -224,8 +226,9 @@ html:has(.acc-layout){scroll-behavior:smooth}
   .acc-facts-w .acc-fact-wide,.acc-facts-w .acc-fact-act{grid-column:1/-1;border-left:0;padding-left:16px;padding-right:16px}
   .acc-facts-w .acc-fact-wide{border-bottom:1px solid var(--line)}
   .acc-facts-w .acc-fact:nth-child(2){border-left:0;padding-left:16px}
-  .acc-facts-w .acc-fact-act{border-top:1px solid var(--line);padding-top:8px;padding-bottom:10px}
-  .acc-facts-w .acc-fact-act .m-btn{width:100%;justify-content:center}
+  /* On a phone the action owns its own full-width row, stretched to a thumb. */
+  .acc-facts-w .acc-fact-act{border-top:1px solid var(--line);padding:8px 16px 10px;align-items:stretch}
+  .acc-facts-w .acc-fact-act .m-btn{padding:7px 10px;width:100%;justify-content:center}
   .acc-dossier-b .acc-card-b{padding:18px}
   .acc-form-grid{grid-template-columns:1fr}
   .acc-goals{grid-template-columns:minmax(0,1fr)}
@@ -912,8 +915,8 @@ export default function AccountPage() {
                               </p>
                             </div>
                           ))}
-                        </div>                        {/* Weight, in the same cells: reading, target, the
-                            date it was logged, and the one action. */}
+                        </div>                        {/* Weight, in the same cells: reading, target, when the
+                            last weigh-in happened, and the one action. */}
                         <div className="acc-facts acc-facts-w">
                           <div className="acc-fact acc-fact-wide">
                             <span className="acc-k">Weight</span>
@@ -927,7 +930,7 @@ export default function AccountPage() {
                             <p className="acc-fact-v quiet">{weightInfo.targetWeight}<small>kg</small></p>
                           </div>
                           <div className="acc-fact">
-                            <span className="acc-k">Logged</span>
+                            <span className="acc-k">Last weigh-in</span>
                             <p className="acc-fact-v quiet">
                               {latestEntry
                                 ? new Date(latestEntry.date).toLocaleDateString(undefined, { day: "numeric", month: "short" })
