@@ -149,9 +149,10 @@ NutriGain/
    └── POST /api/onboarding 'skip'  → marks onboardedAt, uses defaults
 
 4. Dashboard (/dashboard)
-   ├── Overview of today's macros, gym status, and streaks
-   ├── Quick-navigate to Meal or Gym sub-dashboards
-   └── Date navigation for past logs
+   ├── "Left today" — remaining calories and macros, not totals already spent
+   ├── Breakfast / lunch / dinner slots: per-entry macros, slot totals, one log action each
+   ├── Today's split and session status, with the gym one click away
+   └── Weight, streaks, and history live on Progress rather than being duplicated here
 
 5. Meal Dashboard (/dashboard/meal)
    ├── Search the meal database → add entries at breakfast, lunch, or dinner

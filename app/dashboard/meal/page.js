@@ -7,6 +7,7 @@ import AppShell from "@/components/AppShell";
 import Loader from "@/components/Loader";
 import { FALLBACK_MACRO_GOALS } from "@/lib/goals";
 import { calculateEntryMacros } from "@/lib/daily-log";
+import { MEAL_TYPES } from "@/lib/validation";
 
 /* ------------------------------------------------------------------ */
 /* Geist design system — ink on canvas, hairline chrome, mono eyebrows. */
@@ -592,6 +593,13 @@ export default function MealTrackingPage() {
   // Search-first logging: the slot is a default, not a prerequisite. It is
   // suggested from the clock and stays editable in the log bar.
   const [selectedMealType, setSelectedMealType] = useState(() => {
+    // A link from Today names the slot it wants filled (?slot=dinner);
+    // otherwise the clock suggests one. The value stays editable either way.
+    const requested =
+      typeof window === "undefined"
+        ? null
+        : new URLSearchParams(window.location.search).get("slot");
+    if (MEAL_TYPES.includes(requested)) return requested;
     const hour = new Date().getHours();
     return hour < 11 ? "breakfast" : hour < 16 ? "lunch" : "dinner";
   });
