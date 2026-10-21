@@ -308,20 +308,40 @@ const PAGE_CSS = `
 .lp .plan-link:hover{color:var(--link);gap:9px}
 
 /* FAQ ------------------------------------------------------------------- */
-.lp .faq-list{margin-top:32px;border-top:1px solid var(--line);max-width:820px}
-.lp .faq-list details{border-bottom:1px solid var(--line)}
-.lp .faq-list summary{
-  display:flex;align-items:center;justify-content:space-between;gap:16px;
-  padding:19px 2px;cursor:pointer;list-style:none;font-size:15.5px;font-weight:500;letter-spacing:-.01em;
+/* A ruled index, not a card of drawers. The rows sit straight on the page's
+   paper, the ledger numbers let someone refer to "the third one", and the
+   answers open underneath without a panel to lift them off the page. The
+   left column carries what the questions cannot: where to ask. */
+.lp .faq-grid{display:grid;grid-template-columns:minmax(0,4.4fr) minmax(0,7.6fr);gap:clamp(32px,5vw,88px);align-items:start}
+.lp .faq-intro{position:sticky;top:96px;display:grid;gap:14px;align-content:start}
+.lp .faq-intro h2{max-width:12ch}
+.lp .faq-lede{font-size:15px;line-height:1.65;color:var(--ink-2);max-width:32ch}
+.lp .faq-meta{margin-top:clamp(22px,3vw,36px);padding-top:18px;border-top:1px solid var(--line);display:grid;gap:10px;justify-items:start}
+.lp .faq-meta-label{font-family:var(--font-geist-mono),monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.lp .faq-meta p{font-size:13px;line-height:1.6;color:var(--ink-2);max-width:30ch}
+.lp .faq-ask{display:inline-flex;align-items:center;gap:7px;min-height:32px;font-size:13px;font-weight:500;color:var(--ink);border-bottom:1px solid var(--line-2);transition:color .15s,border-color .15s,gap .2s}
+.lp .faq-ask:hover{color:var(--link);border-color:currentColor;gap:10px}
+
+.lp .faq-list{border-top:1px solid var(--line-2)}
+.lp .faq-item{border-bottom:1px solid var(--line)}
+.lp .faq-item summary{
+  display:grid;grid-template-columns:30px minmax(0,1fr) 22px;align-items:start;gap:14px;
+  padding:19px 0;cursor:pointer;list-style:none;transition:padding .2s ease;
 }
-.lp .faq-list summary::-webkit-details-marker{display:none}
-.lp .faq-list summary::after{
-  content:"";flex:none;width:11px;height:11px;margin-right:4px;
-  border-right:1.5px solid var(--ink-3);border-bottom:1.5px solid var(--ink-3);
-  transform:rotate(45deg) translateY(-2px);transition:transform .22s;
-}
-.lp .faq-list details[open] summary::after{transform:rotate(-135deg) translateY(-2px);border-color:var(--accent)}
-.lp .faq-list details p{padding:0 2px 20px;font-size:14px;line-height:1.65;color:var(--ink-2);max-width:70ch}
+.lp .faq-item summary::-webkit-details-marker{display:none}
+.lp .faq-n{padding-top:5px;font-family:var(--font-geist-mono),monospace;font-size:11px;
+  letter-spacing:.06em;font-variant-numeric:tabular-nums;color:var(--ink-3);transition:color .15s}
+.lp .faq-q{font-size:17px;font-weight:500;letter-spacing:-.016em;line-height:1.45;color:var(--ink);text-wrap:pretty}
+.lp .faq-toggle{justify-self:end;padding-top:3px;font-family:var(--font-geist-mono),monospace;font-size:17px;line-height:1;
+  color:var(--ink-2);transition:transform .24s cubic-bezier(.22,1,.36,1),color .15s}
+.lp .faq-item summary:hover .faq-n{color:var(--ink-2)}
+.lp .faq-item summary:hover .faq-toggle{color:var(--ink)}
+.lp .faq-item[open] summary{padding-bottom:8px}
+.lp .faq-item[open] .faq-n{color:var(--accent)}
+.lp .faq-item[open] .faq-toggle{transform:rotate(45deg);color:var(--accent)}
+.lp .faq-a{padding:0 48px 22px 44px;animation:faq-in .24s cubic-bezier(.22,1,.36,1)}
+.lp .faq-a p{font-size:14.5px;line-height:1.7;color:var(--ink-2);max-width:62ch}
+@keyframes faq-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 
 /* Closing CTA ----------------------------------------------------------- */
 .lp .close{margin-top:clamp(64px,8vw,112px)}
@@ -350,6 +370,12 @@ const PAGE_CSS = `
 @media(max-width:900px){
   .lp .also-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .lp .steps{grid-template-columns:minmax(0,1fr)}
+  .lp .faq-grid{grid-template-columns:minmax(0,1fr);gap:28px}
+  .lp .faq-intro{position:static;gap:12px}
+  .lp .faq-intro h2{max-width:20ch}
+  .lp .faq-lede{max-width:46ch}
+  .lp .faq-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px;margin-top:4px;padding-top:14px}
+  .lp .faq-meta p{max-width:38ch}
   .lp .feature{grid-template-columns:minmax(0,1fr);gap:28px}
   .lp .feature.flip .feature-media{order:0}
   .lp .plan{grid-template-columns:minmax(0,1fr)}
@@ -397,6 +423,10 @@ const PAGE_CSS = `
   .lp .ui-slot{grid-template-columns:64px minmax(0,1fr) auto;font-size:12px}
   .lp .hero-actions .btn{width:100%}
   .lp .hero-actions{gap:10px}
+  .lp .faq-item summary{grid-template-columns:22px minmax(0,1fr) 20px;gap:10px;padding:16px 0}
+  .lp .faq-q{font-size:15px}
+  .lp .faq-a{padding:0 10px 18px 32px}
+  .lp .faq-a p{font-size:13.5px}
   .lp .also-grid{grid-template-columns:minmax(0,1fr)}
   .lp .stage::after{display:none}
 }
@@ -900,17 +930,49 @@ export default function Home() {
           {/* ---------------- FAQ ---------------- */}
           <section id="faq" className="sec" aria-labelledby="faq-title">
             <div className="ng-container">
-              <div className="sec-head" data-reveal>
-                <span className="eyebrow">FAQ</span>
-                <h2 id="faq-title">Questions, answered plainly.</h2>
-              </div>
-              <div className="faq-list" data-reveal>
-                {FAQ.map((item) => (
-                  <details key={item.q}>
-                    <summary>{item.q}</summary>
-                    <p>{item.a}</p>
-                  </details>
-                ))}
+              <div className="faq-grid">
+                <div className="faq-intro" data-reveal>
+                  <span className="eyebrow">FAQ</span>
+                  <h2 id="faq-title">Questions, answered plainly.</h2>
+                  <p className="faq-lede">
+                    The five things people ask before logging a first meal. No trial
+                    terms buried in a footnote.
+                  </p>
+                  <div className="faq-meta">
+                    <span className="faq-meta-label">Still stuck</span>
+                    <p>
+                      Open an issue and say what you were trying to log — meals,
+                      macros, a lift that did not save.
+                    </p>
+                    <a
+                      className="faq-ask"
+                      href="https://github.com/chaudhary64/NutriGain/issues"
+                      rel="noreferrer"
+                    >
+                      Ask on GitHub
+                      <span aria-hidden="true">→</span>
+                    </a>
+                  </div>
+                </div>
+
+                <div className="faq-list" data-reveal data-delay="80">
+                  {FAQ.map((item, i) => (
+                    <details key={item.q} className="faq-item" open={i === 0}>
+                      <summary>
+                        <span className="faq-n" aria-hidden="true">
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
+                        <span className="faq-q">{item.q}</span>
+                        <span className="faq-toggle" aria-hidden="true">
+                          +
+                        </span>
+                      </summary>
+                      <div className="faq-a">
+                        <p>{item.a}</p>
+                      </div>
+                    </details>
+                  ))}
+                </div>
               </div>
             </div>
           </section>
