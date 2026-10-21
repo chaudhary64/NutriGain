@@ -663,7 +663,7 @@ export default function MealTrackingPage() {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (showMealDropdown && !event.target.closest(".m-dd-anchor")) {
+      if (showMealDropdown && !event.target.closest(".ml-dd-anchor")) {
         setShowMealDropdown(false);
       }
     };
