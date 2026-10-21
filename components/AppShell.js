@@ -90,7 +90,6 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
     <Link
       href={homeHref}
       className="flex items-center gap-2.5 min-w-0 hover:opacity-80 transition-opacity"
-      aria-label={isAdmin ? "NutriGain admin home" : isMarketing ? "NutriGain home" : "NutriGain dashboard home"}
     >
       <span
         aria-hidden="true"
@@ -98,7 +97,7 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
       >
         N.
       </span>
-      <span className="text-[13px] font-semibold uppercase tracking-[0.22em] leading-none whitespace-nowrap text-[var(--shell-ink)]">
+      <span className="mk-word text-[13px] font-semibold uppercase tracking-[0.22em] leading-none whitespace-nowrap text-[var(--shell-ink)]">
         NUTRIGAIN<span className="text-[var(--shell-accent)]">.</span>
       </span>
       {isAdmin && (
@@ -211,16 +210,24 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
 
   const marketingBar = (
     <nav className="mk-bar" aria-label="Primary">
-      <div className="ng-container flex h-14 items-center justify-between gap-4">
+      <div className="ng-container flex h-16 items-center justify-between gap-4">
         {brand}
         <div className="flex items-center gap-3">
+          {/* In-page signposts — the landing page is one long argument, so
+              its sections are the only navigation it needs. The primary
+              action stays in the hero rather than competing up here. */}
+          {!isAdmin && (
+            <div className="mk-links">
+              <Link href="/#features" className="mk-link">Features</Link>
+              <Link href="/#how" className="mk-link">How it works</Link>
+              <Link href="/#pricing" className="mk-link">Pricing</Link>
+              <Link href="/#faq" className="mk-link">FAQ</Link>
+            </div>
+          )}
           {themeToggle}
           {user ? (
             <>
-              <Link
-                href="/dashboard"
-                className="hidden sm:inline text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--shell-ink-2)] hover:text-[var(--shell-ink)] transition-colors"
-              >
+              <Link href="/dashboard" className="mk-link mk-link-dash">
                 Dashboard
               </Link>
               <span className="hidden sm:flex items-center gap-2 min-w-0">
@@ -238,16 +245,10 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
             </>
           ) : (
             <>
-              <Link
-                href="/login"
-                className="text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--shell-muted)] hover:text-[var(--shell-ink)] transition-colors"
-              >
-                Login
+              <Link href="/login" className="mk-link mk-link-signin">
+                Sign in
               </Link>
-              <Link
-                href="/register"
-                className="text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--shell-on-accent)] bg-[var(--shell-accent)] hover:opacity-90 transition-opacity rounded-md px-4 py-2"
-              >
+              <Link href="/register" className="mk-link mk-link-ink">
                 Get started
               </Link>
             </>
@@ -263,8 +264,11 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
   if (isMarketing) {
     return (
       <div className="app-shell min-h-screen bg-[var(--shell-bg)] text-[var(--shell-ink)] font-sans selection:bg-[var(--shell-accent)] selection:text-[var(--shell-on-accent)]">
+        <a className="skip-link" href="#main">
+          Skip to content
+        </a>
         {marketingBar}
-        <div className="pt-14">{children}</div>
+        <div className="pt-16">{children}</div>
       </div>
     );
   }

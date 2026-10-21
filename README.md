@@ -61,8 +61,8 @@ Instead of scattered spreadsheets and basic calorie counters, NutriGain gives yo
 ### Frontend
 - **[Next.js 16](https://nextjs.org/)** — App Router, file-based routing, route guards via the proxy convention
 - **[React 19](https://react.dev/)** — UI library with hooks and context
-- **[Tailwind CSS 4](https://tailwindcss.com/)** — Utility-first styling with dark, premium aesthetics
-- **[GSAP 3](https://gsap.com/)** — High-performance animations (hero reveals, scroll triggers, cursor glow)
+- **[Tailwind CSS 4](https://tailwindcss.com/)** — Utility-first styling over the shared Geist/Meridian tokens
+- **[GSAP 3](https://gsap.com/)** — Entrance animation on the auth shell
 - **[Lenis](https://lenis.studiofreight.com/)** — Buttery smooth scrolling across the entire app
 - **[Recharts 3](https://recharts.org/)** — Composable data visualization for weight trends and PR progression
 - **[react-activity-calendar](https://www.npmjs.com/package/react-activity-calendar)** — GitHub-style gym heatmap
@@ -106,9 +106,11 @@ NutriGain/
 │   ├── register/               # Sign-up page
 │   ├── globals.css             # Global design tokens & base styles
 │   ├── layout.js               # Root layout with fonts & providers
-│   └── page.js                 # Landing page with GSAP scroll animations
+│   └── page.js                 # Landing page — hero, features, pricing, FAQ, CTA
 ├── components/
 │   ├── AppShell.js             # Shared nav shell (dashboard/admin variants, slot support)
+│   ├── AppFooter.js            # Landing footer — product, account and project columns
+│   ├── HomeMotion.js           # Landing motion — scroll reveals via IntersectionObserver
 │   ├── LenisProvider.js        # Global smooth-scroll provider
 │   └── Loader.js               # Full-screen loading state
 ├── context/
@@ -135,9 +137,14 @@ NutriGain/
 
 ```
 1. Landing Page (/)
-   └── GSAP-animated hero with scroll sections
-       ├── "Get Started Free" → /register
-       └── "Login" → /login
+   └── Product marketing page with the dashboard in the hero (see DESIGN.md)
+       ├── Hero: "Know what's left. Not what you spent." + live markup of the Today screen
+       ├── Features: meal slots, remaining macros, sets as weight × reps
+       ├── Also included: weight trend, streaks, split planner, training heatmap
+       ├── How it works: set targets → log meals and sets → read the trend
+       ├── Pricing: one plan, $0, with the self-host path
+       ├── FAQ: free?, targets?, lifting only?, data?, phone?
+       └── "Get started free" → /register · "Sign in" → /login
 
 2. Auth (/login, /register)
    ├── Register: POST /api/auth/register → creates User, sets JWT cookie

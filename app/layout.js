@@ -5,9 +5,10 @@ import "./meridian.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import LenisProvider from "@/components/LenisProvider";
-/* Geist — the app's type system (Geist Sans for UI + prose, Geist Mono for
-   technical eyebrows, code, and tabular figures). Playfair stays scoped to
-   the marketing page's display headings. */
+/* Geist — the app's type system, shared by the dashboard and the landing
+   page (Geist Sans for UI, prose and display; Geist Mono for technical
+   eyebrows, code and tabular figures). Playfair remains on the error and
+   404 pages. */
 const geist = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],

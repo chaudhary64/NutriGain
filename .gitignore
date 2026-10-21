@@ -49,3 +49,7 @@ design/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# build/server logs (local verification)
+.build.log
+.prod.log
