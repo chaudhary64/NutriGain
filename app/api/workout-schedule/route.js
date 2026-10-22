@@ -2,13 +2,50 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import WorkoutSchedule from "@/models/WorkoutSchedule";
 import WorkoutTemplate, { TEMPLATE_DAY_KEYS, toPlainDays } from "@/models/WorkoutTemplate";
-import UserSchedule from "@/models/UserSchedule";
+import UserSchedule, { toPlainDayExercises } from "@/models/UserSchedule";
+import Exercise from "@/models/Exercise";
 import { withAuth } from "@/lib/auth";
+import { isValidObjectId } from "@/lib/validation";
 
 const MUSCLE_GROUP_OPTIONS = [
   "Abs", "Back", "Bicep", "Chest", "Forearms", "Legs", "Shoulders", "Tricep",
   "Push", "Pull", "Upper Body", "Lower Body", "Full Body", "Rest Day",
 ];
+
+const MAX_DAY_EXERCISES = 20;
+
+/**
+ * Validate the optional per-day exercise picks: { Monday: [id, id], ... }.
+ * Returns [error, clean] — an absent payload means "leave the picks alone".
+ */
+function validateDayExercises(raw) {
+  if (raw === undefined) return [null, null];
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    return ["exercises must be an object keyed by weekday", null];
+  }
+
+  const clean = {};
+  for (const [day, ids] of Object.entries(raw)) {
+    if (!TEMPLATE_DAY_KEYS.includes(day)) {
+      return [`Unknown weekday: ${day}`, null];
+    }
+    if (!Array.isArray(ids)) {
+      return [`${day} exercises must be an array`, null];
+    }
+    if (ids.length > MAX_DAY_EXERCISES) {
+      return [`At most ${MAX_DAY_EXERCISES} exercises per day`, null];
+    }
+    const unique = new Set();
+    for (const id of ids) {
+      if (!isValidObjectId(id)) {
+        return [`${day} has an invalid exercise id`, null];
+      }
+      unique.add(String(id));
+    }
+    clean[day] = [...unique];
+  }
+  return [null, clean];
+}
 
 function defaultDaysMap() {
   return {
@@ -64,7 +101,11 @@ export const GET = withAuth(async (request, user) => {
     });
   }
 
-  return NextResponse.json({ days: toPlainDays(schedule.days), sourceTemplateName: schedule.sourceTemplateName });
+  return NextResponse.json({
+    days: toPlainDays(schedule.days),
+    sourceTemplateName: schedule.sourceTemplateName,
+    exercises: toPlainDayExercises(schedule.exercises),
+  });
 });
 
 // PUT — update days of the user's private split. Optionally re-fork from a
@@ -90,12 +131,19 @@ export const PUT = withAuth(async (request, user) => {
           days: toPlainDays(template.days),
           sourceTemplateId: template._id,
           sourceTemplateName: template.name,
+          // A different split means different days; per-day picks from the
+          // previous one would be stale, so the new split starts clean.
+          exercises: {},
         },
       },
       { new: true, upsert: true }
     );
 
-    return NextResponse.json({ days: toPlainDays(schedule.days), sourceTemplateName: schedule.sourceTemplateName });
+    return NextResponse.json({
+      days: toPlainDays(schedule.days),
+      sourceTemplateName: schedule.sourceTemplateName,
+      exercises: toPlainDayExercises(schedule.exercises),
+    });
   }
 
   if (body.days === undefined) {
@@ -121,11 +169,38 @@ export const PUT = withAuth(async (request, user) => {
     }
   }
 
+  // Per-day exercise picks ride along with the groups. They are optional, so
+  // a client that only edits the week keeps the picks it never touched.
+  const [exerciseError, dayExercises] = validateDayExercises(body.exercises);
+  if (exerciseError) {
+    return NextResponse.json({ error: exerciseError }, { status: 400 });
+  }
+
+  if (dayExercises) {
+    const ids = [...new Set(Object.values(dayExercises).flat())];
+    if (ids.length > 0) {
+      const existing = await Exercise.countDocuments({ _id: { $in: ids } });
+      if (existing !== ids.length) {
+        return NextResponse.json(
+          { error: "One or more picked exercises no longer exist in the library" },
+          { status: 400 }
+        );
+      }
+    }
+  }
+
+  const update = { $set: { days, sourceTemplateId: null, sourceTemplateName: null } };
+  if (dayExercises) update.$set.exercises = dayExercises;
+
   const schedule = await UserSchedule.findOneAndUpdate(
     { user: user.id },
-    { $set: { days, sourceTemplateId: null, sourceTemplateName: null } },
+    update,
     { new: true, upsert: true }
   );
 
-  return NextResponse.json({ days: toPlainDays(schedule.days), sourceTemplateName: schedule.sourceTemplateName });
+  return NextResponse.json({
+    days: toPlainDays(schedule.days),
+    sourceTemplateName: schedule.sourceTemplateName,
+    exercises: toPlainDayExercises(schedule.exercises),
+  });
 });

@@ -277,6 +277,9 @@ export default function GymTrackingPage() {
   const [exercises, setExercises] = useState([]);
   const [workoutSchedule, setWorkoutSchedule] = useState([]); // derived: [{day, muscleGroups}]
   const [splitDays, setSplitDays] = useState({}); // raw user schedule: { Monday: [...], ... }
+  // Per-day exercise picks from Account → Training split: { Monday: [id, ...] }.
+  // A day absent here keeps the muscle-group default.
+  const [splitExercises, setSplitExercises] = useState({});
 
   // Per-dataset failure flags — every initial-load fetch surfaces its own
   // inline notice (with retry) instead of failing silently.
@@ -385,6 +388,17 @@ export default function GymTrackingPage() {
         setWorkoutSchedule(
           SPLIT_DAYS.map((day) => ({ day, muscleGroups: days[day] || ["Rest Day"] }))
         );
+      }
+
+      const picks = scheduleData?.exercises;
+      if (picks && typeof picks === "object" && !Array.isArray(picks)) {
+        const normalized = {};
+        for (const [day, ids] of Object.entries(picks)) {
+          if (Array.isArray(ids)) normalized[day] = ids.map(String);
+        }
+        setSplitExercises(normalized);
+      } else {
+        setSplitExercises({});
       }
       setDataError("plan", false);
     } catch (error) {
@@ -728,12 +742,46 @@ export default function GymTrackingPage() {
   };
 
   const todaySchedule = workoutSchedule.find((d) => d.day === selectedDayName);
-  const isRestDay = !todaySchedule || todaySchedule.muscleGroups.includes("Rest Day");
+
+  /* Account → Training split can curate a day's exercises. A stored pick list
+     wins over the muscle-group default: it keeps the chosen order and may hold
+     movements from outside the day's own groups. */
+  const dayPicks = Array.isArray(splitExercises?.[selectedDayName])
+    ? splitExercises[selectedDayName]
+    : null;
+  const pickedIds = dayPicks ? new Set(dayPicks) : null;
+
+  // A rest day stays a rest day unless the athlete deliberately picked
+  // exercises for it.
+  const isRestDay =
+    (!todaySchedule || todaySchedule.muscleGroups.includes("Rest Day")) && !pickedIds;
 
   // One session board: muscle-group sections, each holding its exercises.
   // Dedupe across groups so a composite split never repeats a movement.
   const sections = (() => {
     if (isRestDay) return [];
+
+    if (pickedIds) {
+      const picked = exercises
+        .filter((ex) => pickedIds.has(String(ex._id)))
+        .sort((a, b) => dayPicks.indexOf(String(a._id)) - dayPicks.indexOf(String(b._id)));
+      if (picked.length === 0) return [];
+
+      const pickedGroups = [];
+      for (const ex of picked) {
+        if (!pickedGroups.includes(ex.muscleGroup)) pickedGroups.push(ex.muscleGroup);
+      }
+      // The day's own groups lead; picks from other groups follow them.
+      const orderedGroups = [
+        ...expandedGroups.filter((g) => pickedGroups.includes(g)),
+        ...pickedGroups.filter((g) => !expandedGroups.includes(g)),
+      ];
+      return orderedGroups.map((group) => ({
+        group,
+        exercises: picked.filter((ex) => ex.muscleGroup === group),
+      }));
+    }
+
     const seen = new Set();
     const out = [];
     for (const group of expandMuscleGroups(todaySchedule.muscleGroups)) {
@@ -788,7 +836,9 @@ export default function GymTrackingPage() {
             <div className="gy-head-main">
               <p className="gy-kicker">Training · Gym log</p>
               <h1 className="gy-title">
-                {isRestDay ? "Rest & recovery" : `${muscleGroups.join(" & ")} day`}
+                {muscleGroups.includes("Rest Day")
+                  ? "Rest & recovery"
+                  : `${muscleGroups.join(" & ")} day`}
               </h1>
               <p className="gy-dek">
                 {format(parseISO(currentDate), "EEEE d MMMM")}
