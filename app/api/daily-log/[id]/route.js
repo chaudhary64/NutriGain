@@ -3,7 +3,11 @@ import dbConnect from '@/lib/mongodb';
 import DailyLog from '@/models/DailyLog';
 import Meal from '@/models/Meal';
 import { withAuth } from '@/lib/auth';
-import { calculateEntryMacros, recalculateTotals } from '@/lib/daily-log';
+import {
+  calculateEntryMacros,
+  calculateEntryMicros,
+  recalculateTotals,
+} from '@/lib/daily-log';
 import { isValidObjectId, isValidDateString } from '@/lib/validation';
 
 // PUT update meal entry quantity
@@ -59,6 +63,7 @@ export const PUT = withAuth(async (request, user, { params }) => {
   // Update entry, then recompute totals from all entries
   mealEntry.quantity = qty;
   mealEntry.macros = calculateEntryMacros(meal, qty);
+  mealEntry.micros = calculateEntryMicros(meal, qty);
 
   recalculateTotals(dailyLog);
   dailyLog.updatedAt = new Date();

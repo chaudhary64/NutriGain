@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { MicroProfileSchema } from './Micros.js';
 
 const MealSchema = new mongoose.Schema({
   name: {
@@ -32,6 +33,11 @@ const MealSchema = new mongoose.Schema({
       required: true,
       default: 0,
     },
+  },
+  // Optional micronutrient profile. Absent means "not enriched yet" — it is
+  // never an empty set standing in for zero intake.
+  micros: {
+    type: MicroProfileSchema,
   },
   category: {
     type: String,

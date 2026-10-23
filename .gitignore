@@ -35,6 +35,7 @@ yarn-error.log*
 .freebuff/
 .impeccable/
 design/
+screenshots/
 
 # local ops scripts (one-off migrations & seeding; kept on disk, not shipped)
 /scripts/

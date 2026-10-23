@@ -5,6 +5,7 @@ import Meal from '@/models/Meal';
 import { withAuth } from '@/lib/auth';
 import {
   calculateEntryMacros,
+  calculateEntryMicros,
   createEmptyDailyLog,
   heatmapHistoryFromDateString,
   recalculateTotals,
@@ -90,6 +91,7 @@ export const POST = withAuth(async (request, user) => {
     quantity,
     mealType,
     macros: calculateEntryMacros(meal, quantity),
+    micros: calculateEntryMicros(meal, quantity),
   });
 
   // Recompute totals from entries — no add/subtract drift.

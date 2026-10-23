@@ -37,6 +37,7 @@ export const PUT = withAuth(
       name: body?.name,
       servingSize: body?.servingSize,
       category: body?.category,
+      micros: body?.micros,
       macros: body?.macros ?? {
         calories: body?.calories,
         protein: body?.protein,

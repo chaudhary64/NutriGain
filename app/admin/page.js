@@ -5,11 +5,39 @@ import { useAuth } from "@/context/AuthContext";
 import AppShell from "@/components/AppShell";
 import { useRouter } from "next/navigation";
 import Loader from "@/components/Loader";
+import { MICRO_KEYS, MICRO_NUTRIENTS, MICRO_SOURCES, MICRO_BASES } from "@/lib/micros";
+
+/** One blank field per tracked nutrient — an admin fills only what a source reported. */
+const emptyMicroValues = () => Object.fromEntries(MICRO_KEYS.map((key) => [key, ""]));
+
+const MICRO_SOURCE_LABEL = {
+  usda: "USDA FoodData Central",
+  indb: "Indian Nutrient Databank",
+  ifct: "IFCT 2017",
+  off: "Open Food Facts",
+  user: "Entered by hand",
+  estimate: "Estimated from a recipe",
+};
+
+const MICRO_BASIS_LABEL = { serving: "One serving", "100g": "100 g" };
 
 // Helper function to convert text to title case
 const toTitleCase = (str) => {
   if (!str) return "";
   return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
+/* A DailyLog date is a yyyy-MM-dd string; parsing the parts keeps it from
+   drifting a day in a timezone west of UTC. */
+const fmtLoggedDay = (value) => {
+  if (!value) return "—";
+  const [y, m, d] = String(value).split("-").map(Number);
+  if (!y || !m || !d) return value;
+  return new Date(y, m - 1, d).toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 };
 
 /* ============ Meridian Admin — theme tokens (mirror of the dashboard systems) ============ */
@@ -152,6 +180,9 @@ export default function AdminPage() {
 
   const [activeTab, setActiveTab] = useState("meals"); // 'meals', 'gym', or 'users'
   const [meals, setMeals] = useState([]);
+  // Foods with no micro profile, ranked by log usage. Null until the admin-only
+  // coverage call answers; the queue is simply absent until then.
+  const [coverage, setCoverage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingMeal, setEditingMeal] = useState(null);
@@ -163,6 +194,10 @@ export default function AdminPage() {
     carbs: "",
     fats: "",
     category: "general",
+    micros: emptyMicroValues(),
+    microSource: "usda",
+    microBasis: "serving",
+    microVerified: false,
   });
 
   // Users state
@@ -256,10 +291,21 @@ export default function AdminPage() {
     }
   };
 
+  const fetchCoverage = async () => {
+    try {
+      const res = await fetch("/api/admin/micro-coverage");
+      if (!res.ok) return;
+      setCoverage(await res.json());
+    } catch (error) {
+      console.error("Error fetching micro coverage:", error);
+    }
+  };
+
   useEffect(() => {
     if (user && user.isAdmin) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchMeals();
+      fetchCoverage();
       fetchGymData();
       fetchUsers();
     }
@@ -267,6 +313,15 @@ export default function AdminPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    /* Only fields that were actually filled go up. An empty field means the
+       source didn't report that nutrient, which is not the same as zero. */
+    const microValues = MICRO_KEYS.map((key) => ({ key, raw: formData.micros[key] }))
+      // Whitespace is still an empty field: Number(' ') is 0, and saving it as a
+      // measured zero would claim the source reported none of that nutrient.
+      .filter(({ raw }) => String(raw ?? "").trim() !== "")
+      .map(({ key, raw }) => ({ key, amount: Number(String(raw).trim()) }))
+      .filter(({ amount }) => Number.isFinite(amount) && amount >= 0);
 
     const payload = {
       name: formData.name,
@@ -278,6 +333,14 @@ export default function AdminPage() {
         fats: parseFloat(formData.fats) || 0,
       },
       category: formData.category,
+      micros: microValues.length
+        ? {
+            values: microValues,
+            source: formData.microSource,
+            basis: formData.microBasis,
+            verified: formData.microVerified,
+          }
+        : null,
     };
 
     try {
@@ -292,6 +355,8 @@ export default function AdminPage() {
 
       if (res.ok) {
         fetchMeals();
+        // The saved food may have just left the coverage queue.
+        fetchCoverage();
         resetForm();
       } else {
         const data = await res.json();
@@ -305,6 +370,11 @@ export default function AdminPage() {
 
   const handleEdit = (meal) => {
     setEditingMeal(meal);
+    const storedMicros = meal.micros || {};
+    const microValues = emptyMicroValues();
+    for (const value of storedMicros.values || []) {
+      if (value?.key in microValues) microValues[value.key] = String(value.amount);
+    }
     setFormData({
       name: meal.name,
       servingSize: meal.servingSize,
@@ -313,6 +383,10 @@ export default function AdminPage() {
       carbs: meal.macros.carbs,
       fats: meal.macros.fats,
       category: meal.category,
+      micros: microValues,
+      microSource: storedMicros.source || "usda",
+      microBasis: storedMicros.basis || "serving",
+      microVerified: !!storedMicros.verified,
     });
     setShowForm(true);
 
@@ -329,6 +403,7 @@ export default function AdminPage() {
       const res = await fetch(`/api/meals/${id}`, { method: "DELETE" });
       if (res.ok) {
         fetchMeals();
+        fetchCoverage();
       } else {
         const data = await res.json();
         alert(data.error || "Failed to delete meal");
@@ -348,6 +423,10 @@ export default function AdminPage() {
       carbs: "",
       fats: "",
       category: "general",
+      micros: emptyMicroValues(),
+      microSource: "usda",
+      microBasis: "serving",
+      microVerified: false,
     });
     setEditingMeal(null);
     setShowForm(false);
@@ -576,6 +655,72 @@ export default function AdminPage() {
               </div>
             )}
 
+            {/* Foods the board cannot count because no profile was entered —
+                ranked by how many logged entries they affect. */}
+            {coverage && (
+              <>
+                <div className="adm-sec" style={{ marginTop: 0, marginBottom: 12 }}>
+                  <div>
+                    <h2>Micro coverage</h2>
+                    <p>
+                      {coverage.totals.missing === 0
+                        ? `All ${coverage.totals.meals} foods have a micro profile.`
+                        : `${coverage.totals.missing} of ${coverage.totals.meals} foods have no micro profile. Ranked by how often they are logged — a gap near the top costs the most days.`}
+                    </p>
+                  </div>
+                  {coverage.totals.missing > 0 && (
+                    <span className="adm-chip" style={{ whiteSpace: "nowrap" }}>
+                      {coverage.totals.entriesAffected.toLocaleString()} entries affected
+                    </span>
+                  )}
+                </div>
+
+                {coverage.totals.missing > 0 && (
+                  <div className="adm-card adm-tblwrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Food</th>
+                          <th className="hidden sm:table-cell">Serving</th>
+                          <th>Logged</th>
+                          <th className="hidden md:table-cell">Last logged</th>
+                          <th style={{ textAlign: "right" }}>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {coverage.queue.map(({ meal, entries, lastLogged }) => (
+                          <tr key={meal._id}>
+                            <td>
+                              <span className="tname">{toTitleCase(meal.name)}</span>
+                            </td>
+                            <td className="hidden sm:table-cell">{meal.servingSize}</td>
+                            <td>
+                              <span className="tnum">{entries}</span>
+                              <span className="tunit">
+                                {entries === 1 ? "entry" : "entries"}
+                              </span>
+                            </td>
+                            <td className="hidden md:table-cell">{fmtLoggedDay(lastLogged)}</td>
+                            <td style={{ textAlign: "right" }}>
+                              <button
+                                type="button"
+                                onClick={() => handleEdit(meal)}
+                                className="adm-ghost"
+                                style={{ height: 30, padding: "0 12px", fontSize: 12, whiteSpace: "nowrap" }}
+                                title={`Add micronutrients for ${meal.name}`}
+                              >
+                                Add micros
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </>
+            )}
+
             {showForm && (
               <div ref={mealFormRef} className="adm-card adm-form">
                 <div className="flex items-center justify-between mb-5">
@@ -673,6 +818,100 @@ export default function AdminPage() {
                           required
                         />
                       </div>
+                    </div>
+                  </div>
+
+                  <div style={{ borderTop: "1px solid var(--line)", paddingTop: 18 }}>
+                    <div className="flex items-start justify-between mb-4" style={{ gap: 12, flexWrap: "wrap" }}>
+                      <div>
+                        <label className="adm-lbl" style={{ marginBottom: 2 }}>Micronutrients (optional)</label>
+                        <p style={{ fontSize: 12, fontWeight: 400, color: "var(--t2)", margin: 0, maxWidth: "60ch" }}>
+                          Leave a field empty if the source didn&apos;t measure it — empty is not zero.
+                        </p>
+                      </div>
+                      <label className={`adm-check ${formData.microVerified ? "on" : ""}`} style={{ width: "fit-content" }}>
+                        <input
+                          type="checkbox"
+                          checked={formData.microVerified}
+                          onChange={(e) => setFormData({ ...formData, microVerified: e.target.checked })}
+                        />
+                        Verified
+                      </label>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {MICRO_KEYS.map((key) => {
+                        const nutrient = MICRO_NUTRIENTS[key];
+                        return (
+                          <div key={key}>
+                            <label className="adm-lbl" htmlFor={`micro-${key}`}>
+                              {nutrient.label} ({nutrient.unit === "ug" ? "µg" : nutrient.unit})
+                            </label>
+                            <input
+                              id={`micro-${key}`}
+                              type="number"
+                              step="any"
+                              min="0"
+                              value={formData.micros[key]}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  micros: { ...formData.micros, [key]: e.target.value },
+                                })
+                              }
+                              className="adm-in"
+                              placeholder="—"
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ marginTop: 16 }}>
+                      <div>
+                        <label className="adm-lbl" htmlFor="micro-source">Source</label>
+                        <select
+                          id="micro-source"
+                          className="adm-in"
+                          value={formData.microSource}
+                          onChange={(e) => setFormData({ ...formData, microSource: e.target.value })}
+                        >
+                          {MICRO_SOURCES.map((source) => (
+                            <option key={source} value={source}>
+                              {MICRO_SOURCE_LABEL[source] || source}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="adm-lbl" htmlFor="micro-basis">Amounts are per</label>
+                        <select
+                          id="micro-basis"
+                          className="adm-in"
+                          value={formData.microBasis}
+                          onChange={(e) => setFormData({ ...formData, microBasis: e.target.value })}
+                        >
+                          {MICRO_BASES.map((basis) => (
+                            <option key={basis} value={basis}>
+                              {MICRO_BASIS_LABEL[basis] || basis}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      {formData.microBasis === "100g" && (
+                        <p
+                          style={{
+                            gridColumn: "1 / -1",
+                            margin: 0,
+                            fontSize: 12,
+                            fontWeight: 400,
+                            color: "var(--t2)",
+                          }}
+                        >
+                          Per-100 g amounts are converted with the serving size above, so that
+                          field has to state grams (e.g. &ldquo;250 g&rdquo;).
+                        </p>
+                      )}
                     </div>
                   </div>
 

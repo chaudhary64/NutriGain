@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { MicroProfileSchema } from './Micros.js';
 
 const MealEntrySchema = new mongoose.Schema({
   meal: {
@@ -22,6 +23,12 @@ const MealEntrySchema = new mongoose.Schema({
     protein: Number,
     carbs: Number,
     fats: Number,
+  },
+  // Snapshot of the meal's micro profile at logging time, scaled by quantity —
+  // the same way `macros` is snapshotted, so an edited meal never rewrites
+  // what a past day recorded.
+  micros: {
+    type: MicroProfileSchema,
   },
   addedAt: {
     type: Date,

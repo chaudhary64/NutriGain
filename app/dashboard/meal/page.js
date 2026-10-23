@@ -6,7 +6,13 @@ import { format, isToday } from "date-fns";
 import AppShell from "@/components/AppShell";
 import Loader from "@/components/Loader";
 import { FALLBACK_MACRO_GOALS } from "@/lib/goals";
-import { calculateEntryMacros } from "@/lib/daily-log";
+import {
+  calculateEntryMacros,
+  calculateEntryMicros,
+  resolveEntryMicros,
+  rollupEntryMicros,
+} from "@/lib/daily-log";
+import { MICRO_KEYS, MICRO_NUTRIENTS, MICRO_RDI_SOURCE, microTarget } from "@/lib/micros";
 import { MEAL_TYPES } from "@/lib/validation";
 
 /* ------------------------------------------------------------------ */
@@ -69,6 +75,31 @@ const MERIDIAN_CSS = `
 .mrd .i-pro{color:var(--pro)}
 .mrd .i-car{color:var(--car)}
 .mrd .i-fat{color:var(--green)}
+/* ---- micronutrients ---- */
+.ml-micros{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.ml-micros-h{display:flex;align-items:center;justify-content:space-between;gap:4px 12px;padding:12px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.ml-micro-grid{list-style:none;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));margin:0;padding:0}
+.ml-micro-cell{padding:14px 18px 16px;border-right:1px solid var(--line);min-width:0}
+.ml-micro-cell:last-child{border-right:0}
+.ml-micro-lbl{display:block;font-size:11.5px;font-weight:500;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ml-micro-val{display:block;margin-top:8px;font-size:19px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1;color:var(--t1)}
+.ml-micro-val small{font-size:11px;font-weight:400;letter-spacing:0;color:var(--t3);margin-left:3px}
+/* The day's target, read as "14.6 / 19 mg" — the share of it lives in the
+   percentage below the bar. */
+.ml-micro-val .ml-micro-of{font-size:10.5px;color:var(--t3);margin-left:5px;white-space:nowrap}
+.ml-micro-cell.is-empty .ml-micro-val{color:var(--faint)}
+.ml-micro-q{font-size:10.5px;color:var(--t3);white-space:nowrap}
+.ml-micro-cell.is-empty .ml-micro-q{color:var(--t2)}
+/* Fill width is progress toward the target; inside it, solid ink is the
+   verified share and the faded remainder the estimate. */
+/* One tone: the fill is progress toward the target. How much of a number came
+   from a composition table versus a recipe is a per-food fact, so it lives in
+   that food's own micros, not as a colour code nobody can decode here. */
+.ml-micro-bar{display:flex;height:3px;margin-top:10px;border-radius:999px;overflow:hidden;background:var(--track)}
+.ml-micro-fill{display:block;height:100%;border-radius:999px;background:var(--t1);transition:width .35s ease}
+.ml-micro-foot{display:flex;align-items:center;gap:8px;margin-top:8px;min-height:18px;flex-wrap:wrap}
+.ml-micro-pct{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.02em;color:var(--t2);font-variant-numeric:tabular-nums}
+.ml-micro-cell.is-empty .ml-micro-pct{color:var(--t3)}
 /* ---- log bar ---- */
 .ml-log{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px 18px}
 .ml-log.m-dd-open{position:relative;z-index:var(--pop-z-dropdown,70)}
@@ -94,19 +125,75 @@ const MERIDIAN_CSS = `
 .ml-selchev{position:absolute;right:9px;top:50%;transform:translateY(-50%);color:var(--t3);pointer-events:none;display:flex}
 .ml-addwrap{display:flex}
 .ml-addwrap .m-btn{height:42px;padding:0 18px;white-space:nowrap}
-.ml-picked{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;background:var(--sunken);border-radius:6px;padding:9px 12px;font-size:12px}
-.ml-picked b{font-weight:500;color:var(--t1)}
-.ml-picked-x{color:var(--t3);font-variant-numeric:tabular-nums}
-.ml-chips{display:flex;gap:4px;flex-wrap:wrap}
+.ml-chips{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
 .ml-chips span{font-family:var(--font-mono);font-size:10.5px;font-weight:500;color:var(--t2);background:var(--card);border:1px solid var(--line);border-radius:4px;padding:2px 6px;font-variant-numeric:tabular-nums}
-.ml-per{margin-left:auto;border:0;background:none;font:inherit;font-size:11.5px;font-weight:500;color:var(--t3);cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line);padding:2px}
-.ml-per:hover{color:var(--t1)}
-.ml-stats{margin-top:10px;border:1px solid var(--line);border-radius:6px;padding:12px 14px}
-.ml-stats-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.ml-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.ml-stats-cell{background:var(--sunken);border-radius:6px;padding:9px 10px}
-.ml-stats-cell span{display:block;font-family:var(--font-mono);font-size:9.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
-.ml-stats-cell b{display:block;font-size:15px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums;color:var(--t1)}
+/* The label trigger lives in the search field's trailing slot: it belongs to
+   the food already chosen there, costs no extra row, and takes the place of
+   the "/" hint, which has done its job once something is picked. */
+/* Once a food is picked the field is no longer a search box, it is the chosen
+   food: the magnifier steps aside so the name keeps its width on a small
+   phone, and the right side belongs to the label action. */
+.ml-search.is-picked input{padding-left:13px;padding-right:96px}
+.ml-search.is-picked .ml-search-ico{display:none}
+.ml-nut-btn{position:absolute;right:6px;top:50%;transform:translateY(-50%);z-index:1;display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 8px 0 6px;border:0;border-radius:5px;background:var(--sunken);font-family:inherit;font-size:10.5px;font-weight:500;color:var(--t2);cursor:pointer;transition:color .15s,background .15s}
+.ml-nut-btn svg{flex:none;width:12px;height:12px}
+/* The glyph stays quiet; the tap target does not shrink to match it. */
+.ml-nut-btn::after{content:"";position:absolute;inset:-7px;border-radius:8px}
+.ml-nut-btn:hover{color:var(--t1);background:var(--line)}
+.ml-nut-btn:focus-visible{outline:2px solid var(--t1);outline-offset:1px}
+/* Nutrition detail. Native <dialog> does the work a hand-rolled modal gets
+   wrong: focus containment, Escape, inert background, focus back to the
+   trigger. It is a bottom sheet on a phone, a centred card on a desk. */
+/* margin:auto is set here because the project's reset zeroes it, and a dialog
+   without it lands in the top-left corner instead of the middle. */
+.ml-nut{margin:auto;width:min(440px,calc(100vw - 32px));max-height:min(86vh,720px);padding:0;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--t1);box-shadow:var(--ng-shadow-2)}
+.ml-nut[open]{display:flex;flex-direction:column;animation:ml-nut-in .18s ease}
+/* The page behind goes soft rather than black: the sheet is the only thing in
+   focus, and the log underneath stays legible as context instead of vanishing. */
+.ml-nut::backdrop{background:rgba(9,9,9,.34);-webkit-backdrop-filter:blur(8px) saturate(.85);backdrop-filter:blur(8px) saturate(.85)}
+.ml-nut-h{display:flex;align-items:flex-start;gap:12px;padding:17px 16px 14px 18px;border-bottom:1px solid var(--line)}
+.ml-nut-eyebrow{font-family:var(--font-mono);font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
+.ml-nut-h>div{min-width:0}
+.ml-nut-title{margin:3px 0 0;font-size:17px;font-weight:600;letter-spacing:-.01em;line-height:1.25;overflow-wrap:break-word;outline:none}
+.ml-nut-sub{margin-top:3px;font-family:var(--font-mono);font-size:11px;color:var(--t3);font-variant-numeric:tabular-nums}
+.ml-nut-x{flex:none;width:28px;height:28px;margin:-3px -4px 0 auto;display:flex;align-items:center;justify-content:center;border:1px solid transparent;border-radius:6px;background:none;color:var(--t3);cursor:pointer;transition:.15s}
+.ml-nut-x svg{width:14px;height:14px}
+.ml-nut-x:hover{color:var(--t1);background:var(--sunken);border-color:var(--line)}
+.ml-nut-x:focus-visible{outline:2px solid var(--t1);outline-offset:1px}
+.ml-nut-body{flex:1;min-height:0;overflow:auto;padding:16px 18px 18px}
+.ml-nut-kcal{display:flex;align-items:baseline;gap:5px}
+.ml-nut-kcal b{font-size:30px;font-weight:600;letter-spacing:-.035em;line-height:1;font-variant-numeric:tabular-nums}
+.ml-nut-kcal span{font-size:11px;color:var(--t3)}
+/* One hairline grid rather than three boxes: the macros are a row of the same
+   table as the micros below, not a second card. */
+.ml-nut-macros{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:14px;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:var(--line)}
+.ml-nut-macro{padding:8px 10px;background:var(--card)}
+.ml-nut-macro span{display:block;font-family:var(--font-mono);font-size:9px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+.ml-nut-macro b{display:block;margin-top:2px;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.ml-nut-macro b small{margin-left:1px;font-size:9.5px;font-weight:400;color:var(--t3);letter-spacing:0}
+.ml-nut-sect{margin-top:18px}
+.ml-nut-sect-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:2px}
+.ml-nut-sect-h i{font-style:normal;font-size:9.5px;color:var(--t3)}
+.ml-nut-row{display:grid;grid-template-columns:1fr auto auto;align-items:baseline;gap:12px;padding:7px 0;border-bottom:1px solid var(--line);font-size:12px}
+.ml-nut-row:last-of-type{border-bottom:0}
+.ml-nut-row>span{color:var(--t2)}
+.ml-nut-row b{font-size:12.5px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.ml-nut-row b small{margin-left:2px;font-size:9.5px;font-weight:400;color:var(--t3);letter-spacing:0}
+.ml-nut-row i{min-width:34px;font-style:normal;text-align:right;white-space:nowrap;font-family:var(--font-mono);font-size:10px;color:var(--t3);font-variant-numeric:tabular-nums}
+.ml-nut-row.is-missing>span,.ml-nut-row.is-missing b{color:var(--t3)}
+.ml-nut-row.is-missing b{font-weight:400}
+.ml-nut-miss{margin:8px 0 0;font-size:10px;line-height:1.5;color:var(--t3)}
+.ml-nut-foot{margin:14px 0 0;font-size:10.5px;line-height:1.55;color:var(--t3)}
+.ml-nut-foot a{color:var(--t2)}
+@keyframes ml-nut-in{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:none}}
+@media(max-width:640px){
+  .ml-nut{width:100%;max-width:none;margin:auto 0 0;border-radius:14px 14px 0 0;border-bottom:0;max-height:88vh}
+  .ml-nut[open]{animation:ml-nut-up .22s cubic-bezier(.2,.8,.2,1)}
+  .ml-nut-body{padding-bottom:calc(18px + env(safe-area-inset-bottom))}
+}
+@keyframes ml-nut-up{from{opacity:.5;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.ml-nut[open]{animation:none}}
+body:has(.ml-nut[open]){overflow:hidden}
 .ml-iconbtn{width:30px;height:30px;border-radius:6px;border:1px solid transparent;background:none;color:var(--t3);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;flex:none}
 .ml-iconbtn:hover{background:var(--sunken);color:var(--red);border-color:var(--line)}
 .ml-iconbtn:focus-visible{outline:2px solid var(--t1);outline-offset:2px}
@@ -164,11 +251,33 @@ const MERIDIAN_CSS = `
 .ml-slot-add svg{width:14px;height:14px}
 .ml-slot-add:hover{background:var(--t1);border-color:var(--t1);color:var(--on-ac)}
 .ml-entries{border-top:1px solid var(--line)}
-.ml-entry{display:grid;grid-template-columns:minmax(0,1fr) auto auto 84px 30px;align-items:center;gap:14px;padding:10px 18px 10px 46px;border-top:1px solid var(--line);font-size:13px;transition:background .12s}
+/* The entry's left edge sits on the meal title's, so foods read as children
+   of the meal rather than a list interrupted by headings. */
+.ml-entry{display:grid;grid-template-columns:minmax(0,1fr) 140px 80px 90px 84px 30px;align-items:center;gap:14px;padding:10px 18px 10px 74px;border-top:1px solid var(--line);font-size:13px;transition:background .12s}
+.ml-meta{display:contents}
 .ml-entry:first-child{border-top:0}
 .ml-entry:hover{background:var(--paper)}
 .ml-entry-name{min-width:0;font-weight:500;color:var(--t1);line-height:1.3;overflow-wrap:anywhere}
 .ml-serving{display:block;font-size:11.5px;font-weight:400;color:var(--t3);margin-top:2px}
+/* Micros on a logged entry: one column of its own, so the control lands in the
+   same place on every row instead of following the serving text. */
+.ml-micro-toggle{display:inline-flex;align-items:center;justify-content:center;gap:4px;width:80px;height:32px;padding:0 6px;border:1px solid var(--line);border-radius:5px;background:none;font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:var(--t2);cursor:pointer;transition:color .15s,border-color .15s}
+.ml-micro-toggle:hover{color:var(--t1);border-color:var(--t2)}
+.ml-micro-toggle:focus-visible{outline:2px solid var(--t1);outline-offset:1px}
+/* An entry whose food has no micro profile: same slot, quieter voice. */
+.ml-micro-none{font-size:10.5px;color:var(--t3);white-space:nowrap}
+.ml-micro-toggle-chev{display:inline-flex;transition:transform .18s ease}
+.ml-micro-toggle-chev svg{width:9px;height:9px}
+.ml-micro-toggle.is-open .ml-micro-toggle-chev{transform:rotate(180deg)}
+.ml-entry-micro-wrap{grid-column:1/-1;min-width:0;margin-top:2px;padding-top:10px;border-top:1px dashed var(--line)}
+.ml-entry-micro-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px;font-family:var(--font-mono);font-size:9px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+.ml-entry-micro-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 12px}
+@media(min-width:640px){.ml-entry-micro-grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
+.ml-entry-micro-cell{background:var(--sunken);border-radius:4px;padding:6px 8px;min-width:0}
+.ml-entry-micro-l{display:block;font-family:var(--font-mono);font-size:8.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ml-entry-micro-v{display:block;margin-top:2px;font-size:12px;font-weight:600;letter-spacing:-.01em;line-height:1.2;color:var(--t1);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ml-entry-micro-v small{font-size:9px;font-weight:400;letter-spacing:0;color:var(--t3);margin-left:2px}
+.ml-entry-micro-v.is-blank{color:var(--faint);font-weight:400}
 .ml-step{display:flex;align-items:center;border:1px solid var(--line);border-radius:6px;padding:1px;background:var(--card)}
 .ml-step button{width:26px;height:26px;border:0;background:none;color:var(--t2);border-radius:4px;cursor:pointer;font-size:13px;line-height:1}
 .ml-step button:hover{background:var(--sunken);color:var(--t1)}
@@ -178,6 +287,11 @@ const MERIDIAN_CSS = `
 .ml-kcal{text-align:right;font-weight:500;color:var(--t1);font-variant-numeric:tabular-nums;white-space:nowrap}
 .ml-kcal small{font-size:10.5px;font-weight:400;color:var(--t3);margin-left:3px}
 /* ---- responsive ---- */
+@media(max-width:1100px){
+  .ml-micro-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .ml-micro-cell:nth-child(3n){border-right:0}
+  .ml-micro-cell:nth-child(n+4){border-top:1px solid var(--line)}
+}
 @media(max-width:900px){
   .ml-cols{grid-template-columns:1fr 1fr}
   .ml-col{border-right:0;border-top:1px solid var(--line)}
@@ -186,6 +300,15 @@ const MERIDIAN_CSS = `
   .ml-form{grid-template-columns:108px minmax(0,1fr) auto}
   .ml-search{grid-column:1/-1;grid-row:1}
   .ml-slot-split{display:none}
+  /* Five columns stop fitting once the ledger narrows, so the row becomes
+     three bands: food, macros + micros, quantity + calories. */
+  .ml-entry{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"name del" "meta meta" "step kcal";row-gap:8px}
+  .ml-entry-name{grid-area:name}
+  .ml-meta{grid-area:meta;display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0}
+  .ml-chips{justify-content:flex-start;min-width:0}
+  .ml-step{grid-area:step;justify-self:start}
+  .ml-kcal{grid-area:kcal;justify-self:end}
+  .ml-del{grid-area:del;justify-self:end}
 }
 @media(max-width:640px){
   /* Two rows in the log bar: search, then quantity + slot, then a full-width
@@ -203,20 +326,22 @@ const MERIDIAN_CSS = `
   /* Slot rows: chevron, glyph, name, kcal. The spacer and the macros are
      hidden so nothing can push the row wider than the card. */
   .ml-slot-toggle{grid-template-columns:16px 24px minmax(0,1fr) auto;gap:8px}
-  .ml-slot-count,.ml-slot-spacer{display:none}
+  .ml-slot-count{display:none}
   .ml-slotwrap select{padding-right:26px}
   .ml-slot-id{grid-column:3;min-width:0}
   .ml-slot-nums{gap:9px}
-  .ml-slot-macros{gap:7px}
-  .ml-macro{font-size:10px;gap:3px}
   .ml-slot-kcal{grid-column:4}
-  .ml-entry{grid-template-columns:minmax(0,1fr) auto 30px;grid-template-areas:"name kcal del" "chips chips chips" "step step step";row-gap:8px;padding-left:18px}
-  .ml-entry-name{grid-area:name}
-  .ml-chips{grid-area:chips}
-  .ml-step{grid-area:step;justify-self:start}
-  .ml-kcal{grid-area:kcal}
-  .ml-del{grid-area:del}
-  .ml-stats-grid{grid-template-columns:1fr 1fr}
+  /* The macro trio needs the width the meal name needs; the day's macros are
+     already in Daily Targets and in every row below. */
+  .ml-slot-macros{display:none}
+  .ml-entry{padding-left:68px}
+  /* Two micros per row: the lightest arrangement that keeps a 6-cell board
+     readable without a horizontal squeeze. */
+  .ml-micro-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ml-micro-cell{border-right:0;border-top:1px solid var(--line);padding:12px 14px 14px}
+  .ml-micro-cell:nth-child(odd){border-right:1px solid var(--line)}
+  .ml-micro-cell:nth-child(1),.ml-micro-cell:nth-child(2){border-top:0}
+  .ml-micro-cell:nth-child(3n){border-right:1px solid var(--line)}
   .ml-title{font-size:24px}
   .ml-date{min-width:0}
   .ml-nav{width:100%;justify-content:space-between}
@@ -381,6 +506,269 @@ function TargetCol({ label, macroKey, value, goal, preview = 0, mode }) {
   );
 }
 
+const MICRO_UNIT_LABEL = { mg: "mg", ug: "µg", iu: "IU" };
+
+/* Micro amounts span 0.03 µg of B12 and 625 mg of calcium, so the displayed
+   precision follows the magnitude instead of one fixed rule. */
+const fmtMicro = (value) => {
+  const n = Math.abs(Number(value) || 0);
+  if (n >= 100) return Math.round(n).toLocaleString();
+  if (n >= 10) return String(Math.round(n * 10) / 10);
+  if (n >= 0.01) return String(Math.round(n * 100) / 100);
+  // A trace amount is not zero: rounding 0.004 µg down to "0" would claim the
+  // day recorded none of that nutrient.
+  return n > 0 ? "<0.01" : "0";
+};
+
+function MicroCell({ nutrientKey, meta, value, profile }) {
+  const unit = MICRO_UNIT_LABEL[meta.unit] || meta.unit;
+  // Sex and age decide the target, so the same day can be enough for one
+  // profile and short for another — the number alone never says which.
+  const target = microTarget(nutrientKey, profile);
+  // "Verified" means every food behind the number reported a composition-table
+  // row; as soon as any of it was summed from ingredients the total is a mixed
+  // answer and says so. Counted per contributing food, not read off the amounts:
+  // a verified food reporting 0 alongside an estimated one is still mixed.
+  const status = !value
+    ? "none"
+    : value.estimatedEntries === 0
+      ? "verified"
+      : value.verifiedEntries === 0
+        ? "estimated"
+        : "mixed";
+  // A total is silent about provenance unless something is missing: every food
+  // here is either measured from a table or partly guessed, and "MIXED" told
+  // nobody which. Only the absence of data needs a word.
+  const qualifier = status === "none" ? "not reported" : null;
+
+  const targetText = target === null ? null : `${fmtMicro(target)} ${unit}`;
+  const pct = value && target ? (value.amount / target) * 100 : null;
+  const pctLabel =
+    pct === null ? null : pct > 0 && pct < 1 ? "<1%" : `${Math.round(pct)}%`;
+
+  const title = value
+    ? [
+        targetText
+          ? `${fmtMicro(value.amount)} ${unit} of ${targetText} (${pctLabel})`
+          : `${fmtMicro(value.amount)} ${unit}`,
+        status === "mixed"
+          ? `${fmtMicro(value.verified)} ${unit} from food data · ${fmtMicro(value.estimated)} ${unit} estimated`
+          : status === "verified"
+            ? "all from food data"
+            : "all estimated",
+        targetText ? `${MICRO_RDI_SOURCE} adult RDA` : null,
+      ]
+        .filter(Boolean)
+        .join(" · ")
+    : `No logged food reported ${meta.label.toLowerCase()}${
+        targetText ? ` · target ${targetText} (${MICRO_RDI_SOURCE})` : ""
+      }`;
+
+  return (
+    <li className={`ml-micro-cell${value ? "" : " is-empty"}`} title={title} data-micro={nutrientKey}>
+      <span className="ml-micro-lbl">{meta.label}</span>
+      <span className="ml-micro-val m-num">
+        {value ? fmtMicro(value.amount) : "—"}
+        {targetText ? (
+          <small className="ml-micro-of">/ {targetText}</small>
+        ) : (
+          value && <small>{unit}</small>
+        )}
+      </span>
+      {/* Width is progress toward the target; the fill carries one weight so a
+          glance reads as "how far along", not as a code to learn. */}
+      <span className="ml-micro-bar" aria-hidden="true">
+        {pct !== null && pct > 0 && (
+          <span className="ml-micro-fill" style={{ width: `${Math.min(100, pct)}%` }} />
+        )}
+      </span>
+      <span className="ml-micro-foot">
+        {pctLabel && <span className="ml-micro-pct">{pctLabel}</span>}
+        {qualifier && <span className="ml-micro-q">{qualifier}</span>}
+      </span>
+    </li>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* MicroPanel — the day's six nutrients, with the provenance of each  */
+/* total kept visible.                                               */
+/* ------------------------------------------------------------------ */
+
+function MicroPanel({ rollup, profile }) {
+  const byKey = new Map(rollup.values.map((value) => [value.key, value]));
+  const entryWord = rollup.totalEntries === 1 ? "entry" : "entries";
+  // Saying it once is enough: one recipe in the day weakens every nutrient it
+  // touches, so repeating the caveat in all six cells is noise, not detail.
+  const partlyEstimated = rollup.values.some((value) => value.estimatedEntries > 0);
+
+  return (
+    <section className="ml-micros m-in" aria-label="Micronutrients">
+      <div className="ml-micros-h">
+        <span className="ml-eyebrow">Micronutrients</span>
+        <span className="ml-ledger-meta">
+          {rollup.enrichedEntries} of {rollup.totalEntries} {entryWord} have micro data
+          {partlyEstimated ? " · partly estimated" : ""}
+        </span>
+      </div>
+      <ul className="ml-micro-grid">
+        {MICRO_KEYS.map((key) => (
+          <MicroCell
+            key={key}
+            nutrientKey={key}
+            meta={MICRO_NUTRIENTS[key]}
+            value={byKey.get(key)}
+            profile={profile}
+          />
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* NutritionDialog — the full label for the food in the pick summary.  */
+/* Same basis as the strip beside it: the quantity about to be logged, */
+/* stated once in the header, so no number here needs a second column. */
+/* ------------------------------------------------------------------ */
+
+function NutritionDialog({ open, onClose, meal, qty, macros, micros, profile }) {
+  const ref = useRef(null);
+  const titleRef = useRef(null);
+  const name = toTitleCase(meal.name);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (open && !el.open) {
+      el.showModal();
+      // A read-only panel: focus the title, so the ring lands on the heading
+      // instead of painting a button that is not the point of the sheet.
+      titleRef.current?.focus();
+    } else if (!open && el.open) {
+      el.close();
+    }
+  }, [open]);
+
+  const amounts = new Map((micros?.values || []).map((value) => [value.key, value.amount]));
+  const missing = MICRO_KEYS.filter((key) => amounts.get(key) == null).length;
+  // Some foods are stored with a bare "1" as their serving size, where "1 × 1"
+  // says nothing; and a plain "1 bowl" reads better counted ("2 bowls") than
+  // multiplied. Anything with a stated weight keeps the multiplication, because
+  // that is the number the values were measured against.
+  const serving = (meal.servingSize || "")
+    .replace(/\s+/g, " ")
+    .replace(/\(\s*/g, "(")
+    .replace(/\s*\)/g, ")")
+    .trim();
+  const unit = serving.match(/^1\s+([a-z]+)(\s.*)?$/i);
+  const basis =
+    !serving || serving === "1"
+      ? `${qty} ${qty === 1 ? "serving" : "servings"}`
+      : unit
+        ? `${qty} ${unit[1]}${qty === 1 ? "" : "s"}${unit[2] || ""}`
+        : `${qty} × ${serving}`;
+
+  return (
+    <dialog
+      ref={ref}
+      className="ml-nut"
+      aria-labelledby="ml-nut-title"
+      onClose={onClose}
+      /* A click that lands on the dialog itself is a click on the backdrop; the
+         panel's own children stop it from ever being the target. */
+      onClick={(event) => {
+        if (event.target === ref.current) onClose();
+      }}
+    >
+      <div className="ml-nut-h">
+        <div>
+          <div className="ml-nut-eyebrow">Nutrition</div>
+          <h2 id="ml-nut-title" className="ml-nut-title" ref={titleRef} tabIndex={-1}>
+            {name}
+          </h2>
+          <div className="ml-nut-sub">{basis}</div>
+        </div>
+        <button
+          type="button"
+          className="ml-nut-x"
+          onClick={onClose}
+          aria-label="Close nutrition details"
+        >
+          <Icon d={ICONS.x} />
+        </button>
+      </div>
+
+      <div className="ml-nut-body">
+        <div className="ml-nut-kcal">
+          <b>{Math.round(macros.calories || 0).toLocaleString()}</b>
+          <span>kcal</span>
+        </div>
+
+        <div className="ml-nut-macros">
+          {[
+            ["Protein", "protein"],
+            ["Carbs", "carbs"],
+            ["Fat", "fats"],
+          ].map(([label, key]) => (
+            <div key={key} className="ml-nut-macro">
+              <span>{label}</span>
+              <b>
+                {fmtMacro(macros[key])}
+                <small>g</small>
+              </b>
+            </div>
+          ))}
+        </div>
+
+        <div className="ml-nut-sect">
+          <div className="ml-nut-sect-h">
+            <span className="ml-nut-eyebrow">Micronutrients</span>
+            <i>{MICRO_RDI_SOURCE} adult RDA</i>
+          </div>
+          {MICRO_KEYS.map((key) => {
+            const meta = MICRO_NUTRIENTS[key];
+            const amount = amounts.get(key);
+            const unitLabel = MICRO_UNIT_LABEL[meta.unit] || meta.unit;
+            const target = microTarget(key, profile);
+            const pct = amount != null && target ? (amount / target) * 100 : null;
+            const pctLabel =
+              pct === null ? "" : pct > 0 && pct < 1 ? "<1%" : `${Math.round(pct)}%`;
+            return (
+              <div key={key} className={`ml-nut-row${amount == null ? " is-missing" : ""}`}>
+                <span>{meta.label}</span>
+                <b>
+                  {amount == null ? (
+                    "—"
+                  ) : (
+                    <>
+                      {fmtMicro(amount)}
+                      <small>{unitLabel}</small>
+                    </>
+                  )}
+                </b>
+                <i>{pctLabel}</i>
+              </div>
+            );
+          })}
+          {missing > 0 && missing < MICRO_KEYS.length && (
+            <p className="ml-nut-miss">A dash means this food does not report that nutrient.</p>
+          )}
+        </div>
+
+        <p className="ml-nut-foot">
+          {micros?.values?.length
+            ? meal.micros?.verified
+              ? "From composition tables"
+              : "Partly estimated from ingredients"
+            : "This food has no micronutrient profile, so only energy and macros are known"}
+          {". "}Values for {basis}.
+        </p>
+      </div>
+    </dialog>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /* EntryRow — one logged food inside a slot.                          */
 /* ------------------------------------------------------------------ */
@@ -392,6 +780,17 @@ function EntryRow({ entry, onUpdateQuantity, onDelete }) {
   const tC = (m.carbs || 0) * q;
   const tF = (m.fats || 0) * q;
   const tK = Math.round((m.calories || 0) * q);
+  // Same resolution the day's totals use, so "no micros" here means the entry
+  // really contributed nothing to the board — not that its snapshot was skipped.
+  const micros = resolveEntryMicros(entry);
+  const microValues = new Map(
+    (Array.isArray(micros?.values) ? micros.values : []).map((value) => [
+      String(value.key).toLowerCase(),
+      Number(value.amount) || 0,
+    ])
+  );
+  const hasMicros = microValues.size > 0;
+  const [showMicros, setShowMicros] = useState(false);
 
   return (
     <div className="ml-entry">
@@ -402,10 +801,37 @@ function EntryRow({ entry, onUpdateQuantity, onDelete }) {
         </span>
       </span>
 
-      <span className="ml-chips" title={`Total for ×${q}`}>
-        <span>{fmtMacro(tP)}P</span>
-        <span>{fmtMacro(tC)}C</span>
-        <span>{fmtMacro(tF)}F</span>
+      {/* Macros and micros share one wrapper so the narrow layout can put them
+          on a single line while the wide one keeps its five columns. */}
+      <span className="ml-meta">
+        <span className="ml-chips" title={`Total for ×${q}`}>
+          <span>{fmtMacro(tP)}P</span>
+          <span>{fmtMacro(tC)}C</span>
+          <span>{fmtMacro(tF)}F</span>
+        </span>
+
+        {hasMicros ? (
+          <button
+            type="button"
+            className={`ml-micro-toggle${showMicros ? " is-open" : ""}`}
+            onClick={() => setShowMicros((open) => !open)}
+            aria-expanded={showMicros}
+            aria-controls={`entry-micros-${entry._id}`}
+            title={`Micronutrients in ${toTitleCase(entry.mealName)}`}
+          >
+            Micros
+            <span className="ml-micro-toggle-chev" aria-hidden="true">
+              <Icon d={ICONS.chevD} />
+            </span>
+          </button>
+        ) : (
+          <span
+            className="ml-micro-none"
+            title="No micronutrient profile for this food, so it adds nothing to the day's micros"
+          >
+            no micros
+          </span>
+        )}
       </span>
 
       <div className="ml-step">
@@ -447,6 +873,39 @@ function EntryRow({ entry, onUpdateQuantity, onDelete }) {
       >
         <Icon d={ICONS.trash} />
       </button>
+
+      {/* The entry's own six values, scaled to the quantity logged. Kept out of
+          the collapsed row so the ledger still scans as a food list. */}
+      {showMicros && (
+        <div className="ml-entry-micro-wrap" id={`entry-micros-${entry._id}`}>
+          <div className="ml-entry-micro-head">
+            <span>{micros?.verified ? "Verified profile" : "Estimated profile"}</span>
+            <span>this entry · ×{q}</span>
+          </div>
+          <div className="ml-entry-micro-grid">
+            {MICRO_KEYS.map((key) => {
+              const amount = microValues.get(key);
+              const meta = MICRO_NUTRIENTS[key];
+              const unit = MICRO_UNIT_LABEL[meta.unit] || meta.unit;
+              return (
+                <div key={key} className="ml-entry-micro-cell">
+                  <span className="ml-entry-micro-l">{meta.short || meta.label}</span>
+                  <span className={`ml-entry-micro-v${amount === undefined ? " is-blank" : ""}`}>
+                    {amount === undefined ? (
+                      "—"
+                    ) : (
+                      <>
+                        {fmtMicro(amount)}
+                        <small>{unit}</small>
+                      </>
+                    )}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -605,7 +1064,9 @@ export default function MealTrackingPage() {
   });
   const [selectedMeal, setSelectedMeal] = useState("");
   const [quantity, setQuantity] = useState(1);
-  const [showMealStats, setShowMealStats] = useState(false);
+  // Which food's full label is open, by id: picking another food closes it by
+  // itself, and a cleared selection can never reopen a stale one.
+  const [nutritionFor, setNutritionFor] = useState(null);
   const [openSlots, setOpenSlots] = useState({ breakfast: true, lunch: true, dinner: true });
   const [mealSearch, setMealSearch] = useState("");
   const [showMealDropdown, setShowMealDropdown] = useState(false);
@@ -912,6 +1373,11 @@ export default function MealTrackingPage() {
     fats: 0,
   };
 
+  // Rolled up from the entry snapshots, so editing a food later never rewrites
+  // what this day recorded.
+  const microRollup = rollupEntryMicros(dailyLog?.meals || []);
+
+
   // Per-user daily goals (editable on the profile page)
   const goals = user?.macroGoals || FALLBACK_MACRO_GOALS;
 
@@ -960,6 +1426,10 @@ export default function MealTrackingPage() {
     previewMeal?.macros && previewQty > 0
       ? calculateEntryMacros(previewMeal, previewQty)
       : null;
+  // Scaled to the picked quantity, like the kcal and macros beside it, so the
+  // preview answers "what does this add?" rather than "what is one serving?".
+  const previewMicros =
+    previewMeal && previewQty > 0 ? calculateEntryMicros(previewMeal, previewQty) : null;
   const previewing = Boolean(previewMacros);
   const previewOf = (key) => previewMacros?.[key] || 0;
   const displayedCalories = totalMacros.calories + previewOf("calories");
@@ -1093,6 +1563,14 @@ export default function MealTrackingPage() {
             </div>
           </section>
 
+          {/* Micronutrients — derived from the entries above, never stored.
+              Shown on any day with food, including a day whose foods have no
+              profiles: the six labels are how someone learns what is tracked,
+              and a hidden board reads as a missing feature. */}
+          {microRollup.totalEntries > 0 && (
+            <MicroPanel rollup={microRollup} profile={user?.profile} />
+          )}
+
           {/* Log bar — search first, slot assigned before it is logged. */}
           <section className={`ml-log m-in${showMealDropdown ? " m-dd-open" : ""}`} aria-label="Log food">
             <div className="ml-log-h">
@@ -1102,7 +1580,7 @@ export default function MealTrackingPage() {
 
             <form onSubmit={handleAddMeal}>
               <div className="ml-form">
-                <div className="ml-dd-anchor ml-search">
+                <div className={`ml-dd-anchor ml-search${previewMacros ? " is-picked" : ""}`}>
                   <span className="ml-search-ico" aria-hidden="true">
                     <Icon d={ICONS.search} />
                   </span>
@@ -1158,8 +1636,25 @@ export default function MealTrackingPage() {
                     placeholder="Search foods…"
                     aria-label="Search foods"
                     required={!selectedMeal}
-                  />
-                  <span className="ml-kbd" aria-hidden="true">/</span>
+                  />                  {previewMeal && previewMacros ? (
+                    <button
+                      type="button"
+                      className="ml-nut-btn"
+                      onClick={() => {
+                        setShowMealDropdown(false);
+                        setNutritionFor(previewMeal._id);
+                      }}
+                      aria-haspopup="dialog"
+                      aria-label={`Nutrition details for ${toTitleCase(previewMeal.name)}`}
+                    >
+                      <Icon d={ICONS.info} />
+                      <span>Nutrition</span>
+                    </button>
+                  ) : (
+                    <span className="ml-kbd" aria-hidden="true">
+                      /
+                    </span>
+                  )}
 
                   {showMealDropdown && (
                     <div className="m-dd" data-lenis-prevent="true" role="listbox" aria-label="Matching foods">
@@ -1174,7 +1669,6 @@ export default function MealTrackingPage() {
                             setSelectedMeal(meal._id);
                             setMealSearch(toTitleCase(meal.name));
                             setShowMealDropdown(false);
-                            setShowMealStats(false);
                             qtyInputRef.current?.focus();
                           }}
                           className={`m-dd-item${activeIdx === idx ? " is-active" : ""}${selectedMeal === meal._id ? " is-picked" : ""}`}
@@ -1268,62 +1762,21 @@ export default function MealTrackingPage() {
                 </div>
               </div>
 
-              {/* Live pick summary — always visible once a food is chosen */}
+              {/* The trigger sits inside the field, so the sheet it opens is
+                  attached to the food named there and the card gains no row. */}
               {previewMeal && previewMacros && (
-                <div className="ml-picked">
-                  <b>{toTitleCase(previewMeal.name)}</b>
-                  <span className="ml-picked-x">
-                    × {previewQty} → {Math.round(previewMacros.calories).toLocaleString()} kcal
-                  </span>
-                  <span className="ml-chips">
-                    <span>{fmtMacro(previewMacros.protein)}P</span>
-                    <span>{fmtMacro(previewMacros.carbs)}C</span>
-                    <span>{fmtMacro(previewMacros.fats)}F</span>
-                  </span>
-                  <button
-                    type="button"
-                    className="ml-per"
-                    onClick={() => setShowMealStats((v) => !v)}
-                    aria-expanded={showMealStats}
-                  >
-                    {showMealStats ? "Hide per serving" : "Per serving"}
-                  </button>
-                </div>
+                <>
+                  <NutritionDialog
+                    open={nutritionFor === previewMeal._id}
+                    onClose={() => setNutritionFor(null)}
+                    meal={previewMeal}
+                    qty={previewQty}
+                    macros={previewMacros}
+                    micros={previewMicros}
+                    profile={user?.profile}
+                  />
+                </>
               )}
-
-              {/* Per-serving stats panel */}
-              {showMealStats && selectedMeal && (() => {
-                const meal = meals.find((m) => m._id === selectedMeal);
-                if (!meal) return null;
-                return (
-                  <div className="ml-stats">
-                    <div className="ml-stats-h">
-                      <span className="ml-eyebrow">Per serving · {meal.servingSize || "1 serving"}</span>
-                      <button
-                        type="button"
-                        onClick={() => setShowMealStats(false)}
-                        className="ml-iconbtn"
-                        aria-label="Close nutrition info"
-                      >
-                        <Icon d={ICONS.x} />
-                      </button>
-                    </div>
-                    <div className="ml-stats-grid">
-                      {[
-                        { k: "Calories", v: meal.macros?.calories || 0 },
-                        { k: "Protein", v: `${meal.macros?.protein || 0} g` },
-                        { k: "Carbs", v: `${meal.macros?.carbs || 0} g` },
-                        { k: "Fats", v: `${meal.macros?.fats || 0} g` },
-                      ].map((s) => (
-                        <div key={s.k} className="ml-stats-cell">
-                          <span>{s.k}</span>
-                          <b>{s.v}</b>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })()}
             </form>
           </section>
 
