@@ -1,8 +1,10 @@
 # Exercise illustration credits
 
-The files in this directory are unmodified copies of artwork from the
+The exercise illustrations shown in this app are unmodified works from the
 **Workout Guide** library — <https://github.com/bryllim/workout-guide> —
-by Bryl Lim, which in turn builds on the Everkinetic pose library.
+by Bryl Lim, which in turn builds on the Everkinetic pose library. They are
+fetched at request time by `app/api/exercise-media/[slug]/[frame]/route.js`
+and are not stored in this repository.
 
 | | |
 |---|---|
@@ -16,7 +18,7 @@ a transparent 512 × 512 canvas, recolored for monochrome display, and
 vector-traced. No further changes were made for this app — the SVGs are served
 as published, with three frames per movement.
 
-Only the movements used by this app's exercise library are copied here (39
+Only the movements used by this app's exercise library are requested (39
 movements). The artwork remains licensed under CC BY-SA 4.0: it may be reused
 and adapted, including commercially, provided the attribution above is kept
 and any derivative artwork is shared under the same licence. The application's
