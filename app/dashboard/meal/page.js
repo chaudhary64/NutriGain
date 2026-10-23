@@ -77,7 +77,17 @@ const MERIDIAN_CSS = `
 .mrd .i-fat{color:var(--green)}
 /* ---- micronutrients ---- */
 .ml-micros{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.ml-micros-h{display:flex;align-items:center;justify-content:space-between;gap:4px 12px;padding:12px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+/* A one-line summary that opens into the board: coverage is a fact to check
+   occasionally, not a number to steer the next meal by. */
+.ml-micros-h{display:flex;align-items:center;gap:4px 12px;width:100%;padding:12px 18px;border:0;background:none;font-family:inherit;text-align:left;color:inherit;cursor:pointer;transition:background .15s}
+.ml-micros-h:hover{background:var(--paper)}
+.ml-micros-h:focus-visible{outline:2px solid var(--t1);outline-offset:-2px}
+.ml-micros.is-open .ml-micros-h{border-bottom:1px solid var(--line)}
+.ml-micro-sum{flex:1;min-width:0;margin-left:auto;font-size:12px;color:var(--t3);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ml-micro-chev{display:inline-flex;flex:none;color:var(--t3);transition:transform .18s ease}
+.ml-micro-chev svg{width:13px;height:13px}
+.ml-micros.is-open .ml-micro-chev{transform:rotate(180deg)}
+.ml-micro-note{margin:0;padding:10px 18px 13px;border-top:1px solid var(--line);font-size:10.5px;line-height:1.5;color:var(--t3)}
 .ml-micro-grid{list-style:none;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));margin:0;padding:0}
 .ml-micro-cell{padding:14px 18px 16px;border-right:1px solid var(--line);min-width:0}
 .ml-micro-cell:last-child{border-right:0}
@@ -314,6 +324,11 @@ body:has(.ml-nut[open]){overflow:hidden}
   .ml-del{grid-area:del;justify-self:end}
 }
 @media(max-width:640px){
+  /* The coverage summary needs the full line: the strip is one glance tall,
+     so it wraps under the label rather than truncating to "4 of 6 …". */
+  .ml-micros-h{flex-wrap:wrap;row-gap:2px}
+  .ml-micro-sum{order:3;flex:1 1 100%;text-align:left;white-space:normal}
+  .ml-micro-chev{margin-left:auto}
   /* Two rows in the log bar: search, then quantity + slot, then a full-width
      Add so the slot name never truncates. */
   /* 100px keeps the stepper intact at 320px and leaves the slot name its
@@ -470,16 +485,21 @@ function TargetCol({ label, macroKey, value, goal, preview = 0, mode }) {
   const projectedPct = Math.min((eaten / goal) * 100, 100);
   const ghostPct = Math.max(projectedPct - committedPct, 0);
 
+  const fmtAmount = (n) =>
+    macroKey === "calories" ? Math.round(n).toLocaleString() : fmtMacro(n);
   const shown = mode === "remaining" ? Math.max(remaining, 0) : eaten;
-  const shownText = macroKey === "calories" ? Math.round(shown).toLocaleString() : fmtMacro(shown);
-  // The note always carries the complementary fact, never a repeat of the
-  // headline: "Left" reports progress, "Eaten" reports the remainder.
+  const shownText = fmtAmount(shown);
+  // The headline names its own number ("kcal left" / "kcal eaten") instead of
+  // the old "2,093 of 2,100", where "of" meant remaining or consumed depending
+  // on the toggle. The note then carries the complementary fact only.
+  const modeWord = mode === "remaining" ? "left" : "eaten";
+  const pctOfGoal = goal > 0 ? Math.round((eaten / goal) * 100) : 0;
   const note =
     mode === "remaining"
-      ? `${Math.round((eaten / goal) * 100)}% eaten`
+      ? `${pctOfGoal}% of ${goal.toLocaleString()} ${unit}`
       : remaining < 0
-        ? `${Math.abs(Math.round(remaining)).toLocaleString()} ${unit} over`
-        : `${Math.round(remaining).toLocaleString()} ${unit} left`;
+        ? `${fmtAmount(Math.abs(remaining))} ${unit} over`
+        : `${fmtAmount(remaining)} ${unit} left`;
 
   return (
     <div className={`ml-col${macroKey === "calories" ? " is-cal" : ""}`}>
@@ -489,7 +509,7 @@ function TargetCol({ label, macroKey, value, goal, preview = 0, mode }) {
       </div>
       <div className="ml-val m-num">
         {shownText}
-        <small>of {goal.toLocaleString()} {unit}</small>
+        <small>{unit} {modeWord}</small>
       </div>
       <div className="ml-bar">
         <i
@@ -504,7 +524,7 @@ function TargetCol({ label, macroKey, value, goal, preview = 0, mode }) {
           />
         )}
       </div>
-      <div className={`ml-note${mode === "consumed" && remaining < 0 ? " is-over" : ""}`}>{note}</div>
+      <div className={`ml-note${remaining < 0 ? " is-over" : ""}`}>{note}</div>
     </div>
   );
 }
@@ -522,6 +542,10 @@ const fmtMicro = (value) => {
   // day recorded none of that nutrient.
   return n > 0 ? "<0.01" : "0";
 };
+
+/* A share of a target never rounds down to a flat "0%" while something was
+   eaten: a trace is still progress. */
+const fmtPct = (pct) => (pct > 0 && pct < 1 ? "<1%" : `${Math.round(pct)}%`);
 
 function MicroCell({ nutrientKey, meta, value, profile }) {
   const unit = MICRO_UNIT_LABEL[meta.unit] || meta.unit;
@@ -546,8 +570,7 @@ function MicroCell({ nutrientKey, meta, value, profile }) {
 
   const targetText = target === null ? null : `${fmtMicro(target)} ${unit}`;
   const pct = value && target ? (value.amount / target) * 100 : null;
-  const pctLabel =
-    pct === null ? null : pct > 0 && pct < 1 ? "<1%" : `${Math.round(pct)}%`;
+  const pctLabel = pct === null ? null : fmtPct(pct);
 
   const title = value
     ? [
@@ -599,33 +622,79 @@ function MicroCell({ nutrientKey, meta, value, profile }) {
 /* ------------------------------------------------------------------ */
 
 function MicroPanel({ rollup, profile }) {
+  // Coverage is a background fact, not a target to plan the day around: the
+  // calories and macros are what the next meal is steered by, so this strip
+  // stays one line until someone asks for the detail. Saying it once is
+  // enough, too: one recipe in the day weakens every nutrient it touches, so
+  // repeating the caveat in all six cells is noise, not detail.
+  const [open, setOpen] = useState(false);
   const byKey = new Map(rollup.values.map((value) => [value.key, value]));
-  const entryWord = rollup.totalEntries === 1 ? "entry" : "entries";
-  // Saying it once is enough: one recipe in the day weakens every nutrient it
-  // touches, so repeating the caveat in all six cells is noise, not detail.
   const partlyEstimated = rollup.values.some((value) => value.estimatedEntries > 0);
 
+  // Weakest nutrient first: the strip exists to show where the day is short,
+  // and a fixed alphabetical-ish order would bury that under "vitamin D".
+  const cells = MICRO_KEYS.map((key) => {
+    const value = byKey.get(key);
+    const target = microTarget(key, profile);
+    const pct = value && target ? (value.amount / target) * 100 : null;
+    return { key, value, pct };
+  }).sort((a, b) => {
+    if (a.pct === null && b.pct === null) return 0;
+    if (a.pct === null) return 1;
+    if (b.pct === null) return -1;
+    return a.pct - b.pct;
+  });
+
+  const reported = cells.filter((cell) => cell.pct !== null);
+  const lowest = reported[0];
+  const summary =
+    reported.length === 0
+      ? "No logged food reported micronutrients"
+      : [
+          `${reported.length} of ${cells.length} reported`,
+          lowest ? `${MICRO_NUTRIENTS[lowest.key].label} lowest at ${fmtPct(lowest.pct)}` : null,
+        ]
+          .filter(Boolean)
+          .join(" · ");
+
   return (
-    <section className="ml-micros m-in" aria-label="Micronutrients">
-      <div className="ml-micros-h">
-        <span className="ml-eyebrow">Micronutrients</span>
-        <span className="ml-ledger-meta">
-          {rollup.enrichedEntries} of {rollup.totalEntries} {entryWord}{" "}
-          {rollup.enrichedEntries === 1 ? "has" : "have"} micro data
-          {partlyEstimated ? " · partly estimated" : ""}
+    <section className={`ml-micros m-in${open ? " is-open" : ""}`} aria-label="Micronutrient coverage">
+      <button
+        type="button"
+        className="ml-micros-h"
+        aria-expanded={open}
+        aria-controls="micro-board"
+        onClick={() => setOpen((value) => !value)}
+      >
+        <span className="ml-eyebrow">Nutrient coverage</span>
+        <span className="ml-micro-sum" title={`${summary} · ${MICRO_RDI_SOURCE} adult RDA`}>
+          {summary}
         </span>
+        <span className="ml-micro-chev" aria-hidden="true">
+          <Icon d={ICONS.chevD} />
+        </span>
+      </button>
+
+      {/* Kept in the DOM and hidden, so aria-controls always resolves and the
+          board does not remount every time the strip is opened. */}
+      <div id="micro-board" hidden={!open}>
+        <ul className="ml-micro-grid">
+          {cells.map((cell) => (
+            <MicroCell
+              key={cell.key}
+              nutrientKey={cell.key}
+              meta={MICRO_NUTRIENTS[cell.key]}
+              value={cell.value}
+              profile={profile}
+            />
+          ))}
+        </ul>
+        <p className="ml-micro-note">
+          Targets are {MICRO_RDI_SOURCE} adult RDA · “—” means no logged food reported that
+          nutrient.
+          {partlyEstimated ? " Some values are estimated from recipe ingredients." : ""}
+        </p>
       </div>
-      <ul className="ml-micro-grid">
-        {MICRO_KEYS.map((key) => (
-          <MicroCell
-            key={key}
-            nutrientKey={key}
-            meta={MICRO_NUTRIENTS[key]}
-            value={byKey.get(key)}
-            profile={profile}
-          />
-        ))}
-      </ul>
     </section>
   );
 }
