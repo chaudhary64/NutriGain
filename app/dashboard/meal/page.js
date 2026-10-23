@@ -255,7 +255,7 @@ body:has(.ml-nut[open]){overflow:hidden}
 .ml-entries{border-top:1px solid var(--line)}
 /* The entry's left edge sits on the meal title's, so foods read as children
    of the meal rather than a list interrupted by headings. */
-.ml-entry{display:grid;grid-template-columns:minmax(0,1fr) 140px 80px 90px 84px 30px;align-items:center;gap:14px;padding:10px 18px 10px 74px;border-top:1px solid var(--line);font-size:13px;transition:background .12s}
+.ml-entry{display:grid;grid-template-columns:minmax(0,1fr) 140px 58px 80px 90px 30px;align-items:center;gap:14px;padding:10px 18px 10px 74px;border-top:1px solid var(--line);font-size:13px;transition:background .12s}
 .ml-meta{display:contents}
 .ml-entry:first-child{border-top:0}
 .ml-entry:hover{background:var(--paper)}
@@ -285,7 +285,9 @@ body:has(.ml-nut[open]){overflow:hidden}
 .ml-step button:focus-visible{outline:2px solid var(--t1);outline-offset:-2px}
 .ml-step input{width:34px;border:0;background:none;text-align:center;font-size:12.5px;font-weight:500;color:var(--t1);outline:none;font-variant-numeric:tabular-nums;-moz-appearance:textfield}
 .ml-step input::-webkit-outer-spin-button,.ml-step input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
-.ml-kcal{text-align:right;font-weight:500;color:var(--t1);font-variant-numeric:tabular-nums;white-space:nowrap}
+/* Calories close the macro group, so the row reads as one nutrition block
+   instead of numbers split between two edges. */
+.ml-kcal{text-align:left;font-weight:500;color:var(--t1);font-variant-numeric:tabular-nums;white-space:nowrap}
 .ml-kcal small{font-size:10.5px;font-weight:400;color:var(--t3);margin-left:3px}
 /* ---- responsive ---- */
 @media(max-width:1100px){
@@ -303,12 +305,12 @@ body:has(.ml-nut[open]){overflow:hidden}
   .ml-slot-split{display:none}
   /* Five columns stop fitting once the ledger narrows, so the row becomes
      three bands: food, macros + micros, quantity + calories. */
-  .ml-entry{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"name del" "meta meta" "step kcal";row-gap:8px}
+  .ml-entry{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"name del" "chips kcal" "step micro";row-gap:8px}
   .ml-entry-name{grid-area:name}
-  .ml-meta{grid-area:meta;display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0}
-  .ml-chips{justify-content:flex-start;min-width:0}
-  .ml-step{grid-area:step;justify-self:start}
+  .ml-chips{grid-area:chips;justify-content:flex-start;min-width:0}
   .ml-kcal{grid-area:kcal;justify-self:end}
+  .ml-step{grid-area:step;justify-self:start}
+  .ml-micro-toggle,.ml-micro-none{grid-area:micro;justify-self:end}
   .ml-del{grid-area:del;justify-self:end}
 }
 @media(max-width:640px){
@@ -801,13 +803,18 @@ function EntryRow({ entry, onUpdateQuantity, onDelete }) {
           serving size stays in the nutrition label, one tap away. */}
       <span className="ml-entry-name">{toTitleCase(entry.mealName)}</span>
 
-      {/* Macros and micros share one wrapper so the narrow layout can put them
-          on a single line while the wide one keeps its five columns. */}
+      {/* Macros, then calories, then micros — one nutrition block. The narrow
+          layout folds the same three items into two columns. */}
       <span className="ml-meta">
         <span className="ml-chips" title={`Total for ×${q}`}>
           <span>{fmtMacro(tP)}P</span>
           <span>{fmtMacro(tC)}C</span>
           <span>{fmtMacro(tF)}F</span>
+        </span>
+
+        <span className="ml-kcal">
+          {tK.toLocaleString()}
+          <small>kcal</small>
         </span>
 
         {hasMicros ? (
@@ -858,11 +865,6 @@ function EntryRow({ entry, onUpdateQuantity, onDelete }) {
           +
         </button>
       </div>
-
-      <span className="ml-kcal">
-        {tK.toLocaleString()}
-        <small>kcal</small>
-      </span>
 
       <button
         type="button"
