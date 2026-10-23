@@ -260,7 +260,6 @@ body:has(.ml-nut[open]){overflow:hidden}
 .ml-entry:first-child{border-top:0}
 .ml-entry:hover{background:var(--paper)}
 .ml-entry-name{min-width:0;font-weight:500;color:var(--t1);line-height:1.3;overflow-wrap:anywhere}
-.ml-serving{display:block;font-size:11.5px;font-weight:400;color:var(--t3);margin-top:2px}
 /* Micros on a logged entry: one column of its own, so the control lands in the
    same place on every row instead of following the serving text. */
 .ml-micro-toggle{display:inline-flex;align-items:center;justify-content:center;gap:4px;width:80px;height:32px;padding:0 6px;border:1px solid var(--line);border-radius:5px;background:none;font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:var(--t2);cursor:pointer;transition:color .15s,border-color .15s}
@@ -797,12 +796,10 @@ function EntryRow({ entry, onUpdateQuantity, onDelete }) {
 
   return (
     <div className="ml-entry">
-      <span className="ml-entry-name">
-        {toTitleCase(entry.mealName)}
-        <span className="ml-serving">
-          {q} × {entry.meal?.servingSize || "1 serving"} · {m.calories || 0} kcal each
-        </span>
-      </span>
+      {/* The quantity lives in the stepper and the calories at the row's end;
+          repeating them here only made the name cell two lines tall. The
+          serving size stays in the nutrition label, one tap away. */}
+      <span className="ml-entry-name">{toTitleCase(entry.mealName)}</span>
 
       {/* Macros and micros share one wrapper so the narrow layout can put them
           on a single line while the wide one keeps its five columns. */}
