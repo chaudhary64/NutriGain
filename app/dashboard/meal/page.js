@@ -222,13 +222,9 @@ body:has(.ml-nut[open]){overflow:hidden}
 .ml-chev{display:flex;color:var(--t3);transition:transform .18s ease}
 .ml-slot.is-open .ml-chev{transform:rotate(90deg)}
 /* The arrow stays on empty rows too: the left gutter is what says the row
-   opens something, and hiding it left a blank where the arrow belongs. An
-   empty slot is an invitation, so its label sits beside the meal name and the
-   em-dash kcal column is gone. */
-.ml-slot.is-empty .ml-slot-toggle{grid-template-columns:16px 26px minmax(0,1fr)}
-.ml-slot-cta{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:400;color:var(--t2);white-space:nowrap;transition:color .15s}
-.ml-slot-cta svg{width:11px;height:11px;stroke-width:2.5}
-.ml-slot-head:hover .ml-slot-cta{color:var(--t1)}
+   opens something, and hiding it left a blank where the arrow belongs. The
+   action stays in the row's trailing lane, so empty and filled meals line up. */
+.ml-slot-add.is-labeled{width:auto;gap:6px;padding:0 10px 0 8px;font-family:inherit;font-size:11.5px;font-weight:500;color:var(--t2)}
 .ml-slot-ico{width:26px;height:26px;border-radius:6px;background:var(--sunken);display:flex;align-items:center;justify-content:center;color:var(--t2)}
 .ml-slot-ico svg{width:14px;height:14px}
 .ml-slot-id{display:flex;align-items:baseline;gap:9px;min-width:0}
@@ -332,7 +328,6 @@ body:has(.ml-nut[open]){overflow:hidden}
   /* Slot rows: chevron, glyph, name, kcal. The spacer and the macros are
      hidden so nothing can push the row wider than the card. */
   .ml-slot-toggle{grid-template-columns:16px 24px minmax(0,1fr) auto;gap:8px}
-  .ml-slot.is-empty .ml-slot-toggle{grid-template-columns:16px 24px minmax(0,1fr)}
   .ml-slot-count{display:none}
   .ml-slotwrap select{padding-right:26px}
   .ml-slot-id{grid-column:3;min-width:0}
@@ -989,14 +984,9 @@ function LedgerSection({ slot, label, entries, open, onToggle, onAdd, onUpdateQu
           </span>
           <span className="ml-slot-id">
             <span className="ml-slot-name">{label}</span>
-            {has ? (
+            {has && (
               <span className="ml-slot-count">
                 {entries.length} {entries.length === 1 ? "item" : "items"}
-              </span>
-            ) : (
-              <span className="ml-slot-cta">
-                <Icon d={ICONS.plus} />
-                Add food
               </span>
             )}
           </span>
@@ -1026,17 +1016,16 @@ function LedgerSection({ slot, label, entries, open, onToggle, onAdd, onUpdateQu
             </span>
           )}
         </button>
-        {has && (
-          <button
-            type="button"
-            className="ml-slot-add"
-            onClick={onAdd}
-            aria-label={`Add food to ${label}`}
-            title={`Add to ${label}`}
-          >
-            <Icon d={ICONS.plus} />
-          </button>
-        )}
+        <button
+          type="button"
+          className={`ml-slot-add${has ? "" : " is-labeled"}`}
+          onClick={onAdd}
+          aria-label={`Add food to ${label}`}
+          title={`Add to ${label}`}
+        >
+          <Icon d={ICONS.plus} />
+          {!has && <span>Add food</span>}
+        </button>
       </div>
 
       {expanded && (
