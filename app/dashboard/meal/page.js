@@ -303,8 +303,8 @@ body:has(.ml-nut[open]){overflow:hidden}
   .ml-form{grid-template-columns:108px minmax(0,1fr) auto}
   .ml-search{grid-column:1/-1;grid-row:1}
   .ml-slot-split{display:none}
-  /* Five columns stop fitting once the ledger narrows, so the row becomes
-     three bands: food, macros + micros, quantity + calories. */
+  /* Six columns stop fitting once the ledger narrows, so the row becomes
+     three bands: food, macros + calories, quantity + micros. */
   .ml-entry{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"name del" "chips kcal" "step micro";row-gap:8px}
   .ml-entry-name{grid-area:name}
   .ml-chips{grid-area:chips;justify-content:flex-start;min-width:0}
