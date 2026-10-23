@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { format, parseISO } from "date-fns";
 import { expandMuscleGroups } from "@/lib/muscle-groups";
+import { exerciseMedia, EXERCISE_MEDIA_CREDIT } from "@/lib/exercise-media";
 import AppShell from "@/components/AppShell";
 import Loader from "@/components/Loader";
 import {
@@ -99,6 +100,22 @@ const GYM_CSS = `
 .gym .gy-row-h:hover{background:var(--sunken)}
 .gym .gy-row-h:focus-visible{outline:2px solid var(--t1);outline-offset:-2px}
 .gym .gy-no{flex:0 0 30px;font-family:var(--font-mono);font-size:10.5px;font-weight:500;letter-spacing:.06em;color:var(--t3);font-variant-numeric:tabular-nums}
+/* The movement in the index: a small picture beside the number, so a row can
+   be recognised before its name is read. */
+.gym .gy-thumb{flex:none;display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid var(--line);border-radius:5px;background:var(--card);overflow:hidden}
+.gym .gy-thumb img{width:32px;height:32px;object-fit:contain;opacity:.92}
+/* The artwork is white line-art on transparency, so it is inverted for the
+   light theme and left as published for the dark one. */
+.gym .gy-thumb img,.gym .gy-figure-img{filter:invert(1)}
+html[data-theme="dark"] .gym .gy-thumb img,html[data-theme="dark"] .gym .gy-figure-img{filter:none}
+.gym .gy-figure{margin:0;display:flex;flex-direction:column;gap:7px;align-items:flex-start;min-width:0}
+.gym .gy-figure-img{width:152px;height:152px;object-fit:contain;opacity:.95}
+.gym .gy-figure-cap{font-family:var(--font-mono);font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:var(--t3);text-align:left}
+.gym .gy-figure-cap a{color:var(--t3);text-decoration:underline;text-underline-offset:2px}
+.gym .gy-figure-cap a:hover{color:var(--t2)}
+.gym .gy-credit{margin:14px 0 0;font-family:var(--font-mono);font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--t3)}
+.gym .gy-credit a{color:var(--t3);text-decoration:underline;text-underline-offset:2px}
+.gym .gy-credit a:hover{color:var(--t2)}
 .gym .gy-row-main{flex:1;min-width:0}
 .gym .gy-row-name{display:block;font-size:17px;font-weight:600;letter-spacing:-.02em;color:var(--t1);line-height:1.3}
 .gym .gy-row-meta{display:block;margin-top:3px;font-size:12px;color:var(--t3);font-variant-numeric:tabular-nums}
@@ -185,6 +202,9 @@ const GYM_CSS = `
   .gym .gy-head-tools{width:100%;align-items:flex-end;gap:12px}
   .gym .gy-row-name{font-size:16px}
   .gym .gy-row-state{display:none}
+  /* The name needs this width more than the picture does. */
+  .gym .gy-thumb{display:none}
+  .gym .gy-figure-img{width:104px;height:104px}
 }
 @media (max-width:600px){
   .gym .gy-panel{padding:14px 10px 16px;border-top:0}
@@ -261,6 +281,33 @@ const toTitleCase = (str) => {
     .replace(/\(\s+/g, "(") // "Fly( Lower Chest )" → "Fly(Lower Chest)"
     .replace(/\s+\)/g, ")");
 };
+
+/* Three published frames of one movement, played as a slow loop so the lift
+   reads as a movement rather than a pose. Reduced motion gets the first frame,
+   which is the starting position. */
+function ExerciseFigure({ frames, label }) {
+  const [frame, setFrame] = useState(0);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
+    const timer = setInterval(
+      () => setFrame((index) => (index + 1) % frames.length),
+      650
+    );
+    return () => clearInterval(timer);
+  }, [frames.length]);
+
+  return (
+    <img
+      className="gy-figure-img"
+      src={frames[frame]}
+      alt={`Illustration of ${label}`}
+      width="512"
+      height="512"
+      decoding="async"
+    />
+  );
+}
 
 /* Status is carried by the label, not by a coloured fill: chips stay neutral
    so the ink/hairline chrome holds. */
@@ -797,6 +844,7 @@ export default function GymTrackingPage() {
 
   const flatExercises = sections.flatMap((section) => section.exercises);
   const totalExercises = flatExercises.length;
+  const illustratedExercises = flatExercises.filter((ex) => exerciseMedia(ex.name)).length;
   // One running number across the whole session, so a row can be called out
   // by its place in the workout rather than by muscle abbreviation.
   const exerciseNo = new Map(flatExercises.map((ex, i) => [ex._id, i + 1]));
@@ -956,6 +1004,7 @@ export default function GymTrackingPage() {
                             : summary
                               ? "Logged"
                               : "Not logged";
+                        const media = exerciseMedia(ex.name);
                         return (
                           <li
                             key={ex._id}
@@ -973,6 +1022,18 @@ export default function GymTrackingPage() {
                               <span className="gy-no m-num">
                                 {String(exerciseNo.get(ex._id)).padStart(2, "0")}
                               </span>
+                              {media && (
+                                <span className="gy-thumb" aria-hidden="true">
+                                  <img
+                                    src={media.frames[0]}
+                                    alt=""
+                                    width="512"
+                                    height="512"
+                                    loading="lazy"
+                                    decoding="async"
+                                  />
+                                </span>
+                              )}
                               <span className="gy-row-main">
                                 <span className="gy-row-name">{toTitleCase(ex.name)}</span>
                                 {summary && (
@@ -991,6 +1052,24 @@ export default function GymTrackingPage() {
                               <div className="gy-panel" id={`gy-panel-${ex._id}`}>
                                 <div className="gy-workbench">
                                   <aside className="gy-aside">
+                                  {media && (
+                                    <figure className="gy-figure">
+                                      <ExerciseFigure
+                                        frames={media.frames}
+                                        label={toTitleCase(ex.name)}
+                                      />
+                                      <figcaption className="gy-figure-cap">
+                                        <a
+                                          href={EXERCISE_MEDIA_CREDIT.url}
+                                          target="_blank"
+                                          rel="noreferrer noopener"
+                                        >
+                                          {EXERCISE_MEDIA_CREDIT.label}
+                                        </a>{" "}
+                                        · {EXERCISE_MEDIA_CREDIT.license}
+                                      </figcaption>
+                                    </figure>
+                                  )}
                                   <div className="gy-aside-block">
                                     <span className="gy-spec-lbl">
                                       <span className="gy-label">Warm up</span>
@@ -1307,6 +1386,22 @@ export default function GymTrackingPage() {
                     </ul>
                   </div>
                 ))}
+
+                {/* The artwork is CC BY-SA 4.0: the credit travels with the
+                    board, not only inside an expanded row. */}
+                {illustratedExercises > 0 && (
+                  <p className="gy-credit">
+                    Movement illustrations:{" "}
+                    <a
+                      href={EXERCISE_MEDIA_CREDIT.url}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                    >
+                      {EXERCISE_MEDIA_CREDIT.label}
+                    </a>{" "}
+                    · {EXERCISE_MEDIA_CREDIT.license}
+                  </p>
+                )}
               </div>
             )}
           </section>
