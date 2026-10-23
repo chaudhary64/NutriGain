@@ -221,7 +221,14 @@ body:has(.ml-nut[open]){overflow:hidden}
 .ml-slot-toggle:focus-visible,.ml-slot-add:focus-visible{outline:2px solid var(--t1);outline-offset:-1px;border-radius:6px}
 .ml-chev{display:flex;color:var(--t3);transition:transform .18s ease}
 .ml-slot.is-open .ml-chev{transform:rotate(90deg)}
-.ml-slot.is-empty .ml-chev{opacity:0}
+/* The arrow stays on empty rows too: the left gutter is what says the row
+   opens something, and hiding it left a blank where the arrow belongs. An
+   empty slot is an invitation, so its label sits beside the meal name and the
+   em-dash kcal column is gone. */
+.ml-slot.is-empty .ml-slot-toggle{grid-template-columns:16px 26px minmax(0,1fr)}
+.ml-slot-cta{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:400;color:var(--t2);white-space:nowrap;transition:color .15s}
+.ml-slot-cta svg{width:11px;height:11px;stroke-width:2.5}
+.ml-slot-head:hover .ml-slot-cta{color:var(--t1)}
 .ml-slot-ico{width:26px;height:26px;border-radius:6px;background:var(--sunken);display:flex;align-items:center;justify-content:center;color:var(--t2)}
 .ml-slot-ico svg{width:14px;height:14px}
 .ml-slot-id{display:flex;align-items:baseline;gap:9px;min-width:0}
@@ -245,8 +252,7 @@ body:has(.ml-nut[open]){overflow:hidden}
 .ml-slot-kcal{display:inline-flex;align-items:baseline;gap:4px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .ml-slot-kcal b{font-size:13.5px;font-weight:600;letter-spacing:-.01em;color:var(--t1)}
 .ml-slot-kcal small{font-family:var(--font-mono);font-size:9px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--t3)}
-.ml-slot.is-empty .ml-slot-name{color:var(--t2)}
-.ml-slot.is-empty .ml-slot-kcal b{font-weight:400;color:var(--t3)}
+
 .ml-slot-add{width:28px;height:28px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--t2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;flex:none}
 .ml-slot-add svg{width:14px;height:14px}
 .ml-slot-add:hover{background:var(--t1);border-color:var(--t1);color:var(--on-ac)}
@@ -326,6 +332,7 @@ body:has(.ml-nut[open]){overflow:hidden}
   /* Slot rows: chevron, glyph, name, kcal. The spacer and the macros are
      hidden so nothing can push the row wider than the card. */
   .ml-slot-toggle{grid-template-columns:16px 24px minmax(0,1fr) auto;gap:8px}
+  .ml-slot.is-empty .ml-slot-toggle{grid-template-columns:16px 24px minmax(0,1fr)}
   .ml-slot-count{display:none}
   .ml-slotwrap select{padding-right:26px}
   .ml-slot-id{grid-column:3;min-width:0}
@@ -607,7 +614,8 @@ function MicroPanel({ rollup, profile }) {
       <div className="ml-micros-h">
         <span className="ml-eyebrow">Micronutrients</span>
         <span className="ml-ledger-meta">
-          {rollup.enrichedEntries} of {rollup.totalEntries} {entryWord} have micro data
+          {rollup.enrichedEntries} of {rollup.totalEntries} {entryWord}{" "}
+          {rollup.enrichedEntries === 1 ? "has" : "have"} micro data
           {partlyEstimated ? " · partly estimated" : ""}
         </span>
       </div>
@@ -981,14 +989,19 @@ function LedgerSection({ slot, label, entries, open, onToggle, onAdd, onUpdateQu
           </span>
           <span className="ml-slot-id">
             <span className="ml-slot-name">{label}</span>
-            {has && (
+            {has ? (
               <span className="ml-slot-count">
                 {entries.length} {entries.length === 1 ? "item" : "items"}
               </span>
+            ) : (
+              <span className="ml-slot-cta">
+                <Icon d={ICONS.plus} />
+                Add food
+              </span>
             )}
           </span>
-          <span className="ml-slot-nums">
-            {has && (
+          {has && (
+            <span className="ml-slot-nums">
               <span
                 className="ml-slot-macros"
                 title="Protein · carbohydrates · fats, in grams"
@@ -998,30 +1011,32 @@ function LedgerSection({ slot, label, entries, open, onToggle, onAdd, onUpdateQu
                 <span className="ml-macro is-c"><i>C</i><b>{fmtMacro(totals.c)}</b></span>
                 <span className="ml-macro is-f"><i>F</i><b>{fmtMacro(totals.f)}</b></span>
               </span>
-            )}
-            {has && (macroCals > 0 || totals.kcal > 0) && (
-              <span className="ml-slot-split" aria-hidden="true" title={splitTitle}>
-                {totals.p > 0 && <i className="seg-p" style={{ flexGrow: totals.p * 4 }} />}
-                {totals.c > 0 && <i className="seg-c" style={{ flexGrow: totals.c * 4 }} />}
-                {totals.f > 0 && <i className="seg-f" style={{ flexGrow: totals.f * 9 }} />}
-                {otherKcal >= 1 && <i className="seg-o" style={{ flexGrow: otherKcal }} />}
+              {(macroCals > 0 || totals.kcal > 0) && (
+                <span className="ml-slot-split" aria-hidden="true" title={splitTitle}>
+                  {totals.p > 0 && <i className="seg-p" style={{ flexGrow: totals.p * 4 }} />}
+                  {totals.c > 0 && <i className="seg-c" style={{ flexGrow: totals.c * 4 }} />}
+                  {totals.f > 0 && <i className="seg-f" style={{ flexGrow: totals.f * 9 }} />}
+                  {otherKcal >= 1 && <i className="seg-o" style={{ flexGrow: otherKcal }} />}
+                </span>
+              )}
+              <span className="ml-slot-kcal">
+                <b>{Math.round(totals.kcal).toLocaleString()}</b>
+                <small>kcal</small>
               </span>
-            )}
-            <span className="ml-slot-kcal">
-              <b>{has ? Math.round(totals.kcal).toLocaleString() : "—"}</b>
-              <small>kcal</small>
             </span>
-          </span>
+          )}
         </button>
-        <button
-          type="button"
-          className="ml-slot-add"
-          onClick={onAdd}
-          aria-label={`Add food to ${label}`}
-          title={`Add to ${label}`}
-        >
-          <Icon d={ICONS.plus} />
-        </button>
+        {has && (
+          <button
+            type="button"
+            className="ml-slot-add"
+            onClick={onAdd}
+            aria-label={`Add food to ${label}`}
+            title={`Add to ${label}`}
+          >
+            <Icon d={ICONS.plus} />
+          </button>
+        )}
       </div>
 
       {expanded && (
@@ -1785,8 +1800,9 @@ export default function MealTrackingPage() {
             <div className="ml-ledger-h">
               <span className="ml-eyebrow">Day log</span>
               <span className="ml-ledger-meta">
-                {mealCount} {mealCount === 1 ? "entry" : "entries"} ·{" "}
-                {Math.round(totalMacros.calories).toLocaleString()} kcal
+                {mealCount === 0
+                  ? "Nothing logged yet"
+                  : `${mealCount} ${mealCount === 1 ? "entry" : "entries"} · ${Math.round(totalMacros.calories).toLocaleString()} kcal`}
               </span>
             </div>
 
