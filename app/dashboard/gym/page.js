@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { format, parseISO } from "date-fns";
@@ -45,13 +45,6 @@ const MERIDIAN_CSS = `
 .gym-toast-x:hover{color:var(--t1);background:var(--sunken)}
 .gym .rt-cell{display:flex;flex-direction:column;gap:2px;padding:8px 12px;border-radius:var(--ng-r-sm,6px);font-size:13px;border:1px solid transparent}
 .gym .rt-cell:hover{background:var(--paper)}
-/* Status — Whisper-styled segmented switcher: all options visible, active
-   filled in ink. Full-width row on mobile, quiet right-aligned on desktop. */
-.gym .status-seg{display:inline-flex;border:1px solid var(--line);border-radius:var(--ng-r-sm,6px);background:var(--card);padding:3px;gap:2px}
-.gym .status-seg button{appearance:none;border:0;background:transparent;font-family:var(--font-mono);color:var(--t3);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:8px 12px;border-radius:var(--ng-r-sm,6px);cursor:pointer;transition:.15s;white-space:nowrap}
-.gym .status-seg button:hover{color:var(--t1);background:var(--sunken)}
-.gym .status-seg button[aria-pressed="true"]{background:var(--t1);color:var(--card)}
-@media (max-width:640px){.gym .status-wrap{width:100%}.gym .status-seg{display:flex;width:100%}.gym .status-seg button{flex:1;padding:11px 4px;text-align:center}}
 .gym .m-card{min-width:0}
 `;
 
@@ -65,7 +58,10 @@ const GYM_CSS = `
    Session — training first. The board is the page; the plan follows.
    Masthead over a full-width session ledger, one exercise open at a time.
    ========================================================================== */
-.gym .gy-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px 40px;flex-wrap:wrap;padding-bottom:20px;border-bottom:1px solid var(--t1)}
+/* The masthead owns the stacked status menu, so it has to paint above the
+   session section that follows it (both carry the reveal animation's
+   transform, which makes each its own stacking context). */
+.gym .gy-head{position:relative;z-index:2;display:flex;align-items:flex-end;justify-content:space-between;gap:20px 40px;flex-wrap:wrap;padding-bottom:20px;border-bottom:1px solid var(--t1)}
 .gym .gy-head-main{min-width:0}
 .gym .gy-kicker{font-family:var(--font-mono);font-size:10.5px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin:0 0 10px}
 .gym .gy-title{margin:0;font-size:clamp(28px,3.4vw,38px);font-weight:600;letter-spacing:-.035em;line-height:1.05;color:var(--t1)}
@@ -81,6 +77,25 @@ const GYM_CSS = `
 .gym .gy-daynav > button:focus-visible{outline:2px solid var(--t1);outline-offset:1px}
 .gym .gy-daynav-date{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.04em;color:var(--t1);padding:0 10px;min-width:76px;text-align:center;white-space:nowrap}
 .gym .gy-daynav .gy-today{width:auto;padding:0 9px;font:inherit;font-size:11px;font-weight:600;color:var(--link)}
+/* Day status is a fact that mostly follows from what is logged, so it lives
+   behind one quiet summary beside the date instead of three buttons that
+   compete with the log action. */
+.gym .gy-tools-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.gym .gy-status{position:relative}
+.gym .gy-status > summary{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 11px;border:1px solid var(--line);border-radius:var(--ng-r-sm,6px);background:var(--card);color:var(--t2);font-family:var(--font-mono);font-size:10.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;list-style:none;user-select:none}
+.gym .gy-status > summary::-webkit-details-marker{display:none}
+.gym .gy-status > summary:hover{color:var(--t1);border-color:var(--t2)}
+.gym .gy-status > summary:focus-visible{outline:2px solid var(--t1);outline-offset:2px}
+.gym .gy-status > summary svg{flex:none;width:11px;height:11px;transition:transform .15s}
+.gym .gy-status[open] > summary svg{transform:rotate(180deg)}
+.gym .gy-status-dot{width:6px;height:6px;flex:none;border-radius:50%;background:var(--t3)}
+.gym .gy-status-dot[data-state="completed"]{background:var(--t1)}
+.gym .gy-status-dot[data-state="partially-completed"]{background:var(--t2)}
+.gym .gy-status-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:60;display:flex;flex-direction:column;min-width:172px;padding:4px;border:1px solid var(--line);border-radius:8px;background:var(--card);box-shadow:var(--ng-shadow-2)}
+.gym .gy-status-menu button{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 9px;border:0;border-radius:5px;background:none;color:var(--t2);font:inherit;font-size:12px;font-weight:500;text-align:left;cursor:pointer}
+.gym .gy-status-menu button:hover{background:var(--sunken);color:var(--t1)}
+.gym .gy-status-menu button[aria-pressed="true"]{color:var(--t1);font-weight:600}
+.gym .gy-status-menu button svg{flex:none;width:12px;height:12px}
 .gym .gy-session{margin-top:26px}
 .gym .gy-session-h{display:flex;align-items:flex-end;justify-content:space-between;gap:14px 28px;flex-wrap:wrap;padding-bottom:14px}
 .gym .gy-session-meta{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
@@ -90,7 +105,6 @@ const GYM_CSS = `
 .gym .gy-board{border-top:1px solid var(--t1)}
 .gym .gy-group-h{display:flex;align-items:center;gap:12px;padding:22px 0 8px}
 .gym .gy-group-name{display:inline-flex;align-items:baseline;gap:12px;font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--t1)}
-.gym .gy-group-name .gy-no{font-size:10px;color:var(--t3)}
 .gym .gy-group-count{font-family:var(--font-mono);font-size:10px;color:var(--t3);font-variant-numeric:tabular-nums}
 .gym .gy-rule{flex:1;height:1px;background:var(--line)}
 .gym .gy-rows{list-style:none;margin:0;padding:0}
@@ -99,20 +113,14 @@ const GYM_CSS = `
 .gym .gy-row-h{display:flex;align-items:center;gap:14px;width:100%;padding:14px 6px;border:0;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer;transition:background .15s ease}
 .gym .gy-row-h:hover{background:var(--sunken)}
 .gym .gy-row-h:focus-visible{outline:2px solid var(--t1);outline-offset:-2px}
-.gym .gy-no{flex:0 0 30px;font-family:var(--font-mono);font-size:10.5px;font-weight:500;letter-spacing:.06em;color:var(--t3);font-variant-numeric:tabular-nums}
-/* The movement in the index: a small picture beside the number, so a row can
-   be recognised before its name is read. */
+/* The movement in the index: a small picture ahead of the name, so a row can
+   be recognised before it is read. */
 .gym .gy-thumb{flex:none;display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid var(--line);border-radius:5px;background:var(--card);overflow:hidden}
 .gym .gy-thumb img{width:32px;height:32px;object-fit:contain;opacity:.92}
 /* The artwork is white line-art on transparency, so it is inverted for the
    light theme and left as published for the dark one. */
-.gym .gy-thumb img,.gym .gy-figure-img{filter:invert(1)}
-html[data-theme="dark"] .gym .gy-thumb img,html[data-theme="dark"] .gym .gy-figure-img{filter:none}
-.gym .gy-figure{margin:0;display:flex;flex-direction:column;gap:7px;align-items:flex-start;min-width:0}
-.gym .gy-figure-img{width:152px;height:152px;object-fit:contain;opacity:.95}
-.gym .gy-figure-cap{font-family:var(--font-mono);font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:var(--t3);text-align:left}
-.gym .gy-figure-cap a{color:var(--t3);text-decoration:underline;text-underline-offset:2px}
-.gym .gy-figure-cap a:hover{color:var(--t2)}
+.gym .gy-thumb img{filter:invert(1)}
+html[data-theme="dark"] .gym .gy-thumb img{filter:none}
 .gym .gy-credit{margin:14px 0 0;font-family:var(--font-mono);font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--t3)}
 .gym .gy-credit a{color:var(--t3);text-decoration:underline;text-underline-offset:2px}
 .gym .gy-credit a:hover{color:var(--t2)}
@@ -124,42 +132,37 @@ html[data-theme="dark"] .gym .gy-thumb img,html[data-theme="dark"] .gym .gy-figu
 .gym .gy-row-state.is-pr{color:var(--t1);border-bottom:1px solid var(--t1)}
 .gym .gy-caret{flex:none;display:inline-flex;color:var(--t3);transition:transform .2s ease}
 .gym .gy-row.is-open .gy-caret{transform:rotate(180deg);color:var(--t1)}
-.gym .gy-panel{padding:14px 18px 16px 44px;border-top:1px solid var(--line);animation:gy-in .22s ease}
+/* The panel is the card's own two-column grid: the logging form keeps a
+   readable width, the movement's trend takes what is left. */
+.gym .gy-panel{display:grid;grid-template-columns:minmax(0,480px) minmax(0,1fr);gap:0 40px;align-items:start;padding:14px 18px 16px 44px;border-top:1px solid var(--line);animation:gy-in .22s ease}
 @keyframes gy-in{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
-/* Workbench: reference facts in a narrow rail, logging in the main column. */
-.gym .gy-workbench{display:grid;grid-template-columns:236px minmax(0,1fr);gap:0 24px;max-width:820px}
-.gym .gy-aside{display:flex;flex-direction:column;gap:16px;min-width:0;padding:2px 22px 2px 0;border-right:1px solid var(--line)}
-.gym .gy-aside-block{display:flex;flex-direction:column;gap:3px;min-width:0}
-.gym .gy-aside .gy-input{width:76px}
-.gym .gy-aside .gy-input[type="date"]{width:118px}
-.gym .gy-meta-sub{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.04em;color:var(--t3)}
-.gym .gy-prlink{margin-top:auto;display:inline-flex;align-items:center;gap:7px;width:fit-content;padding:8px 0 0;border:0;background:none;color:var(--t2);font:inherit;font-size:12.5px;font-weight:500;cursor:pointer}
-.gym .gy-prlink:hover{color:var(--t1)}
-.gym .gy-prlink:focus-visible{outline:2px solid var(--link);outline-offset:2px;border-radius:2px}
-.gym .gy-main{display:flex;flex-direction:column;min-width:0}
-.gym .gy-spec-lbl{display:inline-flex;align-items:center;gap:6px}
+/* The form is one column: the facts that inform a set (warm-up, best) sit on
+   a single line, the sets follow, and the action that saves them sits at the
+   end of the rows it submits instead of floating off to the far edge. */
+.gym .gy-main{display:flex;flex-direction:column;min-width:0;max-width:480px}
+.gym .gy-facts{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 20px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.gym .gy-fact{display:inline-flex;align-items:baseline;gap:7px;min-width:0}
+.gym .gy-fact .gy-edit{width:20px;height:20px}
+.gym .gy-wu-edit,.gym .gy-pr-edit{padding-top:12px}
 .gym .gy-spec-val{margin:0;font-size:14px;font-weight:600;letter-spacing:-.01em;line-height:1.5;color:var(--t1);font-variant-numeric:tabular-nums}
 .gym .gy-spec-sub{margin-left:8px;font-family:var(--font-mono);font-size:10.5px;font-weight:500;color:var(--t3)}
 .gym .gy-edit{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border:0;background:none;border-radius:5px;color:var(--t3);cursor:pointer;flex:none}
 .gym .gy-edit:hover{color:var(--t1);background:var(--card)}
 .gym .gy-edit:focus-visible{outline:2px solid var(--link);outline-offset:1px}
-.gym .gy-wu-edit,.gym .gy-pr-edit{display:grid;gap:6px;min-width:0}
+.gym .gy-wu-edit{display:grid;gap:6px;min-width:0}
 .gym .gy-pr-edit{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
 .gym .gy-wu-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .gym .gy-edit-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:2px}
-.gym .gy-setblock{max-width:none}
+.gym .gy-setblock{padding-top:12px}
 .gym .gy-setblock-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding-bottom:8px}
-.gym .gy-hint{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
-/* Sets are a small aligned table: set no. / load / reps / computed volume. */
+/* Sets are a small aligned table: set no. / load / reps. Volume is summed
+   once under the table, where it answers a question, instead of in a column. */
 .gym .gy-sets{display:grid}
-.gym .gy-setrow{display:grid;grid-template-columns:30px minmax(0,1fr) minmax(0,1fr) 84px 28px;align-items:center;gap:10px;padding:4px 0;min-width:0}
+.gym .gy-setrow{display:grid;grid-template-columns:30px minmax(0,1fr) minmax(0,1fr) 28px;align-items:center;gap:10px;padding:4px 0;min-width:0}
 .gym .gy-setrow-head{padding:0 0 7px;border-bottom:1px solid var(--line)}
 .gym .gy-setrow-head span{font-family:var(--font-mono);font-size:9.5px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--t3)}
-.gym .gy-setrow-head span:nth-child(4){text-align:right}
 .gym .gy-setno{font-family:var(--font-mono);font-size:10.5px;color:var(--t3);font-variant-numeric:tabular-nums}
 .gym .gy-setrow .gy-input{width:100%}
-.gym .gy-setvol{text-align:right;font-family:var(--font-mono);font-size:10.5px;font-weight:500;letter-spacing:.03em;color:var(--faint);font-variant-numeric:tabular-nums;white-space:nowrap}
-.gym .gy-setvol.has-value{color:var(--t2)}
 .gym .gy-addrow{display:inline-flex;align-items:center;gap:7px;width:fit-content;margin-top:9px;padding:6px 0;border:0;background:none;color:var(--t3);font:inherit;font-size:12.5px;font-weight:500;cursor:pointer}
 .gym .gy-addrow:hover{color:var(--t1)}
 .gym .gy-addrow:focus-visible{outline:2px solid var(--link);outline-offset:2px;border-radius:2px}
@@ -178,44 +181,49 @@ html[data-theme="dark"] .gym .gy-thumb img,html[data-theme="dark"] .gym .gy-figu
 .gym .gy-save-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 14px;border:0;border-radius:var(--ng-r-sm,6px);background:var(--t1);color:var(--card);font:inherit;font-size:12px;font-weight:600;cursor:pointer}
 .gym .gy-save-btn:hover{opacity:.88}
 .gym .gy-save-btn:focus-visible{outline:2px solid var(--link);outline-offset:2px}
-.gym .gy-main-foot{display:flex;align-items:center;gap:14px;margin-top:12px}
-.gym .gy-main-foot .gy-log-btn{margin-left:auto}
-.gym .gy-foot-sum{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--t3);white-space:nowrap}
+/* The action holds the right edge of the table whether or not a running
+   total is present, so it never moves between an empty and a filled form. */
+.gym .gy-main-foot{display:flex;align-items:center;justify-content:flex-end;gap:14px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.gym .gy-foot-sum{margin-right:auto;font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--t3);white-space:nowrap}
 .gym .gy-log-btn{display:inline-flex;align-items:center;gap:10px;height:36px;padding:0 16px;border:0;border-radius:var(--ng-r-sm,6px);background:var(--t1);color:var(--card);font:inherit;font-size:12.5px;font-weight:600;letter-spacing:-.005em;cursor:pointer;transition:opacity .15s ease}
 .gym .gy-log-btn::after{content:"→";font-weight:500}
 .gym .gy-log-btn:hover{opacity:.88}
 .gym .gy-log-btn:disabled{opacity:.5;cursor:default}
 .gym .gy-log-btn:focus-visible{outline:2px solid var(--link);outline-offset:2px}
-.gym .gy-prchart{max-width:820px;margin-top:16px;padding:14px 16px;border:1px solid var(--line);border-radius:var(--ng-r-md,12px);background:var(--card)}
+.gym .gy-side{min-width:0;padding-left:40px;border-left:1px solid var(--line);align-self:stretch}
+.gym .gy-side-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.gym .gy-side-sub{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);white-space:nowrap}
+.gym .gy-side-empty{margin:10px 0 0;max-width:34ch;font-size:12.5px;line-height:1.55;color:var(--t3)}
+.gym .gy-chart{height:200px;margin-top:12px;min-width:0;overflow:hidden}
+@media (max-width:1100px){
+  .gym .gy-panel{grid-template-columns:1fr;gap:18px}
+  .gym .gy-side{padding:18px 0 0;border-left:0;border-top:1px solid var(--line)}
+}
 .gym .gy-rest{border-top:1px solid var(--t1);border-bottom:1px solid var(--line);padding:44px 0;text-align:center}
 .gym .gy-rest-t{margin:0 0 6px;font-size:18px;font-weight:600;letter-spacing:-.02em;color:var(--t1)}
 .gym .gy-rest-d{margin:0 auto;max-width:460px;font-size:13px;line-height:1.6;color:var(--t2)}
 @media (prefers-reduced-motion:reduce){.gym .gy-panel{animation:none}.gym .gy-caret{transition:none}}
 @media (max-width:760px){
-  .gym .gy-workbench{grid-template-columns:1fr;gap:14px}
-  .gym .gy-aside{flex-direction:row;flex-wrap:wrap;align-items:flex-start;gap:10px 26px;padding:0 0 12px;border-right:0;border-bottom:1px solid var(--line)}
-  .gym .gy-aside-block{flex-direction:row;align-items:baseline;gap:8px}
-  .gym .gy-prlink{margin-top:0;margin-left:auto;padding-top:0}
+  .gym .gy-main{max-width:none}
   .gym .gy-group-h{padding-top:18px}
 }
 @media (max-width:640px){
   .gym .gy-head-tools{width:100%;align-items:flex-end;gap:12px}
+  .gym .gy-tools-row{width:100%;justify-content:flex-end}
   .gym .gy-row-name{font-size:16px}
   .gym .gy-row-state{display:none}
   /* The name needs this width more than the picture does. */
   .gym .gy-thumb{display:none}
-  .gym .gy-figure-img{width:104px;height:104px}
+  .gym .gy-facts{gap:4px 16px}
 }
 @media (max-width:600px){
   .gym .gy-panel{padding:14px 10px 16px;border-top:0}
   .gym .gy-title{font-size:27px}
   .gym .gy-setrow{grid-template-columns:26px minmax(0,1fr) minmax(0,1fr) 28px;gap:7px}
-  .gym .gy-setrow-head span:nth-child(4),.gym .gy-setvol{display:none}
 }
 @media (max-width:380px){
   .gym .gy-input{width:72px}
   .gym .gy-setrow{gap:7px}
-  .gym .gy-no{flex-basis:24px}
 }
 `;
 
@@ -226,9 +234,6 @@ const Icon = ({ d, className = "m-ic" }) => (
 );
 
 const ICONS = {
-  /* The shell nav's chart glyph — one "trend" app-wide. The old arrow stopped
-     its polyline 4 units short of the arrowhead corner. */
-  trend: <><path d="M3 3v18h18" /><path d="M6.5 15.5 10 11l3 2.7L18.7 8" /></>,
   check: <path d="M5 13l4 4L19 7" />,
   x: <path d="M18 6 6 18M6 6l12 12" />,
   chevron: <path d="m6 9 6 6 6-6" />,
@@ -282,39 +287,12 @@ const toTitleCase = (str) => {
     .replace(/\s+\)/g, ")");
 };
 
-/* Three published frames of one movement, played as a slow loop so the lift
-   reads as a movement rather than a pose. Reduced motion gets the first frame,
-   which is the starting position. */
-function ExerciseFigure({ frames, label }) {
-  const [frame, setFrame] = useState(0);
-
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
-    const timer = setInterval(
-      () => setFrame((index) => (index + 1) % frames.length),
-      650
-    );
-    return () => clearInterval(timer);
-  }, [frames.length]);
-
-  return (
-    <img
-      className="gy-figure-img"
-      src={frames[frame]}
-      alt={`Illustration of ${label}`}
-      width="512"
-      height="512"
-      decoding="async"
-    />
-  );
-}
-
 /* Status is carried by the label, not by a coloured fill: chips stay neutral
    so the ink/hairline chrome holds. */
 const STATUS_META = {
-  completed: { label: "Completed", chip: { background: "var(--sunken)", color: "var(--t1)" } },
-  "partially-completed": { label: "Partial", chip: { background: "var(--sunken)", color: "var(--t2)" } },
-  "not-completed": { label: "Pending", chip: { background: "transparent", color: "var(--t3)" } },
+  completed: { label: "Completed" },
+  "partially-completed": { label: "Partial" },
+  "not-completed": { label: "Pending" },
 };
 
 export default function GymTrackingPage() {
@@ -358,13 +336,28 @@ export default function GymTrackingPage() {
     format(new Date(), "yyyy-MM-dd"),
   );
   const [toasts, setToasts] = useState([]);
+  const statusMenuRef = useRef(null); // closes the day-status menu after a pick
+  const prRequestRef = useRef(null); // exerciseId of the trend request in flight
+
+  // Recharts keeps the width it measured on mount, so it goes stale when its
+  // column changes width (window resize, breakpoint). The chart's slot reports
+  // its own width instead, which also settles once the series loads.
+  const [trendWidth, setTrendWidth] = useState(0);
+  const trendObserver = useRef(null);
+  const attachTrend = useCallback((node) => {
+    trendObserver.current?.disconnect();
+    if (!node) return;
+    const measure = () => setTrendWidth(Math.round(node.getBoundingClientRect().width));
+    measure();
+    trendObserver.current = new ResizeObserver(measure);
+    trendObserver.current.observe(node);
+  }, []);
 
   // Day status
   const [todayGymStatus, setTodayGymStatus] = useState("not-completed");
 
   // Forms
-  const [prExerciseId, setPrExerciseId] = useState(null); // exerciseId whose PR chart is open
-  const [prSeries, setPrSeries] = useState([]);
+  const [prSeries, setPrSeries] = useState([]); // six-month top-set series for the open row
   // Session board: one exercise expanded at a time, and none of them on load.
   // null = the board is fully collapsed; a row opens only when picked.
   const [openExerciseId, setOpenExerciseId] = useState(null);
@@ -719,23 +712,37 @@ export default function GymTrackingPage() {
     }
   };
 
-  const handleOpenPRChart = async (exerciseId) => {
-    if (prExerciseId === exerciseId) {
-      setPrExerciseId(null);
-      return;
-    }
-    setPrExerciseId(exerciseId);
+  // The trend is part of the open card, so opening a row loads its history.
+  // Late responses are dropped when another row has been opened since.
+  const loadPrSeries = async (exerciseId) => {
+    prRequestRef.current = exerciseId;
+    setPrSeries([]);
+    setDataError("pr", false);
     try {
       const res = await fetch(`/api/workout-sessions?exerciseId=${exerciseId}&months=6`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
+      if (prRequestRef.current !== exerciseId) return;
       setPrSeries(data.series || []);
-      setDataError("pr", false);
     } catch (error) {
+      if (prRequestRef.current !== exerciseId) return;
       console.error("Error fetching PR series:", error);
       setPrSeries([]);
       setDataError("pr", true);
     }
+  };
+
+  // Opening loads the row's history; closing forgets it, so the next open
+  // never flashes the previous movement's line.
+  const toggleRow = (exerciseId) => {
+    if (openExerciseId === exerciseId) {
+      setOpenExerciseId(null);
+      prRequestRef.current = null;
+      setPrSeries([]);
+      return;
+    }
+    setOpenExerciseId(exerciseId);
+    loadPrSeries(exerciseId);
   };
 
   /** "2× 60kg · 50kg" style summary of a numeric sets array. */
@@ -776,7 +783,8 @@ export default function GymTrackingPage() {
     if (nextStr > TODAY) return; // never navigate into the future
     setCurrentDate(nextStr);
     setSetDrafts({}); // stale drafts from another date would mislead
-    setPrExerciseId(null);
+    prRequestRef.current = null;
+    setPrSeries([]);
     setOpenExerciseId(null);
   };
 
@@ -784,7 +792,8 @@ export default function GymTrackingPage() {
     if (currentDate === TODAY) return;
     setCurrentDate(TODAY);
     setSetDrafts({});
-    setPrExerciseId(null);
+    prRequestRef.current = null;
+    setPrSeries([]);
     setOpenExerciseId(null);
   };
 
@@ -845,9 +854,6 @@ export default function GymTrackingPage() {
   const flatExercises = sections.flatMap((section) => section.exercises);
   const totalExercises = flatExercises.length;
   const illustratedExercises = flatExercises.filter((ex) => exerciseMedia(ex.name)).length;
-  // One running number across the whole session, so a row can be called out
-  // by its place in the workout rather than by muscle abbreviation.
-  const exerciseNo = new Map(flatExercises.map((ex, i) => [ex._id, i + 1]));
 
   // Saved sets for one exercise — the row summary and the session progress
   // both read from the persisted session, never from unsaved drafts.
@@ -899,34 +905,61 @@ export default function GymTrackingPage() {
               <Link href="/dashboard/account#acc-training" className="gy-split-link">
                 Change your training split in Account →
               </Link>
-              <div className="gy-daynav" role="group" aria-label="Change the session date">
-                <button
-                  type="button"
-                  onClick={() => shiftDate(-1)}
-                  aria-label="View the previous day"
-                >
-                  <span style={{ display: "inline-flex", transform: "rotate(90deg)" }} aria-hidden="true">
-                    <Icon d={ICONS.chevron} className="w-3.5 h-3.5" />
-                  </span>
-                </button>
-                <span className="gy-daynav-date m-num">
-                  {isToday ? "Today" : format(parseISO(currentDate), "EEE d MMM")}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => shiftDate(1)}
-                  aria-label="View the next day"
-                  disabled={isToday}
-                >
-                  <span style={{ display: "inline-flex", transform: "rotate(-90deg)" }} aria-hidden="true">
-                    <Icon d={ICONS.chevron} className="w-3.5 h-3.5" />
-                  </span>
-                </button>
-                {!isToday && (
-                  <button type="button" className="gy-today" onClick={goToday}>
-                    Today
+              <div className="gy-tools-row">
+                {/* The day's own reading of its status: set from a menu, so the
+                    board keeps one primary action instead of two. */}
+                <details className="gy-status" ref={statusMenuRef}>
+                  <summary aria-label={`Day status: ${STATUS_META[todayGymStatus].label}`}>
+                    <span className="gy-status-dot" data-state={todayGymStatus} aria-hidden="true" />
+                    {STATUS_META[todayGymStatus].label}
+                    <Icon d={ICONS.chevron} className="w-3 h-3" />
+                  </summary>
+                  <div className="gy-status-menu">
+                    {Object.entries(STATUS_META).map(([val, meta]) => (
+                      <button
+                        key={val}
+                        type="button"
+                        aria-pressed={todayGymStatus === val}
+                        onClick={() => {
+                          statusMenuRef.current?.removeAttribute("open");
+                          handleGymStatusUpdate(val);
+                        }}
+                      >
+                        {meta.label}
+                        {todayGymStatus === val && <Icon d={ICONS.check} className="w-3 h-3" />}
+                      </button>
+                    ))}
+                  </div>
+                </details>
+                <div className="gy-daynav" role="group" aria-label="Change the session date">
+                  <button
+                    type="button"
+                    onClick={() => shiftDate(-1)}
+                    aria-label="View the previous day"
+                  >
+                    <span style={{ display: "inline-flex", transform: "rotate(90deg)" }} aria-hidden="true">
+                      <Icon d={ICONS.chevron} className="w-3.5 h-3.5" />
+                    </span>
                   </button>
-                )}
+                  <span className="gy-daynav-date m-num">
+                    {isToday ? "Today" : format(parseISO(currentDate), "EEE d MMM")}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => shiftDate(1)}
+                    aria-label="View the next day"
+                    disabled={isToday}
+                  >
+                    <span style={{ display: "inline-flex", transform: "rotate(-90deg)" }} aria-hidden="true">
+                      <Icon d={ICONS.chevron} className="w-3.5 h-3.5" />
+                    </span>
+                  </button>
+                  {!isToday && (
+                    <button type="button" className="gy-today" onClick={goToday}>
+                      Today
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </header>
@@ -948,22 +981,6 @@ export default function GymTrackingPage() {
                     {dayVolume > 0 && ` · ${dayVolume.toLocaleString()} kg`}
                   </span>
                 )}
-              </div>
-              <div className="status-wrap">
-                <span className="gy-label" id="gy-status-lbl">
-                  Day status
-                </span>
-                <div className="status-seg" role="group" aria-labelledby="gy-status-lbl">
-                  {Object.entries(STATUS_META).map(([val, meta]) => (
-                    <button
-                      key={val}
-                      onClick={() => handleGymStatusUpdate(val)}
-                      aria-pressed={todayGymStatus === val}
-                    >
-                      {meta.label}
-                    </button>
-                  ))}
-                </div>
               </div>
             </div>
 
@@ -1013,15 +1030,10 @@ export default function GymTrackingPage() {
                             <button
                               type="button"
                               className="gy-row-h"
-                              onClick={() =>
-                                setOpenExerciseId(open ? null : ex._id)
-                              }
+                              onClick={() => toggleRow(ex._id)}
                               aria-expanded={open}
                               aria-controls={`gy-panel-${ex._id}`}
                             >
-                              <span className="gy-no m-num">
-                                {String(exerciseNo.get(ex._id)).padStart(2, "0")}
-                              </span>
                               {media && (
                                 <span className="gy-thumb" aria-hidden="true">
                                   <img
@@ -1038,7 +1050,7 @@ export default function GymTrackingPage() {
                                 <span className="gy-row-name">{toTitleCase(ex.name)}</span>
                                 {summary && (
                                   <span className="gy-row-meta">
-                                    {`${summary.count} set${summary.count === 1 ? "" : "s"} · ${summary.top} kg top · ${summary.volume.toLocaleString()} kg volume`}
+                                    {`${summary.count} set${summary.count === 1 ? "" : "s"} · ${summary.top} kg top`}
                                   </span>
                                 )}
                               </span>
@@ -1050,29 +1062,15 @@ export default function GymTrackingPage() {
 
                             {open && (
                               <div className="gy-panel" id={`gy-panel-${ex._id}`}>
-                                <div className="gy-workbench">
-                                  <aside className="gy-aside">
-                                  {media && (
-                                    <figure className="gy-figure">
-                                      <ExerciseFigure
-                                        frames={media.frames}
-                                        label={toTitleCase(ex.name)}
-                                      />
-                                      <figcaption className="gy-figure-cap">
-                                        <a
-                                          href={EXERCISE_MEDIA_CREDIT.url}
-                                          target="_blank"
-                                          rel="noreferrer noopener"
-                                        >
-                                          {EXERCISE_MEDIA_CREDIT.label}
-                                        </a>{" "}
-                                        · {EXERCISE_MEDIA_CREDIT.license}
-                                      </figcaption>
-                                    </figure>
-                                  )}
-                                  <div className="gy-aside-block">
-                                    <span className="gy-spec-lbl">
+                                <div className="gy-main">
+                                  <div className="gy-facts">
+                                    <div className="gy-fact">
                                       <span className="gy-label">Warm up</span>
+                                      <span className="gy-spec-val">
+                                        {ex.warmUpSets?.length > 0
+                                          ? formatSetsDisplay(ex.warmUpSets)
+                                          : ex.warmUp || "Not set"}
+                                      </span>
                                       <button
                                         type="button"
                                         onClick={() => openWarmUpEdit(ex)}
@@ -1081,8 +1079,29 @@ export default function GymTrackingPage() {
                                       >
                                         <Icon d={ICONS.pencil} className="w-3.5 h-3.5" />
                                       </button>
-                                    </span>
-                                    {wuExerciseId === ex._id ? (
+                                    </div>
+                                    <div className="gy-fact">
+                                      <span className="gy-label">Best</span>
+                                      <span className="gy-spec-val">
+                                        {ex.prWeight != null ? `${ex.prWeight} kg` : ex.lastPR || "None"}
+                                        {ex.lastPRDate && (
+                                          <span className="gy-spec-sub">
+                                            {format(new Date(ex.lastPRDate), "d MMM yyyy")}
+                                          </span>
+                                        )}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => openPrEdit(ex)}
+                                        aria-label={`Edit personal best for ${toTitleCase(ex.name)}`}
+                                        className="gy-edit"
+                                      >
+                                        <Icon d={ICONS.pencil} className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
+                                  </div>
+
+                                  {wuExerciseId === ex._id && (
                                       <div className="gy-wu-edit">
                                         {wuDraft.map((set, idx) => (
                                           <div className="gy-wu-row" key={idx}>
@@ -1139,28 +1158,9 @@ export default function GymTrackingPage() {
                                           </button>
                                         </div>
                                       </div>
-                                    ) : (
-                                      <p className="gy-spec-val">
-                                        {ex.warmUpSets?.length > 0
-                                          ? formatSetsDisplay(ex.warmUpSets)
-                                          : ex.warmUp || "Not set"}
-                                      </p>
-                                    )}
-                                  </div>
+                                  )}
 
-                                  <div className="gy-aside-block">
-                                    <span className="gy-spec-lbl">
-                                      <span className="gy-label">Best</span>
-                                      <button
-                                        type="button"
-                                        onClick={() => openPrEdit(ex)}
-                                        aria-label={`Edit personal best for ${toTitleCase(ex.name)}`}
-                                        className="gy-edit"
-                                      >
-                                        <Icon d={ICONS.pencil} className="w-3.5 h-3.5" />
-                                      </button>
-                                    </span>
-                                    {prEditExerciseId === ex._id ? (
+                                  {prEditExerciseId === ex._id && (
                                       <div className="gy-pr-edit">
                                         <input
                                           type="number"
@@ -1204,41 +1204,16 @@ export default function GymTrackingPage() {
                                           <Icon d={ICONS.x} className="w-3.5 h-3.5" />
                                         </button>
                                       </div>
-                                    ) : (
-                                      <p className="gy-spec-val">
-                                        {ex.prWeight != null
-                                          ? `${ex.prWeight} kg`
-                                          : ex.lastPR || "None"}
-                                        {ex.lastPRDate && (
-                                          <span className="gy-spec-sub">
-                                            {format(new Date(ex.lastPRDate), "d MMM yyyy")}
-                                          </span>
-                                        )}
-                                      </p>
-                                    )}
-                                  </div>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleOpenPRChart(ex._id)}
-                                    aria-expanded={prExerciseId === ex._id}
-                                    className="gy-prlink"
-                                  >
-                                    <Icon d={ICONS.trend} className="w-4 h-4" />
-                                    {prExerciseId === ex._id ? "Hide PR trend" : "PR trend"}
-                                  </button>
-                                  </aside>
+                                  )}
 
-                                  <div className="gy-main">
-                                <div className="gy-setblock">
+                                  <div className="gy-setblock">
                                   <div className="gy-setblock-h">
                                     <span className="gy-label">Working sets</span>
-                                    <span className="gy-hint">{getSetsFor(ex._id).length} set{getSetsFor(ex._id).length === 1 ? "" : "s"}</span>
                                   </div>
                                   <div className="gy-setrow gy-setrow-head" aria-hidden="true">
                                     <span>Set</span>
                                     <span>Kg</span>
                                     <span>Reps</span>
-                                    <span>Volume</span>
                                     <span></span>
                                   </div>
                                   <div className="gy-sets" data-ex-sets={ex._id}>
@@ -1267,15 +1242,6 @@ export default function GymTrackingPage() {
                                           onKeyDown={(e) => handleSetRowKeyDown(e, ex._id)}
                                           className="gy-input"
                                         />
-                                        <span
-                                          className={`gy-setvol${
-                                            Number(set.weight) > 0 && Number(set.reps) > 0 ? " has-value" : ""
-                                          }`}
-                                        >
-                                          {Number(set.weight) > 0 && Number(set.reps) > 0
-                                            ? `${(Number(set.weight) * Number(set.reps)).toLocaleString()} kg`
-                                            : "—"}
-                                        </span>
                                         <button
                                           type="button"
                                           onClick={() => removeSetRow(ex._id, idx)}
@@ -1322,62 +1288,66 @@ export default function GymTrackingPage() {
                                     {savingExercise === ex._id ? "Saving…" : "Log sets"}
                                   </button>
                                 </div>
-                              </div>
-                            </div>
+                                </div>
 
-                            {prExerciseId === ex._id && (
-                              <div className="gy-prchart">
-                                <p className="gy-label">Top set weight — last 6 months</p>
-                                {renderStaleNotice("pr", "Couldn't load your PR history.")}
-                                {prSeries.length === 0 ? (
-                                  <p className="gy-spec-val" style={{ margin: "8px 0 0" }}>
-                                    No sets logged yet — save your working sets to build history.
-                                  </p>
-                                ) : (
-                                  <div style={{ height: 180, marginTop: 10 }}>
-                                    <ResponsiveContainer width="100%" height={180}>
-                                      <LineChart data={prSeries}>
-                                        <CartesianGrid stroke={RT_GRID} strokeDasharray="3 3" vertical={false} />
-                                        <XAxis
-                                          dataKey="date"
-                                          tick={AXIS_TICK}
-                                          axisLine={{ stroke: RT_GRID }}
-                                          tickLine={false}
-                                          tickFormatter={(d) => format(new Date(d), "MMM d")}
-                                        />
-                                        <YAxis
-                                          tick={AXIS_TICK}
-                                          axisLine={false}
-                                          tickLine={false}
-                                          width={34}
-                                          domain={[0, "dataMax + 5"]}
-                                        />
-                                        <Tooltip
-                                          contentStyle={{
-                                            backgroundColor: "var(--card)",
-                                            border: "1px solid var(--line)",
-                                            borderRadius: "var(--ng-r-sm, 6px)",
-                                            boxShadow: "var(--ng-shadow-2)",
-                                            fontSize: 12,
-                                          }}
-                                          formatter={(value, name) => [
-                                            name === "weight" ? `${value} kg` : value,
-                                            name === "weight" ? "Top set" : name,
-                                          ]}
-                                        />
-                                        <Line
-                                          type="monotone"
-                                          dataKey="weight"
-                                          stroke="var(--ac)"
-                                          strokeWidth={2}
-                                          dot={{ r: 3, fill: "var(--ac)" }}
-                                        />
-                                      </LineChart>
-                                    </ResponsiveContainer>
+                                <aside className="gy-side" aria-label="Top set weight trend">
+                                  <div className="gy-side-h">
+                                    <span className="gy-label">Top set weight</span>
+                                    <span className="gy-side-sub">Last 6 months</span>
                                   </div>
-                                )}
-                              </div>
-                            )}
+                                  {renderStaleNotice("pr", "Couldn't load your PR history.")}
+                                  {prSeries.length === 0 ? (
+                                    <p className="gy-side-empty">
+                                      No sets logged yet — save your working sets to build history.
+                                    </p>
+                                  ) : (
+                                    <div className="gy-chart" ref={attachTrend}>
+                                      <ResponsiveContainer
+                                        key={trendWidth}
+                                        width={trendWidth || 1}
+                                        height={200}
+                                      >
+                                        <LineChart data={prSeries}>
+                                          <CartesianGrid stroke={RT_GRID} strokeDasharray="3 3" vertical={false} />
+                                          <XAxis
+                                            dataKey="date"
+                                            tick={AXIS_TICK}
+                                            axisLine={{ stroke: RT_GRID }}
+                                            tickLine={false}
+                                            tickFormatter={(d) => format(new Date(d), "MMM d")}
+                                          />
+                                          <YAxis
+                                            tick={AXIS_TICK}
+                                            axisLine={false}
+                                            tickLine={false}
+                                            width={34}
+                                            domain={[0, "dataMax + 5"]}
+                                          />
+                                          <Tooltip
+                                            contentStyle={{
+                                              backgroundColor: "var(--card)",
+                                              border: "1px solid var(--line)",
+                                              borderRadius: "var(--ng-r-sm, 6px)",
+                                              boxShadow: "var(--ng-shadow-2)",
+                                              fontSize: 12,
+                                            }}
+                                            formatter={(value, name) => [
+                                              name === "weight" ? `${value} kg` : value,
+                                              name === "weight" ? "Top set" : name,
+                                            ]}
+                                          />
+                                          <Line
+                                            type="monotone"
+                                            dataKey="weight"
+                                            stroke="var(--ac)"
+                                            strokeWidth={2}
+                                            dot={{ r: 3, fill: "var(--ac)" }}
+                                          />
+                                        </LineChart>
+                                      </ResponsiveContainer>
+                                    </div>
+                                  )}
+                                </aside>
                               </div>
                             )}
                           </li>
