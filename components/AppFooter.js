@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Logo from "@/components/Logo";
 
 /**
  * Landing page footer: brand and the three columns a product page needs —
@@ -13,7 +14,7 @@ export default function AppFooter() {
       <div className="ft-grid">
         <div className="ft-brand">
           <span className="ft-lockup">
-            <span aria-hidden="true" className="ft-mark">N.</span>
+            <Logo size={26} className="ft-mark" />
             NUTRIGAIN.
           </span>
           <p>
@@ -35,7 +36,7 @@ export default function AppFooter() {
         <div>
           <h3>Account</h3>
           <ul>
-            <li><Link href="/register">Create account</Link></li>
+            <li><Link href="/register">Get started free</Link></li>
             <li><Link href="/login">Sign in</Link></li>
             <li><Link href="/dashboard">Dashboard</Link></li>
           </ul>

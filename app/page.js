@@ -3,6 +3,7 @@ import AppShell from "@/components/AppShell";
 import AppFooter from "@/components/AppFooter";
 import HomeMotion from "@/components/HomeMotion";
 import NavIcon from "@/components/NavIcon";
+import Logo from "@/components/Logo";
 
 const DESCRIPTION =
   "NutriGain counts meals against your macro targets and records every set as weight x reps, so calories, protein and training live in one daily log.";
@@ -97,12 +98,6 @@ const PAGE_CSS = `
 .lp h2{font-size:clamp(1.85rem,3.2vw,2.75rem);line-height:1.06}
 .lp h3{font-size:clamp(1.3rem,1.9vw,1.75rem);line-height:1.15;letter-spacing:-.03em}
 .lp p{margin:0}
-.lp .eyebrow{
-  display:inline-flex;align-items:center;gap:8px;
-  font-family:var(--font-geist-mono),monospace;font-size:11px;font-weight:500;
-  letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);
-}
-.lp .eyebrow::before{content:"";width:6px;height:6px;border-radius:2px;background:var(--accent);flex:none}
 .lp .lede{font-size:clamp(1rem,1.35vw,1.2rem);line-height:1.6;color:var(--ink-2);max-width:52ch;text-wrap:pretty}
 
 /* Buttons --------------------------------------------------------------- */
@@ -122,13 +117,12 @@ const PAGE_CSS = `
   box-shadow:none;
 }
 .lp .btn-ghost:hover{background:var(--sunken);border-color:var(--line);transform:translateY(-1px)}
-.lp .btn-sm{height:40px;padding:0 16px;font-size:13px;border-radius:6px}
 
 /* Page rhythm ----------------------------------------------------------- */
 .lp #features,.lp #how,.lp #pricing,.lp #faq{scroll-margin-top:84px}
 .lp .hero{position:relative;overflow:clip;padding:clamp(48px,7vw,92px) 0 0}
 .lp .hero-in{position:relative;z-index:1;text-align:center;display:grid;justify-items:center;gap:0}
-.lp .hero h1{margin-top:22px;max-width:19ch}
+.lp .hero h1{max-width:19ch}
 .lp .hero .lede{margin-top:22px;text-align:center}
 .lp .hero-actions{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px;margin-top:34px}
 .lp .hero-meta{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;margin-top:22px;font-size:13px;color:var(--ink-3)}
@@ -160,8 +154,7 @@ const PAGE_CSS = `
 .lp .ui{display:grid;grid-template-columns:190px minmax(0,1fr) 250px;min-height:440px;text-align:left}
 .lp .ui-rail{border-right:1px solid var(--line);padding:18px 14px;background:var(--surface-2);display:grid;align-content:start;gap:4px}
 .lp .ui-logo{
-  display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;margin:2px 8px 16px;
-  border-radius:6px;background:var(--ink);color:var(--surface);font-size:11px;font-weight:600;
+  display:block;width:30px;height:30px;margin:2px 8px 16px;border-radius:6px;
 }
 .lp .ui-rail-row{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:8px;font-size:12.5px;color:var(--ink-2)}
 .lp .ui-rail-row svg{width:15px;height:15px;color:var(--ink-3)}
@@ -187,7 +180,6 @@ const PAGE_CSS = `
 .lp .ui-figure u{text-decoration:none;font-family:var(--font-geist-mono),monospace;font-size:9.5px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
 .lp .ui-track{height:4px;border-radius:999px;background:var(--line);overflow:hidden;margin-top:9px}
 .lp .ui-track i{display:block;height:100%;border-radius:999px;background:var(--ink)}
-.lp .ui-track i.accent{background:var(--ink)}
 .lp .ui-note{margin-top:7px;font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
 .lp .ui-slots{border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .lp .ui-slot{display:grid;grid-template-columns:78px minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 14px;border-top:1px solid var(--line);font-size:12.5px}
@@ -211,16 +203,9 @@ const PAGE_CSS = `
 .lp .ui-spark-k b{font-family:var(--font-geist-mono),monospace;font-size:11px;color:var(--ink)}
 .lp .ui-spark-note{font-size:10.5px;color:var(--ink-3);margin-top:3px}
 
-/* Trust strip ----------------------------------------------------------- */
-.lp .proof{border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-top:clamp(64px,8vw,104px);background:var(--surface)}
-.lp .proof-in{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:14px 44px;padding:22px 0}
-.lp .proof-k{font-family:var(--font-geist-mono),monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
-.lp .proof-in b{font-size:13px;font-weight:600;color:var(--ink-2);letter-spacing:-.01em}
-
 /* Sections -------------------------------------------------------------- */
 .lp .sec{padding:clamp(64px,9vw,120px) 0 0}
 .lp .sec-head{max-width:56ch;display:grid;gap:16px}
-.lp .sec-head h2{margin-top:2px}
 .lp .feature{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(28px,5vw,72px);align-items:center;padding:clamp(40px,5vw,64px) 0}
 .lp .feature + .feature{border-top:1px solid var(--line)}
 .lp .feature-copy{display:grid;gap:16px;align-content:center}
@@ -237,7 +222,6 @@ const PAGE_CSS = `
 .lp .card-h b{font-size:12.5px;font-weight:600}
 .lp .card-h span{font-family:var(--font-geist-mono),monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
 .lp .card-b{padding:16px}
-.lp .meals{display:grid}
 .lp .meal{display:grid;grid-template-columns:72px minmax(0,1fr) auto;gap:10px;align-items:center;padding:13px 16px;border-top:1px solid var(--line);font-size:13px}
 .lp .meal:first-child{border-top:0}
 .lp .meal-k{font-family:var(--font-geist-mono),monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
@@ -258,7 +242,6 @@ const PAGE_CSS = `
 .lp .band-total b{font-family:var(--font-geist-sans),system-ui,sans-serif;font-size:40px;font-weight:600;letter-spacing:-.045em;line-height:.9;font-variant-numeric:tabular-nums}
 .lp .band-total b u{text-decoration:none;font-family:var(--font-geist-mono),monospace;font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-left:6px}
 .lp .band-total span{font-size:11.5px;color:var(--ink-3);text-align:right;line-height:1.4;max-width:16ch}
-.lp .sets{display:grid}
 .lp .set{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:12px 16px;border-top:1px solid var(--line);font-size:13px}
 .lp .set:first-child{border-top:0}
 .lp .set b{font-family:var(--font-geist-mono),monospace;font-size:12px;font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -266,14 +249,66 @@ const PAGE_CSS = `
 .lp .set-foot{display:flex;gap:18px;flex-wrap:wrap;padding:12px 16px;border-top:1px solid var(--line);background:var(--surface-2);font-size:12px;color:var(--ink-2)}
 .lp .set-foot b{font-family:var(--font-geist-mono),monospace;font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums}
 
-/* Also included --------------------------------------------------------- */
-.lp .also{margin-top:clamp(32px,4vw,48px);padding-top:clamp(32px,4vw,48px);border-top:1px solid var(--line)}
-.lp .also-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:26px}
-.lp .also-card{padding:20px;border:1px solid var(--line);border-radius:12px;background:var(--surface);transition:border-color .15s ease}
-.lp .also-card:hover{border-color:var(--faint)}
-.lp .also-card svg{width:19px;height:19px;color:var(--accent)}
-.lp .also-card h4{margin:14px 0 6px;font-size:14px;font-weight:600;letter-spacing:-.01em}
-.lp .also-card p{font-size:13px;line-height:1.55;color:var(--ink-2)}
+/* Read-back record ------------------------------------------------------ */
+/* Two measured artifacts instead of a grid of icon cards: the training
+   heatmap and the PR trend are the page's only unrepeatable claims, so they
+   are shown rather than asserted. Both sit on the paper with one rule between
+   them, and both are labelled as sample data. */
+.lp .record{margin-top:clamp(32px,4vw,48px);padding-top:clamp(32px,4vw,48px);border-top:1px solid var(--line)}
+.lp .record-head{display:grid;gap:14px;max-width:56ch}
+.lp .record h2{font-size:clamp(1.5rem,2.4vw,2rem)}
+.lp .record-grid{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);align-items:start;
+  margin-top:clamp(24px,3vw,34px);border-top:1px solid var(--line-2);
+}
+.lp .record-panel{margin:0;padding:22px 0 0;min-width:0}
+.lp .record-panel + .record-panel{padding-left:clamp(20px,3vw,36px);border-left:1px solid var(--line)}
+.lp .record-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.lp .record-h b{font-size:13px;font-weight:600;letter-spacing:-.01em}
+.lp .record-h span{
+  font-family:var(--font-geist-mono),monospace;font-size:9.5px;font-weight:500;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap;
+}
+.lp .record-panel figcaption{margin-top:12px;font-size:12px;line-height:1.5;color:var(--ink-3)}
+.lp .record-panel figcaption b{color:var(--ink);font-weight:500;font-variant-numeric:tabular-nums}
+
+/* Heatmap — twenty-four weeks across, seven days down. The cells are
+   sessions; the shading is how many sets that day carried. */
+.lp .heat{display:grid;grid-template-columns:repeat(24,minmax(0,1fr));gap:3px;margin-top:14px}
+.lp .heat i,.lp .heat-legend i{display:block;border-radius:2px;background:var(--line)}
+.lp .heat i{aspect-ratio:1}
+.lp .heat-legend{display:flex;align-items:center;gap:4px;margin-top:10px;
+  font-family:var(--font-geist-mono),monospace;font-size:9.5px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-3)}
+.lp .heat-legend i{width:9px;height:9px;flex:none}
+.lp .heat-legend span:first-child{margin-right:3px}
+.lp .heat-legend span:last-child{margin-left:3px}
+.lp .heat i[data-l="1"],.lp .heat-legend i[data-l="1"]{background:color-mix(in srgb, var(--ink) 30%, var(--paper))}
+.lp .heat i[data-l="2"],.lp .heat-legend i[data-l="2"]{background:color-mix(in srgb, var(--ink) 50%, var(--paper))}
+.lp .heat i[data-l="3"],.lp .heat-legend i[data-l="3"]{background:color-mix(in srgb, var(--ink) 72%, var(--paper))}
+.lp .heat i[data-l="4"],.lp .heat-legend i[data-l="4"]{background:var(--ink)}
+
+/* PR trend — one lift's best set per month, drawn from the same values the
+   caption names so the picture cannot drift from the claim. */
+.lp .trend{display:block;width:100%;height:auto;margin-top:12px}
+.lp .trend line{stroke:var(--line);stroke-width:1}
+.lp .trend path{fill:none;stroke:var(--ink);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.lp .trend circle{fill:var(--paper);stroke:var(--ink);stroke-width:2}
+.lp .trend circle.pr-dot{fill:var(--ink)}
+.lp .trend-foot{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-top:8px;
+  font-family:var(--font-geist-mono),monospace;font-size:9.5px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-3)}
+.lp .trend-foot b{font-family:var(--font-geist-sans),system-ui,sans-serif;font-size:13.5px;letter-spacing:-.01em;
+  text-transform:none;color:var(--ink);font-variant-numeric:tabular-nums}
+
+/* The three claims the artifacts do not already cover, as a ruled list
+   rather than another row of cards. */
+.lp .record-facts{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(18px,3vw,34px);
+  margin:clamp(22px,3vw,30px) 0 0;padding-top:20px;border-top:1px solid var(--line);
+}
+.lp .record-facts dt{font-size:13px;font-weight:600;letter-spacing:-.01em}
+.lp .record-facts dd{margin:6px 0 0;font-size:13px;line-height:1.55;color:var(--ink-2);max-width:34ch}
 
 /* How it works ---------------------------------------------------------- */
 .lp .steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:36px;counter-reset:step}
@@ -351,11 +386,6 @@ const PAGE_CSS = `
   padding:clamp(32px,5vw,60px);
   display:grid;grid-template-columns:minmax(0,1fr) auto;gap:28px;align-items:center;
 }
-.lp .close-in::before{
-  content:"";position:absolute;right:-10%;top:-60%;width:520px;height:520px;border-radius:50%;
-  background:radial-gradient(closest-side,rgba(255,255,255,.22),transparent 70%);
-  pointer-events:none;
-}
 .lp .close h2{color:inherit;max-width:18ch}
 .lp .close p{margin-top:14px;font-size:15px;line-height:1.6;max-width:44ch;color:inherit;opacity:.9}
 .lp .close .btn{background:var(--accent-ink);color:var(--accent);box-shadow:none}
@@ -368,7 +398,8 @@ const PAGE_CSS = `
   .lp .ui-side{display:none}
 }
 @media(max-width:900px){
-  .lp .also-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .lp .record-grid{grid-template-columns:minmax(0,1fr)}
+  .lp .record-panel + .record-panel{margin-top:24px;padding:24px 0 0;border-left:0;border-top:1px solid var(--line)}
   .lp .steps{grid-template-columns:minmax(0,1fr)}
   .lp .faq-grid{grid-template-columns:minmax(0,1fr);gap:28px}
   .lp .faq-intro{position:static;gap:12px}
@@ -389,7 +420,7 @@ const PAGE_CSS = `
 .lp .ft-grid{display:grid;grid-template-columns:minmax(0,1.7fr) repeat(3,minmax(0,.75fr));gap:32px}
 .lp .ft-brand{display:grid;gap:14px;align-content:start;max-width:40ch}
 .lp .ft-lockup{display:inline-flex;align-items:center;gap:9px;font-size:12.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--ink)}
-.lp .ft-mark{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:7px;background:var(--ink);color:var(--surface);font-size:10px;font-weight:700;letter-spacing:0}
+.lp .ft-mark{display:block;width:26px;height:26px;border-radius:7px}
 .lp .ft-brand p{font-size:13px;line-height:1.65;color:var(--ink-3)}
 .lp .ft h3{margin:0 0 13px;font-family:var(--font-geist-mono),monospace;font-size:10px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
 .lp .ft ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
@@ -421,18 +452,17 @@ const PAGE_CSS = `
   .lp .ui-figure{font-size:22px}
   .lp .ui-figure.mid{font-size:17px}
   .lp .ui-slot{grid-template-columns:64px minmax(0,1fr) auto;font-size:12px}
+  .lp .record-facts{grid-template-columns:minmax(0,1fr);gap:16px}
   .lp .hero-actions .btn{width:100%}
   .lp .hero-actions{gap:10px}
   .lp .faq-item summary{grid-template-columns:22px minmax(0,1fr) 20px;gap:10px;padding:16px 0}
   .lp .faq-q{font-size:15px}
   .lp .faq-a{padding:0 10px 18px 32px}
   .lp .faq-a p{font-size:13.5px}
-  .lp .also-grid{grid-template-columns:minmax(0,1fr)}
-  .lp .stage::after{display:none}
 }
 @media(prefers-reduced-motion:reduce){
   .lp *{transition:none!important;animation:none!important}
-  .lp .btn:hover,.lp .also-card:hover{transform:none}
+  .lp .btn:hover{transform:none}
 }
 `;
 
@@ -454,42 +484,74 @@ const SETS = [
   { lift: "Overhead press", set: "40 kg × 8", pr: false },
 ];
 
-const ALSO = [
-  { icon: "trend", title: "Weight trend", copy: "One weigh-in a day, charted across the month you are actually in." },
-  { icon: "flame", title: "Streaks", copy: "Consecutive days with a meal logged, so a good week is visible." },
-  { icon: "split", title: "Split planner", copy: "A weekly rotation that tells you which muscles are due." },
-  { icon: "grid", title: "Calendar heatmap", copy: "Every training day in one grid, GitHub-style." },
+/* Twenty-four weeks of training as the heatmap reads it: one string per week,
+   seven days each, "0" for no session and 1–4 for the sets that day carried.
+   Authored rather than generated so the picture is the same on the server and
+   in the browser. The count is fixed because it sets the cell size: twenty-four
+   columns fill the panel the way a heatmap is meant to read, where twelve left
+   each cell the size of a tile. */
+const HEAT_WEEKS = [
+  "0302100",
+  "0203400",
+  "0003201",
+  "1202000",
+  "0303100",
+  "0214000",
+  "0021300",
+  "1303020",
+  "0203100",
+  "0312000",
+  "0202410",
+  "0030200",
+  "1303020",
+  "0212400",
+  "0302301",
+  "0021320",
+  "2303010",
+  "0204200",
+  "1030320",
+  "0302300",
+  "0203100",
+  "0312400",
+  "0203010",
+  "0302300",
 ];
 
-/* Four small marks for the "also included" row, drawn here rather than
-   added to the app's NavIcon set: these are page illustrations, not chrome. */
-const MINI = {
-  trend: (
-    <>
-      <path d="M3 16.5 8 11l3.5 3.5L20 6" />
-      <path d="M15.5 6H20v4.5" />
-    </>
-  ),
-  flame: (
-    <path d="M12 3c3 3.6 5.5 6.1 5.5 9.6A5.5 5.5 0 0 1 12 18a5.5 5.5 0 0 1-5.5-5.4C6.5 9.1 9 6.6 12 3Z" />
-  ),
-  split: (
-    <>
-      <path d="M3.5 7h9" />
-      <path d="M10.5 4.2 13.5 7l-3 2.8" />
-      <path d="M20.5 17h-9" />
-      <path d="M13.5 14.2 10.5 17l3 2.8" />
-    </>
-  ),
-  grid: (
-    <>
-      <rect x="3.5" y="3.5" width="5" height="5" rx="1.2" />
-      <rect x="12.5" y="3.5" width="5" height="5" rx="1.2" />
-      <rect x="3.5" y="12.5" width="5" height="5" rx="1.2" />
-      <rect x="12.5" y="12.5" width="5" height="5" rx="1.2" />
-    </>
-  ),
-};
+/* The grid fills left to right, so the weeks are transposed into day rows. */
+const HEAT_CELLS = Array.from({ length: 7 }, (_, day) =>
+  HEAT_WEEKS.map((week) => week[day] || "0")
+).flat();
+
+const HEAT_DAYS = HEAT_CELLS.filter((level) => level !== "0").length;
+
+/* One lift's best set per month, six months running. The chart is drawn from
+   these numbers and so is its caption, so the two cannot disagree. */
+const PR_TREND = [
+  { month: "May", kg: 70, reps: 5 },
+  { month: "Jun", kg: 72.5, reps: 5 },
+  { month: "Jul", kg: 75, reps: 4 },
+  { month: "Aug", kg: 75, reps: 5 },
+  { month: "Sep", kg: 80, reps: 4 },
+  { month: "Oct", kg: 82.5, reps: 3 },
+];
+
+const PR_MIN = 65;
+const PR_MAX = 85;
+/* A wide, flat plot: the trend column starts life 726px across, and a 320-wide
+   viewBox scaled to that would make six points 290px tall. */
+const PR_POINTS = PR_TREND.map((entry, i) => [
+  8 + (i * (552 - 8)) / (PR_TREND.length - 1),
+  112 - ((entry.kg - PR_MIN) / (PR_MAX - PR_MIN)) * (112 - 16),
+]);
+const PR_PATH = PR_POINTS.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`).join(" ");
+const PR_LAST = PR_TREND[PR_TREND.length - 1];
+
+/* What the two artifacts do not already show, said in one line each. */
+const RECORD_FACTS = [
+  { title: "Weight trend", copy: "One weigh-in a day, charted across the month you are actually in." },
+  { title: "Streaks", copy: "Consecutive days with a meal logged, so a good week is visible." },
+  { title: "Split planner", copy: "A weekly rotation that names the muscles due today." },
+];
 
 const FAQ = [
   {
@@ -514,22 +576,6 @@ const FAQ = [
   },
 ];
 
-function MiniIcon({ name }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      {MINI[name]}
-    </svg>
-  );
-}
-
 function Check() {
   return (
     <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
@@ -543,7 +589,11 @@ function Check() {
 function DashboardMock() {
   return (
     <div className="stage" data-reveal>
-      <div className="window">
+      <div
+        className="window"
+        role="group"
+        aria-label="The NutriGain dashboard for a sample day: calories and macros left, three meal slots, the day's sets and a weight trend."
+      >
         <div className="window-bar">
           <span className="window-url">nutrigain.app/dashboard</span>
           <span className="window-tag">Sample day</span>
@@ -551,7 +601,7 @@ function DashboardMock() {
 
         <div className="ui">
           <div className="ui-rail" aria-hidden="true">
-            <span className="ui-logo">N.</span>
+            <Logo size={30} className="ui-logo" />
             {[
               ["feed", "Today"],
               ["meal", "Meal"],
@@ -581,7 +631,7 @@ function DashboardMock() {
                 <span className="ui-figure">
                   1,000 <u>kcal</u>
                 </span>
-                <div className="ui-track"><i className="accent" style={{ width: "58%" }} /></div>
+                <div className="ui-track"><i style={{ width: "58%" }} /></div>
                 <span className="ui-note">1,400 of 2,400 logged</span>
               </div>
               {MACROS.map((m) => (
@@ -663,7 +713,6 @@ export default function Home() {
           {/* ---------------- HERO ---------------- */}
           <section className="hero" aria-labelledby="title">
             <div className="ng-container hero-in">
-              <span className="eyebrow">Nutrition and lifting, one log</span>
               <h1 id="title">
                 Know what’s left.{" "}
                 <br />
@@ -695,23 +744,10 @@ export default function Home() {
             </div>
           </section>
 
-          {/* ---------------- PROOF / STACK ---------------- */}
-          <section className="proof" aria-label="Built with">
-            <div className="ng-container proof-in" data-reveal>
-              <span className="proof-k">Built on</span>
-              <b>Next.js 16</b>
-              <b>React 19</b>
-              <b>MongoDB</b>
-              <b>Tailwind CSS 4</b>
-              <b>Self-hostable</b>
-            </div>
-          </section>
-
           {/* ---------------- FEATURES ---------------- */}
           <section id="features" className="sec" aria-labelledby="features-title">
             <div className="ng-container">
               <div className="sec-head" data-reveal>
-                <span className="eyebrow">What it does</span>
                 <h2 id="features-title">The whole day, and the numbers that matter in it.</h2>
                 <p className="lede">
                   Three surfaces do the daily work: meals, macros and sets. Everything else
@@ -831,19 +867,86 @@ export default function Home() {
                 </div>
               </article>
 
-              <div className="also">
-                <div className="sec-head" data-reveal>
-                  <h2 style={{ fontSize: "clamp(1.5rem,2.4vw,2rem)" }}>Also included</h2>
+              <div className="record" data-reveal>
+                <div className="record-head">
+                  <h2>What six months of logging looks like.</h2>
+                  <p className="lede">
+                    The heatmap and the PR trend are the two things a calorie counter cannot
+                    show you. Both are drawn from entries the log already holds — there is no
+                    weekly review to fill in.
+                  </p>
                 </div>
-                <div className="also-grid">
-                  {ALSO.map((item) => (
-                    <div className="also-card" key={item.title} data-reveal>
-                      <MiniIcon name={item.icon} />
-                      <h4>{item.title}</h4>
-                      <p>{item.copy}</p>
+
+                <div className="record-grid">
+                  <figure className="record-panel">
+                    <div className="record-h">
+                      <b>Training heatmap</b>
+                      <span>Last 24 weeks</span>
+                    </div>
+                    <div className="heat" aria-hidden="true">
+                      {HEAT_CELLS.map((level, i) => (
+                        <i key={i} data-l={level} />
+                      ))}
+                    </div>
+                    <div className="heat-legend" aria-hidden="true">
+                      <span>Less</span>
+                      {["0", "1", "2", "3", "4"].map((level) => (
+                        <i key={level} data-l={level} />
+                      ))}
+                      <span>More</span>
+                    </div>
+                    <figcaption>
+                      <b>{HEAT_DAYS}</b> training days in twenty-four weeks, shaded by the sets
+                      each one carried. Sample data.
+                    </figcaption>
+                  </figure>
+
+                  <figure className="record-panel">
+                    <div className="record-h">
+                      <b>Bench press · top set</b>
+                      <span>Six months</span>
+                    </div>
+                    <svg
+                      className="trend"
+                      viewBox="0 0 560 128"
+                      role="img"
+                      aria-label="Best bench press set each month, rising from 70 kilograms in May to 82.5 kilograms in October."
+                    >
+                      {[16, 64, 112].map((y) => (
+                        <line key={y} x1="8" x2="552" y1={y} y2={y} />
+                      ))}
+                      <path d={PR_PATH} />
+                      {PR_POINTS.map(([x, y], i) => (
+                        <circle
+                          key={i}
+                          cx={x.toFixed(1)}
+                          cy={y.toFixed(1)}
+                          r={i === PR_POINTS.length - 1 ? 3.5 : 2.5}
+                          className={i === PR_POINTS.length - 1 ? "pr-dot" : undefined}
+                        />
+                      ))}
+                    </svg>
+                    <div className="trend-foot">
+                      <span>May</span>
+                      <b>
+                        {PR_LAST.kg} kg × {PR_LAST.reps}
+                      </b>
+                      <span>Oct</span>
+                    </div>
+                    <figcaption>
+                      Personal best set on 18 October, from the month you are in. Sample data.
+                    </figcaption>
+                  </figure>
+                </div>
+
+                <dl className="record-facts">
+                  {RECORD_FACTS.map((fact) => (
+                    <div key={fact.title}>
+                      <dt>{fact.title}</dt>
+                      <dd>{fact.copy}</dd>
                     </div>
                   ))}
-                </div>
+                </dl>
               </div>
             </div>
           </section>
@@ -852,7 +955,6 @@ export default function Home() {
           <section id="how" className="sec" aria-labelledby="how-title">
             <div className="ng-container">
               <div className="sec-head" data-reveal>
-                <span className="eyebrow">How it works</span>
                 <h2 id="how-title">Set up once, then log the day.</h2>
                 <p className="lede">
                   No import, no spreadsheet to migrate, no ten-step wizard. Three screens
@@ -889,7 +991,6 @@ export default function Home() {
           <section id="pricing" className="sec" aria-labelledby="pricing-title">
             <div className="ng-container">
               <div className="sec-head" data-reveal>
-                <span className="eyebrow">Pricing</span>
                 <h2 id="pricing-title">One plan. No tiers to compare.</h2>
               </div>
 
@@ -905,7 +1006,7 @@ export default function Home() {
                     the hosted app, or run the same code against your own database.
                   </p>
                   <Link href="/register" className="btn">
-                    Create your account
+                    Get started free
                   </Link>
                 </div>
                 <div className="plan-list">
@@ -932,7 +1033,6 @@ export default function Home() {
             <div className="ng-container">
               <div className="faq-grid">
                 <div className="faq-intro" data-reveal>
-                  <span className="eyebrow">FAQ</span>
                   <h2 id="faq-title">Questions, answered plainly.</h2>
                   <p className="faq-lede">
                     The five things people ask before logging a first meal. No trial

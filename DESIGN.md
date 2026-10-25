@@ -14,14 +14,13 @@ expects.
 | Order | Section | Job |
 |---|---|---|
 | 1 | Hero | One promise, two actions, the dashboard immediately below |
-| 2 | Stack strip | What it is built on, no invented customer logos |
-| 3 | Features ×3 | Meals, remaining macros, sets — each with the real UI beside it |
-| 4 | Also included | The four secondary surfaces, as compact cards |
-| 5 | How it works | Three steps, honest about the actual setup |
-| 6 | Pricing | One plan, $0, inclusions on the right |
-| 7 | FAQ | Five questions that block signup |
-| 8 | Closing CTA | Ink panel, repeat of the primary action |
-| 9 | Footer | Product, account, project |
+| 2 | Features ×3 | Meals, remaining macros, sets — each with the real UI beside it |
+| 3 | Record | The training heatmap and the PR trend drawn from sample entries, then three surfaces as a ruled list |
+| 4 | How it works | Three steps, honest about the actual setup |
+| 5 | Pricing | One plan, $0, inclusions on the right |
+| 6 | FAQ | Five questions that block signup |
+| 7 | Closing CTA | Ink panel, repeat of the primary action |
+| 8 | Footer | Product, account, project |
 
 Anchors: `#features`, `#how`, `#pricing`, `#faq`, all with `scroll-margin-top: 84px`.
 
@@ -60,7 +59,8 @@ One family, like the app: **Geist** for everything, **Geist Mono** for labels an
 - h1 600, `clamp(2.8rem, 5.6vw, 4.6rem)`, tracking −0.04em, leading 1.02.
 - h2 600, `clamp(1.85rem, 3.2vw, 2.75rem)`; h3 600, `clamp(1.3rem, 1.9vw, 1.75rem)`.
 - Body 15–17px / 1.6, measure 40–52 characters, `--t2`.
-- Eyebrows and table labels: Geist Mono 10–11px, uppercase, 0.06–0.08em.
+- Section headings stand alone: no eyebrow or kicker sits above an h1/h2. Micro-labels
+  (card headers, legends, table captions) are Geist Mono 9.5–11px, uppercase, 0.06–0.08em.
 - Nav 13px/500, buttons 13.5px/500 — the dashboard's own sizes.
 - Archivo (the previous display face) is no longer loaded; `app/layout.js` carries Geist,
   Geist Mono and the 404/error Playfair only.
@@ -88,11 +88,13 @@ rows — crops of the surfaces they describe.
 
 ## Content rules
 
-- No testimonials, no customer logos, no user counts. The stack strip stands where a logo row
-  would sit, because the products named there are actually used.
+- No testimonials, no customer logos, no user counts. Nothing stands where a logo row would
+  sit; the claim is the page itself.
 - One plan at $0 because that is true, with the self-host path stated and linked.
 - FAQ answers the real blockers: free?, targets?, lifting only?, data?, phone?.
 - Every claim maps to something the app does.
+- One label for the primary action everywhere — nav, hero, pricing, closing panel: **Get
+  started free**. Nothing on the page asks for the same thing under a second name.
 
 ## Motion
 
@@ -115,13 +117,16 @@ stack, pricing stacks, footer to two columns), 700px (hero type scale, mock budg
 2×2, full-width actions), 640px (nav drops the duplicate "Sign in"), 360px (lockup shrinks so
 it never touches the toggle).
 
-## Verification (production build)
+## Verification
 
-- axe (color-contrast) — 0 violations light, 0 dark.
-- Full audit: 0 violations overall, 0 undersized targets, LCP 164ms desktop / 1.12s mobile
-  (4× CPU, slow 4G), CLS 0, 60fps scroll, keyboard order clean, reduced motion still, every
-  hover target moves.
-- `npm run build` and ESLint exit 0.
+- `next build` and ESLint exit 0.
+- Contrast computed from the rendered page in both themes: body copy 7.7:1 dark / 5.1:1 light,
+  captions and micro-labels 6.8:1 / 5.0:1 — every text step clears 4.5:1.
+- Layout measured at 1440 and 375: no horizontal overflow, the two record panels within 10px
+  of each other, heat cells 23px and 10px respectively.
+- Semantics checked by hand — figures carry captions, the heatmap cells and mockup rails are
+  decorative, the trend svg and mockup group are labelled. axe is not a project dependency, so
+  there is no automated sweep to report.
 
 ## Files
 

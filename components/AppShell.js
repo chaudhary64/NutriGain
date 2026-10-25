@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import NavIcon from "@/components/NavIcon";
+import Logo from "@/components/Logo";
 
 /**
  * Shared application shell.
@@ -85,18 +86,13 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
 
   const homeHref = isAdmin ? "/admin" : isMarketing ? "/" : "/dashboard";
 
-  // W2 lockup — ink monogram + wide-tracked NUTRIGAIN. wordmark.
+  // The app mark beside the wide-tracked NUTRIGAIN. wordmark.
   const brand = (
     <Link
       href={homeHref}
       className="flex items-center gap-2.5 min-w-0 hover:opacity-80 transition-opacity"
     >
-      <span
-        aria-hidden="true"
-        className="w-6 h-6 rounded-md bg-[var(--shell-ink)] text-[var(--shell-on-ink)] flex items-center justify-center text-[11px] font-semibold leading-none select-none" style={{ flex: "none" }}
-      >
-        N.
-      </span>
+      <Logo size={24} className="shrink-0" />
       <span className="mk-word text-[13px] font-semibold uppercase tracking-[0.22em] leading-none whitespace-nowrap text-[var(--shell-ink)]">
         NUTRIGAIN<span className="text-[var(--shell-accent)]">.</span>
       </span>
@@ -249,7 +245,7 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
                 Sign in
               </Link>
               <Link href="/register" className="mk-link mk-link-ink">
-                Get started
+                Get started free
               </Link>
             </>
           )}
