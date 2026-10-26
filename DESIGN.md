@@ -24,6 +24,48 @@ expects.
 
 Anchors: `#features`, `#how`, `#pricing`, `#faq`, all with `scroll-margin-top: 84px`.
 
+## Chrome
+
+One fixed bar, 64px, on the page's own ground with a hairline under it — no shadow, no
+second row. Left: the mark and the wide-tracked wordmark. Centre: the four section links.
+Right: a 1px rule, the appearance switch, then the account end — Dashboard, your name and
+logout, or Sign in and Get started free. The rule is what keeps the links from reading as
+the first items of one long list, and it is why the switch never reads as a fifth link. The
+bar is a three-track grid, so the centre group sits on the bar's own centre line rather
+than in whatever room the wordmark leaves over.
+
+The appearance switch is the one control in the bar whose glyph could be read as decoration
+or as a state badge, so from 1200px it carries its word as well — "Dark" beside a moon while
+the page is light, "Light" beside a sun while it is dark. Word and glyph both name the
+action. Narrower, the glyph carries it alone with `aria-label` and `title` doing the naming.
+It is a button named for what pressing it does, not a `switch`: APG requires a switch's label
+to stay put while its state flips.
+
+The link for the section being read carries a 2px underline in ink and
+`aria-current="location"`; the rest keep the hover rule. The marker is read from the
+section's own box, so it needs no offset table.
+
+Below 940px the bar is the mark and the menu, and everything else moves inside it: the four
+sections, the account end — Dashboard, your name, logout, or Sign in and Get started free —
+and an Appearance row that names Light and Dark as two buttons rather than leaving the sun
+and moon to carry it. The glyph is three lines with the last one short and pulled right; even
+bars read as a list icon at this size, and the broken line is what makes it a menu.
+
+The menu is the whole screen, not a dropdown under the bar. Both directions are GSAP
+timelines in `MarketingLinks` — not CSS keyframes, because the timing then lives in one
+place and the exit can be awaited before the sheet unmounts. It drops in from the bar's top
+edge on a `transform` (the `clip-path` wipe it started as was repainted every frame), the
+rows follow it in on a 50ms stagger, and it leaves on a 260ms `power2.in` before unmounting.
+A 600ms guard finishes the close even if the tab's animation clock has stopped, so a
+backgrounded tab can never leave the page scroll-locked. Reduced motion skips both tweens.
+It repeats the wordmark with a named Close beside it, lists the sections at 56px rows, and
+pins the account end and the Appearance choice to the bottom edge. Picking a section, Close
+or Escape returns to the page with focus back on the button and the page scroll unlocked. It is portalled out of the bar, because the bar's `backdrop-filter` would
+otherwise become the containing block for a fixed sheet and clip it to 64px. A bordered box
+with a chevron was the first version of this control and it read as a select.
+
+Below 520px the wordmark is clipped rather than removed, so the home link keeps its name.
+
 ## Tokens
 
 The page carries `.lp mrd`; `.mrd` supplies the Meridian token set, and `.lp` only renames
@@ -112,10 +154,12 @@ both themes.
 
 ## Responsive
 
-1440px container, 28px gutters. Breaks: 1080px (mock drops its side column), 900px (features
-stack, pricing stacks, footer to two columns), 700px (hero type scale, mock budget becomes
-2×2, full-width actions), 640px (nav drops the duplicate "Sign in"), 360px (lockup shrinks so
-it never touches the toggle).
+1440px container, 28px gutters. Breaks: 1200px (the appearance switch keeps its word), 1080px
+(mock drops its side column), 940px (the bar becomes mark and menu; section
+links fold into the `Sections` disclosure, the rule leaves the bar), 900px (features stack,
+pricing stacks, footer to two columns), 700px (hero type scale, mock budget becomes 2×2,
+full-width actions), 640px (nav drops the duplicate "Sign in"), 520px (mark without the
+wordmark), 360px (everything above still clears the menu and the switch).
 
 ## Verification
 
@@ -133,6 +177,7 @@ it never touches the toggle).
 - `app/page.js` — the page, its scoped CSS, the mockup and the content arrays.
 - `components/HomeMotion.js` — the IntersectionObserver reveal.
 - `components/AppFooter.js` — footer columns.
-- `components/AppShell.js` — marketing bar (nav labels, one ink action).
+- `components/AppShell.js` — marketing bar (mark, action cluster, one ink action).
+- `components/MarketingLinks.js` — the section links, the read marker and the disclosure.
 - `app/globals.css` — `.mk-*` chrome styles, skip link.
 - `public/og.png` — regenerated from the live hero at 1200×630.

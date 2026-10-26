@@ -167,9 +167,7 @@ export default function AuthShell({ photo, photoPosition = "50% 38%", next = "",
         type="button"
         onClick={toggleTheme}
         className="auth-theme"
-        role="switch"
         aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-        aria-checked={theme === "dark"}
         title={theme === "dark" ? "Light mode" : "Dark mode"}
       >
         <ThemeGlyph dark={theme === "dark"} />

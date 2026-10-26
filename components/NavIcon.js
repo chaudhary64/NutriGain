@@ -69,8 +69,12 @@ export default function NavIcon({ name, className = "w-[18px] h-[18px]" }) {
       <path d="M21.752 15.002A9.718 9.718 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998z" />
     ),
     close: <path d="M6 18 18 6M6 6l12 12" />,
-    menu: <path d="M4 6h16M4 12h16M4 18h16" />,
+    /* Three lines, the last one short and pulled to the right. Equal bars read
+       as a list icon at 20px; the broken bottom line reads as a menu, which is
+       the one thing this glyph has to say. */
+    menu: <path d="M4 6h16M4 12h16m-7 6h7" />,
     arrow: <path d="M5 12h14m0 0-6-6m6 6-6 6" />,
+    chevron: <path d="m6 9.5 6 6 6-6" />,
   };
   return (
     <svg

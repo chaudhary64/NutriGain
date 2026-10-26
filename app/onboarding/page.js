@@ -179,9 +179,8 @@ export default function OnboardingPage() {
       <button
         onClick={toggleTheme}
         className="onb-toggle"
-        role="switch"
         aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-        aria-checked={theme === "dark"}
+        title={theme === "dark" ? "Light mode" : "Dark mode"}
       >
         {theme === "dark" ? (
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" width="20" height="20" aria-hidden="true">

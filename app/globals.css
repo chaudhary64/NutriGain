@@ -333,7 +333,6 @@ html[data-theme="dark"] {
 /* Visible keyboard focus — WCAG 2.4.7 (global: shell + all pages) */
 button:focus-visible,
 a:focus-visible,
-[role="switch"]:focus-visible,
 [role="menuitem"]:focus-visible,
 [role="option"]:focus-visible,
 [tabindex]:focus-visible {
@@ -709,14 +708,33 @@ a:focus-visible,
   border-bottom: 1px solid var(--shell-line);
 }
 
+/* Three tracks, not space-between: the wordmark owns the left track and the
+   cluster owns the middle one, so the links and the account action sit on the
+   bar's own centre line instead of in whatever room the wordmark left over.
+   The empty right track is what keeps the two fr tracks equal. */
+.mk-bar-inner {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  height: 64px;
+  gap: 16px;
+}
+
+/* justify-self — a stretched grid item would make the wordmark's link swallow
+   the whole left track, so the empty middle of the bar became a home link. */
+.mk-bar-inner > :first-child {
+  grid-column: 1;
+  justify-self: start;
+  min-width: 0;
+}
+
 /* Marketing chrome: quiet text links while there is room, one filled
-   accented action on the right. The dashboard keeps its own dark rail, so
-   nothing here is shared with the signed-in surfaces. */
+   accented action at the end of the cluster. The dashboard keeps its own dark
+   rail, so nothing here is shared with the signed-in surfaces. */
 .mk-links {
   display: none;
   align-items: center;
-  gap: 28px;
-  margin-right: 6px;
+  gap: 24px;
 }
 
 @media (min-width: 940px) {
@@ -789,6 +807,429 @@ a:focus-visible,
   color: var(--shell-on-accent);
   transform: translateY(-1px);
   filter: brightness(1.08);
+}
+
+/* The map of the page: the section links, a hairline, then the appearance
+   switch. The rule is what keeps the switch from reading as another link. */
+.mk-actions {
+  grid-column: 2;
+  justify-self: center;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  /* max-content, not 0: a group allowed to shrink below its own width spills
+     into its neighbour instead of making the track give way. */
+  min-width: max-content;
+}
+
+/* The account end, held apart from the map so the two never read as one list.
+   It ends on the bar's gutter whatever the centre group is doing. */
+.mk-auth {
+  grid-column: 3;
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: max-content;
+}
+
+.mk-sep {
+  display: none;
+  width: 1px;
+  height: 20px;
+  background: var(--shell-line);
+}
+
+/* The appearance switch. A sun and a moon are the one pair of glyphs in this
+   bar that can be read as decoration or as a state badge, so where the bar has
+   room the action gets its word too — the same word the glyph stands for. */
+.mk-theme {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--ng-r-sm, 6px);
+  background: transparent;
+  color: var(--shell-ink-2);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.mk-theme:hover {
+  background: var(--shell-sunken);
+  color: var(--shell-ink);
+}
+
+.mk-theme-label {
+  display: none;
+  white-space: nowrap;
+}
+
+@media (min-width: 1200px) {
+  /* Below this the word would push the centre group off its line, so the glyph
+     carries the control alone — its name and title stay for everyone else. */
+  .mk-theme-label {
+    display: block;
+  }
+}
+
+/* The underline doubles as the current-section marker — drawn, not replaced by
+   a second indicator. */
+.mk-link.is-active {
+  color: var(--shell-ink);
+}
+
+.mk-link.is-active::after {
+  height: 2px;
+  bottom: 3px;
+  transform: scaleX(1);
+}
+
+.mk-link.is-active:hover {
+  transform: none;
+}
+
+/* Below 940px the sections move behind one disclosure rather than vanishing. */
+/* The bar's menu. Three lines and no frame: a bordered box around a chevron
+   reads as a select, and this button opens the page's sections instead. */
+.mk-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ng-r-sm, 6px);
+  background: transparent;
+  color: var(--shell-ink-2);
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+/* A tint of the ink rather than --shell-sunken: the landing rebinds that token
+   to its own surface, which is the same value as the bar's ground in light
+   mode, so the pressed state would disappear. */
+.mk-more:hover,
+.mk-more[aria-expanded="true"] {
+  color: var(--shell-ink);
+  background: color-mix(in srgb, var(--shell-ink) 7%, transparent);
+}
+
+.mk-more svg {
+  width: 22px;
+  height: 22px;
+}
+
+.mk-panel-brand {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+/* The menu is the whole screen, not a dropdown under the bar: on a phone the
+   section list, the account end and the appearance choice do not fit in a
+   panel, and a sheet is what the bar's three lines have always promised. It
+   opens on its own header so the wordmark and a named Close stay put while the
+   list scrolls. */
+
+/* Reserving the gutter for as long as the sheet exists is what stops the page
+   from jumping: locking the scroll removes the scrollbar, which hands the
+   viewport ~11–17px of width, and every centred block shifts sideways by half
+   of it while the sheet is still dropping in. Scoped with :has() so the space
+   is reserved only while the sheet is open — and the sheet is fixed, so it
+   still paints across the reserved strip instead of stopping short of the
+   window edge. */
+html:has(.mk-panel) {
+  scrollbar-gutter: stable;
+}
+
+.mk-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  background: var(--shell-bg);
+  color: var(--shell-ink);
+  /* Both directions are GSAP timelines (MarketingLinks): the sheet drops in
+     from the bar and leaves on the same clock. Kept on a transform so the
+     compositor owns it — the clip-path wipe this replaced repainted the whole
+     sheet on the main thread every frame. */
+  will-change: transform, opacity;
+}
+
+.mk-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 64px;
+  flex: none;
+  border-bottom: 1px solid var(--shell-line);
+}
+
+.mk-panel-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  /* The lists ride at the top, the account block sits on the bottom edge — the
+     same split the signed-in menu uses. */
+  justify-content: space-between;
+  overflow-y: auto;
+  padding-block: 8px 26px;
+}
+
+.mk-panel-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--shell-muted);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.mk-panel-close:hover {
+  color: var(--shell-ink);
+}
+
+.mk-panel-close-lbl {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.mk-panel-close svg {
+  width: 24px;
+  height: 24px;
+}
+
+.mk-panel a {
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+  border-top: 1px solid var(--shell-line);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.012em;
+  color: var(--shell-ink-2);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.mk-panel-nav a:first-child {
+  border-top: 0;
+}
+
+
+
+.mk-panel a:hover,
+.mk-panel a[aria-current] {
+  color: var(--shell-ink);
+}
+
+/* The menu's second half: who you are, the way in or out, and the appearance
+   choice. Same 48px rows as the sections, one hairline between the two lists.
+   Scoped past `.mk-panel a` so a row that is a link and a row that is a
+   button are the same object. */
+.mk-menu-more {
+  margin-top: 6px;
+  border-top: 1px solid var(--shell-line);
+  padding-top: 2px;
+}
+
+.mk-menu-id {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 0 10px;
+}
+
+.mk-menu-ava {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: var(--ng-r-sm, 6px);
+  border: 1px solid var(--shell-line);
+  background: var(--shell-sunken);
+  color: var(--shell-ink);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.mk-menu-id-txt {
+  display: grid;
+  min-width: 0;
+}
+
+.mk-menu-id-txt b {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--shell-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mk-menu-id-txt i {
+  font-style: normal;
+  font-size: 11.5px;
+  color: var(--shell-muted);
+}
+
+.mk-panel .mk-menu-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 56px;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--shell-line);
+  background: transparent;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.012em;
+  color: var(--shell-ink-2);
+  text-decoration: none;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.mk-panel .mk-menu-row:hover {
+  color: var(--shell-ink);
+}
+
+.mk-panel .mk-menu-row svg {
+  width: 18px;
+  height: 18px;
+  color: var(--shell-muted);
+}
+
+.mk-panel .mk-menu-row-ink {
+  justify-content: center;
+  min-height: 44px;
+  margin: 10px 0 4px;
+  border: 0;
+  border-radius: var(--ng-r-sm, 6px);
+  background: var(--shell-accent);
+  color: var(--shell-on-accent);
+  font-weight: 600;
+}
+
+.mk-panel .mk-menu-row-ink:hover {
+  color: var(--shell-on-accent);
+  filter: brightness(1.06);
+}
+
+.mk-menu-theme {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  border-top: 1px solid var(--shell-line);
+}
+
+.mk-menu-theme-lbl {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--shell-muted);
+}
+
+.mk-seg {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--shell-line);
+  border-radius: var(--ng-r-sm, 6px);
+}
+
+.mk-seg button {
+  height: 30px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--shell-ink-2);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.mk-seg button[aria-pressed="true"] {
+  background: var(--shell-ink);
+  color: var(--shell-bg);
+}
+
+@media (min-width: 940px) {
+  .mk-more {
+    display: none;
+  }
+
+  .mk-sep {
+    display: block;
+  }
+}
+
+@media (max-width: 939px) {
+  /* The phone bar is the mark and the menu. Everything the bar cannot hold —
+     the sections, the appearance control, the way in or out — lives inside the
+     menu, so nothing competes with the one target that opens it. */
+  .mk-bar-inner {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+
+  .mk-actions {
+    grid-column: 2;
+    justify-self: end;
+  }
+
+  .mk-auth {
+    display: none;
+  }
+}
+
+@media (max-width: 519px) {
+  /* The mark alone still brands the bar on the narrowest phones, and collapsing
+     the wordmark to a clipped box (rather than display:none) is what lets the
+     sections control, the appearance switch and the action share one row while
+     the home link keeps its name. */
+  .mk-word {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 }
 
 .mk-bar :is(a, button):focus-visible {

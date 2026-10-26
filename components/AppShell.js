@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import NavIcon from "@/components/NavIcon";
 import Logo from "@/components/Logo";
+import MarketingLinks from "@/components/MarketingLinks";
 
 /**
  * Shared application shell.
@@ -20,6 +21,8 @@ import Logo from "@/components/Logo";
  *    destination is lost on small screens.
  *  - "marketing" — public pages keep the slim fixed top bar; framing the
  *    landing page in app chrome would make it read as a signed-in surface.
+ *    Its links, the marker for the section being read, and the narrow-screen
+ *    disclosure live in MarketingLinks.
  *
  * The sidebar is a real <aside> landmark and its rows carry aria-current,
  * so keyboard and screen-reader users get the same map as sighted ones.
@@ -31,7 +34,7 @@ import Logo from "@/components/Logo";
  */
 export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, children }) {
   const { user, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -106,20 +109,31 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
 
   /* Both glyphs are drawn so the icon can morph between them rather than snap.
      The visible one is the action, not the state: a sun in dark mode, a moon in
-     light mode — the page already tells you which mode you are in. */
-  const themeToggle = (
+     light mode — the page already tells you which mode you are in.
+
+     A button whose name is the action it performs, not a switch: APG requires a
+     switch's label to stay the same as its state flips, and this one is named
+     for what pressing it will do. `labelled` adds the same word the glyph
+     carries, for the marketing bar's wide layout. */
+  const themeToggle = ({ labelled = false, className = "sb-icon" } = {}) => (
     <button
+      type="button"
       onClick={toggleTheme}
-      className="sb-icon"
-      role="switch"
+      className={className}
       aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-      aria-checked={theme === "dark"}
       title={theme === "dark" ? "Light mode" : "Dark mode"}
     >
       <span className={"sb-theme-glyph" + (theme === "light" ? " is-moon" : "")} aria-hidden="true">
         <NavIcon name="sun" className="sb-theme-sun" />
         <NavIcon name="moon" className="sb-theme-moon" />
       </span>
+      {/* The name already carries this word, so the span stays out of the
+          accessibility tree and the control is not announced twice. */}
+      {labelled && (
+        <span className="mk-theme-label" aria-hidden="true">
+          {theme === "dark" ? "Light" : "Dark"}
+        </span>
+      )}
     </button>
   );
 
@@ -175,7 +189,7 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
             <i>{isAdmin ? "Admin" : "Signed in"}</i>
           </span>
           <div className="sb-acts">
-            {themeToggle}
+            {themeToggle()}
             {logoutButton}
           </div>
         </div>
@@ -190,7 +204,7 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
     <div className="sb-mbar">
       {brand}
       <div className="flex items-center gap-1">
-        {themeToggle}
+        {themeToggle()}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           className="sb-icon"
@@ -206,21 +220,88 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
 
   const marketingBar = (
     <nav className="mk-bar" aria-label="Primary">
-      <div className="ng-container flex h-16 items-center justify-between gap-4">
+      <div className="ng-container mk-bar-inner">
         {brand}
-        <div className="flex items-center gap-3">
-          {/* In-page signposts — the landing page is one long argument, so
-              its sections are the only navigation it needs. The primary
-              action stays in the hero rather than competing up here. */}
+        <div className="mk-actions">
+          {/* In-page signposts — the landing page is one long argument, so its
+              sections are the only navigation it needs. MarketingLinks owns
+              them: the marker for the section being read, and the menu that
+              keeps them reachable below 940px. The menu also carries the
+              account end and the appearance control, so the phone bar is the
+              mark and one button instead of three small targets. */}
           {!isAdmin && (
-            <div className="mk-links">
-              <Link href="/#features" className="mk-link">Features</Link>
-              <Link href="/#how" className="mk-link">How it works</Link>
-              <Link href="/#pricing" className="mk-link">Pricing</Link>
-              <Link href="/#faq" className="mk-link">FAQ</Link>
-            </div>
+            <MarketingLinks
+              brand={brand}
+              renderMenu={() => (
+                <>
+                  {user ? (
+                    <div className="mk-menu-acct">
+                      <div className="mk-menu-id">
+                        <span className="mk-menu-ava" aria-hidden="true">{initials}</span>
+                        <span className="mk-menu-id-txt">
+                          <b>{user.name}</b>
+                          <i>{user.isAdmin ? "Admin" : "Signed in"}</i>
+                        </span>
+                      </div>
+                      <Link href="/dashboard" className="mk-menu-row">
+                        Dashboard
+                      </Link>
+                      {/* data-menu-close: the sheet closes itself on anything
+                          that leaves the page, including this. */}
+                      <button
+                        type="button"
+                        className="mk-menu-row"
+                        data-menu-close
+                        onClick={logout}
+                      >
+                        Log out
+                        <NavIcon name="logout" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="mk-menu-acct">
+                      <Link href="/login" className="mk-menu-row">
+                        Sign in
+                      </Link>
+                      <Link href="/register" className="mk-menu-row mk-menu-row-ink">
+                        Get started free
+                      </Link>
+                    </div>
+                  )}
+
+                  {/* Two states, named. A menu has room for the words an icon
+                      in the bar has to stand in for. */}
+                  <div className="mk-menu-theme" role="group" aria-label="Appearance">
+                    <span className="mk-menu-theme-lbl">Appearance</span>
+                    <div className="mk-seg">
+                      <button
+                        type="button"
+                        aria-pressed={theme === "light"}
+                        onClick={() => setTheme("light")}
+                      >
+                        Light
+                      </button>
+                      <button
+                        type="button"
+                        aria-pressed={theme === "dark"}
+                        onClick={() => setTheme("dark")}
+                      >
+                        Dark
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            />
           )}
-          {themeToggle}
+        </div>
+
+        {/* The account end: the way the page looks, who you are, and the way in
+            or out — held off the map of the page by a rule, so the links never
+            read as the first two items of one long list. */}
+        <div className="mk-auth">
+          {!isAdmin && <span className="mk-sep" aria-hidden="true" />}
+          {themeToggle({ labelled: true, className: "mk-theme" })}
           {user ? (
             <>
               <Link href="/dashboard" className="mk-link mk-link-dash">
@@ -300,7 +381,7 @@ export default function AppShell({ variant = "dashboard", navSlot, mobileSlot, c
           <div className="sb-menu-head ng-container">
             {brand}
             <div className="flex items-center gap-1">
-              {themeToggle}
+              {themeToggle()}
               <button
                 onClick={() => setMobileMenuOpen(false)}
                 className="sb-icon"
