@@ -13,7 +13,7 @@ import { FALLBACK_MACRO_GOALS } from "@/lib/goals";
 /* Today — the daily landing surface.                                  */
 /*                                                                     */
 /* The page answers one question: what is left to do today. It leads  */
-/* with the food budget still available, lists the three meal slots    */
+/* with the food budget still available, lists every meal slot         */
 /* with their own log actions, and states today's session. History,    */
 /* streaks, and weight belong to Progress; a second copy of them here  */
 /* only competed with the actions.                                     */
@@ -60,7 +60,7 @@ const TODAY_CSS = `
   .td-pend{grid-column:2;grid-row:1;margin-top:0}
 }
 
-/* Meal slots — one row per slot, always all three, so the shape of the
+/* Meal slots — one row per slot, always all of them, so the shape of the
    day is visible before anything is logged. The macro column sits between
    the name and the slot total so the width carries reading, not air. */
 .td-slot{display:grid;grid-template-columns:88px minmax(0,1fr) auto;gap:4px 14px;align-items:start;padding:13px 18px;border-top:1px solid var(--line)}
@@ -124,6 +124,7 @@ const TODAY_CSS = `
 const SLOTS = [
   { key: "breakfast", label: "Breakfast" },
   { key: "lunch", label: "Lunch" },
+  { key: "snacks", label: "Snacks" },
   { key: "dinner", label: "Dinner" },
 ];
 
@@ -324,7 +325,7 @@ export default function TodayPage() {
   const sub = (() => {
     if (loading) return "Loading today’s log…";
     if (failed.log) return "Today’s log is unavailable right now.";
-    if (!nextSlot) return "All three slots logged — the rest of the day is yours.";
+    if (!nextSlot) return "Every slot logged — the rest of the day is yours.";
     if (!entries.length) return "Nothing logged yet — every target is still open.";
     if (remaining.calories < 0) return `${fmt(-remaining.calories)} kcal over — noted, not judged.`;
     return `${openCount} ${openCount === 1 ? "slot" : "slots"} open — ${nextSlot.label.toLowerCase()} is next.`;
@@ -418,7 +419,7 @@ export default function TodayPage() {
           )}
         </section>
 
-        {/* ---------- The three slots ---------- */}
+        {/* ---------- Every slot ---------- */}
         <section className="m-card" style={{ marginBottom: 20 }} aria-label="Today's meals">
           <div className="m-card-h">
             <h2>Meals</h2>

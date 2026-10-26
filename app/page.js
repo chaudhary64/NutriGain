@@ -506,10 +506,15 @@ const MACROS = [
   { name: "Fat", left: 44, logged: 36, target: 80, pct: 45 },
 ];
 
+/* The sample day, in the order the app logs it: breakfast, lunch, snacks,
+   dinner. Dinner is the open slot because the hero's whole argument is about
+   what is still ahead of you, and snacks sits between lunch and dinner the way
+   it does in the ledger. */
 const SLOTS = [
   { key: "07:20 breakfast", name: "Oats, whey, banana", note: "Breakfast · 3 entries", kcal: "620", open: false },
   { key: "13:05 lunch", name: "Paneer, rice, dal", note: "Lunch · 4 entries", kcal: "780", open: false },
-  { key: "18:40 dinner", name: "Dinner", note: "No entries yet", kcal: null, open: true },
+  { key: "16:40 snacks", name: "Curd, almonds", note: "Snacks · 2 entries", kcal: "210", open: false },
+  { key: "19:30 dinner", name: "Dinner", note: "No entries yet", kcal: null, open: true },
 ];
 
 const SETS = [
@@ -626,7 +631,7 @@ function DashboardMock() {
       <div
         className="window"
         role="group"
-        aria-label="The NutriGain dashboard for a sample day: calories and macros left, three meal slots, the day's sets and a weight trend."
+        aria-label="The NutriGain dashboard for a sample day: calories and macros left, four meal slots, the day's sets and a weight trend."
       >
         <div className="window-bar">
           <span className="window-url">nutrigain.app/dashboard</span>
@@ -822,8 +827,8 @@ export default function Home() {
                 <div className="feature-copy" data-reveal>
                   <h3 id="f1">Meals that do their own arithmetic</h3>
                   <p>
-                    Breakfast, lunch and dinner each keep their own entries and their own
-                    total. Add a food and the day&apos;s calories and macros update in the
+                    Breakfast, lunch, snacks and dinner each keep their own entries and
+                    their own total. Add a food and the day&apos;s calories and macros update in the
                     same keystroke — no spreadsheet, no second app.
                   </p>
                   <ul className="feature-list">
@@ -836,7 +841,7 @@ export default function Home() {
                   <div className="card">
                     <div className="card-h">
                       <b>Today&apos;s meals</b>
-                      <span>2 of 3 logged</span>
+                      <span>3 of 4 logged</span>
                     </div>
                     {SLOTS.map((s) => (
                       <div className="meal" key={"m" + s.key}>

@@ -48,10 +48,27 @@ const MealSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
   },
+  // Foods a signed-in user creates are private to them; the admin-curated
+  // library stays shared. Missing on documents written before this field
+  // existed, which reads as shared — so no backfill is needed.
+  isPrivate: {
+    type: Boolean,
+    default: false,
+  },
+  // A one-off entry typed on the spot: it exists only so the day's entry has
+  // a food to point at, and is excluded from search so it never clutters the
+  // library.
+  isQuickAdd: {
+    type: Boolean,
+    default: false,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
   },
 });
+
+// Search reads "shared, or mine" on every log-bar keystroke.
+MealSchema.index({ isPrivate: 1, createdBy: 1 });
 
 export default mongoose.models.Meal || mongoose.model('Meal', MealSchema);

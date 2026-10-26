@@ -11,7 +11,12 @@ import {
   recalculateTotals,
   todayDateString,
 } from '@/lib/daily-log';
-import { isValidDateString, validateDailyLogMeal, validateGymStatus } from '@/lib/validation';
+import {
+  isValidDateString,
+  validateDailyLogMeal,
+  validateGymStatus,
+  validateQuickAddEntry,
+} from '@/lib/validation';
 
 // GET daily log (read-only — never creates documents or mutates data)
 export const GET = withAuth(async (request, user) => {
@@ -57,11 +62,16 @@ export const GET = withAuth(async (request, user) => {
   );
 });
 
-// POST add meal to daily log
+// POST add meal to daily log. Two shapes: a library food by id, or `quick` —
+// a one-off whose numbers are typed rather than looked up. Both end up as a
+// meal document, so a logged day is populated the same way either way.
 export const POST = withAuth(async (request, user) => {
   const body = await request.json().catch(() => ({}));
+  const isQuick = Boolean(body?.quick);
 
-  const [validationErrors, normalized] = validateDailyLogMeal(body);
+  const [validationErrors, normalized] = isQuick
+    ? validateQuickAddEntry(body.quick)
+    : validateDailyLogMeal(body);
   if (validationErrors.length > 0) {
     return NextResponse.json(
       { error: validationErrors[0], errors: validationErrors },
@@ -69,14 +79,33 @@ export const POST = withAuth(async (request, user) => {
     );
   }
 
-  const { mealId, quantity, mealType, date } = normalized;
-
   await dbConnect();
 
-  const meal = await Meal.findById(mealId);
-  if (!meal) {
-    return NextResponse.json({ error: 'Meal not found' }, { status: 404 });
+  let meal;
+  if (isQuick) {
+    meal = await Meal.create({
+      name: normalized.name,
+      servingSize: '1 serving',
+      macros: normalized.macros,
+      category: 'general',
+      createdBy: user.id,
+      isPrivate: true,
+      isQuickAdd: true,
+    });
+  } else {
+    meal = await Meal.findById(normalized.mealId);
+    // Another user's private food is not loggable, and is reported as missing
+    // rather than forbidden so an id cannot be probed for existence.
+    if (
+      !meal ||
+      (meal.isPrivate && !user.isAdmin && String(meal.createdBy) !== String(user.id))
+    ) {
+      return NextResponse.json({ error: 'Meal not found' }, { status: 404 });
+    }
   }
+
+  const quantity = isQuick ? 1 : normalized.quantity;
+  const { mealType, date } = normalized;
 
   const dailyLog = await DailyLog.findOneAndUpdate(
     { user: user.id, date },
@@ -86,7 +115,7 @@ export const POST = withAuth(async (request, user) => {
 
   // Add meal entry
   dailyLog.meals.push({
-    meal: mealId,
+    meal: meal._id,
     mealName: meal.name,
     quantity,
     mealType,

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { format, isToday } from "date-fns";
 import AppShell from "@/components/AppShell";
+import FoodSheet from "@/components/FoodSheet";
 import Loader from "@/components/Loader";
 import { FALLBACK_MACRO_GOALS } from "@/lib/goals";
 import {
@@ -208,7 +209,10 @@ body:has(.ml-nut[open]){overflow:hidden}
 .ml-iconbtn:hover{background:var(--sunken);color:var(--red);border-color:var(--line)}
 .ml-iconbtn:focus-visible{outline:2px solid var(--t1);outline-offset:2px}
 /* ---- food dropdown ---- */
-.mrd .m-dd{position:absolute;z-index:var(--pop-z-dropdown,70);width:100%;min-width:300px;margin-top:6px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--ng-shadow-2);max-height:320px;overflow:auto;padding:6px}
+.mrd .m-dd{position:absolute;z-index:var(--pop-z-dropdown,70);width:100%;min-width:300px;max-width:560px;margin-top:6px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--ng-shadow-2);max-height:320px;overflow:auto;padding:6px}
+/* When the field sits low in the viewport — the usual case on a phone — the
+   list opens upward instead of running off the bottom of the screen. */
+.mrd .m-dd.is-up{top:auto;bottom:calc(100% + 6px);margin-top:0;margin-bottom:0;border-radius:12px}
 .mrd .m-dd-item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 10px;cursor:pointer;font-size:13px;border-radius:6px;border:0}
 .mrd .m-dd-item:hover,.mrd .m-dd-item.is-active{background:var(--sunken)}
 .mrd .m-dd-item.is-picked{background:var(--sunken)}
@@ -218,6 +222,29 @@ body:has(.ml-nut[open]){overflow:hidden}
 .mrd .m-dd-kcal{flex:none;font-size:12px;font-weight:500;color:var(--t1);background:var(--sunken);border-radius:6px;padding:4px 8px;font-variant-numeric:tabular-nums}
 .mrd .m-dd-item:hover .m-dd-kcal,.mrd .m-dd-item.is-active .m-dd-kcal{background:var(--card)}
 .mrd .m-dd-recent{flex:none;font-family:var(--font-mono);font-size:9.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);background:var(--card);border:1px solid var(--line);border-radius:4px;padding:2px 6px}
+/* The dropdown always ends with the two ways a food that isn't there can still
+   be logged: save it for next time, or count it once and move on. Pinned to
+   the bottom of the scroll area, because on a full library it would otherwise
+   sit below thirty rows — the one thing a stuck user needs, hidden. */
+.mrd .m-dd-foot{position:sticky;bottom:-6px;z-index:1;margin:4px -6px -6px;padding:2px 6px 6px;background:var(--card);border-top:1px solid var(--line);border-radius:0 0 11px 11px;box-shadow:0 -8px 12px -10px rgba(0,0,0,.25)}
+.mrd .m-dd-act{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border:0;border-radius:6px;background:none;font-family:inherit;text-align:left;color:var(--t1);cursor:pointer;transition:background .15s}
+.mrd .m-dd-act:hover,.mrd .m-dd-act.is-active{background:var(--sunken)}
+.mrd .m-dd-act:focus-visible{outline:2px solid var(--t1);outline-offset:-2px}
+.mrd .m-dd-act-ico{flex:none;width:26px;height:26px;display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);border-radius:6px;color:var(--t2)}
+.mrd .m-dd-act-ico svg{width:13px;height:13px}
+.mrd .m-dd-act-main{min-width:0;flex:1}
+.mrd .m-dd-act-name{display:block;font-size:12.5px;font-weight:500;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mrd .m-dd-act-sub{display:block;font-size:10.5px;color:var(--t3);margin-top:2px}
+.mrd .m-dd-more{margin:0;padding:9px 10px 8px;border-top:1px solid var(--line);font-size:10.5px;line-height:1.5;color:var(--t3);text-align:center}
+.mrd .m-dd-empty{margin:0}
+/* Editing belongs to the foods the user made, so the affordance only appears
+   on those rows — and only on hover, where it cannot be mistaken for the row's
+   own click target. Touch devices always show it. */
+.mrd .m-dd-edit{flex:none;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border:1px solid transparent;border-radius:5px;background:none;color:var(--t3);cursor:pointer;opacity:0;transition:opacity .15s,color .15s,background .15s}
+.mrd .m-dd-item:hover .m-dd-edit,.mrd .m-dd-item.is-active .m-dd-edit,.mrd .m-dd-edit:focus-visible{opacity:1}
+.mrd .m-dd-edit:hover,.mrd .m-dd-edit:focus-visible{color:var(--t1);background:var(--card);border-color:var(--line)}
+.mrd .m-dd-edit svg{width:12px;height:12px}
+@media(hover:none){.mrd .m-dd-edit{opacity:1}}
 .mrd .m-dd-empty{padding:22px;text-align:center;color:var(--t3);font-size:12.5px}
 /* ---- day ledger ---- */
 .ml-ledger{margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
@@ -402,6 +429,17 @@ const ICONS = {
   chevR: <path d="m9 18 6-6-6-6" />,
   chevD: <path d="m6 9 6 6 6-6" />,
   check: <path d="M20 6 9 17l-5-5" />,
+  pencil: <><path d="M4 20h4l10.4-10.4a2.1 2.1 0 0 0-3-3L5 17v3z" /><path d="m13.4 6.6 4 4" /></>,
+  zap: <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z" />,
+};
+
+/* One label per log slot, read by the select and the ledger alike so a slot
+   can never be named two ways. The order comes from MEAL_TYPES. */
+const SLOT_LABEL = {
+  breakfast: "Breakfast",
+  lunch: "Lunch",
+  dinner: "Dinner",
+  snacks: "Snacks",
 };
 
 /* Semantic macro metadata — accent icon class + bar class per macro. */
@@ -432,6 +470,32 @@ const fmtMacro = (value) => {
   const rounded = Math.round((Number(value) || 0) * 10) / 10;
   return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
 };
+
+/**
+ * What one logged entry contributed to the day.
+ *
+ * The entry's own snapshot wins: it is what the day was logged with, it
+ * survives the food being edited, and it still reads correctly after the food
+ * is deleted. The linked food is the fallback for entries written before
+ * snapshots existed. Both the row and its slot header read this, so they can
+ * never disagree.
+ */
+function entryMacros(entry) {
+  const quantity = parseFloat(entry.quantity) || 0;
+  const snapshot = entry.macros;
+  const mealMacros = entry.meal?.macros || {};
+  const hasSnapshot = Number.isFinite(Number(snapshot?.calories));
+  const pick = (key) =>
+    hasSnapshot ? Number(snapshot[key]) || 0 : (mealMacros[key] || 0) * quantity;
+
+  return {
+    quantity,
+    calories: pick("calories"),
+    protein: pick("protein"),
+    carbs: pick("carbs"),
+    fats: pick("fats"),
+  };
+}
 
 /* ------------------------------------------------------------------ */
 /* ToastHost — designed feedback replacing native alert()/confirm().  */
@@ -847,12 +911,12 @@ function NutritionDialog({ open, onClose, meal, qty, macros, micros, profile }) 
 /* ------------------------------------------------------------------ */
 
 function EntryRow({ entry, onUpdateQuantity, onDelete }) {
-  const q = parseFloat(entry.quantity) || 0;
-  const m = entry.meal?.macros || {};
-  const tP = (m.protein || 0) * q;
-  const tC = (m.carbs || 0) * q;
-  const tF = (m.fats || 0) * q;
-  const tK = Math.round((m.calories || 0) * q);
+  const logged = entryMacros(entry);
+  const q = logged.quantity;
+  const tP = logged.protein;
+  const tC = logged.carbs;
+  const tF = logged.fats;
+  const tK = Math.round(logged.calories);
   // Same resolution the day's totals use, so "no micros" here means the entry
   // really contributed nothing to the board — not that its snapshot was skipped.
   const micros = resolveEntryMicros(entry);
@@ -999,18 +1063,26 @@ const SLOT_ICONS = {
     </>
   ),
   dinner: <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z" />,
+  /* Snacks are the slot with no time of day, so the mark is a cookie rather
+     than a sun: something eaten between the day's proper meals. */
+  snacks: (
+    <>
+      <circle cx="12" cy="12" r="8" />
+      <circle cx="9.2" cy="10.2" r="1.1" />
+      <circle cx="14.2" cy="9.4" r="1.1" />
+      <circle cx="12.6" cy="14.4" r="1.1" />
+    </>
+  ),
 };
 
 function LedgerSection({ slot, label, entries, open, onToggle, onAdd, onUpdateQuantity, onDelete }) {
-  const qtyOf = (e) => parseFloat(e.quantity) || 0;
   const totals = entries.reduce(
     (acc, e) => {
-      const m = e.meal?.macros || {};
-      const q = qtyOf(e);
-      acc.kcal += (m.calories || 0) * q;
-      acc.p += (m.protein || 0) * q;
-      acc.c += (m.carbs || 0) * q;
-      acc.f += (m.fats || 0) * q;
+      const logged = entryMacros(e);
+      acc.kcal += logged.calories;
+      acc.p += logged.protein;
+      acc.c += logged.carbs;
+      acc.f += logged.fats;
       return acc;
     },
     { kcal: 0, p: 0, c: 0, f: 0 },
@@ -1139,9 +1211,14 @@ export default function MealTrackingPage() {
   // Which food's full label is open, by id: picking another food closes it by
   // itself, and a cleared selection can never reopen a stale one.
   const [nutritionFor, setNutritionFor] = useState(null);
-  const [openSlots, setOpenSlots] = useState({ breakfast: true, lunch: true, dinner: true });
+  const [openSlots, setOpenSlots] = useState(() =>
+    Object.fromEntries(MEAL_TYPES.map((type) => [type, true])),
+  );
   const [mealSearch, setMealSearch] = useState("");
   const [showMealDropdown, setShowMealDropdown] = useState(false);
+  // Which side of the field the list has room for. Measured when it opens, not
+  // on every render: the answer only changes when the field moves.
+  const [dropUp, setDropUp] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
   // Research-backed: MacroFactor-style Consumed ↔ Remaining toggle —
   // remaining is the default because it helps plan the rest of the day.
@@ -1158,6 +1235,9 @@ export default function MealTrackingPage() {
   });
   const [toasts, setToasts] = useState([]);
   const [submitting, setSubmitting] = useState(false);
+  // The create / edit / quick-add sheet. Kept as one state object so the mode
+  // and the food it targets can never disagree.
+  const [foodSheet, setFoodSheet] = useState(null);
   const searchInputRef = useRef(null);
   const qtyInputRef = useRef(null);
   const submitRef = useRef(null);
@@ -1177,6 +1257,20 @@ export default function MealTrackingPage() {
   };
   const dismissToast = (id) =>
     setToasts((prev) => prev.filter((t) => t.id !== id));
+
+  // Recently logged foods float to the top of search; the list is small and
+  // local, so a storage failure only costs the ordering, never the action.
+  const rememberMeal = (id) => {
+    setRecentIds((prev) => {
+      const next = [id, ...prev.filter((x) => x !== id)].slice(0, 8);
+      try {
+        localStorage.setItem("ng-recent-meals", JSON.stringify(next));
+      } catch {
+        /* private mode — recency just won't persist */
+      }
+      return next;
+    });
+  };
 
   // Refresh user data when component mounts or becomes visible
   useEffect(() => {
@@ -1301,15 +1395,7 @@ export default function MealTrackingPage() {
         const addedName = meals.find((m) => m._id === selectedMeal)?.name;
         const addedId = selectedMeal;
         setSelectedMeal("");
-        setRecentIds((prev) => {
-          const next = [addedId, ...prev.filter((id) => id !== addedId)].slice(0, 8);
-          try {
-            localStorage.setItem("ng-recent-meals", JSON.stringify(next));
-          } catch {
-            /* private mode — recency just won't persist */
-          }
-          return next;
-        });
+        rememberMeal(addedId);
         setQuantity(1);
         setMealSearch("");
         setShowMealDropdown(false);
@@ -1457,6 +1543,13 @@ export default function MealTrackingPage() {
   const [selY, selM, selD] = currentDate.split("-").map(Number);
   const selDate = new Date(selY, selM - 1, selD);
   const selectedIsToday = isToday(selDate);
+  // Named in the create sheet so "Save & log" cannot back-date in silence.
+  const selectedDateLabel = selectedIsToday
+    ? "today"
+    : format(
+        selDate,
+        selDate.getFullYear() === new Date().getFullYear() ? "EEE, d MMM" : "d MMM yyyy",
+      );
 
   const mealCount = dailyLog?.meals?.length || 0;
   const daySummary = `${mealCount} ${mealCount === 1 ? "entry" : "entries"} logged`;
@@ -1467,16 +1560,87 @@ export default function MealTrackingPage() {
   };
   const toggleSlot = (slot) =>
     setOpenSlots((prev) => ({ ...prev, [slot]: !prev[slot] }));
-  const quickAdd = (type) => {
+  const focusSlot = (type) => {
     setSelectedMealType(type);
     setShowMealDropdown(true);
     requestAnimationFrame(() => searchInputRef.current?.focus());
   };
 
+  const openFoodSheet = (options) => {
+    setShowMealDropdown(false);
+    setFoodSheet(options);
+  };
+
+  const openDropdown = () => {
+    const anchor = searchInputRef.current?.closest(".ml-dd-anchor");
+    if (anchor) {
+      const rect = anchor.getBoundingClientRect();
+      const below = window.innerHeight - rect.bottom;
+      // Flip only when below is genuinely cramped and above is roomier, so a
+      // desktop list keeps opening downward.
+      setDropUp(below < 340 && rect.top > below);
+    }
+    setShowMealDropdown(true);
+  };
+
+  // One place to reconcile what the sheet did: the library changed either way,
+  // and a log or a delete also moves the day or the recent list.
+  const handleFoodDone = (result) => {
+    setFoodSheet(null);
+    const label = toTitleCase(result.name || "Food");
+
+    if (result.deleted) {
+      if (selectedMeal === result.mealId) {
+        setSelectedMeal("");
+        setMealSearch("");
+      }
+      setRecentIds((prev) => {
+        const next = prev.filter((id) => id !== result.mealId);
+        try {
+          localStorage.setItem("ng-recent-meals", JSON.stringify(next));
+        } catch {
+          /* private mode — recency just won't persist */
+        }
+        return next;
+      });
+      fetchMeals();
+      pushToast(`${label} deleted. Days it was logged keep their own numbers.`, "success");
+      // The trigger that opened the sheet is gone with the row; without this
+      // the caret lands on the document body.
+      requestAnimationFrame(() => searchInputRef.current?.focus());
+      return;
+    }
+
+    if (result.dailyLog) setDailyLog(result.dailyLog);
+    fetchMeals();
+
+    if (result.logged) {
+      if (result.meal?._id) rememberMeal(result.meal._id);
+      pushToast(`${label} added to ${result.slot || selectedMealType}.`, "success");
+      requestAnimationFrame(() => searchInputRef.current?.focus());
+      return;
+    }
+
+    if (result.edited) {
+      // An edit is not a pick: only refresh the field if the edited food is the
+      // one already selected, so a rename can't silently swap the log target.
+      if (selectedMeal === result.meal?._id) setMealSearch(toTitleCase(result.meal.name));
+      requestAnimationFrame(() => searchInputRef.current?.focus());
+    } else if (result.meal?._id) {
+      // Saved without logging: load it into the log bar so the remaining step
+      // is the one visible button, not another search.
+      setSelectedMeal(result.meal._id);
+      setMealSearch(toTitleCase(result.meal.name));
+      requestAnimationFrame(() => qtyInputRef.current?.focus());
+    }
+
+    pushToast(`${label} saved to your foods.`, "success");
+  };
+
   const recentSet = new Set(recentIds);
   // Personal history first (recent picks, in recency order), then A–Z —
   // returning users can re-log a familiar food without full-db hunting.
-  const orderedMeals = (() => {
+  const filteredMeals = (() => {
     const q = mealSearch.toLowerCase();
     const hit = meals.filter((meal) => meal.name.toLowerCase().includes(q));
     const rank = new Map(recentIds.map((id, i) => [id, i]));
@@ -1486,7 +1650,33 @@ export default function MealTrackingPage() {
       return ra - rb;
     });
   })();
-  const filteredMeals = orderedMeals;
+
+  // What the keyboard actually walks: the rows on screen, then the two actions
+  // pinned under them. Bounded to the visible slice so ArrowDown can never
+  // highlight a row that was cut off at 30.
+  const searchTerm = mealSearch.trim();
+  const visibleMeals = filteredMeals.slice(0, 30);
+  const menuSize = visibleMeals.length + 2;
+
+  const pickMeal = (meal) => {
+    setSelectedMeal(meal._id);
+    setMealSearch(toTitleCase(meal.name));
+    setShowMealDropdown(false);
+    qtyInputRef.current?.focus();
+  };
+
+  const runMenuItem = (index) => {
+    if (index < visibleMeals.length) {
+      const meal = visibleMeals[index];
+      if (meal) pickMeal(meal);
+      return;
+    }
+    if (index === visibleMeals.length) {
+      openFoodSheet({ mode: "create", name: searchTerm });
+      return;
+    }
+    openFoodSheet({ mode: "quick" });
+  };
 
   // Live preview of the picked-but-unsaved entry. It only tints the Daily
   // targets rail — the log below stays committed until "Add entry" succeeds.
@@ -1667,21 +1857,33 @@ export default function MealTrackingPage() {
                       // picked meal so the input is a single source of truth.
                       setSelectedMeal("");
                       setMealSearch(e.target.value);
-                      setShowMealDropdown(true);
+                      openDropdown();
                       setActiveIdx(0);
                     }}
                     onFocus={(e) => {
-                      setShowMealDropdown(true);
+                      openDropdown();
                       // Revisiting a picked meal: select-all so typing or one
                       // backspace replaces it cleanly.
                       if (selectedMeal) e.target.select();
                     }}
+                    role="combobox"
+                    aria-expanded={showMealDropdown}
+                    aria-controls="m-food-panel"
+                    aria-autocomplete="list"
+                    aria-activedescendant={
+                      showMealDropdown && activeIdx < visibleMeals.length
+                        ? `m-food-${activeIdx}`
+                        : undefined
+                    }
                     onKeyDown={(e) => {
-                      const list = orderedMeals;
                       if (e.key === "ArrowDown") {
                         e.preventDefault();
-                        if (!showMealDropdown) setShowMealDropdown(true);
-                        else setActiveIdx((i) => Math.min(i + 1, Math.max(list.length - 1, 0)));
+                        if (!showMealDropdown) {
+                          openDropdown();
+                          setActiveIdx(0);
+                        } else {
+                          setActiveIdx((i) => Math.min(i + 1, menuSize - 1));
+                        }
                         return;
                       }
                       if (e.key === "ArrowUp") {
@@ -1690,19 +1892,16 @@ export default function MealTrackingPage() {
                         return;
                       }
                       if (e.key === "Enter") {
+                        // With a food already picked and the list closed, Enter
+                        // belongs to the form (it adds the entry).
+                        if (selectedMeal && !showMealDropdown) return;
                         e.preventDefault();
-                        const pick = list[activeIdx] || list[0];
-                        if (list.length === 1 || pick) {
-                          const target = list.length === 1 ? list[0] : pick;
-                          if (target) {
-                            setSelectedMeal(target._id);
-                            setMealSearch(toTitleCase(target.name));
-                            setShowMealDropdown(false);
-                            qtyInputRef.current?.focus();
-                          }
-                        } else if (list.length > 1) {
-                          setShowMealDropdown(true);
+                        if (!showMealDropdown) {
+                          openDropdown();
+                          setActiveIdx(0);
+                          return;
                         }
+                        runMenuItem(Math.min(activeIdx, menuSize - 1));
                       }
                     }}
                     placeholder="Search foods…"
@@ -1729,42 +1928,106 @@ export default function MealTrackingPage() {
                   )}
 
                   {showMealDropdown && (
-                    <div className="m-dd" data-lenis-prevent="true" role="listbox" aria-label="Matching foods">
-                      {filteredMeals.slice(0, 30).map((meal, idx) => (
-                        <div
-                          key={meal._id}
-                          role="option"
-                          aria-selected={selectedMeal === meal._id || activeIdx === idx}
-                          tabIndex={-1}
-                          onMouseEnter={() => setActiveIdx(idx)}
-                          onClick={() => {
-                            setSelectedMeal(meal._id);
-                            setMealSearch(toTitleCase(meal.name));
-                            setShowMealDropdown(false);
-                            qtyInputRef.current?.focus();
-                          }}
-                          className={`m-dd-item${activeIdx === idx ? " is-active" : ""}${selectedMeal === meal._id ? " is-picked" : ""}`}
+                    <div
+                      className={`m-dd${dropUp ? " is-up" : ""}`}
+                      id="m-food-panel"
+                      data-lenis-prevent="true"
+                    >
+                      {visibleMeals.length > 0 ? (
+                        <div id="m-food-list" role="listbox" aria-label="Matching foods">
+                          {visibleMeals.map((meal, idx) => (
+                            <div
+                              key={meal._id}
+                              id={`m-food-${idx}`}
+                              role="option"
+                              aria-selected={activeIdx === idx}
+                              tabIndex={-1}
+                              onMouseEnter={() => setActiveIdx(idx)}
+                              onClick={() => pickMeal(meal)}
+                              className={`m-dd-item${activeIdx === idx ? " is-active" : ""}${selectedMeal === meal._id ? " is-picked" : ""}`}
+                            >
+                              <span className="m-dd-main">
+                                <span className="m-dd-name">{toTitleCase(meal.name)}</span>
+                                <span className="m-dd-sub">
+                                  {meal.servingSize} · {meal.macros?.protein || 0}P · {meal.macros?.carbs || 0}C · {meal.macros?.fats || 0}F
+                                </span>
+                              </span>
+                              <span style={{ display: "flex", alignItems: "center", gap: 6, flex: "none" }}>
+                                {recentSet.has(meal._id) && <span className="m-dd-recent">Recent</span>}
+                                <span className="m-dd-kcal m-num">{meal.macros?.calories || 0} kcal</span>
+                                {/* Only reachable for a food this user made: the
+                                    API never returns someone else's private food. */}
+                                {meal.isPrivate && (
+                                  <button
+                                    type="button"
+                                    className="m-dd-edit"
+                                    aria-label={`Edit ${toTitleCase(meal.name)}`}
+                                    title="Edit this food"
+                                    onClick={(event) => {
+                                      // The row's own click picks the food;
+                                      // editing is a separate action here.
+                                      event.stopPropagation();
+                                      openFoodSheet({ mode: "edit", meal });
+                                    }}
+                                  >
+                                    <Icon d={ICONS.pencil} />
+                                  </button>
+                                )}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="m-dd-empty" role="status">
+                          No food matches{searchTerm ? ` “${searchTerm}”` : " your search"}.
+                        </p>
+                      )}
+
+                      {filteredMeals.length > visibleMeals.length && (
+                        <p className="m-dd-more">
+                          Showing {visibleMeals.length} of {filteredMeals.length} — keep
+                          typing to narrow.
+                        </p>
+                      )}
+
+                      {/* A food that isn't in the library is not a dead end:
+                          it can be saved for next time, or counted once. The
+                          footer stays pinned so the way out never scrolls
+                          away behind 30 results. */}
+                      <div className="m-dd-foot">
+                        <button
+                          type="button"
+                          id="m-food-create"
+                          className={`m-dd-act${activeIdx === visibleMeals.length ? " is-active" : ""}`}
+                          onMouseEnter={() => setActiveIdx(visibleMeals.length)}
+                          onClick={() => openFoodSheet({ mode: "create", name: searchTerm })}
                         >
-                          <span className="m-dd-main">
-                            <span className="m-dd-name">{toTitleCase(meal.name)}</span>
-                            <span className="m-dd-sub">
-                              {meal.servingSize} · {meal.macros?.protein || 0}P · {meal.macros?.carbs || 0}C · {meal.macros?.fats || 0}F
+                          <span className="m-dd-act-ico" aria-hidden="true">
+                            <Icon d={ICONS.plus} />
+                          </span>
+                          <span className="m-dd-act-main">
+                            <span className="m-dd-act-name">
+                              {searchTerm ? `Create “${searchTerm}”` : "Create a food"}
                             </span>
+                            <span className="m-dd-act-sub">Saved to your foods</span>
                           </span>
-                          <span style={{ display: "flex", alignItems: "center", gap: 6, flex: "none" }}>
-                            {recentSet.has(meal._id) && <span className="m-dd-recent">Recent</span>}
-                            <span className="m-dd-kcal m-num">{meal.macros?.calories || 0} kcal</span>
+                        </button>
+                        <button
+                          type="button"
+                          id="m-food-quick"
+                          className={`m-dd-act${activeIdx === visibleMeals.length + 1 ? " is-active" : ""}`}
+                          onMouseEnter={() => setActiveIdx(visibleMeals.length + 1)}
+                          onClick={() => openFoodSheet({ mode: "quick" })}
+                        >
+                          <span className="m-dd-act-ico" aria-hidden="true">
+                            <Icon d={ICONS.zap} />
                           </span>
-                        </div>
-                      ))}
-                      {filteredMeals.length === 0 && (
-                        <div className="m-dd-empty">No matching foods — try a shorter search.</div>
-                      )}
-                      {filteredMeals.length > 30 && (
-                        <div className="m-dd-empty" style={{ padding: "10px" }}>
-                          Showing 30 of {filteredMeals.length} — keep typing to narrow.
-                        </div>
-                      )}
+                          <span className="m-dd-act-main">
+                            <span className="m-dd-act-name">Quick add</span>
+                            <span className="m-dd-act-sub">Counted once, this day only</span>
+                          </span>
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1817,9 +2080,11 @@ export default function MealTrackingPage() {
                     aria-label="Meal slot"
                     title="Meal slot"
                   >
-                    <option value="breakfast">Breakfast</option>
-                    <option value="lunch">Lunch</option>
-                    <option value="dinner">Dinner</option>
+                    {MEAL_TYPES.map((type) => (
+                      <option key={type} value={type}>
+                        {SLOT_LABEL[type]}
+                      </option>
+                    ))}
                   </select>
                   <span className="ml-selchev" aria-hidden="true">
                     <Icon d={ICONS.chevD} />
@@ -1852,6 +2117,22 @@ export default function MealTrackingPage() {
             </form>
           </section>
 
+          {/* One sheet for all three ways a food enters the log: created,
+              edited, or counted once. Mounted only while open, so its form
+              state is always the current food's. */}
+          {foodSheet && (
+            <FoodSheet
+              mode={foodSheet.mode}
+              meal={foodSheet.meal || null}
+              initialName={foodSheet.name || ""}
+              date={currentDate}
+              dateLabel={selectedDateLabel}
+              mealType={selectedMealType}
+              onClose={() => setFoodSheet(null)}
+              onDone={handleFoodDone}
+            />
+          )}
+
           {/* Day log — one slot per meal, collapsible rows */}
           <section className="ml-ledger m-in" aria-label="Food logged for this day">
             <div className="ml-ledger-h">
@@ -1863,19 +2144,15 @@ export default function MealTrackingPage() {
               </span>
             </div>
 
-            {[
-              { key: "breakfast", label: "Breakfast" },
-              { key: "lunch", label: "Lunch" },
-              { key: "dinner", label: "Dinner" },
-            ].map((s) => (
+            {MEAL_TYPES.map((type) => (
               <LedgerSection
-                key={s.key}
-                slot={s.key}
-                label={s.label}
-                entries={getMealsByType(s.key)}
-                open={openSlots[s.key]}
-                onToggle={() => toggleSlot(s.key)}
-                onAdd={() => quickAdd(s.key)}
+                key={type}
+                slot={type}
+                label={SLOT_LABEL[type]}
+                entries={getMealsByType(type)}
+                open={openSlots[type]}
+                onToggle={() => toggleSlot(type)}
+                onAdd={() => focusSlot(type)}
                 onUpdateQuantity={handleUpdateQuantity}
                 onDelete={handleDeleteEntry}
               />

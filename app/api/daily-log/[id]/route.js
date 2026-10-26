@@ -54,16 +54,42 @@ export const PUT = withAuth(async (request, user, { params }) => {
     return NextResponse.json({ error: 'Meal entry not found' }, { status: 404 });
   }
 
-  // Get the meal to recalculate this entry's macros
+  // Recalculate from the food when it still exists.
   const meal = await Meal.findById(mealEntry.meal);
-  if (!meal) {
-    return NextResponse.json({ error: 'Meal not found' }, { status: 404 });
-  }
 
   // Update entry, then recompute totals from all entries
+  if (meal) {
+    mealEntry.macros = calculateEntryMacros(meal, qty);
+    mealEntry.micros = calculateEntryMicros(meal, qty);
+  } else {
+    // A food can be deleted after it was logged — a user's own food has no
+    // other owner to protect it. The entry kept its own numbers, so scale
+    // those by the quantity change instead of losing the edit.
+    const factor = qty / (Number(mealEntry.quantity) || 1);
+    const round1 = (value) => Math.round((Number(value) || 0) * factor * 10) / 10;
+    const snapshot = mealEntry.macros || {};
+    mealEntry.macros = {
+      calories: Math.round((Number(snapshot.calories) || 0) * factor),
+      protein: round1(snapshot.protein),
+      carbs: round1(snapshot.carbs),
+      fats: round1(snapshot.fats),
+    };
+
+    const microSnapshot = mealEntry.micros;
+    if (Array.isArray(microSnapshot?.values) && microSnapshot.values.length > 0) {
+      mealEntry.micros = {
+        values: microSnapshot.values.map((value) => ({
+          key: value.key,
+          unit: value.unit,
+          amount: Math.round((Number(value.amount) || 0) * factor * 1000) / 1000,
+        })),
+        source: microSnapshot.source,
+        basis: microSnapshot.basis,
+        verified: microSnapshot.verified,
+      };
+    }
+  }
   mealEntry.quantity = qty;
-  mealEntry.macros = calculateEntryMacros(meal, qty);
-  mealEntry.micros = calculateEntryMicros(meal, qty);
 
   recalculateTotals(dailyLog);
   dailyLog.updatedAt = new Date();
