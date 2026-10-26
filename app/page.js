@@ -100,6 +100,40 @@ const PAGE_CSS = `
 .lp p{margin:0}
 .lp .lede{font-size:clamp(1rem,1.35vw,1.2rem);line-height:1.6;color:var(--ink-2);max-width:52ch;text-wrap:pretty}
 
+/* One hand-drawn loop on the phrase the sentence turns on. The mark is
+   absolutely placed so it can sit outside the text box without the line box
+   growing, and it stretches with the phrase: preserveAspectRatio="none" lets
+   the loop take whatever width the words need. The viewBox is authored at the
+   phrase's own aspect ratio (444:84) with the path's x coordinates scaled to
+   match, so that stretch stays uniform -- the pen keeps an even weight, and the
+   dashed draw is measured along the path rather than in screen pixels, which is
+   what a vector-effect="non-scaling-stroke" would get wrong here: it measures
+   dashes in device pixels, so the loop is left partly painted at offset 100.
+   Drawn once, on arrival; without motion the loop is simply already there. */
+.lp .mark{position:relative;display:inline-block;white-space:nowrap}
+.lp .mark-wrap{white-space:nowrap}
+.lp .mark-loop{
+  position:absolute;left:-1.1em;top:-.34em;
+  width:calc(100% + 2.2em);height:calc(100% + .68em);
+  overflow:visible;color:var(--accent);rotate:-1.2deg;pointer-events:none;
+}
+/* Undrawn from the first paint: the resting state is the empty stroke, so the
+   complete loop cannot flash for a frame before the animation takes over. The
+   draw is layered on only where motion is welcome; reduced motion gets the
+   finished loop instead, so the mark is always part of the sentence.
+
+   The offset starts past the end of the path (105 on a 100-long path) and the
+   gap is longer than the whole loop, so at rest nothing is painted at all: no
+   stray cap or sliver survive to reveal the mark before it is drawn. */
+.lp .mark-loop path{stroke-dasharray:100 400;stroke-dashoffset:105}
+@media (prefers-reduced-motion:reduce){
+  .lp .mark-loop path{stroke-dashoffset:0}
+}
+@media (prefers-reduced-motion:no-preference){
+  .lp .mark-loop path{animation:mark-draw .9s cubic-bezier(.5,.05,.3,1) both}
+  @keyframes mark-draw{from{stroke-dashoffset:105}to{stroke-dashoffset:0}}
+}
+
 /* Buttons --------------------------------------------------------------- */
 .lp .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
@@ -719,9 +753,38 @@ export default function Home() {
                 Not what you spent.
               </h1>
               <p className="lede">
-                NutriGain counts meals against your macro targets and saves every set as
-                weight × reps. Calories, protein and training land on one page, so the next
-                meal is a decision instead of arithmetic.
+                <span className="mark-wrap">
+                  <span className="mark">
+                    Meals and lifts in one log
+                    {/* A loop drawn by hand, not a border: one mark on the one phrase
+                        the sentence turns on. That phrase is the product itself, not
+                        a detail of it -- the mark names what you are looking at, and
+                        the rest of the sentence says why it beats the alternatives.
+                        Decorative, so it stays out of the accessibility tree and the
+                        words carry the meaning. */}
+                    <svg
+                      className="mark-loop"
+                      viewBox="0 0 444 84"
+                      preserveAspectRatio="none"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <path
+                        d="M426 34C408 13 289 5 169 7 58 9 18 27 27 48c9 20 124 30 249 27 107-3 155-21 129-40-22-17-138-26-253-23"
+                        pathLength="100"
+                        strokeDasharray="100 400"
+                        strokeDashoffset="105"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="4.4"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </span>
+                  ,
+                </span>{" "}
+                so what’s left today is always in front of you, and the next meal is a decision,
+                not arithmetic.
               </p>
               <div className="hero-actions">
                 <Link href="/register" className="btn">
@@ -748,10 +811,10 @@ export default function Home() {
           <section id="features" className="sec" aria-labelledby="features-title">
             <div className="ng-container">
               <div className="sec-head" data-reveal>
-                <h2 id="features-title">The whole day, and the numbers that matter in it.</h2>
+                <h2 id="features-title">Log three things. The app does the rest.</h2>
                 <p className="lede">
-                  Three surfaces do the daily work: meals, macros and sets. Everything else
-                  in the app exists to read them over time.
+                  Meals, macros and sets are all you enter. Progress, streaks and PRs are
+                  built from them over time.
                 </p>
               </div>
 
@@ -766,7 +829,7 @@ export default function Home() {
                   <ul className="feature-list">
                     <li><Check />Search the food list or save your own entries</li>
                     <li><Check />Per-slot totals, so a heavy lunch is obvious</li>
-                    <li><Check />An empty slot stays visible and says it is empty</li>
+                    <li><Check />Skipped meals stay visible, so gaps in your day are obvious</li>
                   </ul>
                 </div>
                 <div className="feature-media" data-reveal data-delay="80">
@@ -802,7 +865,7 @@ export default function Home() {
                     so you are never adding up the day in your head.
                   </p>
                   <ul className="feature-list">
-                    <li><Check />Remaining macros, not totals you have to invert</li>
+                    <li><Check />Remaining macros, not totals you have to subtract yourself</li>
                     <li><Check />Targets editable at any time, history kept intact</li>
                     <li><Check />An honest over-target state instead of a hidden one</li>
                   </ul>
@@ -843,7 +906,7 @@ export default function Home() {
                   <ul className="feature-list">
                     <li><Check />Per-set logging for every lift in the session</li>
                     <li><Check />PRs recorded the moment they happen</li>
-                    <li><Check />A weekly rotation that names today&apos;s muscles</li>
+                    <li><Check />Weekly volume totals, no spreadsheet</li>
                   </ul>
                 </div>
                 <div className="feature-media" data-reveal data-delay="80">
@@ -980,7 +1043,7 @@ export default function Home() {
                   <h3>Read the trend</h3>
                   <p>
                     Weight, streaks, PRs and a training calendar build themselves from what
-                    you logged. Nothing needs a weekly report.
+                    you logged.
                   </p>
                 </div>
               </div>
@@ -1035,8 +1098,8 @@ export default function Home() {
                 <div className="faq-intro" data-reveal>
                   <h2 id="faq-title">Questions, answered plainly.</h2>
                   <p className="faq-lede">
-                    The five things people ask before logging a first meal. No trial
-                    terms buried in a footnote.
+                    The five things people ask before logging a first meal. Short answers, no
+                    fine print.
                   </p>
                   <div className="faq-meta">
                     <span className="faq-meta-label">Still stuck</span>
