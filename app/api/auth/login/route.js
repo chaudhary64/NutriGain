@@ -55,6 +55,15 @@ export async function POST(request) {
     );
 
     response.cookies.set('token', token, tokenCookieOptions());
+    // Carry the account's theme into the next document request so the first
+    // paint after signing in is already in it, on this browser too.
+    if (user.theme === 'light' || user.theme === 'dark') {
+      response.cookies.set('ng_theme', user.theme, {
+        path: '/',
+        maxAge: 365 * 24 * 60 * 60,
+        sameSite: 'lax',
+      });
+    }
 
     return response;
   } catch (error) {

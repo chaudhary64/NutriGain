@@ -85,7 +85,7 @@ export const PUT = withAuth(async (request, user) => {
     return NextResponse.json({ error: 'User not found' }, { status: 404 });
   }
 
-  return NextResponse.json({
+  const response = NextResponse.json({
     success: true,
     user: {
       id: userData._id,
@@ -96,4 +96,16 @@ export const PUT = withAuth(async (request, user) => {
       macroGoals: userData.macroGoals,
     },
   });
+
+  // Keep the cookie the server reads for the first paint in step with the
+  // account, including when the change came from another device.
+  if (userData.theme === 'light' || userData.theme === 'dark') {
+    response.cookies.set('ng_theme', userData.theme, {
+      path: '/',
+      maxAge: 365 * 24 * 60 * 60,
+      sameSite: 'lax',
+    });
+  }
+
+  return response;
 });
