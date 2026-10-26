@@ -410,9 +410,12 @@ const Icon = ({ d, className = "m-ic" }) => (
 
 const ICONS = {
   flame: <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />,
-  /* Food-source macro glyphs, drawn to match the system stroke style */
-  drumstick: <><circle cx="9.5" cy="9.5" r="5.5" /><path d="M13.6 13.6 17.2 17.2" /><circle cx="19.4" cy="16.5" r="1.7" /><circle cx="16.5" cy="19.4" r="1.7" /></>,
-  wheat: <><path d="M12 22v-7" /><path d="M8 15l4-3 4 3" /><path d="M8 11l4-3 4 3" /><path d="M8 7l4-3 4 3" /></>,
+  /* Food-source macro glyphs, drawn to match the system stroke style. A meat
+     leg for protein and a grain ear for carbs: the two pictures people read as
+     those nutrients, where the earlier drumstick's detached knuckles read as a
+     magnifying glass and stacked chevrons read as an arrow. */
+  drumstick: <><path d="M16.2 3.4c3 0 4.9 2.4 4.9 4.9 0 1.5-.6 2.8-1.6 3.8l-4.6 4.6a2.9 2.9 0 0 1-4.1 0l-1.9-1.9a2.9 2.9 0 0 1 0-4.1l4.6-4.6c1-1 2.1-1.7 2.7-2.7z" /><circle cx="7.4" cy="18.4" r="2.2" /><path d="M11.4 14.4 9 16.8" /></>,
+  wheat: <><path d="M12 21.5v-6" /><path d="M12 15.5c-2.6 0-4-1.6-4-4.2 2.6 0 4 1.6 4 4.2z" /><path d="M12 15.5c2.6 0 4-1.6 4-4.2-2.6 0-4 1.6-4 4.2z" /><path d="M12 11.3c-2.6 0-4-1.6-4-4.2 2.6 0 4 1.6 4 4.2z" /><path d="M12 11.3c2.6 0 4-1.6 4-4.2-2.6 0-4 1.6-4 4.2z" /><path d="M12 7.1V2.5" /></>,
   avocado: <><path d="M12 3c3.2 3.2 6.5 7 6.5 11.2a6.5 6.5 0 0 1-13 0C5.5 10 8.8 6.2 12 3z" /><circle cx="12" cy="14.2" r="2.8" /></>,
   search: <><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></>,
   plus: <path d="M12 5v14M5 12h14" />,
@@ -1049,28 +1052,42 @@ function EntryRow({ entry, onUpdateQuantity, onDelete }) {
 /* LedgerSection — one collapsible meal slot of the day log.          */
 /* ------------------------------------------------------------------ */
 
+/* A glyph per slot, drawn as the food the slot is for rather than the hour it
+   happens at: a sun and a moon say when you ate, not what, and they collapse
+   into near-identical dots at the 14px this renders at. A cup, a bowl, an
+   apple and cutlery stay distinguishable at that size. Keyed in MEAL_TYPES
+   order so the object reads the way a day does. */
 const SLOT_ICONS = {
+  /* Cup with steam — the morning cup. */
   breakfast: (
     <>
-      <circle cx="12" cy="12" r="4" />
-      <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1" />
+      <path d="M17 8h1a3 3 0 0 1 0 6h-1" />
+      <path d="M3 8h14v6a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z" />
+      <path d="M6 2v2M10 2v2M14 2v2" />
     </>
   ),
+  /* A filled bowl: rim, body, and the mound of food above it. */
   lunch: (
     <>
-      <circle cx="12" cy="12" r="4" />
-      <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+      <path d="M3.6 10.8h16.8" />
+      <path d="M4.2 10.8a7.8 7.8 0 0 0 15.6 0" />
+      <path d="M8.2 8.2c.9-1.4 2.3-2.2 3.8-2.2s2.9.8 3.8 2.2" />
     </>
   ),
-  dinner: <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z" />,
-  /* Snacks are the slot with no time of day, so the mark is a cookie rather
-     than a sun: something eaten between the day's proper meals. */
+  /* An apple — the one slot that is a snack by nature, not a sitting. */
   snacks: (
     <>
-      <circle cx="12" cy="12" r="8" />
-      <circle cx="9.2" cy="10.2" r="1.1" />
-      <circle cx="14.2" cy="9.4" r="1.1" />
-      <circle cx="12.6" cy="14.4" r="1.1" />
+      <path d="M12 8.4c-1.1-1.1-3.1-1.3-4.4-.2-1.5 1.2-1.2 3.8.1 5.9 1.2 2 2.8 3.6 4.3 4.2 1.5-.6 3.1-2.2 4.3-4.2 1.3-2.1 1.6-4.7.1-5.9-1.3-1.1-3.3-.9-4.4.2z" />
+      <path d="M12 8.4V4.8" />
+      <path d="M12.2 5.8c.9-1.5 2.3-2.1 3.8-1.9-.3 1.5-1.6 2.5-3.8 2.3" />
+    </>
+  ),
+  /* Fork and knife: the one slot that is a meal at a table. */
+  dinner: (
+    <>
+      <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
+      <path d="M7 2v20" />
+      <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7" />
     </>
   ),
 };
