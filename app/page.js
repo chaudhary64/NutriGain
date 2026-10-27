@@ -307,7 +307,7 @@ const PAGE_CSS = `
 .lp .record-panel figcaption b{color:var(--ink);font-weight:500;font-variant-numeric:tabular-nums}
 
 /* Heatmap — twenty-four weeks across, seven days down. The cells are
-   sessions; the shading is how many sets that day carried. */
+   days; the shading is each day's gym status — the same ramp the dashboard uses. */
 .lp .heat{display:grid;grid-template-columns:repeat(24,minmax(0,1fr));gap:3px;margin-top:14px}
 .lp .heat i,.lp .heat-legend i{display:block;border-radius:2px;background:var(--line)}
 .lp .heat i{aspect-ratio:1}
@@ -511,49 +511,50 @@ const MACROS = [
    what is still ahead of you, and snacks sits between lunch and dinner the way
    it does in the ledger. */
 const SLOTS = [
-  { key: "07:20 breakfast", name: "Oats, whey, banana", note: "Breakfast · 3 entries", kcal: "620", open: false },
-  { key: "13:05 lunch", name: "Paneer, rice, dal", note: "Lunch · 4 entries", kcal: "780", open: false },
+  { key: "07:20 breakfast", name: "Oats, whey, banana", note: "Breakfast · 3 entries", kcal: "520", open: false },
+  { key: "13:05 lunch", name: "Paneer, rice, dal", note: "Lunch · 4 entries", kcal: "670", open: false },
   { key: "16:40 snacks", name: "Curd, almonds", note: "Snacks · 2 entries", kcal: "210", open: false },
   { key: "19:30 dinner", name: "Dinner", note: "No entries yet", kcal: null, open: true },
 ];
 
 const SETS = [
-  { lift: "Bench press", set: "80 kg × 5", pr: true },
+  { lift: "Bench press", set: "82.5 kg × 3", pr: true },
   { lift: "Barbell row", set: "60 kg × 8", pr: false },
   { lift: "Overhead press", set: "40 kg × 8", pr: false },
 ];
 
 /* Twenty-four weeks of training as the heatmap reads it: one string per week,
-   seven days each, "0" for no session and 1–4 for the sets that day carried.
+   seven days each, "0" for nothing logged and 1, 2 or 4 for the day's gym status —
+   the same four states the dashboard renders.
    Authored rather than generated so the picture is the same on the server and
    in the browser. The count is fixed because it sets the cell size: twenty-four
    columns fill the panel the way a heatmap is meant to read, where twelve left
    each cell the size of a tile. */
 const HEAT_WEEKS = [
-  "0302100",
-  "0203400",
-  "0003201",
+  "0402100",
+  "0204400",
+  "0004201",
   "1202000",
-  "0303100",
+  "0404100",
   "0214000",
-  "0021300",
-  "1303020",
-  "0203100",
-  "0312000",
+  "0021400",
+  "1404020",
+  "0204100",
+  "0412000",
   "0202410",
-  "0030200",
-  "1303020",
+  "0040200",
+  "1404020",
   "0212400",
-  "0302301",
-  "0021320",
-  "2303010",
+  "0402401",
+  "0021420",
+  "2404010",
   "0204200",
-  "1030320",
-  "0302300",
-  "0203100",
-  "0312400",
-  "0203010",
-  "0302300",
+  "1040420",
+  "0402400",
+  "0204100",
+  "0412400",
+  "0204010",
+  "0402400",
 ];
 
 /* The grid fills left to right, so the weeks are transposed into day rows. */
@@ -603,7 +604,7 @@ const FAQ = [
   },
   {
     q: "Can I use it only for lifting?",
-    a: "Meals and training are separate surfaces. Log a session and skip the food, or log food and ignore the gym — the day still adds up. Most people end up using both because they live on the same page.",
+    a: "Meals and training are separate surfaces. Log a session and skip the food, or log food and ignore the gym — the day still adds up, and nothing in the app assumes you do both.",
   },
   {
     q: "Where does my data live?",
@@ -634,7 +635,7 @@ function DashboardMock() {
         aria-label="The NutriGain dashboard for a sample day: calories and macros left, four meal slots, the day's sets and a weight trend."
       >
         <div className="window-bar">
-          <span className="window-url">nutrigain.app/dashboard</span>
+          <span className="window-url">nutri-gain-two.vercel.app/dashboard</span>
           <span className="window-tag">Sample day</span>
         </div>
 
@@ -708,7 +709,7 @@ function DashboardMock() {
             </div>
             <div className="ui-set">
               <span>Bench press</span>
-              <b>80 kg × 5</b>
+              <b>82.5 kg × 3</b>
             </div>
             <div className="ui-set">
               <span>Barbell row</span>
@@ -904,7 +905,7 @@ export default function Home() {
                 <div className="feature-copy" data-reveal>
                   <h3 id="f3">Every set as weight × reps</h3>
                   <p>
-                    Log 80 kg × 5 and the app does the rest: weekly volume, a personal best
+                    Log 82.5 kg × 3 and the app does the rest: weekly volume, a personal best
                     when you beat one, and the split you are due to train. A set is a
                     measurement, not a checkmark.
                   </p>
@@ -958,14 +959,14 @@ export default function Home() {
                     </div>
                     <div className="heat-legend" aria-hidden="true">
                       <span>Less</span>
-                      {["0", "1", "2", "3", "4"].map((level) => (
+                      {["0", "1", "2", "4"].map((level) => (
                         <i key={level} data-l={level} />
                       ))}
                       <span>More</span>
                     </div>
                     <figcaption>
-                      <b>{HEAT_DAYS}</b> training days in twenty-four weeks, shaded by the sets
-                      each one carried. Sample data.
+                      <b>{HEAT_DAYS}</b> training days in twenty-four weeks, shaded by how each day
+                      finished — logged, partly done, or completed. Sample data.
                     </figcaption>
                   </figure>
 
@@ -1002,7 +1003,7 @@ export default function Home() {
                       <span>Oct</span>
                     </div>
                     <figcaption>
-                      Personal best set on 18 October, from the month you are in. Sample data.
+                      Personal best set on 21 October — the last point on the line. Sample data.
                     </figcaption>
                   </figure>
                 </div>
