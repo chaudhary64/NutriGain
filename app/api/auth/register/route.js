@@ -33,7 +33,7 @@ export async function POST(request) {
       macroGoals: getDefaultMacroGoals(),
     });
 
-    const token = signToken(user);
+    const token = await signToken(user);
 
     const response = NextResponse.json(
       {

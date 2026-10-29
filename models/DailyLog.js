@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { MicroProfileSchema } from './Micros.js';
+import { GYM_STATUSES, MEAL_TYPES } from '../lib/constants.js';
 
 const MealEntrySchema = new mongoose.Schema({
   meal: {
@@ -15,7 +16,7 @@ const MealEntrySchema = new mongoose.Schema({
   },
   mealType: {
     type: String,
-    enum: ['breakfast', 'lunch', 'dinner', 'snacks'],
+    enum: MEAL_TYPES,
     required: true,
   },
   macros: {
@@ -67,7 +68,7 @@ const DailyLogSchema = new mongoose.Schema({
   },
   gymStatus: {
     type: String,
-    enum: ['not-completed', 'partially-completed', 'completed'],
+    enum: GYM_STATUSES,
     default: 'not-completed',
   },
   gymCompletedAt: {

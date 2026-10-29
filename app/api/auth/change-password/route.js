@@ -63,7 +63,7 @@ export const POST = withAuth(async (request, authUser) => {
   await user.save();
 
   // Fresh cookie for THIS device (signed with the new tokenVersion).
-  const token = signToken(user);
+  const token = await signToken(user);
   const response = NextResponse.json({ success: true }, { status: 200 });
   response.cookies.set('token', token, tokenCookieOptions());
   return response;

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { COMPOSITE_GROUP_EXPANSIONS } from "@/lib/muscle-groups";
+import { MUSCLE_GROUP_OPTIONS, WEEKDAYS } from "@/lib/constants";
 
 /**
  * Training-split manager, rendered on the Account page. Owns the schedule API
@@ -14,11 +15,8 @@ import { COMPOSITE_GROUP_EXPANSIONS } from "@/lib/muscle-groups";
  * assign groups for the day you picked instead of scrolling seven chip walls.
  */
 
-const SPLIT_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-const SPLIT_GROUPS = [
-  "Abs", "Back", "Bicep", "Chest", "Forearms", "Legs", "Shoulders", "Tricep",
-  "Push", "Pull", "Upper Body", "Lower Body", "Full Body", "Rest Day",
-];
+const SPLIT_DAYS = WEEKDAYS;
+const SPLIT_GROUPS = MUSCLE_GROUP_OPTIONS;
 
 /** { Monday: [id, ...] } from the API, with every id stringified. */
 function normalizePicks(raw) {

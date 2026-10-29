@@ -11,16 +11,9 @@ const UserExerciseDataSchema = new mongoose.Schema({
     ref: 'Exercise',
     required: [true, 'Exercise ID is required'],
   },
-  warmUp: {
-    type: String,
-    default: '',
-  },
-  working: {
-    type: String,
-    default: '',
-  },
-  // Numeric set templates (legacy `warmUp`/`working` strings stay for
-  // backwards compatibility; the migration copies parsed values here).
+  // Numeric set templates. The pre-numeric `warmUp`/`working` strings were
+  // migrated into these and removed from the schema — see
+  // scripts/cleanup-legacy-exercise-fields.js.
   warmUpSets: {
     type: [{ weight: { type: Number, min: 0 }, reps: { type: Number, min: 0 } }],
     default: undefined,
@@ -29,15 +22,11 @@ const UserExerciseDataSchema = new mongoose.Schema({
     type: [{ weight: { type: Number, min: 0 }, reps: { type: Number, min: 0 } }],
     default: undefined,
   },
-  lastPR: {
-    type: String,
-    default: '',
-  },
   lastPRDate: {
     type: String,
     default: '',
   },
-  // Numeric PR (legacy `lastPR` string stays for backwards compatibility).
+  // Heaviest working set ever logged, in kg.
   prWeight: {
     type: Number,
     min: 0,

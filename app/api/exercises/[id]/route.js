@@ -39,8 +39,6 @@ export const PUT = withAuth(async (request, user, { params }) => {
 
   // Whitelist user-data fields — these belong to the caller only.
   const userDataFields = {
-    warmUp: typeof body?.warmUp === "string" ? body.warmUp.slice(0, 200) : undefined,
-    working: typeof body?.working === "string" ? body.working.slice(0, 200) : undefined,
     warmUpSets: parseSetArray(body?.warmUpSets),
     workingSets: parseSetArray(body?.workingSets),
     prWeight:
@@ -49,7 +47,6 @@ export const PUT = withAuth(async (request, user, { params }) => {
         : Number.isFinite(Number(body?.prWeight)) && Number(body?.prWeight) >= 0
           ? Number(body?.prWeight)
           : undefined,
-    lastPR: typeof body?.lastPR === "string" ? body.lastPR.slice(0, 100) : undefined,
     lastPRDate: typeof body?.lastPRDate === "string" ? body.lastPRDate.slice(0, 40) : undefined,
     updatedAt: Date.now(),
   };
@@ -68,11 +65,8 @@ export const PUT = withAuth(async (request, user, { params }) => {
     muscleGroup: exercise.muscleGroup,
     name: exercise.name,
     type: exercise.type,
-    warmUp: userExerciseData.warmUp,
-    working: userExerciseData.working,
     warmUpSets: userExerciseData.warmUpSets || [],
     workingSets: userExerciseData.workingSets || [],
-    lastPR: userExerciseData.lastPR,
     lastPRDate: userExerciseData.lastPRDate,
     prWeight: userExerciseData.prWeight ?? null,
   });

@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { MicroProfileSchema } from './Micros.js';
+import { MEAL_CATEGORIES } from '../lib/constants.js';
 
 const MealSchema = new mongoose.Schema({
   name: {
@@ -41,7 +42,7 @@ const MealSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: ['breakfast', 'lunch', 'dinner', 'general'],
+    enum: MEAL_CATEGORIES,
     default: 'general',
   },
   createdBy: {
@@ -68,7 +69,11 @@ const MealSchema = new mongoose.Schema({
   },
 });
 
-// Search reads "shared, or mine" on every log-bar keystroke.
-MealSchema.index({ isPrivate: 1, createdBy: 1 });
+// The log bar reads "shared foods plus mine, newest first, never quick-adds".
+// Each branch of that $or gets its filter fields as an index prefix and shares
+// the sort key, so lookups stay index-backed as the library grows instead of
+// scanning the collection. Indexes are built by `pnpm run sync-indexes`.
+MealSchema.index({ isQuickAdd: 1, isPrivate: 1, createdAt: -1 });
+MealSchema.index({ isQuickAdd: 1, createdBy: 1, createdAt: -1 });
 
 export default mongoose.models.Meal || mongoose.model('Meal', MealSchema);

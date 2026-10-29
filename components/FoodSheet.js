@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { MICRO_KEYS, MICRO_NUTRIENTS } from "@/lib/micros";
-import { MEAL_TYPES } from "@/lib/validation";
+import { MEAL_TYPES } from "@/lib/constants";
 
 /* ------------------------------------------------------------------ */
 /* FoodSheet — one sheet for the three ways a food enters the log.     */

@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { format, parseISO } from "date-fns";
 import { expandMuscleGroups } from "@/lib/muscle-groups";
 import { exerciseMedia, EXERCISE_MEDIA_CREDIT } from "@/lib/exercise-media";
+import { WEEKDAYS } from "@/lib/constants";
 import AppShell from "@/components/AppShell";
 import Loader from "@/components/Loader";
 import {
@@ -246,7 +247,7 @@ const ICONS = {
 
 let toastSeq = 0;
 
-const SPLIT_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const SPLIT_DAYS = WEEKDAYS;
 
 // Composite split names (from templates) expand to the granular muscleGroup
 // values the exercise library is actually tagged with.
@@ -592,7 +593,7 @@ export default function GymTrackingPage() {
       if (res.ok) {
         setExercises((prev) =>
           prev.map((e) =>
-            e._id === prEditExerciseId ? { ...e, prWeight: data.prWeight ?? null, lastPR: data.lastPR ?? "", lastPRDate: data.lastPRDate ?? "" } : e,
+            e._id === prEditExerciseId ? { ...e, prWeight: data.prWeight ?? null, lastPRDate: data.lastPRDate ?? "" } : e,
           ),
         );
         setPrEditExerciseId(null);
@@ -1069,7 +1070,7 @@ export default function GymTrackingPage() {
                                       <span className="gy-spec-val">
                                         {ex.warmUpSets?.length > 0
                                           ? formatSetsDisplay(ex.warmUpSets)
-                                          : ex.warmUp || "Not set"}
+                                          : "Not set"}
                                       </span>
                                       <button
                                         type="button"
@@ -1083,7 +1084,7 @@ export default function GymTrackingPage() {
                                     <div className="gy-fact">
                                       <span className="gy-label">Best</span>
                                       <span className="gy-spec-val">
-                                        {ex.prWeight != null ? `${ex.prWeight} kg` : ex.lastPR || "None"}
+                                        {ex.prWeight != null ? `${ex.prWeight} kg` : "None"}
                                         {ex.lastPRDate && (
                                           <span className="gy-spec-sub">
                                             {format(new Date(ex.lastPRDate), "d MMM yyyy")}

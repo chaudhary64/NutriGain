@@ -14,7 +14,7 @@ import {
   rollupEntryMicros,
 } from "@/lib/daily-log";
 import { MICRO_KEYS, MICRO_NUTRIENTS, MICRO_RDI_SOURCE, microTarget } from "@/lib/micros";
-import { MEAL_TYPES } from "@/lib/validation";
+import { MEAL_TYPES } from "@/lib/constants";
 
 /* ------------------------------------------------------------------ */
 /* Geist design system — ink on canvas, hairline chrome, mono eyebrows. */

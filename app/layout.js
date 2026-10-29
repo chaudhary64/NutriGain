@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import jwt from "jsonwebtoken";
+import { jwtVerify } from "jose";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 /* Meridian design system — shared tokens + components for every surface. */
@@ -9,7 +9,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import LenisProvider from "@/components/LenisProvider";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
-import { getJwtSecret } from "@/lib/auth";
+import { JWT_ALGORITHM, getJwtKey } from "@/lib/jwt-secret";
 /* Geist — the app's type system, shared by the dashboard and the landing
    page (Geist Sans for UI, prose and display; Geist Mono for technical
    eyebrows, code and tabular figures). Playfair remains on the error and
@@ -91,7 +91,10 @@ async function resolveFirstPaintTheme() {
   const token = cookieStore.get('token')?.value;
   if (token) {
     try {
-      const { userId } = jwt.verify(token, getJwtSecret());
+      const { payload } = await jwtVerify(token, getJwtKey(), {
+        algorithms: [JWT_ALGORITHM],
+      });
+      const userId = payload.userId;
       await dbConnect();
       const account = await User.findById(userId).select('theme').lean();
       if (isTheme(account?.theme)) return { theme: account.theme, resolved: true };

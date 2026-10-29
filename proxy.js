@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
-import { getJwtSecret } from '@/lib/auth';
+import { JWT_ALGORITHM, getJwtKey } from '@/lib/jwt-secret';
 
 /**
  * Route guard (Next.js 16 "proxy" — the replacement for middleware).
@@ -24,15 +24,18 @@ const PROTECTED_API_PREFIXES = [
   '/api/workout-sessions',
 ];
 
-// JWT_SECRET is read via getJwtSecret() per request so misconfiguration is
-// caught at request time, not bundled as a static value at build time.
+// The secret is resolved inside the request path, so a missing or weak value
+// fails the request instead of breaking module evaluation. Importing it from
+// lib/jwt-secret keeps this edge bundle free of the route-handler graph
+// (Mongoose, models) and of any Node-only crypto dependency.
 async function getTokenPayload(request) {
   const token = request.cookies.get('token')?.value;
   if (!token) return null;
 
   try {
-    const secret = new TextEncoder().encode(getJwtSecret());
-    const { payload } = await jwtVerify(token, secret);
+    const { payload } = await jwtVerify(token, getJwtKey(), {
+      algorithms: [JWT_ALGORITHM],
+    });
     return payload;
   } catch {
     return null;

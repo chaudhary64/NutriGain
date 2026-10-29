@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
+import { MUSCLE_GROUP_OPTIONS, WEEKDAYS } from '../lib/constants.js';
 
-const TEMPLATE_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-const TEMPLATE_MUSCLE_GROUPS = ['Abs', 'Back', 'Bicep', 'Chest', 'Forearms', 'Legs', 'Shoulders', 'Tricep', 'Push', 'Pull', 'Upper Body', 'Lower Body', 'Full Body', 'Rest Day'];
+const TEMPLATE_DAYS = WEEKDAYS;
+const TEMPLATE_MUSCLE_GROUPS = MUSCLE_GROUP_OPTIONS;
 
 /**
  * Serialize a Map-typed `days` field (WorkoutTemplate / UserSchedule) to a

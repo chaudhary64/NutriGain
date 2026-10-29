@@ -6,6 +6,7 @@ import AppShell from "@/components/AppShell";
 import { useRouter } from "next/navigation";
 import Loader from "@/components/Loader";
 import { MICRO_KEYS, MICRO_NUTRIENTS, MICRO_SOURCES, MICRO_BASES } from "@/lib/micros";
+import { MUSCLE_GROUP_OPTIONS, WEEKDAYS } from "@/lib/constants";
 
 /** One blank field per tracked nutrient — an admin fills only what a source reported. */
 const emptyMicroValues = () => Object.fromEntries(MICRO_KEYS.map((key) => [key, ""]));
@@ -204,8 +205,8 @@ export default function AdminPage() {
   const [users, setUsers] = useState([]);
 
   // Gym workout state — split templates
-  const TEMPLATE_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-  const TEMPLATE_GROUPS = ["Abs", "Back", "Bicep", "Chest", "Forearms", "Legs", "Shoulders", "Tricep", "Push", "Pull", "Upper Body", "Lower Body", "Full Body", "Rest Day"];
+  const TEMPLATE_DAYS = WEEKDAYS;
+  const TEMPLATE_GROUPS = MUSCLE_GROUP_OPTIONS;
   const [templates, setTemplates] = useState([]);
   const [showTemplateForm, setShowTemplateForm] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState(null); // {_id|null, name, description, days}
@@ -219,10 +220,6 @@ export default function AdminPage() {
     muscleGroup: "",
     name: "",
     type: "COMPOUND",
-    warmUp: "",
-    working: "",
-    lastPR: "",
-    lastPRDate: "",
   });
 
   // Searchable dropdown state
@@ -494,10 +491,6 @@ export default function AdminPage() {
       muscleGroup: "",
       name: "",
       type: "COMPOUND",
-      warmUp: "",
-      working: "",
-      lastPR: "",
-      lastPRDate: "",
     });
     setEditingExercise(null);
     setShowExerciseForm(false);

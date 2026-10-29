@@ -11,12 +11,15 @@ export const GET = withAuth(async (request, user) => {
   const { searchParams } = new URL(request.url);
   const category = searchParams.get('category');
 
+  // Predicates are written as `$in: [false, null]` rather than `$ne: true` so
+  // they stay index-usable: documents written before these flags existed (field
+  // absent, which reads as null) still match, so no backfill is required.
   const filter = {
     // One-off entries belong to a single day's log, not to search.
-    isQuickAdd: { $ne: true },
+    isQuickAdd: { $in: [false, null] },
     // A missing isPrivate on older documents reads as shared, so the whole
     // existing library stays visible without a migration.
-    $or: [{ isPrivate: { $ne: true } }, { createdBy: user.id }],
+    $or: [{ isPrivate: { $in: [false, null] } }, { createdBy: user.id }],
     ...(category ? { category } : {}),
   };
   const meals = await Meal.find(filter).sort({ createdAt: -1 });

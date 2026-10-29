@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import mongoose from "mongoose";
 import dbConnect from "@/lib/mongodb";
 import WorkoutSession from "@/models/WorkoutSession";
 import Exercise from "@/models/Exercise";
@@ -92,35 +93,39 @@ export const GET = withAuth(async (request, user) => {
   }
 
   if (wantsSummary) {
-    const docs = await WorkoutSession.find({ user: user.id })
-      .select("date exercises")
-      .lean();
+    // Rolled up in the database: the previous version pulled every session the
+    // user had ever logged into the function just to add up its sets, so the
+    // response time (and memory) grew with account age.
+    const userObjectId = new mongoose.Types.ObjectId(user.id);
 
-    let totalVolume = 0;
-    let totalSets = 0;
-    let totalReps = 0;
-    let bestSetWeight = 0;
-    const days = new Set();
+    const [totals] = await WorkoutSession.aggregate([
+      { $match: { user: userObjectId } },
+      { $unwind: "$exercises" },
+      { $unwind: "$exercises.sets" },
+      {
+        $group: {
+          _id: null,
+          totalVolume: {
+            $sum: { $multiply: ["$exercises.sets.weight", "$exercises.sets.reps"] },
+          },
+          totalSets: { $sum: 1 },
+          totalReps: { $sum: "$exercises.sets.reps" },
+          bestSetWeight: { $max: "$exercises.sets.weight" },
+        },
+      },
+    ]);
 
-    for (const doc of docs) {
-      days.add(doc.date);
-      for (const ex of doc.exercises || []) {
-        for (const set of ex.sets || []) {
-          totalSets += 1;
-          totalReps += set.reps || 0;
-          totalVolume += (set.weight || 0) * (set.reps || 0);
-          bestSetWeight = Math.max(bestSetWeight, set.weight || 0);
-        }
-      }
-    }
+    // One session per user per calendar day (unique index), so a count is the
+    // number of days trained without transporting any session documents.
+    const daysTrained = await WorkoutSession.countDocuments({ user: userObjectId });
 
     return NextResponse.json({
       summary: {
-        daysTrained: days.size,
-        totalVolume: Math.round(totalVolume),
-        totalSets,
-        totalReps,
-        bestSetWeight,
+        daysTrained,
+        totalVolume: Math.round(totals?.totalVolume || 0),
+        totalSets: totals?.totalSets || 0,
+        totalReps: totals?.totalReps || 0,
+        bestSetWeight: totals?.bestSetWeight || 0,
       },
     });
   }

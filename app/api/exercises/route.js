@@ -18,11 +18,8 @@ export const GET = withAuth(async (request, user) => {
   const userDataMap = new Map();
   userExerciseData.forEach((data) => {
     userDataMap.set(data.exerciseId.toString(), {
-      warmUp: data.warmUp,
-      working: data.working,
       warmUpSets: data.warmUpSets || [],
       workingSets: data.workingSets || [],
-      lastPR: data.lastPR,
       lastPRDate: data.lastPRDate,
       prWeight: data.prWeight ?? null,
     });
@@ -31,10 +28,10 @@ export const GET = withAuth(async (request, user) => {
   // Merge exercise definitions with user-specific data
   const exercisesWithUserData = exercises.map((exercise) => {
     const userData = userDataMap.get(exercise._id.toString()) || {
-      warmUp: "",
-      working: "",
-      lastPR: "",
+      warmUpSets: [],
+      workingSets: [],
       lastPRDate: "",
+      prWeight: null,
     };
 
     return {

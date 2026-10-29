@@ -1,10 +1,11 @@
 import mongoose from 'mongoose';
+import { EXERCISE_TYPES, MUSCLE_GROUPS } from '../lib/constants.js';
 
 const ExerciseSchema = new mongoose.Schema({
   muscleGroup: {
     type: String,
     required: [true, 'Please provide a muscle group'],
-    enum: ['Abs', 'Back', 'Bicep', 'Chest', 'Forearms', 'Legs', 'Shoulders', 'Tricep'],
+    enum: MUSCLE_GROUPS,
   },
   name: {
     type: String,
@@ -14,7 +15,7 @@ const ExerciseSchema = new mongoose.Schema({
   type: {
     type: String,
     required: [true, 'Please provide an exercise type'],
-    enum: ['COMPOUND', 'ISOLATION'],
+    enum: EXERCISE_TYPES,
   },
   createdAt: {
     type: Date,

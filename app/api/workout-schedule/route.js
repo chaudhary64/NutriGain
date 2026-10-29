@@ -6,11 +6,7 @@ import UserSchedule, { toPlainDayExercises } from "@/models/UserSchedule";
 import Exercise from "@/models/Exercise";
 import { withAuth } from "@/lib/auth";
 import { isValidObjectId } from "@/lib/validation";
-
-const MUSCLE_GROUP_OPTIONS = [
-  "Abs", "Back", "Bicep", "Chest", "Forearms", "Legs", "Shoulders", "Tricep",
-  "Push", "Pull", "Upper Body", "Lower Body", "Full Body", "Rest Day",
-];
+import { MUSCLE_GROUP_OPTIONS } from "@/lib/constants";
 
 const MAX_DAY_EXERCISES = 20;
 

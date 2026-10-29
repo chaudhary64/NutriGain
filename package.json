@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test --disable-warning=MODULE_TYPELESS_PACKAGE_JSON"
+    "test": "node --test --disable-warning=MODULE_TYPELESS_PACKAGE_JSON",
+    "sync-indexes": "node scripts/sync-indexes.js",
+    "migrate-sets": "node scripts/migrate-sets.js",
+    "cleanup-legacy-exercise-fields": "node scripts/cleanup-legacy-exercise-fields.js"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
@@ -15,7 +18,6 @@
     "date-fns": "^4.1.0",
     "gsap": "^3.14.2",
     "jose": "^6.2.12",
-    "jsonwebtoken": "^9.0.2",
     "lenis": "^1.3.23",
     "mongoose": "^8.19.3",
     "next": "16.0.10",
