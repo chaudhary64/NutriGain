@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
-import AppShell from "@/components/AppShell";
 import SplitManager from "@/components/SplitManager";
 import { suggestMacroGoals, ACTIVITY_LEVELS, GOALS } from "@/lib/tdee";
 import { FALLBACK_MACRO_GOALS } from "@/lib/goals";
@@ -752,7 +751,6 @@ export default function AccountPage() {
     <>
       <style>{ACCOUNT_CSS}</style>
       <ToastHost toasts={toasts} onDismiss={dismissToast} />
-      <AppShell>
         <div className="mrd ng-container" style={{ padding: "32px var(--layout-gutter) 56px" }}>
           {/* Page header — same title block as the rest of the app */}
           <div className="m-in" style={{ marginBottom: 28 }}>
@@ -1228,7 +1226,6 @@ export default function AccountPage() {
             </div>
           </div>
         </div>
-      </AppShell>
     </>
   );
 }

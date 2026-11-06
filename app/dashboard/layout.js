@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import AppShell from "@/components/AppShell";
 import Loader from "@/components/Loader";
 
 /**
@@ -10,9 +11,15 @@ import Loader from "@/components/Loader";
  *
  * Visitors are redirected to /login and users who have not completed
  * onboarding to /onboarding. Admins are allowed through — they are users
- * too, and the admin shell's "My dashboard" link leads here. Pages render
- * their own <AppShell> so they can inject page-specific controls into the
- * nav via slots.
+ * too, and the admin shell's "My dashboard" link leads here.
+ *
+ * The shell is rendered HERE, above the pages, because a route's loading.js
+ * renders in place of its page. When each page owned its own AppShell, every
+ * handoff from a skeleton to real content unmounted one shell and mounted
+ * another: the nav was rebuilt, the mobile menu state reset, the logo
+ * re-decoded and focus inside the sidebar was lost. Owning it once means the
+ * sidebar is the same DOM node for the whole visit, and the loading
+ * boundaries draw content only.
  */
 export default function DashboardLayout({ children }) {
   const { user, loading: authLoading } = useAuth();
@@ -38,5 +45,5 @@ export default function DashboardLayout({ children }) {
     return null;
   }
 
-  return children;
+  return <AppShell>{children}</AppShell>;
 }

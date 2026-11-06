@@ -3,9 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { format, isToday } from "date-fns";
-import AppShell from "@/components/AppShell";
 import FoodSheet from "@/components/FoodSheet";
-import Loader from "@/components/Loader";
+import MealSkeleton from "@/components/MealSkeleton";
 import { FALLBACK_MACRO_GOALS } from "@/lib/goals";
 import {
   calculateEntryMacros,
@@ -1538,7 +1537,7 @@ export default function MealTrackingPage() {
   };
 
   if (loading) {
-    return <Loader />;
+    return <MealSkeleton />;
   }
 
   const totalMacros = dailyLog?.totalMacros || {
@@ -1717,7 +1716,6 @@ export default function MealTrackingPage() {
     <>
       <style>{MERIDIAN_CSS}</style>
       <ToastHost toasts={toasts} onDismiss={dismissToast} />
-      <AppShell>
         <div
           className="mrd ng-container"
           style={{ padding: "32px var(--layout-gutter) 56px" }}
@@ -2176,7 +2174,6 @@ export default function MealTrackingPage() {
             ))}
           </section>
         </div>
-      </AppShell>
     </>
   );
 }

@@ -7,8 +7,7 @@ import { format, parseISO } from "date-fns";
 import { expandMuscleGroups } from "@/lib/muscle-groups";
 import { exerciseMedia, EXERCISE_MEDIA_CREDIT } from "@/lib/exercise-media";
 import { WEEKDAYS } from "@/lib/constants";
-import AppShell from "@/components/AppShell";
-import Loader from "@/components/Loader";
+import GymSkeleton from "@/components/GymSkeleton";
 import {
   LineChart,
   Line,
@@ -760,7 +759,7 @@ export default function GymTrackingPage() {
   };
 
   if (loading) {
-    return <Loader />;
+    return <GymSkeleton />;
   }
 
   // Render Helpers
@@ -883,7 +882,6 @@ export default function GymTrackingPage() {
       <style>{MERIDIAN_CSS}</style>
       <style>{GYM_CSS}</style>
       <ToastHost toasts={toasts} onDismiss={dismissToast} />
-      <AppShell>
         <div className="gym ng-container" style={{ padding: "32px var(--layout-gutter) 56px" }}>
           {/* Masthead — the session is the page, so the date lives here instead
               of inside a plan card further down. */}
@@ -1377,7 +1375,6 @@ export default function GymTrackingPage() {
             )}
           </section>
         </div>
-      </AppShell>
     </>
   );
 }

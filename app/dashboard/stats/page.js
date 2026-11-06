@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState, cloneElement } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import AppShell from "@/components/AppShell";
+import { StatsBandsSkeleton } from "@/components/StatsSkeleton";
 import { format, parseISO, subDays } from "date-fns";
 import { ActivityCalendar } from "react-activity-calendar";
 import { Tooltip as ReactTooltip } from "react-tooltip";
@@ -99,11 +99,8 @@ const STATS_CSS = `
 .gy-year-tab.is-active{background:var(--ac);border-color:var(--ac);color:var(--on-ac)}
 .gy-year-map{overflow-x:auto;width:100%;max-width:100%}
 .gy-year-hd{display:flex;align-items:baseline;gap:10px;margin:14px 0 8px}
-/* Inline loading + error states (same ring language as components/Loader) */
-.st-loading{display:flex;flex-direction:column;align-items:center;gap:16px;padding:64px 0;color:var(--t3)}
-.st-loading i{display:block;width:32px;height:32px;border-radius:9999px;border:3px solid var(--line);border-top-color:var(--ac);animation:st-spin .8s linear infinite}
-.st-loading p{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;margin:0}
-@keyframes st-spin{to{transform:rotate(360deg)}}
+/* Inline error state. The pending state is a skeleton of the bands, so the
+   old ring here was a second visual language for the same wait. */
 .st-error{display:flex;flex-direction:column;align-items:flex-start;gap:14px;padding:20px;border:1px solid var(--red-soft-b);background:var(--red-soft);border-radius:6px}
 .st-error p{font-size:13px;font-weight:400;color:var(--red);margin:0}
 .st-error button{font:inherit;font-size:13px;font-weight:500;color:var(--on-ac);background:var(--red);border:none;border-radius:6px;padding:8px 14px;cursor:pointer;transition:background .15s}
@@ -506,7 +503,7 @@ export default function StatsPage() {
   };
 
   return (
-    <AppShell>
+    <>
       <style>{STATS_CSS}</style>
       <div className="st ng-container" style={{ padding: "32px var(--layout-gutter) 56px" }}>
         {/* Header + range selector */}
@@ -541,12 +538,7 @@ export default function StatsPage() {
           </div>
         )}
 
-        {loading && !stats && (
-          <div className="st-loading" role="status" aria-live="polite">
-            <i aria-hidden="true" />
-            <p>Loading your stats…</p>
-          </div>
-        )}
+        {loading && !stats && <StatsBandsSkeleton />}
 
         {!loading && !stats && error && (
           <div className="st-error" role="alert">
@@ -1060,6 +1052,6 @@ export default function StatsPage() {
           </>
         )}
       </div>
-    </AppShell>
+    </>
   );
 }

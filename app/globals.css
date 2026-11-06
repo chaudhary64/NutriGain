@@ -320,6 +320,308 @@ html[data-theme="dark"] .m-loader {
   }
 }
 
+/* Skeletons — page-shaped placeholders for content whose layout is known.
+
+   These paint outside every Meridian scope (.mrd, .gym, .st, …): both the
+   route's loading.js and a page's own pre-data return run before AppShell
+   exists, so --line/--card/--sunken are undefined there. The colours are
+   re-derived from html[data-theme] exactly the way .m-loader does.
+
+   The whole frame is gated behind a 350ms delay: a response that beats that
+   window shows no placeholder at all, which is the point — a skeleton that
+   appears and vanishes in 80ms reads as a glitch, not as feedback. */
+.m-sk-page {
+  --sk-bg: #fafafa;
+  --sk-card: #ffffff;
+  --sk-line: #ebebeb;
+  --sk-bar: #ededed;
+  --sk-rule: #171717;
+  /* The mobile bar is 56px and sits above this column, so a full 100vh here
+     would guarantee a scrollbar on a page that otherwise fits. */
+  min-height: calc(100vh - 56px);
+  background: var(--sk-bg);
+  padding: 32px var(--layout-gutter) 56px;
+  animation: m-sk-gate 0.01s linear 350ms both;
+}
+html[data-theme="dark"] .m-sk-page {
+  --sk-bg: #0a0a0a;
+  --sk-card: #111111;
+  --sk-line: #262626;
+  --sk-bar: #1f1f1f;
+  --sk-rule: #ededed;
+}
+@keyframes m-sk-gate {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* One bar. The pulse is slow and shallow: it says "pending" without asking
+   for attention, which a fast shimmer does. */
+.m-sk {
+  display: block;
+  background: var(--sk-bar);
+  animation: m-sk-pulse 1.7s ease-in-out infinite;
+}
+@keyframes m-sk-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.m-sk-text {
+  display: grid;
+}
+.m-sk-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+/* The gym masthead is closed by a strong ink rule, not a hairline. */
+.m-sk-head-ruled {
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--sk-rule);
+}
+.m-sk-head-l {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+.m-sk-head-r {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.m-sk-targets {
+  margin-top: 22px;
+  background: var(--sk-card);
+  border: 1px solid var(--sk-line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.m-sk-targets-h {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--sk-line);
+}
+.m-sk-cols {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+}
+.m-sk-col {
+  display: grid;
+  gap: 10px;
+  padding: 16px 18px;
+  border-left: 1px solid var(--sk-line);
+}
+.m-sk-col:first-child {
+  border-left: 0;
+}
+.m-sk-slots {
+  display: grid;
+  gap: 14px;
+  margin-top: 22px;
+}
+.m-sk-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px 18px;
+  background: var(--sk-card);
+  border: 1px solid var(--sk-line);
+  border-radius: 12px;
+}
+.m-sk-card-h {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.m-sk-session {
+  margin-top: 26px;
+}
+.m-sk-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--sk-line);
+}
+/* The gym session area, reserved at the rest card's shape — see GymSkeleton
+   for why the placeholder does not promise a row count. */
+.m-sk-rest {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 44px 0;
+  border-top: 1px solid var(--sk-rule);
+  border-bottom: 1px solid var(--sk-line);
+}
+.m-sk-strip {
+  margin-top: 20px;
+}
+@media (min-width: 1024px) {
+  .m-sk-page {
+    min-height: 100vh;
+  }
+}
+
+/* The in-page variant sits inside the page's own container, where the Meridian
+   tokens do resolve — so it maps them instead of re-deriving them, and brings
+   no background or sidebar offset of its own. */
+.m-sk-region {
+  --sk-card: var(--card);
+  --sk-line: var(--line);
+  --sk-bar: var(--sunken);
+  --sk-rule: var(--t1);
+  animation: m-sk-gate 0.01s linear 350ms both;
+}
+.m-sk-bands {
+  display: grid;
+  gap: 20px;
+}
+.m-sk-mast {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+/* A band is a card whose header and body own their own padding. */
+.m-sk-flush {
+  padding: 0;
+  overflow: hidden;
+}
+.m-sk-card-h2 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--sk-line);
+}
+.m-sk-body {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+.m-sk-lead {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  background: var(--sk-card);
+  border: 1px solid var(--sk-line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.m-sk-cell {
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+  padding: 17px 20px 18px;
+  border-left: 1px solid var(--sk-line);
+}
+.m-sk-cell:first-child {
+  border-left: 0;
+}
+.m-sk-macros {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+.m-sk-figs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.m-sk-macro {
+  display: grid;
+  gap: 8px;
+}
+.m-sk-line {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+.m-sk-wt {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 0.85fr);
+}
+.m-sk-wt-main {
+  padding: 16px 18px;
+}
+.m-sk-wt-side {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: 16px 18px;
+  border-left: 1px solid var(--sk-line);
+}
+@media (max-width: 860px) {
+  .m-sk-lead {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .m-sk-cell {
+    border-left: 0;
+    border-top: 1px solid var(--sk-line);
+  }
+  .m-sk-cell:first-child {
+    border-top: 0;
+  }
+  .m-sk-macros,
+  .m-sk-figs {
+    grid-template-columns: 1fr 1fr;
+  }
+  .m-sk-wt {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .m-sk-wt-side {
+    border-left: 0;
+    border-top: 1px solid var(--sk-line);
+  }
+}
+
+/* No sidebar offset and no bar allowance are declared here: the frame renders
+   inside the real AppShell, so .sb-main already carries the desktop
+   margin-left and .sb-mwrap the sticky mobile bar above the content. Adding
+   either again would push the placeholder out of line with the page it
+   stands in for. */
+@media (max-width: 700px) {
+  .m-sk-cols {
+    grid-template-columns: 1fr 1fr;
+  }
+  .m-sk-col:nth-child(3) {
+    border-left: 0;
+  }
+}
+
+/* No motion means no pulse and no gate: the bars simply hold still and are
+   visible at once, because a delayed blank is motion the reader did not ask
+   for either. */
+@media (prefers-reduced-motion: reduce) {
+  .m-sk-page,
+  .m-sk-region {
+    animation: none;
+    opacity: 1;
+  }
+  .m-sk {
+    animation: none;
+  }
+}
+
 /* Native controls + scrollbar follow the active theme */
 html[data-theme="light"] { color-scheme: light; }
 html[data-theme="dark"] {

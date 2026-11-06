@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { useAuth } from "@/context/AuthContext";
-import AppShell from "@/components/AppShell";
 import Loader from "@/components/Loader";
 import { FALLBACK_MACRO_GOALS } from "@/lib/goals";
 
@@ -340,7 +339,7 @@ export default function TodayPage() {
   const goalPct = goals.calories > 0 ? Math.round((totals.calories / goals.calories) * 100) : 0;
 
   return (
-    <AppShell>
+    <>
       <style>{TODAY_CSS}</style>
 
       <main
@@ -545,6 +544,6 @@ export default function TodayPage() {
           Weight, streaks, and 30-day trends live in <Link href="/dashboard/stats">Progress</Link>.
         </p>
       </main>
-    </AppShell>
+    </>
   );
 }
