@@ -144,6 +144,7 @@ export default function UserDetailPage() {
 
   useEffect(() => {
     if (authUser && authUser.isAdmin && userId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchUserData();
     }
   }, [authUser, userId, fetchUserData]);
