@@ -101,6 +101,9 @@ One family, like the app: **Geist** for everything, **Geist Mono** for labels an
 - h1 600, `clamp(2.8rem, 5.6vw, 4.6rem)`, tracking −0.04em, leading 1.02.
 - h2 600, `clamp(1.85rem, 3.2vw, 2.75rem)`; h3 600, `clamp(1.3rem, 1.9vw, 1.75rem)`.
 - Body 15–17px / 1.6, measure 40–52 characters, `--t2`.
+- The hero lede is two tiers: a claim line (~1.45rem, 500, ink, carries the loop mark)
+  naming the category, then a supporting sentence (~1.08rem, `--t2`, 46ch) that says why it
+  matters. As one paragraph the claim sat mid-sentence in a block of centred text.
 - Section headings stand alone: no eyebrow or kicker sits above an h1/h2. Micro-labels
   (card headers, legends, table captions) are Geist Mono 9.5–11px, uppercase, 0.06–0.08em.
 - Nav 13px/500, buttons 13.5px/500 — the dashboard's own sizes.

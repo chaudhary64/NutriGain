@@ -154,18 +154,35 @@ const PAGE_CSS = `
 
 /* Page rhythm ----------------------------------------------------------- */
 .lp #features,.lp #how,.lp #pricing,.lp #faq{scroll-margin-top:84px}
-.lp .hero{position:relative;overflow:clip;padding:clamp(48px,7vw,92px) 0 0}
+.lp .hero{position:relative;overflow:clip;padding:clamp(36px,5.2vw,72px) 0 0}
 .lp .hero-in{position:relative;z-index:1;text-align:center;display:grid;justify-items:center;gap:0}
 .lp .hero h1{max-width:19ch}
-.lp .hero .lede{margin-top:22px;text-align:center}
-.lp .hero-actions{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px;margin-top:34px}
-.lp .hero-meta{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;margin-top:22px;font-size:13px;color:var(--ink-3)}
+
+/* The lede is two tiers: the line the loop marks names the category, then the
+   sentence under it says why that matters. Set as one 28-word paragraph it
+   read as a wall of centred text, and the product claim -- meals and lifts in
+   one log -- sat in the middle of it where the eye never lands. Two tiers give
+   the fold one line to read first and one to read next. */
+.lp .hero-claim{
+  margin-top:clamp(24px,3vw,30px);
+  font-size:clamp(1.15rem,1.8vw,1.45rem);
+  font-weight:500;letter-spacing:-.025em;line-height:1.3;
+  color:var(--ink);max-width:44ch;text-wrap:balance;
+}
+.lp .hero-sub{
+  margin-top:14px;
+  font-size:clamp(.98rem,1.15vw,1.08rem);
+  line-height:1.62;color:var(--ink-2);
+  max-width:46ch;text-wrap:pretty;
+}
+.lp .hero-actions{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px;margin-top:30px}
+.lp .hero-meta{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;margin-top:18px;font-size:13px;color:var(--ink-3)}
 .lp .hero-meta span{display:inline-flex;align-items:center;gap:7px}
 .lp .hero-meta span::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--line-2)}
 .lp .hero-meta span:first-child::before{background:var(--accent)}
 
 /* Product frame --------------------------------------------------------- */
-.lp .stage{position:relative;margin:clamp(40px,5vw,64px) auto 0;max-width:1120px}
+.lp .stage{position:relative;margin:clamp(34px,4vw,52px) auto 0;max-width:1120px}
 .lp .window{
   background:var(--surface);border:1px solid var(--line);border-radius:12px;
   box-shadow:var(--shadow-2);overflow:hidden;
@@ -476,7 +493,8 @@ const PAGE_CSS = `
 @media(max-width:700px){
   .lp .hero{padding-top:40px}
   .lp h1{font-size:clamp(2.2rem,9.2vw,2.95rem);line-height:1.05;max-width:17ch}
-  .lp .hero .lede{font-size:15px;line-height:1.6;max-width:40ch}
+  .lp .hero-claim{font-size:clamp(1.05rem,4.4vw,1.3rem);max-width:none}
+  .lp .hero-sub{font-size:15px;line-height:1.6;max-width:40ch}
   .lp .window-bar{height:38px}
   .lp .ui-main{padding:16px;gap:12px}
   .lp .ui-budget{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -758,14 +776,14 @@ export default function Home() {
                 <br />
                 Not what you spent.
               </h1>
-              <p className="lede">
+              <p className="hero-claim">
                 <span className="mark-wrap">
                   <span className="mark">
                     Meals and lifts in one log
                     {/* A loop drawn by hand, not a border: one mark on the one phrase
-                        the sentence turns on. That phrase is the product itself, not
-                        a detail of it -- the mark names what you are looking at, and
-                        the rest of the sentence says why it beats the alternatives.
+                        the fold turns on. That phrase is the product itself, not a
+                        detail of it -- the mark names what you are looking at, and
+                        the sentence below says why it beats the alternatives.
                         Decorative, so it stays out of the accessibility tree and the
                         words carry the meaning. */}
                     <svg
@@ -787,10 +805,11 @@ export default function Home() {
                       />
                     </svg>
                   </span>
-                  ,
-                </span>{" "}
-                so what’s left today is always in front of you, and the next meal is a decision,
-                not arithmetic.
+                </span>
+              </p>
+              <p className="hero-sub">
+                Log the meal. Log the set. What’s left of today’s calories, protein and
+                training stays in front of you, so the next choice is never arithmetic.
               </p>
               <div className="hero-actions">
                 <Link href="/register" className="btn">
