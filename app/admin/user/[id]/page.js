@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
-import AppShell from "@/components/AppShell";
+import { AdminUserSkeleton } from "@/components/AdminSkeleton";
 import { useRouter, useParams } from "next/navigation";
-import Loader from "@/components/Loader";
+
 import {
   LineChart,
   Line,
@@ -165,7 +165,7 @@ export default function UserDetailPage() {
   };
 
   if (loading) {
-    return <Loader />;
+    return <AdminUserSkeleton />;
   }
 
   if (!userData) {
@@ -173,14 +173,7 @@ export default function UserDetailPage() {
   }
 
   return (
-    <AppShell
-      variant="admin"
-      navSlot={
-        <button onClick={() => router.push("/admin")} className="adm-ghost">
-          {I.arrow} Dashboard
-        </button>
-      }
-    >
+    <>
       <style>{ADM_CSS}</style>
 
       <div className="adm ng-container py-8">
@@ -388,6 +381,6 @@ export default function UserDetailPage() {
           )}
         </div>
       </div>
-    </AppShell>
+    </>
   );
 }

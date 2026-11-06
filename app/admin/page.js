@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
-import AppShell from "@/components/AppShell";
+import AdminConsoleSkeleton from "@/components/AdminSkeleton";
 import { useRouter } from "next/navigation";
-import Loader from "@/components/Loader";
+
 import { MICRO_KEYS, MICRO_NUTRIENTS, MICRO_SOURCES, MICRO_BASES } from "@/lib/micros";
 import { MUSCLE_GROUP_OPTIONS, WEEKDAYS } from "@/lib/constants";
 
@@ -599,11 +599,11 @@ export default function AdminPage() {
   ];
 
   if (loading) {
-    return <Loader />;
+    return <AdminConsoleSkeleton />;
   }
 
   return (
-    <AppShell variant="admin">
+    <>
       <style>{ADM_CSS}</style>
 
       <div className="adm ng-container py-8">
@@ -1466,6 +1466,6 @@ export default function AdminPage() {
         )}
       </div>
 
-    </AppShell>
+    </>
   );
 }
